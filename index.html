@@ -5,25 +5,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Walk Through Time</title>
 <meta name="description" content="Explore cities building by building: when each one was built, what stood there before, and the stories behind them.">
+<link rel="icon" href="app/logo.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-:root{ --bg:#e9e5dd; --paper:#f8f6f2; --ink:#20262b; --muted:#6e6a62; --line:#d6d0c4;
+/* Layout: one narrow column; the clock-and-footpath mark beside the name, then the list of cities. */
+:root{ --bg:#e9e5dd; --paper:#f8f6f2; --ink:#20262b; --muted:#6e6a62; --line:#d6d0c4; --trail:#c4472d;
   --sans:"IBM Plex Sans Condensed",system-ui,-apple-system,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace; }
-@media (prefers-color-scheme: dark){ :root{ --bg:#15191c; --paper:#1e2428; --ink:#ebe6dc; --muted:#9d978b; --line:#343c42; color-scheme:dark } }
+@media (prefers-color-scheme: dark){ :root{ --bg:#15191c; --paper:#1e2428; --ink:#ebe6dc; --muted:#9d978b; --line:#343c42; --trail:#e0734f; color-scheme:dark } }
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--sans)}
-main{max-width:640px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + 48px) 16px calc(env(safe-area-inset-bottom,0px) + 48px);display:grid;gap:28px}
+main{max-width:640px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + 48px) 16px calc(env(safe-area-inset-bottom,0px) + 48px);display:grid;gap:32px}
+header{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;align-items:center}
+.mark{width:76px;height:76px;grid-row:span 2;color:var(--ink)}
+.mark .face{fill:var(--paper)}
+.mark .trail{stroke:var(--trail)}
+.mark .stop{fill:var(--trail)}
 h1{font-size:40px;line-height:1.05;margin:0;text-wrap:balance}
-.lead{color:var(--muted);margin:8px 0 0;max-width:34em}
-.eras{display:flex;height:10px;border-radius:3px;overflow:hidden}
-.eras i{flex:1}
+.lead{color:var(--muted);margin:0;max-width:34em;grid-column:2}
+@media (max-width:420px){ header{grid-template-columns:1fr} .mark{grid-row:auto;width:64px;height:64px} .lead{grid-column:1} }
 .lbl{font:400 11px var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
 .cities{display:grid;gap:10px}
 .city{display:flex;align-items:center;gap:14px;padding:16px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:inherit;text-decoration:none}
 .city:hover,.city:focus-visible{border-color:var(--ink)}
+.city:focus-visible{outline:2px solid var(--trail);outline-offset:2px}
 .city b{font-size:20px;display:block}
 .city span{font:400 12px var(--mono);color:var(--muted)}
-.city .go{margin-left:auto;font-size:20px}
+.city .go{margin-left:auto;font-size:20px;color:var(--ink)}
 .city.soon{opacity:.55;pointer-events:none}
 footer{font:400 12px var(--mono);color:var(--muted)}
 footer a{color:inherit}
@@ -32,18 +39,25 @@ footer a{color:inherit}
 <body>
 <main>
   <header>
+    <svg class="mark" viewBox="0 0 64 64" aria-hidden="true">
+      <circle class="face" cx="32" cy="32" r="27" stroke="currentColor" stroke-width="3.5"/>
+      <g stroke="currentColor" stroke-width="3" stroke-linecap="round">
+        <path d="M32 9.5v4M54.5 32h-4M32 54.5v-4M9.5 32h4"/>
+        <path d="M32 32l8.5 6"/>
+      </g>
+      <path class="trail" d="M32 32c-9-1-9-8-1-9.5s8-7 1-8.5" fill="none" stroke-width="3" stroke-linecap="round" stroke-dasharray="0.1 4.4"/>
+      <circle class="stop" cx="32" cy="14" r="3.4"/>
+      <circle cx="32" cy="32" r="3.2" fill="currentColor"/>
+    </svg>
     <h1>Walk Through Time</h1>
     <p class="lead">Explore cities building by building: when each one was built, what stood there before, and the stories behind them.</p>
   </header>
-  <div class="eras" aria-hidden="true">
-    <i style="background:#5b1f43"></i><i style="background:#93283c"></i><i style="background:#c4472d"></i><i style="background:#e2802b"></i><i style="background:#e9b934"></i><i style="background:#9cbf4a"></i><i style="background:#3d9c8a"></i><i style="background:#3a76b6"></i><i style="background:#6c5cc6"></i>
-  </div>
   <section class="cities" aria-label="Cities">
     <div class="lbl">Cities</div>
     <a class="city" href="nottingham/"><div><b>Nottingham</b><span>From the city centre across the Trent · 3D · prototype</span></div><span class="go">→</span></a>
     <div class="city soon"><div><b>More cities</b><span>coming later</span></div></div>
   </section>
-  <footer>Data: © OpenStreetMap contributors (ODbL) · Historic England (OGL) · Wikidata (CC0). Historic maps: National Library of Scotland.</footer>
+  <footer>Data: © OpenStreetMap contributors (ODbL) · Historic England (OGL) · Wikidata (CC0) · Wikipedia (CC BY-SA). Historic maps: National Library of Scotland.</footer>
 </main>
 </body>
 </html>
