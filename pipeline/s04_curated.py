@@ -85,9 +85,10 @@ PEOPLE_GROUPS = [
     ("writers", "Writers and journalists", ["writer", "novelist", "poet", "journalist", "playwright", "author"]),
     ("science", "Scientists and engineers", ["mathematician", "physicist", "scientist", "engineer", "inventor", "chemist"]),
     ("industry", "Industry and trade", ["businessperson", "manufacturer", "industrialist", "merchant", "entrepreneur"]),
-    ("sport", "Sport", ["footballer", "football manager", "cricketer", "skater", "ice dancer", "athlete", "sportsperson"]),
+    ("sport", "Sport", ["football", "cricket", "coach", "skater", "ice dancer", "athlete", "sportsperson"]),
     ("arts", "Arts and performance", ["actor", "musician", "singer", "painter", "dancer", "artist", "designer"]),
     ("public", "Politics and public life", ["politician", "reformer", "activist", "preacher", "philanthropist"]),
+    ("other", "Other people", []),
 ]
 
 
@@ -193,7 +194,7 @@ def main(city_id):
                 continue
             group = e.get("group", L["id"])
             if L.get("kind") == "people":
-                group = "people-" + (e.get("group") or people_group(occ.get(src["qid"], [])) or "public")
+                group = "people-" + (e.get("group") or people_group(occ.get(src["qid"], [])) or "other")
             kept += 1
             entries.append({"layer": L["id"], "group": group, "b": b, "name": e["name"],
                             "story": e["story"], "how": how,

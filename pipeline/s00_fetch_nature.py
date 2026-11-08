@@ -5,7 +5,8 @@ Special Scientific Interest, and the Ancient Woodland Inventory. OpenStreetMap (
 tagged leisure=nature_reserve, such as reserves run by wildlife trusts.
 
 Writes work/<city>/nature.json: GeoJSON features with properties {t: type key, name, source}.
-Only areas that reach into the city's polygon are kept.
+Only areas whose centre lies inside the city's polygon are kept, so large sites just across the boundary
+stay out. OpenStreetMap reserves whose centre lies inside a Natural England area are left out as duplicates.
 """
 from .common import city, http, log, point_in_ring, save
 
@@ -38,14 +39,14 @@ def rings_of(geom):
     return []
 
 
+def centre(geom):
+    pts = [p for r in rings_of(geom) for p in r]
+    return (sum(p[0] for p in pts) / len(pts), sum(p[1] for p in pts) / len(pts)) if pts else (0, 0)
+
+
 def reaches(geom, poly):
-    """True if any vertex of the area lies inside the city polygon, or the city's centre lies inside the area."""
-    rings = rings_of(geom)
-    if any(point_in_ring(x, y, poly) for r in rings for x, y in r[::5]):
-        return True
-    cx = sum(p[0] for p in poly) / len(poly)
-    cy = sum(p[1] for p in poly) / len(poly)
-    return any(point_in_ring(cx, cy, r) for r in rings)
+    """True if the area's centre (the mean of its outline points) lies inside the city polygon."""
+    return point_in_ring(*centre(geom), poly)
 
 
 def rnd(geom):
@@ -106,7 +107,9 @@ def main(city_id):
             continue
         geom = {"type": "MultiPolygon", "coordinates": [[r] for r in rings]}
         name = t.get("name")
-        if (name and name.lower() in named) or not reaches(geom, poly):
+        cx, cy = centre(geom)
+        dup = (name and name.lower() in named) or any(point_in_ring(cx, cy, r) for f in feats for r in rings_of(f["geometry"]))
+        if dup or not reaches(geom, poly):
             continue   # already covered by a Natural England designation, or outside the city
         feats.append({"type": "Feature", "geometry": rnd(geom),
                       "properties": {"t": "reserve", "name": name or "Nature reserve", "source": "OpenStreetMap"}})
