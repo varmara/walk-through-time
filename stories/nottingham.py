@@ -13,19 +13,21 @@ def E(name, source, story, facts, at=None):
 CURATED = [
     dict(
         id="inns", title="Old inns",
-        intro="Three pubs in the centre each claim to be the oldest inn in England. "
-              "The claims rest on tradition more than records, but the buildings are genuinely old.",
+        intro="Three pubs in the centre each claim to be the oldest in Nottingham. A television investigation "
+              "concluded that the Salutation is the oldest building, but the Bell has been a pub the longest.",
         entries=[
             E("Ye Olde Trip to Jerusalem", "en:Ye Olde Trip to Jerusalem",
               "Claims to date from 1189, a date that rests on tradition rather than records. "
               "It is built against the castle rock, with rooms cut into the sandstone.",
               ("1189", "sandstone")),
-            E("Bell Inn", "en:Bell Inn, Nottingham",
-              "One of the pubs that claims to be the oldest in England, on the edge of the Old Market Square.",
-              ("oldest",)),
-            E("Salutation Inn", "en:Salutation Inn, Nottingham",
-              "Another claimant to the title of England's oldest inn, with caves cut into the rock beneath it.",
-              ("oldest", "caves")),
+            E("The Bell Inn", "en:The Bell Inn, Nottingham",
+              "Claims to be the oldest pub in the city. Tree-ring dating of its timbers suggests it was built "
+              "around 1420, and its cellars are cut into the sandstone.",
+              ("oldest", "dendrochronological", "1420", "sandstone")),
+            E("Ye Olde Salutation Inn", "en:Ye Olde Salutation Inn",
+              "Another claimant to the title of the city's oldest pub. The core of the building dates from "
+              "around 1360, and unusually large caves lie beneath it.",
+              ("oldest", "1360", "caves")),
         ]),
     dict(
         id="churches", title="Churches",
@@ -33,32 +35,32 @@ CURATED = [
               "Each still has its church, joined in the 1840s by a Catholic cathedral.",
         entries=[
             E("St Mary's Church", "en:St Mary's Church, Nottingham",
-              "The oldest religious foundation in the city and its largest medieval building, on a site "
-              "mentioned in the Domesday Book.",
-              ("Domesday", "largest")),
+              "One of the three medieval parish churches of Nottingham, on a site mentioned in the Domesday Book.",
+              ("Domesday",)),
             E("St Peter's Church", "en:St Peter's Church, Nottingham",
-              "One of the three medieval parish churches of Nottingham, a short walk from the Old Market Square.",
-              ("medieval",)),
+              "One of the three medieval parish churches of Nottingham. Parts of the building date from "
+              "about 1180.",
+              ("mediaeval", "1180")),
             E("St Nicholas' Church", "en:St Nicholas' Church, Nottingham",
               "The medieval church was pulled down during the Civil War; the brick church standing today "
               "was finished in 1678.",
               ("Civil War", "1678")),
-            E("Cathedral of St Barnabas", "en:Cathedral of St Barnabas, Nottingham",
-              "A Catholic cathedral designed by Augustus Pugin and opened in 1844.",
-              ("Pugin", "1844")),
+            E("Cathedral of St Barnabas", "en:Nottingham Cathedral",
+              "The Catholic cathedral, designed by Augustus Pugin and built between 1841 and 1844.",
+              ("Pugin", "1841", "1844")),
         ]),
     dict(
         id="lace", title="Lace and trade",
         intro="In the 19th century Nottingham was a world centre of lace. Merchants built warehouses and "
               "showrooms in the Lace Market, east of the Old Market Square.",
         entries=[
-            E("Adams Building", "en:Adams Building",
-              "A lace warehouse built for the merchant Thomas Adams and designed by Thomas Chambers Hine.",
-              ("Thomas Adams", "Hine")),
-            E("Severns Building", "en:Severns Building",
-              "A medieval timber-framed house. It was taken down in 1970 and rebuilt on Castle Road "
-              "to make way for a shopping centre.",
-              ("1970", "Castle Road")),
+            E("Adams Building", "en:Adams Building, Nottingham",
+              "A lace showroom and warehouse built for Thomas Adams to a design by Thomas Chambers Hine, "
+              "opened in 1855.",
+              ("Thomas Adams", "Thomas Chambers Hine", "1855")),
+            E("Severn's Building", "en:Severn's Building",
+              "A medieval timber-framed building, moved to its present site on Castle Road.",
+              ("Castle Road",)),
             E("Victoria Centre", "en:Victoria Centre",
               "A shopping centre opened in 1972 on the site of Nottingham Victoria railway station, "
               "whose clock tower still stands beside it.",
@@ -93,8 +95,9 @@ CURATED = [
               "Rioters burnt the mansion in 1831; it reopened as a museum in 1878.",
               ("1831", "1878")),
             E("Bromley House", "en:Bromley House Library",
-              "A Georgian town house of 1752, home to a subscription library since 1822.",
-              ("1752", "1822")),
+              "A Georgian town house built in 1752. The Nottingham Subscription Library, founded in 1816, "
+              "moved in during 1821.",
+              ("1752", "1816", "1821")),
             E("Theatre Royal", "en:Theatre Royal, Nottingham",
               "Opened in 1865 and designed by Charles J. Phipps.",
               ("1865", "Phipps")),
@@ -110,8 +113,5 @@ CURATED = [
             E("Nottingham Contemporary", "en:Nottingham Contemporary",
               "An art centre designed by Caruso St John and opened in 2009, its walls patterned with lace.",
               ("Caruso St John", "2009", "lace")),
-            E("Arkwright Building", "en:Arkwright Building",
-              "Built for University College Nottingham and now part of Nottingham Trent University.",
-              ("University College",)),
         ]),
 ]
