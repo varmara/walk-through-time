@@ -295,6 +295,10 @@ function renderLayers(){
     cb.checked ? active.add(cb.dataset.g) : active.delete(cb.dataset.g);
     saveActive(); applyLayers();
   });
+  $('lSections').querySelectorAll('.find').forEach(inp => inp.oninput = () => {
+    const q = inp.value.trim().toLowerCase();
+    inp.nextElementSibling.querySelectorAll('.item').forEach(b => { b.hidden = q && !b.dataset.name.toLowerCase().includes(q); });
+  });
   $('lSections').querySelectorAll('[data-info]').forEach(btn => btn.onclick = e => {
     e.preventDefault(); e.stopPropagation();
     const box = $('info-' + btn.dataset.info), open = box.hidden;
@@ -310,9 +314,14 @@ function renderLayers(){
 function infoHtml(L, g, withIntro = true){
   const parts = [];
   if (withIntro && L.intro) parts.push(`<p>${esc(L.intro)}</p>`);
-  if (g && g.items && g.items.length) parts.push(`<div class="items">${g.items.map(it => {
-    // items are [name, [buildings]] (older data: [building, name])
-    const [name, bs] = typeof it[0] === 'number' ? [it[1], [it[0]]] : it;
+  // items are [name, [buildings]] (older data: [building, name]); long lists sort ignoring a leading "The"
+  const norm = it => typeof it[0] === 'number' ? [it[1], [it[0]]] : it;
+  const sortKey = n => n.replace(/^the\s+/i, '').toLowerCase();
+  let items = g && g.items ? g.items.map(norm) : [];
+  if (L.kind === 'rule') items = items.slice().sort((a, b) => sortKey(a[0]).localeCompare(sortKey(b[0])));
+  if (items.length > 20) parts.push(`<input class="find" type="search" placeholder="Find in ${items.length} names" aria-label="Find a name in this list">`);
+  if (items.length) parts.push(`<div class="items">${items.map(it => {
+    const [name, bs] = it;
     return `<button class="item" data-b="${bs.join(',')}" data-name="${esc(name)}">${esc(name)}${bs.length > 1 ? `<span class="cnt">${bs.length}</span>` : ''}</button>`;
   }).join('')}</div>`);
   if (L.kind === 'stories') parts.push('<p class="src">Each entry is checked against its Wikipedia article.</p>');

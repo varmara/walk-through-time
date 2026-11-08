@@ -152,3 +152,4 @@ input[type=range]{width:100%;accent-color:var(--ink);height:28px;margin:0}
 .allplaces{display:block;margin:4px 0 0}
 @media (min-width:760px){ .placesbar{left:16px;right:auto;width:420px;bottom:16px} .phead{margin:0} .pcards{padding:2px 0 6px} }
 #needle{transition:transform .1s linear}
+.find{width:100%;box-sizing:border-box;font:14px var(--sans);padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--ink)}
