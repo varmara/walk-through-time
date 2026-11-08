@@ -17,6 +17,8 @@ Historic England list entry ("he:1254566"), whose official description is checke
      The facts must appear in the two articles together, the place's article decides the building, and
      the person's occupations on Wikidata (P106) decide the group: architects, writers, sport and so on.
      An entry can set `group` itself when Wikidata has no occupation (a duo, a team).
+  Historic England blocks automated requests, so an entry using a list entry ("he:1254566") also gives `quote`:
+     short passages copied from the entry. If the page cannot be fetched, the facts are checked against them.
   3. An entry may give the building's `year` ("1855", "c. 1420", "1841..1844"). Its digits must appear in the
      article too. Step s05 uses it as a date source ("Wikipedia") alongside OpenStreetMap and Wikidata.
 
@@ -94,9 +96,13 @@ PEOPLE_GROUPS = [
     ("writers", "Writers and journalists", ["writer", "novelist", "poet", "journalist", "playwright", "author"]),
     ("science", "Scientists and engineers", ["mathematician", "physicist", "scientist", "engineer", "inventor", "chemist"]),
     ("industry", "Industry and trade", ["businessperson", "manufacturer", "industrialist", "merchant", "entrepreneur"]),
-    ("sport", "Sport", ["football", "cricket", "coach", "skater", "ice dancer", "athlete", "sportsperson"]),
-    ("arts", "Arts and performance", ["actor", "musician", "singer", "painter", "dancer", "artist", "designer"]),
-    ("public", "Politics and public life", ["politician", "reformer", "activist", "preacher", "philanthropist"]),
+    ("sport", "Sport", ["football", "cricket", "coach", "skater", "ice dancer", "athlete", "sportsperson", "boxer",
+                        "prize fighter", "pugilist", "jockey", "cyclist"]),
+    ("arts", "Arts and performance", ["actor", "musician", "singer", "painter", "dancer", "artist", "designer", "composer"]),
+    ("faith", "Faith and charity", ["preacher", "evangelist", "minister", "priest", "clergy", "vicar", "bishop",
+                                    "salvation army", "methodist", "missionary", "philanthropist", "charity"]),
+    ("military", "Soldiers and the military", ["soldier", "general", "marshal", "colonel", "officer", "admiral", "governor"]),
+    ("public", "Politics and public life", ["politician", "reformer", "activist", "mayor", "member of parliament"]),
     ("other", "Other people", []),
 ]
 
@@ -153,6 +159,14 @@ def main(city_id):
                 except Exception as ex:  # noqa: BLE001
                     arts[ref] = None
                     log(f"    {ref}: {ex}")
+    for L in layers:   # list entries that could not be fetched: check against the quoted passages instead
+        for e in L["entries"]:
+            for ref in filter(None, (e["source"], e.get("place"))):
+                if arts.get(ref) is None and ref.startswith("he:") and e.get("quote"):
+                    num = ref[3:]
+                    arts[ref] = {"text": " ".join(e["quote"]).lower(), "title": f"List entry {num}",
+                                 "url": f"https://historicengland.org.uk/listing/the-list/list-entry/{num}",
+                                 "qid": None, "coords": None, "nhle": [num], "kind": "Historic England"}
     nhle = nhle_of(sorted({a["qid"] for a in arts.values() if a and a["qid"]}))
     person_qids = sorted({arts[e["source"]]["qid"] for L in layers if L.get("kind") == "people"
                           for e in L["entries"] if arts.get(e["source"]) and arts[e["source"]]["qid"]})

@@ -81,14 +81,18 @@ def main(city_id):
             names.setdefault(str(b), p["address"])
         kind = (p.get("type") or "person").lower()
         roles = [r.strip().lower() for r in (p.get("primary") or "").split(",") + (p.get("roles") or "").split(",") if r.strip()]
-        key = (people_group(roles) or "other") if kind in ("person", "man", "woman", "") else "events"
+        # roles first; if they say nothing we recognise, the plaque's own words
+        words = roles or []
+        key = (people_group(words) or people_group([(p.get("inscription") or "").lower()]) or "other") \
+            if kind in ("person", "man", "woman", "") else "events"
         text = (p.get("inscription") or p.get("title") or "").strip()
         if isinstance(p.get("year"), float):
             p["year"] = int(p["year"])
         story = f"{(p.get('colour') or '').capitalize() + ' p' if p.get('colour') else 'P'}laque" \
                 f"{' put up in ' + str(p['year']) if p.get('year') else ''}{' by ' + p['org'] if p.get('org') else ''}: “{text}”"
         url = f"https://openplaques.org/plaques/{p['id']}" if p.get("id") else "https://openplaques.org/"
-        person(b, key, p.get("subject") or p.get("title") or "Plaque", story,
+        label = p.get("subject") or (text[:40] + "…" if len(text) > 40 else text) or "Plaque"
+        person(b, key, label, story,
                {"title": "Open Plaques", "url": url, "kind": "Open Plaques"})
     log(f"s06 plaques: {placed}/{len(plaques)} placed on a building")
 
@@ -110,6 +114,7 @@ def main(city_id):
     log(f"s06 architects from Wikidata: {arch} buildings")
     order = [f"people-{k}" for k, _, _ in PEOPLE_GROUPS] + ["people-events"]
     for g in pg.values():
+        g["items"] = [list(t) for t in dict.fromkeys(tuple(x) for x in g["items"])]   # one item per building and name
         g["count"] = len({b for b, _ in g["items"]})
     people["groups"] = sorted(pg.values(), key=lambda g: order.index(g["key"]) if g["key"] in order else 99)
 

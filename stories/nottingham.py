@@ -13,12 +13,12 @@ def E(name, source, story, facts, at=None, year=None):
             **({"at": at} if at else {}), **({"year": year} if year else {})}
 
 
-def P(name, person, place, story, facts, at=None, group=None):
+def P(name, person, place, story, facts, at=None, group=None, quote=None):
     """A person and a place. `person` and `place` are Wikipedia articles ("en:Title"); the facts must appear in
     the two articles together, and the place's article decides the building. The type of person comes from
     Wikidata; set `group` only when it has none (architects, writers, science, industry, sport, arts, public)."""
     return {"name": name, "source": person, "place": place, "story": story, "facts": facts,
-            **({"at": at} if at else {}), **({"group": group} if group else {})}
+            **({"at": at} if at else {}), **({"group": group} if group else {}), **({"quote": quote} if quote else {})}
 
 
 CURATED = [
@@ -160,10 +160,11 @@ CURATED = [
             P("Jesse Boot", "en:Jesse Boot, 1st Baron Trent", "he:1254566",
               "Almshouses paid for by Jesse Boot, founder of Boots, in 1908 for veterans of the Crimean War and the "
               "Indian Mutiny: the Dorothy Boot Homes in Wilford.",
-              ("Jesse Boot", "1908", "Crimean", "Indian Mutiny")),
-            P("William Booth", "en:William Booth", None,
-              "William Booth, founder of the Salvation Army, was born in Sneinton. His birthplace is now a museum.",
-              ("Sneinton", "Salvation Army"), at="name:William Booth Birthplace Museum"),
+              ("Jesse Boot", "1908", "Crimean", "Indian Mutiny"),
+              # Historic England blocks automated requests; passages copied from the list entry:
+              quote=["Paid for by Jesse Boot of Nottingham.",
+                     "These almshouses were intended for the use of Crimean War and Indian Mutiny veterans.",
+                     "1908"]),
             P("George Green at the mill", "en:George Green (mathematician)", "en:Green's Windmill",
               "The mathematician George Green was a miller; his family's windmill in Sneinton is restored and "
               "named after him.",
