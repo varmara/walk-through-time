@@ -15,7 +15,8 @@ LAYERS = []
 
 
 def layer(**meta):
-    """meta: id, title, intro, section (heading in the Layers sheet), groups=[(key, title)], source=(title, url)."""
+    """meta: id, title, intro, section (heading in the Layers sheet), groups=[(key, title)], source=(title, url),
+    list=True to show the buildings' names in the Layers sheet (for layers with up to a few hundred buildings)."""
     def wrap(fn):
         LAYERS.append(dict(meta, fn=fn))
         return fn
@@ -50,14 +51,16 @@ def within(ctx, features, group):
 
 
 def containing_places(ctx, test, group):
-    """Buildings that contain a named OpenStreetMap place passing test(tags), or are tagged that way themselves."""
+    """Buildings that contain (or touch, within 10 m) a named OpenStreetMap place passing test(tags), or are tagged
+    that way themselves. group: key or fn(tags) -> key."""
     out = {}
+    pick = group if callable(group) else (lambda t: group)
     for p in ctx.places:
         if p["b"] is not None and test(p["tags"]):
-            out[p["b"]] = group
+            out[p["b"]] = pick(p["tags"])
     for i, b in enumerate(ctx.buildings):
         if test(b["tags"]):
-            out[i] = group
+            out[i] = pick(b["tags"])
     return out
 
 
@@ -72,7 +75,7 @@ def listed(ctx):
     return {int(i): "listed-" + es[0]["Grade"] for i, es in ctx.listing.items() if es[0].get("Grade") in ("I", "II*", "II")}
 
 
-@layer(id="scheduled", title="Scheduled monuments", section="Heritage",
+@layer(id="scheduled", title="Scheduled monuments", section="Heritage", list=True,
        intro="Buildings standing on a scheduled monument: a nationally important archaeological site or structure "
              "protected by law.",
        groups=[("scheduled", "Scheduled monument")],
@@ -82,9 +85,11 @@ def scheduled(ctx):
             for f in ctx.monuments for i in within(ctx, [f], "scheduled")}
 
 
-@layer(id="pubs", title="Pubs today", section="Today",
-       intro="Buildings with a pub in them today, according to OpenStreetMap.",
-       groups=[("pubs", "Pub")],
+@layer(id="pubs", title="Pubs and bars today", section="Today", list=True,
+       intro="Buildings with a pub or a bar in them today, according to OpenStreetMap. A place missing here is "
+             "missing or tagged differently in OpenStreetMap, where anyone can add it.",
+       groups=[("pubs", "Pubs"), ("bars", "Bars")],
        source=("OpenStreetMap", "https://www.openstreetmap.org/copyright"))
 def pubs(ctx):
-    return containing_places(ctx, lambda t: t.get("amenity") == "pub", "pubs")
+    return containing_places(ctx, lambda t: t.get("amenity") in ("pub", "bar"),
+                             lambda t: "pubs" if t.get("amenity") == "pub" else "bars")

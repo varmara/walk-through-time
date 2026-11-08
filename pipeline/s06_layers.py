@@ -131,6 +131,16 @@ def main(city_id):
         g["items"] = grouped(g["items"])
     people["groups"] = sorted(pg.values(), key=lambda g: order.index(g["key"]) if g["key"] in order else 99)
 
+    inside = {}
+    for p in ctx.places:   # a named place inside an unnamed outline names it (a pub, a shop)
+        if p["b"] is not None and p["name"]:
+            inside.setdefault(p["b"], p["name"])
+
+    def bname(i):
+        t = ctx.buildings[i]["tags"]
+        return t.get("name") or inside.get(i) or names.get(str(i)) or t.get("addr:street") and \
+            f"{t.get('addr:housenumber', '')} {t['addr:street']}".strip() or "Unnamed building"
+
     for L in LAYERS:
         res = L["fn"](ctx)
         for i, v in res.items():
@@ -138,8 +148,11 @@ def main(city_id):
             add(i, group, L["id"], extra.get("story"))
         groups = []
         for k, t in L["groups"]:
-            groups.append({"key": k, "title": t,
-                           "count": sum(1 for v in res.values() if (v[0] if isinstance(v, tuple) else v) == k)})
+            members = [i for i, v in res.items() if (v[0] if isinstance(v, tuple) else v) == k]
+            g = {"key": k, "title": t, "count": len(members)}
+            if L.get("list"):   # names to tap in the Layers sheet, A to Z
+                g["items"] = sorted(grouped([[i, bname(i)] for i in members]), key=lambda it: it[0].lower())
+            groups.append(g)
         src = L.get("source")
         meta.append({"id": L["id"], "title": L["title"], "intro": L["intro"], "section": L.get("section", "Heritage"),
                      "kind": "rule", "groups": groups,

@@ -81,7 +81,7 @@ def main(city_id):
         b["bb"] = bbox(b["rings"][0])
         b["h"] = height_of(b["tags"])
     for n in nodes:
-        n["b"] = building_at(buildings, n["x"], n["y"])
+        n["b"] = building_at(buildings, n["x"], n["y"], near=10)   # points are often drawn just outside the outline
 
     save(city_id, "buildings", buildings)
     save(city_id, "base", {"roads": roads, "water": water, "parks": parks})
