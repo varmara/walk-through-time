@@ -128,8 +128,10 @@ function buildingColour(){
   const keys = [...active].filter(k => !isArea(k));
   if (!keys.length) return base;
   const inLayer = ['any', ...keys.map(k => ['in', ',' + k + ',', ['coalesce', ['get', 'L'], '']])];
+  // in a ticked layer: era colour when dated, a strong neutral when not (plain grey would vanish into the faded rest)
   return ['case', ['boolean', ['feature-state', 'sel'], false], tok('--accent'),
-    ['boolean', ['feature-state', 'hl'], false], tok('--hl'), inLayer, ['get', 'c'], tok('--ghost')];
+    ['boolean', ['feature-state', 'hl'], false], tok('--hl'),
+    inLayer, ['case', ['has', 'y'], ['get', 'c'], tok('--marked')], tok('--ghost')];
 }
 const natureColour = () => ['match', ['get', 't'], ...NATURE_TYPES.flatMap(t => [t, tok('--n-' + t)]), tok('--n-reserve')];
 
@@ -331,7 +333,9 @@ function infoHtml(L, g, withIntro = true){
 function updateSummary(){
   const names = [...active].map(k => groups.get(k)).filter(Boolean)
     .map(g => g.layer.groups.filter(x => x.count > 0).length === 1 ? g.layer.title : g.title);
-  $('lSummary').innerHTML = names.length ? `<b>${names.length} on:</b> ${esc(names.join(', '))}` : 'No layers on. Tick any to highlight them on the map.';
+  $('lSummary').innerHTML = names.length
+    ? `<b>${names.length} on:</b> ${esc(names.join(', '))}<span class="key"><i style="background:var(--marked)"></i>in the layer, no date yet</span>`
+    : 'No layers on. Tick any to highlight them on the map.';
   $('lClear').hidden = !names.length;
   $('layerCount').hidden = !names.length;
   $('layerCount').textContent = names.length;
@@ -367,7 +371,8 @@ $('mtSave').onclick = () => {
   store.set('mtKey', k); addNls(k); setBase('nls');
 };
 $('legend').innerHTML = ERAS.map(e => `<div><i style="background:${e[3]}"></i>${e[2]}</div>`).join('')
-  + `<div><i style="background:var(--unknown)"></i>no date</div>`;
+  + `<div><i style="background:var(--unknown)"></i>no date</div>`
+  + `<div><i style="background:var(--marked)"></i>in a ticked layer, no date</div>`;
 
 // ================= Cards =================
 const layerTitle = id => layers.find(L => L.id === id)?.title || id;
