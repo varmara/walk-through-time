@@ -10,6 +10,10 @@ Stories live in stories/<city>.py (see CONTRIBUTING.md). For every entry:
        the article's coordinates, inside (or within 15 m of) a building outline
        at="name:..." or the entry's name, matching a building name or a named place inside one
      Entries that cannot be placed are dropped.
+  People layers (kind="people") pair a person's article (`source`) with a place's article (`place`).
+     The facts must appear in the two articles together, the place's article decides the building, and
+     the person's occupations on Wikidata (P106) decide the group: architects, writers, sport and so on.
+     An entry can set `group` itself when Wikidata has no occupation (a duo, a team).
   3. An entry may give the building's `year` ("1855", "c. 1420", "1841..1844"). Its digits must appear in the
      article too. Step s05 uses it as a date source ("Wikipedia") alongside OpenStreetMap and Wikidata.
 
@@ -73,6 +77,38 @@ def nhle_of(qids):
     return out
 
 
+PEOPLE_GROUPS = [
+    # key, title, words that may appear in an occupation's English label (first match wins)
+    ("architects", "Architects", ["architect"]),
+    ("writers", "Writers and journalists", ["writer", "novelist", "poet", "journalist", "playwright", "author"]),
+    ("science", "Scientists and engineers", ["mathematician", "physicist", "scientist", "engineer", "inventor", "chemist"]),
+    ("industry", "Industry and trade", ["businessperson", "manufacturer", "industrialist", "merchant", "entrepreneur"]),
+    ("sport", "Sport", ["footballer", "football manager", "cricketer", "skater", "ice dancer", "athlete", "sportsperson"]),
+    ("arts", "Arts and performance", ["actor", "musician", "singer", "painter", "dancer", "artist", "designer"]),
+    ("public", "Politics and public life", ["politician", "reformer", "activist", "preacher", "philanthropist"]),
+]
+
+
+def occupations(qids):
+    if not qids:
+        return {}
+    rows = http("https://query.wikidata.org/sparql", {"format": "json", "query":
+                f"SELECT ?item ?label WHERE {{ VALUES ?item {{ {' '.join('wd:' + q for q in qids)} }} "
+                f"?item wdt:P106 ?occ . ?occ rdfs:label ?label FILTER(LANG(?label) = \"en\") }}"},
+                accept="application/sparql-results+json")["results"]["bindings"]
+    out = {}
+    for r in rows:
+        out.setdefault(r["item"]["value"].rsplit("/", 1)[-1], []).append(r["label"]["value"].lower())
+    return out
+
+
+def people_group(labels):
+    for key, _title, words in PEOPLE_GROUPS:
+        if any(w in lab for lab in labels for w in words):
+            return key
+    return None
+
+
 def norm(s):
     return " ".join(str(s or "").lower().replace("’", "'").split())
 
@@ -97,25 +133,37 @@ def main(city_id):
     arts = {}
     for L in layers:
         for e in L["entries"]:
-            try:
-                arts[e["source"]] = article(e["source"])
-            except Exception as ex:  # noqa: BLE001
-                arts[e["source"]] = None
-                log(f"    {e['source']}: {ex}")
+            for ref in filter(None, (e["source"], e.get("place"))):
+                if ref in arts:
+                    continue
+                try:
+                    arts[ref] = article(ref)
+                except Exception as ex:  # noqa: BLE001
+                    arts[ref] = None
+                    log(f"    {ref}: {ex}")
     nhle = nhle_of(sorted({a["qid"] for a in arts.values() if a and a["qid"]}))
+    person_qids = sorted({arts[e["source"]]["qid"] for L in layers if L.get("kind") == "people"
+                          for e in L["entries"] if arts.get(e["source"]) and arts[e["source"]]["qid"]})
+    try:
+        occ = occupations(person_qids)
+    except Exception as ex:  # noqa: BLE001
+        log(f"    occupations from Wikidata failed: {ex}")
+        occ = {}
 
     for L in layers:
         kept = 0
         for e in L["entries"]:
-            a = arts.get(e["source"])
+            src = arts.get(e["source"])
+            a = arts.get(e["place"]) if e.get("place") else src     # the article that places the entry
             why = None
-            if a is None:
+            if src is None or (e.get("place") and a is None):
                 why = "Wikipedia article not found"
             else:
+                text = src["text"] + "\n" + (a["text"] if e.get("place") else "")
                 facts = list(e.get("facts", ())) + re.findall(r"\d{4}", e.get("year", ""))
-                missing = [f for f in dict.fromkeys(facts) if f.lower() not in a["text"]]
+                missing = [f for f in dict.fromkeys(facts) if f.lower() not in text]
                 if missing:
-                    why = "article does not mention: " + ", ".join(missing)
+                    why = "articles do not mention: " + ", ".join(missing)
             b = how = None
             if not why:
                 at = e.get("at", "")
@@ -140,13 +188,23 @@ def main(city_id):
             if why:
                 dropped.append({"layer": L["id"], "name": e["name"], "why": why})
                 continue
+            group = e.get("group", L["id"])
+            if L.get("kind") == "people":
+                group = "people-" + (e.get("group") or people_group(occ.get(src["qid"], [])) or "public")
             kept += 1
-            entries.append({"layer": L["id"], "group": e.get("group", L["id"]), "b": b, "name": e["name"],
+            entries.append({"layer": L["id"], "group": group, "b": b, "name": e["name"],
                             "story": e["story"], "how": how,
-                            "source": {"title": a["title"], "url": a["url"]},
+                            "source": {"title": src["title"], "url": src["url"]},
+                            **({"place": {"title": a["title"], "url": a["url"]}} if e.get("place") else {}),
                             **({"year": list(parse_year(e["year"]))} if e.get("year") and parse_year(e["year"]) else {})})
         log(f"s04 {L['id']}: {kept}/{len(L['entries'])} stories kept")
     for d in dropped:
         log(f"    dropped {d['layer']} / {d['name']}: {d['why']}")
-    meta = [{k: L[k] for k in ("id", "title", "intro") if k in L} for L in layers]
+    meta = []
+    for L in layers:
+        m = {k: L[k] for k in ("id", "title", "intro", "kind") if k in L}
+        if L.get("kind") == "people":
+            used = {e["group"] for e in entries if e["layer"] == L["id"]}
+            m["groups"] = [["people-" + k, t] for k, t, _ in PEOPLE_GROUPS if "people-" + k in used]
+        meta.append(m)
     save(city_id, "curated", {"layers": meta, "entries": entries, "dropped": dropped})

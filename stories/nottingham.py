@@ -13,6 +13,14 @@ def E(name, source, story, facts, at=None, year=None):
             **({"at": at} if at else {}), **({"year": year} if year else {})}
 
 
+def P(name, person, place, story, facts, at=None, group=None):
+    """A person and a place. `person` and `place` are Wikipedia articles ("en:Title"); the facts must appear in
+    the two articles together, and the place's article decides the building. The type of person comes from
+    Wikidata; set `group` only when it has none (architects, writers, science, industry, sport, arts, public)."""
+    return {"name": name, "source": person, "place": place, "story": story, "facts": facts,
+            **({"at": at} if at else {}), **({"group": group} if group else {})}
+
+
 CURATED = [
     dict(
         id="inns", title="Old inns",
@@ -116,5 +124,42 @@ CURATED = [
             E("Nottingham Contemporary", "en:Nottingham Contemporary",
               "An art centre designed by Caruso St John and opened in 2009, its walls patterned with lace.",
               ("Caruso St John", "2009", "lace"), year="2009"),
+        ]),
+    dict(
+        id="people", title="People", kind="people",
+        intro="People connected with buildings on the map: who designed them, who worked in them and who played "
+              "in them. Each link is checked against the Wikipedia articles on the person and the place.",
+        entries=[
+            P("Thomas Chambers Hine", "en:Thomas Chambers Hine", "en:Adams Building, Nottingham",
+              "The Nottingham architect Thomas Chambers Hine designed this lace showroom and warehouse.",
+              ("Thomas Chambers Hine", "Adams")),
+            P("Thomas Adams", "en:Thomas Adams (manufacturer and philanthropist)", "en:Adams Building, Nottingham",
+              "The lace manufacturer Thomas Adams built this showroom and warehouse; it is named after him.",
+              ("Thomas Adams", "lace")),
+            P("Augustus Pugin", "en:Augustus Pugin", "en:Nottingham Cathedral",
+              "Augustus Pugin, who also designed the interior of the Houses of Parliament, designed the cathedral.",
+              ("Pugin", "Houses of Parliament")),
+            P("Thomas Cecil Howitt", "en:Thomas Cecil Howitt", "en:Council House, Nottingham",
+              "The architect Thomas Cecil Howitt designed the Council House.",
+              ("Howitt", "Council House")),
+            P("C. J. Phipps", "en:C. J. Phipps", "en:Theatre Royal, Nottingham",
+              "The theatre architect Charles J. Phipps designed the Theatre Royal.",
+              ("Phipps",)),
+            P("Peter Moro", "en:Peter Moro", "en:Nottingham Playhouse",
+              "The architect Peter Moro designed the Playhouse.",
+              ("Moro", "Playhouse")),
+            P("James Gandon", "en:James Gandon", "en:Shire Hall, Nottingham",
+              "The architect James Gandon designed the rebuilt Shire Hall.",
+              ("Gandon",)),
+            P("George Green", "en:George Green (mathematician)", "en:Bromley House Library",
+              "The mathematician George Green was a member of the subscription library at Bromley House.",
+              ("Bromley House", "George Green")),
+            P("Brian Clough", "en:Brian Clough", "en:City Ground",
+              "Brian Clough managed Nottingham Forest at the City Ground.",
+              ("City Ground", "Clough")),
+            P("Torvill and Dean", "en:Torvill and Dean", "en:National Ice Centre",
+              "The ice dancers Jayne Torvill and Christopher Dean come from Nottingham. The square outside the ice "
+              "centre is named Bolero Square after their Olympic routine.",
+              ("Torvill", "Bolero"), group="sport"),
         ]),
 ]

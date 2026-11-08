@@ -20,6 +20,7 @@ open data ──► pipeline/ (Python, numbered steps) ──► data/<city>.jso
 |---|---|
 | `s00_fetch_osm` | Buildings, roads, water, parks and named places from OpenStreetMap |
 | `s00_fetch_heritage` | Listed buildings and scheduled monuments from Historic England |
+| `s00_fetch_nature` | Nature Reserves, SSSIs and ancient woodland from Natural England; other nature reserves from OpenStreetMap |
 | `s01_buildings` | Building outlines and heights, the base map, named places matched to buildings |
 | `s02_listing` | Listed-building points matched to outlines |
 | `s03_wikidata` | Names, dates, architects, photos and Wikipedia links from Wikidata |
@@ -60,8 +61,9 @@ lib/                      MapLibre GL JS (BSD-3-Clause)
 
 ### Layers
 
-Story layers are hand-written and every story is checked against its Wikipedia article. Rule layers are built from
-open data: listed buildings by grade, buildings on scheduled monuments, and pubs. See [CONTRIBUTING.md](CONTRIBUTING.md)
+Story and people layers are hand-written, and every entry is checked against its Wikipedia articles. Rule layers are
+built from open data: listed buildings by grade, buildings on scheduled monuments, and pubs. Nature areas are drawn on
+the ground by type. On the page, layers are ticked in one sheet behind the Layers button, in any combination. See [CONTRIBUTING.md](CONTRIBUTING.md)
 to add one.
 
 ## Adding a city
@@ -82,6 +84,7 @@ itself inspired by Sasha Bogachev's [Paris, building by building](https://paris.
 ## Data licences
 
 - OpenStreetMap data © OpenStreetMap contributors, [ODbL](https://www.openstreetmap.org/copyright). The prepared files in `data/` are derived from OpenStreetMap and are available under the same licence.
+- Natural England data, [Open Government Licence](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/)
 - Historic England data, [Open Government Licence](https://historicengland.org.uk/terms/website-terms-conditions/open-data-hub/)
 - Wikidata, CC0
 - Wikipedia text, CC BY-SA; stories link to the articles they rest on

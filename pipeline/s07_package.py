@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 import json
 
-from .common import load, log
+from .common import load, log, work
 from .s05_dates import info_for
 
 
@@ -69,7 +69,8 @@ def main(city_id):
     }
     fc = lambda f: {"type": "FeatureCollection", "features": f}  # noqa: E731
     built = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    out = {"city": city_id, "built": built, "stats": stats, "layers": lay["meta"],
+    nature = load(city_id, "nature") if work(city_id, "nature").exists() else []
+    out = {"city": city_id, "built": built, "stats": stats, "layers": lay["meta"], "nature": fc(nature),
            "buildings": fc(feats), "roads": fc(base["roads"]), "water": fc(base["water"]), "parks": fc(base["parks"])}
     Path("data").mkdir(exist_ok=True)
     Path(f"data/{city_id}.json").write_text(json.dumps(out, separators=(",", ":"), ensure_ascii=False))
@@ -84,8 +85,8 @@ def main(city_id):
         *[f"| precision: {f} | {c:,} | {pct(c)} |" for f, c in stats["byPrecision"].items()],
         *[f"| source: {s} | {c:,} | {pct(c)} |" for s, c in stats["bySource"].items()],
         f"| sources disagree (all dates shown) | {stats['conflicts']:,} | {pct(stats['conflicts'])} |",
-        "", "## Layers", "", "| Layer | Kind | Buildings |", "|---|---|---:|",
-        *[f"| {L['title']} | {L['kind']} | {L['count']:,} |" for L in lay["meta"]],
+        "", "## Layers", "", "| Section | Layer | Group | Count |", "|---|---|---|---:|",
+        *[f"| {L['section']} | {L['title']} | {g['title']} | {g['count']:,} |" for L in lay["meta"] for g in L["groups"]],
         "", "## Stories dropped by the checks", "",
         *([f"- **{d['layer']} / {d['name']}**: {d['why']}" for d in cur["dropped"]] or ["None."]),
         "", "## Stories and how they were placed", "",

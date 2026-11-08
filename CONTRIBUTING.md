@@ -33,12 +33,28 @@ Rules, checked by step `s04_curated` every time the pipeline runs:
 - **Stories are short and plain:** one or two sentences, what happened and when. Name legends as legends.
 - **No personal details about private people.** Public figures are fine.
 
+### People
+
+A people layer (`kind="people"`) pairs a person with a building:
+
+```python
+P("Thomas Cecil Howitt", "en:Thomas Cecil Howitt", "en:Council House, Nottingham",
+  "The architect Thomas Cecil Howitt designed the Council House.",
+  ("Howitt", "Council House")),
+```
+
+The facts must appear in the person's and the place's articles taken together, and the place's article decides the
+building. The person's type (architects, writers, science, industry, sport, arts, public life) comes from their
+occupations on Wikidata; set `group="sport"` and so on only when Wikidata has none, for a duo or a team. Each type
+becomes its own tickbox on the page.
+
 ## 2. A rule layer (from an open dataset)
 
 Add a function to `pipeline/layers.py` with the `@layer(...)` decorator. It receives a `Context` (buildings,
 listed-building matches, named places, scheduled monuments) and returns `{building index: group}` or
 `{building index: (group, {"story": "..."})}`. Helpers cover the common joins: `within(ctx, polygons, group)` and
-`containing_places(ctx, test, group)`. A dataset the pipeline does not download yet needs a fetch step
+`containing_places(ctx, test, group)`. Give the layer a `section` (the heading it sits under in the Layers sheet:
+Heritage, Today, ...). A dataset the pipeline does not download yet needs a fetch step
 (`pipeline/s00_fetch_*.py`) and an open licence.
 
 ## Checking your layer

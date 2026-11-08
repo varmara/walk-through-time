@@ -15,7 +15,7 @@ LAYERS = []
 
 
 def layer(**meta):
-    """meta: id, title, intro, groups=[(key, title)], source=(title, url)."""
+    """meta: id, title, intro, section (heading in the Layers sheet), groups=[(key, title)], source=(title, url)."""
     def wrap(fn):
         LAYERS.append(dict(meta, fn=fn))
         return fn
@@ -63,7 +63,7 @@ def containing_places(ctx, test, group):
 
 # ---------- layers ----------
 
-@layer(id="listed", title="Listed buildings",
+@layer(id="listed", title="Listed buildings", section="Heritage",
        intro="Buildings on the National Heritage List for England. Grade I buildings are of exceptional interest, "
              "Grade II* buildings are particularly important, and Grade II buildings are of special interest.",
        groups=[("listed-I", "Grade I"), ("listed-II*", "Grade II*"), ("listed-II", "Grade II")],
@@ -72,7 +72,7 @@ def listed(ctx):
     return {int(i): "listed-" + es[0]["Grade"] for i, es in ctx.listing.items() if es[0].get("Grade") in ("I", "II*", "II")}
 
 
-@layer(id="scheduled", title="Scheduled monuments",
+@layer(id="scheduled", title="Scheduled monuments", section="Heritage",
        intro="Buildings standing on a scheduled monument: a nationally important archaeological site or structure "
              "protected by law.",
        groups=[("scheduled", "Scheduled monument")],
@@ -82,7 +82,7 @@ def scheduled(ctx):
             for f in ctx.monuments for i in within(ctx, [f], "scheduled")}
 
 
-@layer(id="pubs", title="Pubs today",
+@layer(id="pubs", title="Pubs today", section="Today",
        intro="Buildings with a pub in them today, according to OpenStreetMap.",
        groups=[("pubs", "Pub")],
        source=("OpenStreetMap", "https://www.openstreetmap.org/copyright"))

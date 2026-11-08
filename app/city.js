@@ -16,8 +16,9 @@ const ERAS = [
   [1980, 1999, '1980–99',     '#3a76b6'],
   [2000, 9999, '2000+',       '#6c5cc6'],
 ];
-// How much each date precision is faded towards the background
-const FADE = { exact: 0, approx: 0.4, century: 0.62 };
+const FADE = { exact: 0, approx: 0.4, century: 0.62 };   // how far each precision fades towards the background
+const SECTIONS = ['Stories', 'People', 'Heritage', 'Nature', 'Today'];
+const NATURE_TYPES = ['nnr', 'lnr', 'sssi', 'ancient', 'reserve'];
 
 const $ = id => document.getElementById(id);
 const store = { get(k){ try { return localStorage.getItem(k); } catch { return null; } },
@@ -28,18 +29,17 @@ const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;
 const fmt = n => n.toLocaleString('en-GB');
 function progress(p, step){ $('lpct').textContent = Math.round(p) + '%'; if (step) $('lstep').textContent = step; }
 
-async function fetchJSON(url, ms = 60000){
+async function fetchJSON(url, ms = 30000){
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), ms);
   try {
     const r = await fetch(url, { cache:'no-cache', signal: ctrl.signal });
-    if (!r.ok) throw new Error(r.status === 404 ? 'the data file has not been built yet' : 'HTTP ' + r.status);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
     return await r.json();
   } catch (e) {
     throw new Error(e.name === 'AbortError' ? 'timed out' : e.message);
   } finally { clearTimeout(timer); }
 }
-
 // The data file is large, so read it as a stream and show how much has arrived.
 async function fetchData(url){
   const r = await fetch(url, { cache:'no-cache' });
@@ -75,12 +75,18 @@ function dateText(y, f){
 }
 const PRECISION = { exact: 'exact year', approx: 'approximate', century: 'only the century is known' };
 
-// ================= Main =================
-let city, data, features = [], selectedId = null, map, playing = null, stats, activeLayer = null;
+// ================= State =================
+let city, data, features = [], selectedId = null, map, playing = null, stats;
+let layers = [];                 // layer metadata from the data file
+const groups = new Map();        // group key -> { key, title, count, items, layer }
+let active = new Set();          // ticked group keys
+try { active = new Set(JSON.parse(store.get('layers:' + CITY_ID) || '[]')); } catch {}
+const saveActive = () => store.set('layers:' + CITY_ID, JSON.stringify([...active]));
+const isArea = key => groups.get(key)?.layer.kind === 'areas';
 
 async function main(){
   progress(5, 'loading map data…');
-  city = await fetchJSON(`../cities/${CITY_ID}.json`, 20000);
+  city = await fetchJSON(`../cities/${CITY_ID}.json`);
   data = await fetchData(`../data/${CITY_ID}.json`);
   progress(70, 'colouring by year…');
   features = data.buildings.features;
@@ -88,13 +94,18 @@ async function main(){
   let known = 0;
   features.forEach((f, i) => { f.id = i; if (f.properties.y != null) known++; f.properties.c = colourFor(f.properties); });
   stats = { total: features.length, known };
-  buildLayerChips();
+
+  layers = (data.layers || []).map(L => ({ ...L, groups: (L.groups || []).map(g => Array.isArray(g) ? { key: g[0], title: g[1] } : g) }));
+  layers.forEach(L => L.groups.forEach(g => groups.set(g.key, { ...g, layer: L })));
+  active = new Set([...active].filter(k => groups.has(k)));
+  renderLayers();
 
   progress(90, 'drawing the map…');
   await drawMap();
   progress(100);
   $('loader').classList.add('done');
-  if (data.built) say('Data updated ' + new Date(data.built).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' }));
+  if (data.built) $('dataNote').textContent = 'Data updated ' + new Date(data.built).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' }) + '.';
+  applyLayers();
   updateYear();
 }
 
@@ -103,12 +114,15 @@ function isDark(){
   return t === 'dark' || (t !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
 }
 
+// ================= Map =================
 function buildingColour(){
   const base = ['case', ['boolean', ['feature-state', 'sel'], false], tok('--accent'), ['get', 'c']];
-  if (!activeLayer) return base;
-  const inLayer = ['any', ...activeLayer.groups.map(g => ['in', ',' + g[0] + ',', ['coalesce', ['get', 'L'], '']])];
+  const keys = [...active].filter(k => !isArea(k));
+  if (!keys.length) return base;
+  const inLayer = ['any', ...keys.map(k => ['in', ',' + k + ',', ['coalesce', ['get', 'L'], '']])];
   return ['case', ['boolean', ['feature-state', 'sel'], false], tok('--accent'), inLayer, ['get', 'c'], tok('--ghost')];
 }
+const natureColour = () => ['match', ['get', 't'], ...NATURE_TYPES.flatMap(t => [t, tok('--n-' + t)]), tok('--n-reserve')];
 
 function drawMap(){
   return new Promise(resolve => {
@@ -121,7 +135,7 @@ function drawMap(){
         light:{ anchor:'map', position:[1.4, 210, 35], intensity: isDark() ? 0.35 : 0.45 } }
     });
     map.addControl(new maplibregl.AttributionControl({ compact:true, customAttribution:
-      '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors · Historic England (OGL) · Wikidata (CC0) · Wikipedia (CC BY-SA)' }), 'bottom-right');
+      '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors · Historic England (OGL) · Natural England (OGL) · Wikidata (CC0) · Wikipedia (CC BY-SA)' }), 'bottom-right');
 
     map.on('load', () => {
       map.addSource('osm', { type:'raster', tiles:['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize:256, maxzoom:19 });
@@ -137,13 +151,27 @@ function drawMap(){
       map.addLayer({ id:'roads', type:'line', source:'roads', layout:{ 'line-cap':'round', 'line-join':'round' },
         paint:{ 'line-color':tok('--road'), 'line-width':['interpolate', ['linear'], ['zoom'], 13, ['match', ['get','k'], 'major', 1.5, 0.4], 18, ['match', ['get','k'], 'major', 14, 3]] } });
 
+      map.addSource('nature', { type:'geojson', data: data.nature || { type:'FeatureCollection', features:[] } });
+      map.addLayer({ id:'nature-fill', type:'fill', source:'nature', layout:{ visibility:'none' },
+        paint:{ 'fill-color':natureColour(), 'fill-opacity':0.32 } });
+      map.addLayer({ id:'nature-line', type:'line', source:'nature', layout:{ visibility:'none' },
+        paint:{ 'line-color':natureColour(), 'line-width':2, 'line-dasharray':[2, 1] } });
+
       map.addSource('b', { type:'geojson', data:{ type:'FeatureCollection', features } });
       map.addLayer({ id:'b', type:'fill-extrusion', source:'b', paint:{
         'fill-extrusion-color':buildingColour(),
         'fill-extrusion-height':['get', 'h'], 'fill-extrusion-base':0, 'fill-extrusion-opacity':0.95,
         'fill-extrusion-vertical-gradient':true } });
 
-      map.on('click', 'b', e => { const f = e.features[0]; if (f) select(f.id); });
+      map.on('click', e => {
+        const hit = map.queryRenderedFeatures(e.point, { layers:['b'] })[0];
+        if (hit) return selectBuilding(hit.id);
+        const area = map.getLayer('nature-fill') && map.getLayoutProperty('nature-fill', 'visibility') === 'visible'
+          && map.queryRenderedFeatures(e.point, { layers:['nature-fill'] })[0];
+        if (area) showArea(area.properties);
+      });
+      // start the credits folded behind their (i) button: on a phone they would cover the map
+      document.querySelector('.maplibregl-ctrl-attrib')?.classList.remove('maplibregl-compact-show');
       map.on('mouseenter', 'b', () => map.getCanvas().style.cursor = 'pointer');
       map.on('mouseleave', 'b', () => map.getCanvas().style.cursor = '');
       resolve();
@@ -193,47 +221,102 @@ $('play').onclick = () => {
   }, 70);
 };
 
-// ================= Fold the panel =================
-function setFolded(on){
-  $('sheet').classList.toggle('folded', on);
-  $('fold').setAttribute('aria-expanded', !on);
-  $('fold').setAttribute('aria-label', on ? 'Show all controls' : 'Show fewer controls');
-  $('fold').textContent = on ? '▴' : '▾';
-  store.set('folded', on ? '1' : '0');
+// ================= The sheet =================
+const sheet = $('sheet');
+let sheetKind = null;
+function openSheet(kind, title){
+  sheetKind = kind;
+  $('sTitle').textContent = title;
+  ['pLayers', 'pMap', 'pCard'].forEach(id => $(id).hidden = true);
+  $({ layers:'pLayers', map:'pMap', card:'pCard' }[kind]).hidden = false;
+  sheet.hidden = false; sheet.scrollTop = 0;
+  $('bLayers').setAttribute('aria-expanded', kind === 'layers');
+  $('bMap').setAttribute('aria-expanded', kind === 'map');
 }
-$('fold').onclick = () => setFolded(!$('sheet').classList.contains('folded'));
-setFolded(store.get('folded') === '1');
+function closeSheet(){
+  sheet.hidden = true; sheetKind = null;
+  $('bLayers').setAttribute('aria-expanded', false);
+  $('bMap').setAttribute('aria-expanded', false);
+  if (selectedId != null && map) { map.setFeatureState({ source:'b', id:selectedId }, { sel:false }); selectedId = null; }
+}
+$('sClose').onclick = closeSheet;
+addEventListener('keydown', e => { if (e.key === 'Escape' && !sheet.hidden) closeSheet(); });
+$('bLayers').onclick = () => sheetKind === 'layers' ? closeSheet() : openSheet('layers', 'Layers');
+$('bMap').onclick = () => sheetKind === 'map' ? closeSheet() : openSheet('map', 'Map');
+$('bHome').onclick = () => map && map.easeTo({ ...city.home, duration:900 });
 
-// ================= Layers and stories =================
-function buildLayerChips(){
-  const layers = (data.layers || []).filter(L => L.count > 0);
-  $('layerChips').innerHTML = layers.map(L =>
-    `<button class="chip" data-layer="${esc(L.id)}" aria-pressed="false">${esc(L.title)}<small>${fmt(L.count)}</small></button>`).join('');
-  $('layerChips').querySelectorAll('[data-layer]').forEach(btn => btn.onclick = () => {
-    const L = layers.find(x => x.id === btn.dataset.layer);
-    setLayer(activeLayer && activeLayer.id === L.id ? null : L);
-  });
-  $('layerSection').hidden = !layers.length;
-}
-function setLayer(L){
-  activeLayer = L;
-  $('layerChips').querySelectorAll('[data-layer]').forEach(b => b.setAttribute('aria-pressed', !!L && b.dataset.layer === L.id));
-  $('layerInfo').hidden = !L;
-  if (L) {
-    $('lIntro').textContent = L.intro || '';
-    $('lItems').innerHTML = (L.items || []).map(([b, name]) => `<button class="item" data-b="${b}">${esc(name)}</button>`).join('');
-    $('lItems').querySelectorAll('[data-b]').forEach(btn => btn.onclick = () => select(+btn.dataset.b));
-    $('lSource').innerHTML = L.kind === 'stories'
-      ? 'Each story is checked against its Wikipedia article. Tap a building to read it.'
-      : L.source ? `Source: <a href="${esc(L.source.url)}" target="_blank" rel="noopener">${esc(L.source.title)}</a>` : '';
+// ================= Layers panel =================
+function renderLayers(){
+  const html = [];
+  for (const sec of SECTIONS) {
+    const Ls = layers.filter(L => L.section === sec && L.groups.some(g => g.count > 0));
+    if (!Ls.length) continue;
+    html.push(`<div class="section"><div class="seclbl">${esc(sec)}</div>`);
+    for (const L of Ls) {
+      const gs = L.groups.filter(g => g.count > 0);
+      const single = gs.length === 1;
+      if (!single) html.push(`<div class="lrow" style="cursor:default;border-bottom:0;padding-bottom:2px"><b>${esc(L.title)}</b>
+        <button class="more" data-info="${esc(L.id)}" aria-label="About ${esc(L.title)}" aria-expanded="false">ⓘ</button></div>
+        <div class="linfo" id="info-${esc(L.id)}" hidden>${infoHtml(L, null)}</div>`);
+      for (const g of gs) {
+        const title = single ? L.title : g.title;
+        const sw = L.kind === 'areas' ? `<span class="sw" style="background:var(--n-${esc(g.key)})"></span>` : '';
+        html.push(`<label class="lrow"${single ? '' : ' style="padding-left:14px"'}><input type="checkbox" data-g="${esc(g.key)}"${active.has(g.key) ? ' checked' : ''}>${sw}
+          <span>${esc(title)}</span><span class="n">${fmt(g.count)}</span>
+          ${single || g.items ? `<button class="more" data-info="g-${esc(g.key)}" aria-label="About ${esc(title)}" aria-expanded="false">ⓘ</button>` : ''}</label>
+          <div class="linfo" id="info-g-${esc(g.key)}" hidden>${infoHtml(L, single || g.items ? g : null, single)}</div>`);
+      }
+    }
+    html.push('</div>');
   }
-  if (map && map.getLayer('b')) map.setPaintProperty('b', 'fill-extrusion-color', buildingColour());
+  $('lSections').innerHTML = html.join('');
+  $('lSections').querySelectorAll('input[data-g]').forEach(cb => cb.onchange = () => {
+    cb.checked ? active.add(cb.dataset.g) : active.delete(cb.dataset.g);
+    saveActive(); applyLayers();
+  });
+  $('lSections').querySelectorAll('[data-info]').forEach(btn => btn.onclick = e => {
+    e.preventDefault(); e.stopPropagation();
+    const box = $('info-' + btn.dataset.info), open = box.hidden;
+    box.hidden = !open; btn.setAttribute('aria-expanded', open);
+  });
+  $('lSections').querySelectorAll('[data-b]').forEach(btn => btn.onclick = e => {
+    e.preventDefault(); selectBuilding(+btn.dataset.b);
+  });
+  updateSummary();
+}
+function infoHtml(L, g, withIntro = true){
+  const parts = [];
+  if (withIntro && L.intro) parts.push(`<p>${esc(L.intro)}</p>`);
+  if (g && g.items && g.items.length) parts.push(`<div class="items">${g.items.map(([b, n]) => `<button class="item" data-b="${b}">${esc(n)}</button>`).join('')}</div>`);
+  if (L.kind === 'stories' || L.kind === 'people') parts.push('<p class="src">Each entry is checked against its Wikipedia article.</p>');
+  else if (L.source) parts.push(`<p class="src">Source: <a href="${esc(L.source.url)}" target="_blank" rel="noopener">${esc(L.source.title)}</a></p>`);
+  return parts.join('');
+}
+function updateSummary(){
+  const names = [...active].map(k => groups.get(k)).filter(Boolean)
+    .map(g => g.layer.groups.filter(x => x.count > 0).length === 1 ? g.layer.title : g.title);
+  $('lSummary').innerHTML = names.length ? `<b>${names.length} on:</b> ${esc(names.join(', '))}` : 'No layers on. Tick any to highlight them on the map.';
+  $('lClear').hidden = !names.length;
+  $('layerCount').hidden = !names.length;
+  $('layerCount').textContent = names.length;
+}
+$('lClear').onclick = () => { active.clear(); saveActive(); renderLayers(); applyLayers(); };
+
+function applyLayers(){
+  updateSummary();
+  if (!map || !map.getLayer('b')) return;
+  map.setPaintProperty('b', 'fill-extrusion-color', buildingColour());
+  const types = [...active].filter(isArea);
+  const vis = types.length ? 'visible' : 'none';
+  ['nature-fill', 'nature-line'].forEach(id => {
+    map.setLayoutProperty(id, 'visibility', vis);
+    map.setFilter(id, ['in', ['get', 't'], ['literal', types.length ? types : ['none']]]);
+  });
 }
 
-// ================= Toggles =================
+// ================= Map panel =================
 function toggle(btn, fn){ btn.onclick = () => { const on = btn.getAttribute('aria-pressed') !== 'true'; btn.setAttribute('aria-pressed', on); fn(on); }; }
 toggle($('tUnknown'), on => { showUnknown = on; updateYear(); });
-
 document.querySelectorAll('[data-base]').forEach(btn => btn.onclick = () => setBase(btn.dataset.base));
 function setBase(kind){
   document.querySelectorAll('[data-base]').forEach(b => b.setAttribute('aria-pressed', b.dataset.base === kind));
@@ -242,26 +325,26 @@ function setBase(kind){
   map.setLayoutProperty('osm', 'visibility', kind === 'osm' ? 'visible' : 'none');
   if (map.getLayer('nls')) map.setLayoutProperty('nls', 'visibility', kind === 'nls' ? 'visible' : 'none');
   ['parks', 'water', 'waterline', 'roads'].forEach(l => map.setLayoutProperty(l, 'visibility', kind === 'none' ? 'visible' : 'none'));
-  if (kind === 'nls' && !store.get('mtKey')) say('Paste a MapTiler key to show the 1888–1913 map.');
 }
 $('mtSave').onclick = () => {
   const k = $('mtKey').value.trim(); if (!k) return;
-  store.set('mtKey', k); addNls(k); setBase('nls'); say('');
+  store.set('mtKey', k); addNls(k); setBase('nls');
 };
+$('legend').innerHTML = ERAS.map(e => `<div><i style="background:${e[3]}"></i>${e[2]}</div>`).join('')
+  + `<div><i style="background:var(--unknown)"></i>no date</div>`;
 
-// ================= Building card =================
-const sheet = $('sheet');
-const layerTitle = id => (data.layers || []).find(L => L.id === id)?.title || id;
-function select(id){
+// ================= Cards =================
+const layerTitle = id => layers.find(L => L.id === id)?.title || id;
+function selectBuilding(id){
   if (selectedId != null) map.setFeatureState({ source:'b', id:selectedId }, { sel:false });
   selectedId = id;
   map.setFeatureState({ source:'b', id }, { sel:true });
   const f = features[id], p = f.properties;
   const ring = f.geometry.type === 'Polygon' ? f.geometry.coordinates[0] : f.geometry.coordinates[0][0];
   const cx = ring.reduce((a, c) => a + c[0], 0) / ring.length, cy = ring.reduce((a, c) => a + c[1], 0) / ring.length;
-  map.easeTo({ center:[cx, cy], zoom:Math.max(map.getZoom(), 16.5), duration:700, padding:{ bottom: innerWidth >= 760 ? 0 : sheet.offsetHeight * 0.6 } });
+  map.easeTo({ center:[cx, cy], zoom:Math.max(map.getZoom(), 16.5), duration:700,
+    padding: innerWidth >= 760 ? { right: 400 } : { bottom: innerHeight * 0.45 } });
 
-  $('cTitle').textContent = p.name || p.listName || 'Unnamed building';
   const rows = [];
   if (p.y != null) {
     const era = eraOf(p.y);
@@ -270,15 +353,16 @@ function select(id){
     const alts = p.alts || (p.alt ? [p.alt] : []);
     if (alts.length) rows.push(['Other dates', alts.map(a => `${esc(dateText(a.y, a.f))} <span class="muted">from ${esc(a.src)}</span>`).join('<br>')
       + '<div class="hint">Sources disagree. They may describe different moments, such as a founding and a rebuilding.</div>']);
-  } else rows.push(['Built', '<span style="color:var(--muted)">not in open data yet</span>']);
+  } else rows.push(['Built', '<span class="muted">not in open data yet</span>']);
   if (p.architect) rows.push(['Architect', esc(p.architect)]);
   if (p.grade) rows.push(['Listing', `Grade ${esc(p.grade)} listed`]);
   rows.push(['Height', `≈ ${Math.round(p.h)} m${p.levels ? ' · ' + esc(p.levels) + (p.levels === '1' ? ' storey' : ' storeys') : ''}`]);
   if (p.kind && p.kind !== 'yes') rows.push(['Type (OSM)', esc(p.kind.replace(/_/g, ' '))]);
   $('cFacts').innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
 
+  const link = s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>`;
   $('cStories').innerHTML = (p.stories || []).map(s => `<div class="story"><div class="seclbl">${esc(layerTitle(s.layer))}</div>
-    <p>${esc(s.text)}</p>${s.source ? `<p class="src">Source: <a href="${esc(s.source.url)}" target="_blank" rel="noopener">${esc(s.source.title)}, Wikipedia</a></p>` : ''}</div>`).join('');
+    <p>${esc(s.text)}</p>${s.source ? `<p class="src">Wikipedia: ${link(s.source)}${s.place ? ' · ' + link(s.place) : ''}</p>` : ''}</div>`).join('');
 
   const links = [];
   if (p.listUrl || p.listEntry) links.push(`<a href="${esc(p.listUrl || 'https://historicengland.org.uk/listing/the-list/list-entry/' + p.listEntry)}" target="_blank" rel="noopener">Historic England list entry →</a>`);
@@ -290,19 +374,23 @@ function select(id){
   const img = $('cImg');
   if (p.image) { img.src = p.image.replace(/^http:/, 'https:') + '?width=640'; img.alt = p.name || ''; img.hidden = false; img.onerror = () => img.hidden = true; }
   else { img.hidden = true; img.removeAttribute('src'); }
-  $('controls').hidden = true; $('card').hidden = false; sheet.scrollTop = 0;
+  openSheet('card', p.name || p.listName || 'Unnamed building');
 }
-$('cClose').onclick = () => {
-  if (selectedId != null) map.setFeatureState({ source:'b', id:selectedId }, { sel:false });
-  selectedId = null; $('card').hidden = true; $('controls').hidden = false;
-};
-$('reset').onclick = () => map && map.easeTo({ ...city.home, duration:900 });
+function showArea(p){
+  const type = (groups.get(p.t) || {}).title || 'Nature area';
+  $('cImg').hidden = true;
+  $('cFacts').innerHTML = `<dt>Type</dt><dd>${esc(type.replace(/s$/, ''))}</dd><dt>Source</dt><dd>${esc(p.source)}</dd>`;
+  $('cStories').innerHTML = '';
+  $('cLinks').innerHTML = p.source === 'Natural England'
+    ? '<a href="https://designatedsites.naturalengland.org.uk/" target="_blank" rel="noopener">Natural England designated sites →</a>'
+    : '<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>';
+  openSheet('card', p.name);
+}
 
-// ================= Legend + layout =================
-$('legend').innerHTML = ERAS.map(e => `<div><i style="background:${e[3]}"></i>${e[2]}</div>`).join('')
-  + `<div><i style="background:var(--unknown)"></i>no date</div>`;
-const fit = () => document.documentElement.style.setProperty('--sheet-h', (innerWidth >= 760 ? 0 : sheet.offsetHeight) + 'px');
-if (window.ResizeObserver) new ResizeObserver(() => requestAnimationFrame(fit)).observe(sheet);
+// ================= Layout =================
+const bar = $('timebar');
+const fit = () => document.documentElement.style.setProperty('--bar-h', (bar.offsetHeight + 20) + 'px');
+if (window.ResizeObserver) new ResizeObserver(() => requestAnimationFrame(fit)).observe(bar);
 fit(); addEventListener('resize', fit);
 
 main().catch(e => {

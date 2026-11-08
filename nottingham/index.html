@@ -16,35 +16,49 @@
 
 <div class="top">
   <div class="brand"><b><a href="../" class="home" aria-label="Walk Through Time, all cities"><img src="../app/logo.svg" alt="" width="20" height="20">Walk Through Time</a> · Nottingham</b><span id="count">loading…</span></div>
-  <button class="icon" id="reset" aria-label="Back to the starting view">⌂</button>
+  <div class="fabs">
+    <button class="fab" id="bLayers" aria-label="Layers" aria-expanded="false" aria-controls="sheet">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="m3 13 9 5 9-5"/><path d="m3 17.5 9 5 9-5" opacity=".55"/></svg>
+      <span class="badge" id="layerCount" hidden>0</span>
+    </button>
+    <button class="fab" id="bMap" aria-label="Map options and colour key" aria-expanded="false" aria-controls="sheet">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 6 6-2 6 2 6-2v14l-6 2-6-2-6 2V6Z"/><path d="M9 4v14M15 6v14"/></svg>
+    </button>
+    <button class="fab" id="bHome" aria-label="Back to the starting view">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+    </button>
+  </div>
 </div>
 
-<section class="sheet" id="sheet">
-  <div id="controls" style="display:grid;gap:10px">
-    <div class="yearrow">
-      <div><div class="yearlbl">The city in</div><div class="year" id="yearOut">2026</div></div>
-      <button class="fold" id="fold" aria-expanded="true" aria-label="Show fewer controls">▾</button>
-      <button class="play" id="play" aria-label="Play the city's growth">▶</button>
-    </div>
-    <div class="sliderwrap">
-      <input type="range" id="year" min="0" max="1000" step="1" value="1000" aria-label="Year">
-      <div class="ticks" id="ticks"></div>
-    </div>
+<div class="timebar" id="timebar">
+  <div class="yearrow">
+    <div><div class="yearlbl">The city in</div><div class="year" id="yearOut">2026</div></div>
+    <button class="play" id="play" aria-label="Play the city's growth">▶</button>
+  </div>
+  <div>
+    <input type="range" id="year" min="0" max="1000" step="1" value="1000" aria-label="Year">
+    <div class="ticks" id="ticks"></div>
+  </div>
+  <div class="status" id="status"></div>
+</div>
+
+<section class="sheet" id="sheet" hidden aria-labelledby="sTitle">
+  <div class="grip" aria-hidden="true"></div>
+  <div class="shead"><h2 id="sTitle"></h2><button class="close" id="sClose" aria-label="Close">✕</button></div>
+
+  <div class="panel" id="pLayers" hidden>
+    <div class="summary"><span id="lSummary">No layers on</span><button class="textbtn" id="lClear">Clear all</button></div>
+    <div id="lSections" class="panel"></div>
+  </div>
+
+  <div class="panel" id="pMap" hidden>
+    <div class="seclbl">Colours: when it was built</div>
     <div class="legend" id="legend"></div>
-    <p class="note">Paler colours mean the date is approximate.</p>
-    <div id="layerSection" class="section" hidden>
-      <div class="seclbl">Stories and layers</div>
-      <div class="chips" id="layerChips" role="group" aria-label="Stories and layers"></div>
-      <div class="layerinfo" id="layerInfo" hidden>
-        <p id="lIntro"></p>
-        <div class="items" id="lItems"></div>
-        <p class="src" id="lSource"></p>
-      </div>
-    </div>
-    <div class="seclbl">Map</div>
-    <div class="chips" role="group" aria-label="Map options">
-      <button class="chip" id="tUnknown" aria-pressed="true">Undated</button>
-      <button class="chip" data-base="none" aria-pressed="true">No basemap</button>
+    <p class="note">Paler colours mean the date is approximate. Grey: no date in open data yet.</p>
+    <div class="chips"><button class="chip" id="tUnknown" aria-pressed="true">Show undated buildings</button></div>
+    <div class="seclbl">Background</div>
+    <div class="chips" role="group" aria-label="Background map">
+      <button class="chip" data-base="none" aria-pressed="true">Plain</button>
       <button class="chip" data-base="osm" aria-pressed="false">Street map</button>
       <button class="chip" data-base="nls" aria-pressed="false">1888–1913 map</button>
     </div>
@@ -52,15 +66,14 @@
       <input id="mtKey" placeholder="MapTiler key for the old map" autocomplete="off" spellcheck="false">
       <button class="chip" id="mtSave">Save</button>
     </div>
-    <div class="status" id="status"></div>
+    <p class="note" id="dataNote"></p>
   </div>
 
-  <article class="card" id="card" hidden>
-    <div class="head"><h2 id="cTitle"></h2><button class="close" id="cClose" aria-label="Close">✕</button></div>
+  <article class="panel card" id="pCard" hidden>
     <img id="cImg" alt="" hidden>
     <dl class="facts" id="cFacts"></dl>
     <div id="cStories"></div>
-    <div id="cLinks" style="display:flex;flex-wrap:wrap;gap:12px"></div>
+    <div class="links" id="cLinks"></div>
   </article>
 </section>
 

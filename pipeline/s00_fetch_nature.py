@@ -1,0 +1,115 @@
+"""Download nature conservation areas: Natural England designations and OpenStreetMap nature reserves.
+
+Natural England (Open Government Licence): National Nature Reserves, Local Nature Reserves, Sites of
+Special Scientific Interest, and the Ancient Woodland Inventory. OpenStreetMap (ODbL): other areas
+tagged leisure=nature_reserve, such as reserves run by wildlife trusts.
+
+Writes work/<city>/nature.json: GeoJSON features with properties {t: type key, name, source}.
+Only areas that reach into the city's polygon are kept.
+"""
+from .common import city, http, log, point_in_ring, save
+
+NE = "https://services.arcgis.com/JJzESW51TqeY9uat/ArcGIS/rest/services/{}/FeatureServer/0/query"
+TYPES = [
+    # key, Natural England service, title
+    ("nnr", "National_Nature_Reserves_England", "National Nature Reserve"),
+    ("lnr", "Local_Nature_Reserves_England", "Local Nature Reserve"),
+    ("sssi", "SSSI_England", "Site of Special Scientific Interest"),
+    ("ancient", "Ancient_Woodland_England", "Ancient woodland"),
+]
+OVERPASS = ["https://overpass-api.de/api/interpreter", "https://overpass.private.coffee/api/interpreter",
+            "https://overpass.kumi.systems/api/interpreter"]
+
+
+def name_of(props):
+    for k, v in props.items():
+        if "NAME" in k.upper() and "ID" not in k.upper() and isinstance(v, str) and v.strip():
+            return v.strip().title() if v.isupper() else v.strip()
+    return None
+
+
+def rings_of(geom):
+    if not geom:
+        return []
+    if geom["type"] == "Polygon":
+        return [geom["coordinates"][0]]
+    if geom["type"] == "MultiPolygon":
+        return [p[0] for p in geom["coordinates"]]
+    return []
+
+
+def reaches(geom, poly):
+    """True if any vertex of the area lies inside the city polygon, or the city's centre lies inside the area."""
+    rings = rings_of(geom)
+    if any(point_in_ring(x, y, poly) for r in rings for x, y in r[::5]):
+        return True
+    cx = sum(p[0] for p in poly) / len(poly)
+    cy = sum(p[1] for p in poly) / len(poly)
+    return any(point_in_ring(cx, cy, r) for r in rings)
+
+
+def rnd(geom):
+    r = lambda ring: [[round(x, 5), round(y, 5)] for x, y in ring]  # noqa: E731
+    if geom["type"] == "Polygon":
+        return {"type": "Polygon", "coordinates": [r(x) for x in geom["coordinates"]]}
+    return {"type": "MultiPolygon", "coordinates": [[r(x) for x in p] for p in geom["coordinates"]]}
+
+
+def main(city_id):
+    c = city(city_id)
+    b = c["bbox"]
+    poly = c.get("polygon") or [[b["w"], b["s"]], [b["e"], b["s"]], [b["e"], b["n"]], [b["w"], b["n"]], [b["w"], b["s"]]]
+    feats = []
+    for key, service, title in TYPES:
+        try:
+            gj = http(NE.format(service), params={
+                "where": "1=1", "geometry": f"{b['w']},{b['s']},{b['e']},{b['n']}",
+                "geometryType": "esriGeometryEnvelope", "inSR": "4326", "spatialRel": "esriSpatialRelIntersects",
+                "outFields": "*", "outSR": "4326", "returnGeometry": "true", "geometryPrecision": "5",
+                "maxAllowableOffset": "0.00002", "resultRecordCount": "2000", "f": "geojson"})
+        except Exception as e:  # noqa: BLE001 - each designation is optional
+            log(f"s00 Natural England {title}: failed, continuing without it ({e})")
+            continue
+        n = 0
+        for f in gj.get("features", []):
+            if f.get("geometry") and reaches(f["geometry"], poly):
+                feats.append({"type": "Feature", "geometry": rnd(f["geometry"]),
+                              "properties": {"t": key, "name": name_of(f["properties"]) or title,
+                                             "source": "Natural England"}})
+                n += 1
+        log(f"s00 Natural England {title}: {n} areas")
+
+    q = f"""[out:json][timeout:120];(
+      way["leisure"="nature_reserve"]({b['s']},{b['w']},{b['n']},{b['e']});
+      relation["leisure"="nature_reserve"]({b['s']},{b['w']},{b['n']},{b['e']});
+    ); out tags geom qt;"""
+    osm = None
+    for url in OVERPASS:
+        try:
+            osm = http(url, {"data": q}, tries=2, timeout=180)
+            break
+        except Exception as e:  # noqa: BLE001
+            log(f"    {url.split('/')[2]}: {e}")
+    named = {f["properties"]["name"].lower() for f in feats}
+    n = 0
+    for el in (osm or {}).get("elements", []):
+        t = el.get("tags", {})
+        if el["type"] == "way" and el.get("geometry"):
+            rings = [[[g["lon"], g["lat"]] for g in el["geometry"]]]
+        elif el["type"] == "relation":
+            rings = [[[g["lon"], g["lat"]] for g in m["geometry"]] for m in el.get("members", [])
+                     if m.get("role") == "outer" and m.get("geometry")]
+        else:
+            continue
+        rings = [r for r in rings if len(r) > 3 and r[0] == r[-1]]
+        if not rings:
+            continue
+        geom = {"type": "MultiPolygon", "coordinates": [[r] for r in rings]}
+        name = t.get("name")
+        if (name and name.lower() in named) or not reaches(geom, poly):
+            continue   # already covered by a Natural England designation, or outside the city
+        feats.append({"type": "Feature", "geometry": rnd(geom),
+                      "properties": {"t": "reserve", "name": name or "Nature reserve", "source": "OpenStreetMap"}})
+        n += 1
+    log(f"s00 OpenStreetMap nature reserves: {n} more areas")
+    save(city_id, "nature", feats)
