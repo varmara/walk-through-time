@@ -2,6 +2,11 @@ name: Build city data
 
 on:
   workflow_dispatch:
+    inputs:
+      refresh:
+        description: "Download fresh OpenStreetMap data (slow, most of an hour)"
+        type: boolean
+        default: false
   schedule:
     - cron: "17 4 1 1,7 *"   # twice a year: 1 January and 1 July, 04:17 UTC
   push:
@@ -22,7 +27,10 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
+    env:
+      # Scheduled runs and "refresh" runs download everything again; others reuse the saved download.
+      REFRESH: ${{ github.event_name == 'schedule' || inputs.refresh == true }}
     steps:
       - uses: actions/checkout@v4
 
@@ -30,10 +38,29 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Restore the saved OpenStreetMap download
+        if: env.REFRESH != 'true'
+        run: |
+          if git fetch -q --depth 1 origin downloads 2>/dev/null; then
+            for f in $(git ls-tree --name-only FETCH_HEAD | grep '\.osm\.json\.gz$'); do
+              c=${f%.osm.json.gz}
+              mkdir -p "work/$c"
+              git show "FETCH_HEAD:$f" | gunzip > "work/$c/osm.json"
+              git show "FETCH_HEAD:$c.osm.stamp" > "work/$c/osm.stamp"
+              echo "Restored download for $c"
+            done
+          else
+            echo "No saved download yet; the pipeline will fetch one."
+          fi
+
       - name: Run the pipeline for every city
         run: |
           cities=$(ls cities/*.json | xargs -n1 basename | sed 's/\.json$//')
-          python -m pipeline.run $cities
+          if [ "$REFRESH" = "true" ]; then
+            python -m pipeline.run $cities
+          else
+            python -m pipeline.run $cities --reuse-downloads
+          fi
 
       - name: Commit updated data
         run: |
@@ -47,3 +74,24 @@ jobs:
             git pull --rebase
             git push
           fi
+
+      - name: Save new OpenStreetMap downloads
+        if: hashFiles('work/*/osm.fresh') != ''
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          out=$(mktemp -d)
+          for d in work/*/; do
+            c=$(basename "$d")
+            [ -f "$d/osm.json" ] && [ -f "$d/osm.stamp" ] || continue
+            gzip -9 -c "$d/osm.json" > "$out/$c.osm.json.gz"
+            cp "$d/osm.stamp" "$out/$c.osm.stamp"
+          done
+          cd "$out"
+          git init -q -b downloads
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          printf '# Saved downloads\n\nOpenStreetMap data (ODbL, © OpenStreetMap contributors) as last downloaded by the\npipeline, reused by later runs. Replaced on every fresh download; not part of the site.\n' > README.md
+          git add . && git commit -q -m "OpenStreetMap downloads"
+          git push -q -f "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" downloads
+          ls -la

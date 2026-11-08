@@ -31,7 +31,11 @@ open data ──► pipeline/ (Python, numbered steps) ──► data/<city>.jso
 A GitHub Actions workflow (`.github/workflows/build-data.yml`) runs the pipeline twice a year
 (1 January and 1 July), whenever the pipeline, stories or city settings change, and on demand from the
 **Actions** tab, then commits the results.
-Downloads are kept in `work/` while it runs and are not committed.
+
+Downloading OpenStreetMap takes most of an hour, so the last download is kept, compressed, on the `downloads` branch.
+Runs triggered by a change reuse it, as long as the city's area and the download query are unchanged, and finish in a
+few minutes. The twice-yearly runs, and manual runs with **refresh** ticked, download everything again and replace it.
+Historic England, Wikidata and Wikipedia are fetched on every run; they take a minute or two.
 
 ```
 cities/<id>.json          city settings: area (polygon and bounding box) and starting view
@@ -48,8 +52,9 @@ lib/                      MapLibre GL JS (BSD-3-Clause)
   its Historic England list entry (`P1216`).
 - **Precision:** *exact* (one year), *approximate* (circa, a decade, a short range) or *century*. Less precise dates
   are drawn paler; buildings with no date are grey.
-- **Order of trust:** a more precise date wins. At equal precision OpenStreetMap comes first, because its date is
-  tagged on the outline itself, then Wikipedia, then Wikidata, whose item can describe an older institution or site.
+- **Order of trust:** OpenStreetMap and Wikipedia dates come first, the more precise one winning (OpenStreetMap first
+  when equally precise, as its date is tagged on the outline itself). Wikidata is used only when neither has a date,
+  because its item often describes an institution, such as a theatre company or a museum, rather than the building.
 - **Disagreements:** when sources give dates that cannot both be right (their ranges do not overlap), the card shows
   all of them with their sources. They often describe different moments, such as a founding and a rebuilding.
 

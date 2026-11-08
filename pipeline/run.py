@@ -3,6 +3,8 @@
   python -m pipeline.run nottingham              all steps
   python -m pipeline.run nottingham --from s04   from a step onwards (reuses work/ files)
   python -m pipeline.run nottingham --only s05   one step
+  python -m pipeline.run nottingham --reuse-downloads
+                                                 reuse work/<city>/osm.json if the area and query are unchanged
 """
 import argparse
 import importlib
@@ -16,6 +18,7 @@ def main():
     ap.add_argument("cities", nargs="+")
     ap.add_argument("--from", dest="start")
     ap.add_argument("--only")
+    ap.add_argument("--reuse-downloads", action="store_true")
     a = ap.parse_args()
     steps = STEPS
     if a.only:
@@ -24,7 +27,11 @@ def main():
         steps = STEPS[next(i for i, s in enumerate(STEPS) if s.startswith(a.start)):]
     for c in a.cities:
         for s in steps:
-            importlib.import_module(f"pipeline.{s}").main(c)
+            mod = importlib.import_module(f"pipeline.{s}")
+            if s == "s00_fetch_osm" and a.reuse_downloads and mod.reusable(c):
+                print(f"s00 OpenStreetMap: reusing the saved download for {c}", flush=True)
+                continue
+            mod.main(c)
 
 
 if __name__ == "__main__":

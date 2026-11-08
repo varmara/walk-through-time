@@ -1,13 +1,17 @@
 """Choose one construction year per building, keep every other date that disagrees with it.
 
-Candidates, in order of preference at equal precision:
+Candidates:
   OpenStreetMap  start_date (or building:start_date, construction_date) tagged on the outline itself
   Wikipedia      a `year` given in a story (stories/<city>.py); the year must appear in the article (step s04)
   Wikidata       inception (P571) of the item linked to the building
 
 Flags (see common.parse_year): exact (a single year), approx (circa, a decade, a short range),
-century (only the century is known). A more precise date always wins. The page draws less precise
-dates paler.
+century (only the century is known). The page draws less precise dates paler.
+
+Choosing: OpenStreetMap and Wikipedia dates come first, the more precise one winning (OpenStreetMap
+before Wikipedia when equally precise). Wikidata is used only when neither has a date, however precise
+it is: its item often describes an institution (a theatre company, a museum) rather than the building
+it occupies, so its exact year must not displace an approximate date for the building itself.
 
 Two dates disagree when their ranges do not overlap: an exact year is a single year, an approximate
 date covers ten years either side, a century covers the century. Every date that disagrees with the
@@ -89,7 +93,7 @@ def main(city_id):
             cands.append({"y": w[0], "f": w[1], "src": "Wikidata"})
         if not cands:
             continue
-        cands.sort(key=lambda c: (-RANK[c["f"]], ORDER[c["src"]]))
+        cands.sort(key=lambda c: (c["src"] == "Wikidata", -RANK[c["f"]], ORDER[c["src"]]))
         best = dict(cands[0])
         alts, seen = [], set()
         for c in cands[1:]:

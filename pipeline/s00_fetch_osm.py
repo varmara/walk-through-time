@@ -4,11 +4,18 @@ The city's area is split into tiles of about 2 x 3 km, fetched one at a time: pu
 refuse or time out on a single large request. Each tile is clipped to the city polygon, and elements
 that cross tile edges are kept once.
 
-Writes work/<city>/osm.json. Licence: ODbL, © OpenStreetMap contributors.
-"""
-import time
+Writes work/<city>/osm.json, plus osm.stamp (a fingerprint of the city settings and this script) and
+osm.fresh (a marker that this run downloaded new data). Licence: ODbL, © OpenStreetMap contributors.
 
-from .common import city, http, log, save
+Downloading takes most of an hour, so GitHub Actions keeps the last download on the `downloads` branch.
+`python -m pipeline.run <city> --reuse-downloads` skips this step when work/<city>/osm.json is there and
+its stamp still matches, that is when neither the city's area nor this query has changed.
+"""
+import hashlib
+import time
+from pathlib import Path
+
+from .common import city, http, log, save, work
 
 OVERPASS = [
     "https://overpass-api.de/api/interpreter",
@@ -48,6 +55,18 @@ def fetch(area):
     raise RuntimeError(f"All Overpass servers failed: {last}")
 
 
+def stamp(city_id):
+    """Fingerprint of everything that decides what is downloaded."""
+    h = hashlib.sha256(Path(f"cities/{city_id}.json").read_bytes())
+    h.update(Path(__file__).read_bytes())
+    return h.hexdigest()[:16]
+
+
+def reusable(city_id):
+    osm, st = work(city_id, "osm"), work(city_id, "osm").with_suffix(".stamp")
+    return osm.exists() and st.exists() and st.read_text().strip() == stamp(city_id)
+
+
 def main(city_id):
     c = city(city_id)
     poly = ('(poly:"' + " ".join(f"{y} {x}" for x, y in c["polygon"]) + '")') if c.get("polygon") else ""
@@ -66,4 +85,6 @@ def main(city_id):
         log(f"s00 OpenStreetMap tile {n}/{len(ts)}: {new} new elements")
         time.sleep(3)
     save(city_id, "osm", {"elements": elements})
+    work(city_id, "osm").with_suffix(".stamp").write_text(stamp(city_id))
+    work(city_id, "osm").with_suffix(".fresh").write_text("1")
     log(f"    {len(elements)} elements in total")
