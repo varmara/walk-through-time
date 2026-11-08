@@ -151,3 +151,4 @@ input[type=range]{width:100%;accent-color:var(--ink);height:28px;margin:0}
 .pin.cluster{width:34px;height:34px;background:var(--paper);color:var(--ink);border:3px solid var(--hl);font-size:13px}
 .allplaces{display:block;margin:4px 0 0}
 @media (min-width:760px){ .placesbar{left:16px;right:auto;width:420px;bottom:16px} .phead{margin:0} .pcards{padding:2px 0 6px} }
+#needle{transition:transform .1s linear}

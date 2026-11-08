@@ -188,6 +188,7 @@ function drawMap(){
       });
       // start the credits folded behind their (i) button: on a phone they would cover the map
       document.querySelector('.maplibregl-ctrl-attrib')?.classList.remove('maplibregl-compact-show');
+      map.on('rotate', turnNeedle); turnNeedle();
       map.on('mouseenter', 'b', () => map.getCanvas().style.cursor = 'pointer');
       map.on('mouseleave', 'b', () => map.getCanvas().style.cursor = '');
       resolve();
@@ -261,6 +262,9 @@ addEventListener('keydown', e => { if (e.key === 'Escape' && !sheet.hidden) clos
 $('bLayers').onclick = () => sheetKind === 'layers' ? closeSheet() : openSheet('layers', 'Layers');
 $('bMap').onclick = () => sheetKind === 'map' ? closeSheet() : openSheet('map', 'Map');
 $('bHome').onclick = () => map && map.easeTo({ ...city.home, duration:900 });
+$('bNorth').onclick = () => map && map.easeTo({ bearing: 0, duration: 600 });
+// the needle points to north as the map turns
+const turnNeedle = () => { $('needle').style.transform = `rotate(${-map.getBearing()}deg)`; };
 
 // ================= Layers panel =================
 function renderLayers(){
