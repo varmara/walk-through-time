@@ -1,0 +1,7 @@
+{
+  "id": "nottingham",
+  "name": "Nottingham",
+  "area": "City centre",
+  "bbox": { "s": 52.9440, "w": -1.1640, "n": 52.9600, "e": -1.1300 },
+  "home": { "center": [-1.1480, 52.9523], "zoom": 15.4, "pitch": 58, "bearing": -18 }
+}
