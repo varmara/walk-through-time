@@ -28,8 +28,9 @@ open data ──► pipeline/ (Python, numbered steps) ──► data/<city>.jso
 | `s06_layers` | Every layer resolved to its buildings: story layers and rule layers (`pipeline/layers.py`) |
 | `s07_package` | Writes `data/<city>.json` and the data report `data/<city>-report.md` |
 
-A GitHub Actions workflow (`.github/workflows/build-data.yml`) runs the pipeline every Monday, whenever the
-pipeline, stories or city settings change, and on demand from the **Actions** tab, then commits the results.
+A GitHub Actions workflow (`.github/workflows/build-data.yml`) runs the pipeline twice a year
+(1 January and 1 July), whenever the pipeline, stories or city settings change, and on demand from the
+**Actions** tab, then commits the results.
 Downloads are kept in `work/` while it runs and are not committed.
 
 ```
