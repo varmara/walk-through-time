@@ -165,7 +165,7 @@ CURATED = [
               quote=["Paid for by Jesse Boot of Nottingham.",
                      "These almshouses were intended for the use of Crimean War and Indian Mutiny veterans.",
                      "1908"]),
-            P("George Green at the mill", "en:George Green (mathematician)", "en:Green's Windmill",
+            P("George Green", "en:George Green (mathematician)", "en:Green's Windmill",
               "The mathematician George Green was a miller; his family's windmill in Sneinton is restored and "
               "named after him.",
               ("miller", "windmill")),

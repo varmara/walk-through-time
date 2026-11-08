@@ -287,7 +287,11 @@ function renderLayers(){
 function infoHtml(L, g, withIntro = true){
   const parts = [];
   if (withIntro && L.intro) parts.push(`<p>${esc(L.intro)}</p>`);
-  if (g && g.items && g.items.length) parts.push(`<div class="items">${g.items.map(([b, n]) => `<button class="item" data-b="${b}">${esc(n)}</button>`).join('')}</div>`);
+  if (g && g.items && g.items.length) parts.push(`<div class="items">${g.items.map(it => {
+    // items are [name, [buildings]] (older data: [building, name])
+    const [name, bs] = typeof it[0] === 'number' ? [it[1], [it[0]]] : it;
+    return `<button class="item" data-b="${bs[0]}">${esc(name)}${bs.length > 1 ? `<span class="cnt">${bs.length}</span>` : ''}</button>`;
+  }).join('')}</div>`);
   if (L.kind === 'stories') parts.push('<p class="src">Each entry is checked against its Wikipedia article.</p>');
   else if (L.source) parts.push(`<p class="src">Source: <a href="${esc(L.source.url)}" target="_blank" rel="noopener">${esc(L.source.title)}</a></p>`);
   return parts.join('');

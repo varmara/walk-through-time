@@ -126,3 +126,4 @@ input[type=range]{width:100%;accent-color:var(--ink);height:28px;margin:0}
   .maplibregl-ctrl-bottom-right{bottom:0}
 }
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
+.item .cnt{display:inline-block;margin-left:5px;min-width:18px;padding:0 5px;border-radius:9px;background:var(--line);color:var(--ink);font:500 11px/18px var(--mono);text-align:center}

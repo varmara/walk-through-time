@@ -5,6 +5,7 @@ step s00_fetch_nature. Each layer has one or more groups; each group is one tick
 
 Writes layers.json:
   meta    [{id, title, section, kind, intro, source?, groups: [{key, title, count, items?}]}]
+          items: [[name, [building indexes]]], one per person or story, in first-seen order
           kind: stories | people | rule (buildings) or areas (nature, drawn on the ground)
   member  {building index: [group keys]}
   stories {building index: [{layer, text, source, place?}]}
@@ -21,6 +22,16 @@ NATURE = [
     ("ancient", "Ancient woodland"),
     ("reserve", "Other nature reserves"),
 ]
+
+
+def grouped(pairs):
+    """[[building, name], ...] -> [[name, [buildings]]]: one entry per name, with every building it has."""
+    out = {}
+    for b, name in pairs:
+        bs = out.setdefault(name, [])
+        if b not in bs:
+            bs.append(b)
+    return [[n, bs] for n, bs in out.items()]
 
 
 def main(city_id):
@@ -49,6 +60,9 @@ def main(city_id):
                      "groups": [{"key": k, "title": t,
                                  "count": len({e["b"] for e in es if e["group"] == k}),
                                  "items": [[e["b"], e["name"]] for e in es if e["group"] == k]} for k, t in groups]})
+        if not people:
+            for g in meta[-1]["groups"]:
+                g["items"] = grouped(g["items"])
 
     # ---- People: hand-written entries (above), plus plaques and Wikidata architects, in the same groups
     people = next((m for m in meta if m["kind"] == "people"), None)
@@ -107,15 +121,14 @@ def main(city_id):
         if any(t == name or name in t for (j, t) in told if j == i):
             continue   # a hand-written entry already tells this
         url = info.get("architectArticle") or (f"https://www.wikidata.org/wiki/{info['architectQid']}" if info.get("architectQid") else None)
-        bname = b["tags"].get("name") or info.get("label") or "this building"
-        person(i, "architects", f"{name}: {bname}", f"Designed by {name}, according to Wikidata.",
+        person(i, "architects", name, f"Designed by {name}, according to Wikidata.",
                {"title": name, "url": url, "kind": "Wikipedia" if info.get("architectArticle") else "Wikidata"} if url else None)
         arch += 1
     log(f"s06 architects from Wikidata: {arch} buildings")
     order = [f"people-{k}" for k, _, _ in PEOPLE_GROUPS] + ["people-events"]
     for g in pg.values():
-        g["items"] = [list(t) for t in dict.fromkeys(tuple(x) for x in g["items"])]   # one item per building and name
         g["count"] = len({b for b, _ in g["items"]})
+        g["items"] = grouped(g["items"])
     people["groups"] = sorted(pg.values(), key=lambda g: order.index(g["key"]) if g["key"] in order else 99)
 
     for L in LAYERS:
