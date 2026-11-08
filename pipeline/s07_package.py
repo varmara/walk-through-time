@@ -27,6 +27,8 @@ def main(city_id):
     fallback = {}
     for e in cur["entries"]:
         fallback.setdefault(str(e["b"]), e["name"])
+    for k, v in lay.get("names", {}).items():   # plaque addresses
+        fallback.setdefault(k, v)
     for pl in load(city_id, "places"):
         if pl["b"] is not None and pl["name"]:
             fallback.setdefault(str(pl["b"]), pl["name"])

@@ -9,8 +9,10 @@ Writes layers.json:
   member  {building index: [group keys]}
   stories {building index: [{layer, text, source, place?}]}
 """
-from .common import load, log, save, work
+from .common import building_at, load, log, save, work
 from .layers import LAYERS, Context
+from .s04_curated import PEOPLE_GROUPS, people_group
+from .s05_dates import info_for
 
 NATURE = [
     ("nnr", "National Nature Reserves"),
@@ -48,6 +50,69 @@ def main(city_id):
                                  "count": len({e["b"] for e in es if e["group"] == k}),
                                  "items": [[e["b"], e["name"]] for e in es if e["group"] == k]} for k, t in groups]})
 
+    # ---- People: hand-written entries (above), plus plaques and Wikidata architects, in the same groups
+    people = next((m for m in meta if m["kind"] == "people"), None)
+    if people is None:
+        people = {"id": "people", "title": "People", "section": "People", "kind": "people", "groups": [],
+                  "intro": "People connected with buildings on the map."}
+        meta.append(people)
+    people["intro"] = ("People connected with buildings on the map: who designed them, who lived, worked or played "
+                       "in them, and who is remembered on their walls. Entries come from commemorative plaques "
+                       "(Open Plaques), architects recorded in Wikidata, and hand-written entries checked against "
+                       "Wikipedia and Historic England.")
+    titles = {k: t for k, t, _ in PEOPLE_GROUPS} | {"events": "Plaques to events and places"}
+    pg = {g["key"]: g for g in people["groups"]}
+
+    def person(b, key, name, story, source):
+        k = "people-" + key
+        if k not in pg:
+            pg[k] = {"key": k, "title": titles.get(key, key), "count": 0, "items": []}
+        add(b, k, "people", story, source)
+        pg[k]["items"].append([b, name])
+
+    plaques = load(city_id, "plaques") if work(city_id, "plaques").exists() else []
+    placed, names = 0, {}
+    for p in plaques:
+        b = building_at(ctx.buildings, p["x"], p["y"], near=12)
+        if b is None:
+            continue
+        placed += 1
+        if p.get("address"):
+            names.setdefault(str(b), p["address"])
+        kind = (p.get("type") or "person").lower()
+        roles = [r.strip().lower() for r in (p.get("primary") or "").split(",") + (p.get("roles") or "").split(",") if r.strip()]
+        key = (people_group(roles) or "other") if kind in ("person", "man", "woman", "") else "events"
+        text = (p.get("inscription") or p.get("title") or "").strip()
+        if isinstance(p.get("year"), float):
+            p["year"] = int(p["year"])
+        story = f"{(p.get('colour') or '').capitalize() + ' p' if p.get('colour') else 'P'}laque" \
+                f"{' put up in ' + str(p['year']) if p.get('year') else ''}{' by ' + p['org'] if p.get('org') else ''}: “{text}”"
+        url = f"https://openplaques.org/plaques/{p['id']}" if p.get("id") else "https://openplaques.org/"
+        person(b, key, p.get("subject") or p.get("title") or "Plaque", story,
+               {"title": "Open Plaques", "url": url, "kind": "Open Plaques"})
+    log(f"s06 plaques: {placed}/{len(plaques)} placed on a building")
+
+    wd = load(city_id, "wikidata")
+    told = {(int(i), s2["source"]["title"]) for i, ss in stories.items() for s2 in ss if s2.get("source")}
+    arch = 0
+    for i, b in enumerate(ctx.buildings):
+        info = info_for(b, i, wd, ctx.listing)
+        if not info or not info.get("architect"):
+            continue
+        name = info["architect"]
+        if any(t == name or name in t for (j, t) in told if j == i):
+            continue   # a hand-written entry already tells this
+        url = info.get("architectArticle") or (f"https://www.wikidata.org/wiki/{info['architectQid']}" if info.get("architectQid") else None)
+        bname = b["tags"].get("name") or info.get("label") or "this building"
+        person(i, "architects", f"{name}: {bname}", f"Designed by {name}, according to Wikidata.",
+               {"title": name, "url": url, "kind": "Wikipedia" if info.get("architectArticle") else "Wikidata"} if url else None)
+        arch += 1
+    log(f"s06 architects from Wikidata: {arch} buildings")
+    order = [f"people-{k}" for k, _, _ in PEOPLE_GROUPS] + ["people-events"]
+    for g in pg.values():
+        g["count"] = len({b for b, _ in g["items"]})
+    people["groups"] = sorted(pg.values(), key=lambda g: order.index(g["key"]) if g["key"] in order else 99)
+
     for L in LAYERS:
         res = L["fn"](ctx)
         for i, v in res.items():
@@ -73,4 +138,4 @@ def main(city_id):
                  "groups": [g for g in groups if g["count"]]})
     log(f"s06 nature: {len(nature)} areas")
 
-    save(city_id, "layers", {"meta": meta, "member": member, "stories": stories})
+    save(city_id, "layers", {"meta": meta, "member": member, "stories": stories, "names": names})

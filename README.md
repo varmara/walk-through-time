@@ -20,6 +20,7 @@ open data ──► pipeline/ (Python, numbered steps) ──► data/<city>.jso
 |---|---|
 | `s00_fetch_osm` | Buildings, roads, water, parks and named places from OpenStreetMap |
 | `s00_fetch_heritage` | Listed buildings and scheduled monuments from Historic England |
+| `s00_fetch_plaques` | Commemorative plaques (Open Plaques, public domain), as published with locations by Nottingham City Council |
 | `s00_fetch_nature` | Nature Reserves, SSSIs and ancient woodland from Natural England; other nature reserves from OpenStreetMap |
 | `s01_buildings` | Building outlines and heights, the base map, named places matched to buildings |
 | `s02_listing` | Listed-building points matched to outlines |
@@ -61,7 +62,9 @@ lib/                      MapLibre GL JS (BSD-3-Clause)
 
 ### Layers
 
-Story and people layers are hand-written, and every entry is checked against its Wikipedia articles. Rule layers are
+Story layers are hand-written, and every entry is checked against its sources: Wikipedia articles or Historic England
+list entries. The People layer combines hand-written entries, every commemorative plaque in the area, and every
+architect recorded in Wikidata, sorted by type of person. Rule layers are
 built from open data: listed buildings by grade, buildings on scheduled monuments, and pubs. Nature areas are drawn on
 the ground by type. On the page, layers are ticked in one sheet behind the Layers button, in any combination. See [CONTRIBUTING.md](CONTRIBUTING.md)
 to add one.
@@ -87,5 +90,6 @@ itself inspired by Sasha Bogachev's [Paris, building by building](https://paris.
 - Natural England data, [Open Government Licence](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/)
 - Historic England data, [Open Government Licence](https://historicengland.org.uk/terms/website-terms-conditions/open-data-hub/)
 - Wikidata, CC0
+- Open Plaques, public domain; plaque locations via Nottingham City Council
 - Wikipedia text, CC BY-SA; stories link to the articles they rest on
 - Historic maps reproduced with the permission of the [National Library of Scotland](https://maps.nls.uk/)

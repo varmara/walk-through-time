@@ -288,7 +288,7 @@ function infoHtml(L, g, withIntro = true){
   const parts = [];
   if (withIntro && L.intro) parts.push(`<p>${esc(L.intro)}</p>`);
   if (g && g.items && g.items.length) parts.push(`<div class="items">${g.items.map(([b, n]) => `<button class="item" data-b="${b}">${esc(n)}</button>`).join('')}</div>`);
-  if (L.kind === 'stories' || L.kind === 'people') parts.push('<p class="src">Each entry is checked against its Wikipedia article.</p>');
+  if (L.kind === 'stories') parts.push('<p class="src">Each entry is checked against its Wikipedia article.</p>');
   else if (L.source) parts.push(`<p class="src">Source: <a href="${esc(L.source.url)}" target="_blank" rel="noopener">${esc(L.source.title)}</a></p>`);
   return parts.join('');
 }
@@ -362,7 +362,7 @@ function selectBuilding(id){
 
   const link = s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>`;
   $('cStories').innerHTML = (p.stories || []).map(s => `<div class="story"><div class="seclbl">${esc(layerTitle(s.layer))}</div>
-    <p>${esc(s.text)}</p>${s.source ? `<p class="src">Wikipedia: ${link(s.source)}${s.place ? ' · ' + link(s.place) : ''}</p>` : ''}</div>`).join('');
+    <p>${esc(s.text)}</p>${s.source ? `<p class="src">${esc(s.source.kind || 'Wikipedia')}: ${link(s.source)}${s.place ? ` · ${esc(s.place.kind || 'Wikipedia')}: ` + link(s.place) : ''}</p>` : ''}</div>`).join('');
 
   const links = [];
   if (p.listUrl || p.listEntry) links.push(`<a href="${esc(p.listUrl || 'https://historicengland.org.uk/listing/the-list/list-entry/' + p.listEntry)}" target="_blank" rel="noopener">Historic England list entry →</a>`);

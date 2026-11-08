@@ -1,6 +1,7 @@
 """Check hand-written stories against Wikipedia and place each one on a building.
 
-Stories live in stories/<city>.py (see CONTRIBUTING.md). For every entry:
+Stories live in stories/<city>.py (see CONTRIBUTING.md). A source is a Wikipedia article ("en:Title") or a
+Historic England list entry ("he:1254566"), whose official description is checked the same way. For every entry:
   1. The Wikipedia article is fetched. Every string in `facts` must appear in it (case-insensitive).
      If one is missing, the entry is dropped: if the article does not say it, the story should not either.
   2. The entry is placed on a building, trying in order:
@@ -27,7 +28,7 @@ import time
 from pathlib import Path
 from urllib.parse import quote
 
-from .common import building_at, http, load, log, parse_year, save
+from .common import building_at, http, http_text, load, log, parse_year, save
 
 
 def stories(city_id):
@@ -44,10 +45,17 @@ _cache = {}
 
 
 def article(ref):
-    """'en:Title' -> {text, url, qid, coords} or None."""
+    """'en:Title' (Wikipedia) or 'he:1254566' (Historic England list entry) -> {text, url, title, qid, coords, nhle}."""
     if ref in _cache:
         return _cache[ref]
     lang, title = ref.split(":", 1)
+    if lang == "he":
+        url = f"https://historicengland.org.uk/listing/the-list/list-entry/{title}"
+        page = http_text(url)
+        time.sleep(1)
+        _cache[ref] = {"text": page["text"].lower(), "url": url, "title": page["title"] or f"List entry {title}",
+                       "qid": None, "coords": None, "nhle": [title], "kind": "Historic England"}
+        return _cache[ref]
     r = http(f"https://{lang}.wikipedia.org/w/api.php", params={
         "action": "query", "prop": "extracts|info|pageprops|coordinates", "explaintext": 1, "inprop": "url",
         "ppprop": "wikibase_item", "coprimary": "primary", "redirects": 1, "format": "json", "titles": title})
@@ -63,6 +71,7 @@ def article(ref):
         "title": page.get("title", title),
         "qid": page.get("pageprops", {}).get("wikibase_item"),
         "coords": (co["lon"], co["lat"]) if co else None,
+        "nhle": [], "kind": "Wikipedia",
     }
     return _cache[ref]
 
@@ -175,7 +184,7 @@ def main(city_id):
                 if b is None and a["qid"] in by_qid:
                     b, how = by_qid[a["qid"]], "Wikidata tag on the outline"
                 if b is None:
-                    for n in nhle.get(a["qid"], []):
+                    for n in a["nhle"] + nhle.get(a["qid"], []):
                         if n in by_nhle:
                             b, how = by_nhle[n], "Historic England list entry"
                             break
@@ -198,8 +207,8 @@ def main(city_id):
             kept += 1
             entries.append({"layer": L["id"], "group": group, "b": b, "name": e["name"],
                             "story": e["story"], "how": how,
-                            "source": {"title": src["title"], "url": src["url"]},
-                            **({"place": {"title": a["title"], "url": a["url"]}} if e.get("place") else {}),
+                            "source": {"title": src["title"], "url": src["url"], "kind": src["kind"]},
+                            **({"place": {"title": a["title"], "url": a["url"], "kind": a["kind"]}} if e.get("place") else {}),
                             **({"year": list(parse_year(e["year"]))} if e.get("year") and parse_year(e["year"]) else {})})
         log(f"s04 {L['id']}: {kept}/{len(L['entries'])} stories kept")
     for d in dropped:

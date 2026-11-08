@@ -60,6 +60,26 @@ def http(url, data=None, params=None, accept="application/json", tries=4, timeou
     raise RuntimeError(f"{url.split('?')[0]}: {last}")
 
 
+def http_text(url, tries=3, timeout=60):
+    """A web page as plain text (tags removed), for checking facts against it."""
+    import html as _html
+    last = None
+    for attempt in range(tries):
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept": "text/html"})
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                raw = r.read().decode("utf-8", "replace")
+            title = re.search(r"<h1[^>]*>(.*?)</h1>", raw, re.S)
+            body = re.sub(r"<(script|style)[^>]*>.*?</\1>", " ", raw, flags=re.S)
+            body = _html.unescape(re.sub(r"<[^>]+>", " ", body))
+            return {"title": _html.unescape(re.sub(r"<[^>]+>", "", title[1])).strip() if title else url,
+                    "text": " ".join(body.split())}
+        except Exception as e:  # noqa: BLE001
+            last = e
+            time.sleep(5 * (attempt + 1))
+    raise RuntimeError(f"{url}: {last}")
+
+
 # ---------------------------------------------------------------- geometry (lon/lat degrees)
 def point_in_ring(x, y, ring):
     inside, j = False, len(ring) - 1

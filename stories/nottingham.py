@@ -157,6 +157,17 @@ CURATED = [
             P("Brian Clough", "en:Brian Clough", "en:City Ground",
               "Brian Clough managed Nottingham Forest at the City Ground.",
               ("City Ground", "Clough"), at="near:120"),
+            P("Jesse Boot", "en:Jesse Boot, 1st Baron Trent", "he:1254566",
+              "Almshouses paid for by Jesse Boot, founder of Boots, in 1908 for veterans of the Crimean War and the "
+              "Indian Mutiny: the Dorothy Boot Homes in Wilford.",
+              ("Jesse Boot", "1908", "Crimean", "Indian Mutiny")),
+            P("William Booth", "en:William Booth", None,
+              "William Booth, founder of the Salvation Army, was born in Sneinton. His birthplace is now a museum.",
+              ("Sneinton", "Salvation Army"), at="name:William Booth Birthplace Museum"),
+            P("George Green at the mill", "en:George Green (mathematician)", "en:Green's Windmill",
+              "The mathematician George Green was a miller; his family's windmill in Sneinton is restored and "
+              "named after him.",
+              ("miller", "windmill")),
             P("Torvill and Dean", "en:Torvill and Dean", "en:National Ice Centre",
               "The ice dancers Jayne Torvill and Christopher Dean come from Nottingham. The square outside the ice "
               "centre is named Bolero Square after their Olympic routine.",
