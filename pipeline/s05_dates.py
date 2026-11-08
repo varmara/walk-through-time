@@ -1,0 +1,106 @@
+"""Choose one construction year per building, keep every other date that disagrees with it.
+
+Candidates, in order of preference at equal precision:
+  OpenStreetMap  start_date (or building:start_date, construction_date) tagged on the outline itself
+  Wikipedia      a `year` given in a story (stories/<city>.py); the year must appear in the article (step s04)
+  Wikidata       inception (P571) of the item linked to the building
+
+Flags (see common.parse_year): exact (a single year), approx (circa, a decade, a short range),
+century (only the century is known). A more precise date always wins. The page draws less precise
+dates paler.
+
+Two dates disagree when their ranges do not overlap: an exact year is a single year, an approximate
+date covers ten years either side, a century covers the century. Every date that disagrees with the
+chosen one is kept in `alts` and shown on the building's card: sources often describe different
+moments (a first church and its rebuilding, a founding and a completion) and the reader can judge.
+
+Writes dates.json: {building index: {y, f, src, alts?: [{y, f, src}]}}.
+"""
+import re
+
+from .common import APPROX, CENTURY, EXACT, load, log, save
+
+RANK = {EXACT: 3, APPROX: 2, CENTURY: 1}
+ORDER = {"OpenStreetMap": 0, "Wikipedia": 1, "Wikidata": 2}
+
+
+def span(y, f):
+    if f == EXACT:
+        return y, y
+    if f == APPROX:
+        return y - 10, y + 10
+    c = (y - 1) // 100
+    return c * 100 + 1, c * 100 + 100
+
+
+def disagree(a, b):
+    a0, a1 = span(a["y"], a["f"])
+    b0, b1 = span(b["y"], b["f"])
+    return a1 < b0 or b1 < a0
+
+
+def wikidata_year(info):
+    if not info or not info.get("inception"):
+        return None
+    m = re.match(r"^([+-]?\d+)-", info["inception"])
+    if not m:
+        return None
+    y, p = int(m[1]), info.get("prec") or 0
+    if p >= 9:
+        return y, EXACT
+    if p == 8:
+        return y + 5, APPROX
+    if p == 7:
+        return (-(-y // 100) - 1) * 100 + 50, CENTURY
+    return None
+
+
+def info_for(b, i, wd, listing):
+    t = b["tags"]
+    if t.get("wikidata") in wd:
+        return wd[t["wikidata"]]
+    for e in listing.get(str(i), []):
+        if f"nhle:{e['ListEntry']}" in wd:
+            return wd[f"nhle:{e['ListEntry']}"]
+    return None
+
+
+def main(city_id):
+    from .common import parse_year
+    buildings = load(city_id, "buildings")
+    wd = load(city_id, "wikidata")
+    listing = load(city_id, "listing")
+    story_years = {}
+    for e in load(city_id, "curated")["entries"]:
+        if e.get("year"):
+            story_years.setdefault(e["b"], []).append({"y": e["year"][0], "f": e["year"][1], "src": "Wikipedia"})
+
+    out, conflicts = {}, 0
+    for i, b in enumerate(buildings):
+        t = b["tags"]
+        cands = []
+        osm = parse_year(t.get("start_date") or t.get("building:start_date") or t.get("construction_date")
+                         or t.get("year_of_construction"))
+        if osm:
+            cands.append({"y": osm[0], "f": osm[1], "src": "OpenStreetMap"})
+        cands += story_years.get(i, [])
+        w = wikidata_year(info_for(b, i, wd, listing))
+        if w:
+            cands.append({"y": w[0], "f": w[1], "src": "Wikidata"})
+        if not cands:
+            continue
+        cands.sort(key=lambda c: (-RANK[c["f"]], ORDER[c["src"]]))
+        best = dict(cands[0])
+        alts, seen = [], set()
+        for c in cands[1:]:
+            key = (c["y"], c["f"], c["src"])
+            if key not in seen and disagree(best, c):
+                seen.add(key)
+                alts.append(c)
+        if alts:
+            best["alts"] = alts
+            conflicts += 1
+        out[str(i)] = best
+    save(city_id, "dates", out)
+    by_flag = {f: sum(1 for d in out.values() if d["f"] == f) for f in RANK}
+    log(f"s05 {len(out)}/{len(buildings)} buildings dated {by_flag}, {conflicts} where sources disagree")

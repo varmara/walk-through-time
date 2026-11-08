@@ -40,6 +40,25 @@ async function fetchJSON(url, ms = 60000){
   } finally { clearTimeout(timer); }
 }
 
+// The data file is large, so read it as a stream and show how much has arrived.
+async function fetchData(url){
+  const r = await fetch(url, { cache:'no-cache' });
+  if (!r.ok) throw new Error(r.status === 404 ? 'the data file has not been built yet' : 'HTTP ' + r.status);
+  if (!r.body || !window.TextDecoder) return r.json();
+  const reader = r.body.getReader(), parts = [];
+  let got = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    parts.push(value); got += value.length;
+    progress(5 + Math.min(60, got / 4e5), `loading map data… ${(got / 1e6).toFixed(1)} MB`);
+  }
+  const all = new Uint8Array(got);
+  let o = 0; for (const p of parts) { all.set(p, o); o += p.length; }
+  progress(66, 'reading buildings…');
+  return JSON.parse(new TextDecoder().decode(all));
+}
+
 // ================= Colour and date wording =================
 function hexToRgb(h){ const n = parseInt(h.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; }
 function mix(a, b, t){ const A = hexToRgb(a), B = hexToRgb(b);
@@ -62,7 +81,7 @@ let city, data, features = [], selectedId = null, map, playing = null, stats, ac
 async function main(){
   progress(5, 'loading map data…');
   city = await fetchJSON(`../cities/${CITY_ID}.json`, 20000);
-  data = await fetchJSON(`../data/${CITY_ID}.json`);
+  data = await fetchData(`../data/${CITY_ID}.json`);
   progress(70, 'colouring by year…');
   features = data.buildings.features;
   if (!features.length) throw new Error('no buildings in the map data');
@@ -248,7 +267,9 @@ function select(id){
     const era = eraOf(p.y);
     rows.push(['Built', `${esc(dateText(p.y, p.f))}<span class="pill" style="border-color:${era[3]}">${esc(era[2])}</span>`]);
     rows.push(['Date', `${esc(PRECISION[p.f] || '')} · from ${esc(p.src)}`]);
-    if (p.alt) rows.push(['Also given', `${esc(dateText(p.alt.y, p.alt.f))} in ${esc(p.alt.src)}. The sources may describe different buildings on the site.`]);
+    const alts = p.alts || (p.alt ? [p.alt] : []);
+    if (alts.length) rows.push(['Other dates', alts.map(a => `${esc(dateText(a.y, a.f))} <span class="muted">from ${esc(a.src)}</span>`).join('<br>')
+      + '<div class="hint">Sources disagree. They may describe different moments, such as a founding and a rebuilding.</div>']);
   } else rows.push(['Built', '<span style="color:var(--muted)">not in open data yet</span>']);
   if (p.architect) rows.push(['Architect', esc(p.architect)]);
   if (p.grade) rows.push(['Listing', `Grade ${esc(p.grade)} listed`]);

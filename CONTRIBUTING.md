@@ -19,7 +19,7 @@ dict(
     ]),
 ```
 
-Rules, checked by step `s05_curated` every time the pipeline runs:
+Rules, checked by step `s04_curated` every time the pipeline runs:
 
 - **Every story rests on a Wikipedia article.** `facts` are short strings (a year, a name, a key word) that must
   appear in the article. If one is missing, the story is dropped. If the article does not say it, the story
@@ -27,6 +27,9 @@ Rules, checked by step `s05_curated` every time the pipeline runs:
 - **The story must be placed on a building.** The pipeline tries, in order: an explicit `at="osm:way/123"`, the
   article's Wikidata item tagged on an OpenStreetMap outline, the item's Historic England list entry, the article's
   coordinates, and finally the entry's name (or `at="name:..."`) matching a building or a named place inside one.
+- **A story can give the building's year:** `E(..., year="c. 1420")`. The year's digits must appear in the article,
+  and it becomes a date source next to OpenStreetMap and Wikidata. Give it only when the year is about the building
+  standing there today (built, rebuilt or opened), not about an earlier building on the site.
 - **Stories are short and plain:** one or two sentences, what happened and when. Name legends as legends.
 - **No personal details about private people.** Public figures are fine.
 
@@ -42,7 +45,7 @@ listed-building matches, named places, scheduled monuments) and returns `{buildi
 
 ```bash
 python -m pipeline.run nottingham            # everything (downloads take a few minutes)
-python -m pipeline.run nottingham --from s05  # only stories, layers and packaging, reusing downloads in work/
+python -m pipeline.run nottingham --from s04  # only stories, layers and packaging, reusing downloads in work/
 python3 -m http.server 8642                   # then open http://localhost:8642/nottingham/
 ```
 

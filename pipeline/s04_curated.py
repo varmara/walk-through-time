@@ -10,15 +10,18 @@ Stories live in stories/<city>.py (see CONTRIBUTING.md). For every entry:
        the article's coordinates, inside (or within 15 m of) a building outline
        at="name:..." or the entry's name, matching a building name or a named place inside one
      Entries that cannot be placed are dropped.
+  3. An entry may give the building's `year` ("1855", "c. 1420", "1841..1844"). Its digits must appear in the
+     article too. Step s05 uses it as a date source ("Wikipedia") alongside OpenStreetMap and Wikidata.
 
-Writes curated.json: {layers: [...], entries: [{layer, group, b, name, story, source, how}], dropped: [...]}.
+Writes curated.json: {layers: [...], entries: [{layer, group, b, name, story, source, how, year?}], dropped: [...]}.
 """
 import importlib.util
+import re
 import time
 from pathlib import Path
 from urllib.parse import quote
 
-from .common import building_at, http, load, log, save
+from .common import building_at, http, load, log, parse_year, save
 
 
 def stories(city_id):
@@ -109,7 +112,8 @@ def main(city_id):
             if a is None:
                 why = "Wikipedia article not found"
             else:
-                missing = [f for f in e.get("facts", ()) if f.lower() not in a["text"]]
+                facts = list(e.get("facts", ())) + re.findall(r"\d{4}", e.get("year", ""))
+                missing = [f for f in dict.fromkeys(facts) if f.lower() not in a["text"]]
                 if missing:
                     why = "article does not mention: " + ", ".join(missing)
             b = how = None
@@ -139,8 +143,9 @@ def main(city_id):
             kept += 1
             entries.append({"layer": L["id"], "group": e.get("group", L["id"]), "b": b, "name": e["name"],
                             "story": e["story"], "how": how,
-                            "source": {"title": a["title"], "url": a["url"]}})
-        log(f"s05 {L['id']}: {kept}/{len(L['entries'])} stories kept")
+                            "source": {"title": a["title"], "url": a["url"]},
+                            **({"year": list(parse_year(e["year"]))} if e.get("year") and parse_year(e["year"]) else {})})
+        log(f"s04 {L['id']}: {kept}/{len(L['entries'])} stories kept")
     for d in dropped:
         log(f"    dropped {d['layer']} / {d['name']}: {d['why']}")
     meta = [{k: L[k] for k in ("id", "title", "intro") if k in L} for L in layers]

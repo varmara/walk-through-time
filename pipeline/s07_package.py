@@ -3,7 +3,7 @@
   data/<city>.json        buildings (GeoJSON with all attributes), base map, layers, stats
   data/<city>-report.md   coverage of dates by precision and source, conflicts, layers, dropped stories
 
-Building properties: name, y (year), f (exact | approx | century), src, alt {y, f, src},
+Building properties: name, y (year), f (exact | approx | century), src, alts [{y, f, src}],
 h (height, m), levels, kind, osm, grade, listEntry, listName, listUrl, qid, image, article,
 architect, L (",group,group," for map filters), stories [{layer, text, source}].
 """
@@ -12,7 +12,7 @@ from pathlib import Path
 import json
 
 from .common import load, log
-from .s04_dates import info_for
+from .s05_dates import info_for
 
 
 def main(city_id):
@@ -42,8 +42,9 @@ def main(city_id):
             article = "https://en.wikipedia.org/wiki/" + t["wikipedia"][3:].replace(" ", "_")
         p = {
             "name": t.get("name") or info.get("label") or fallback.get(k) or best.get("Name"),
-            "y": d.get("y"), "f": d.get("f"), "src": d.get("src"), "alt": d.get("alt"),
-            "h": b["h"], "levels": t.get("building:levels"), "kind": t.get("building"), "osm": b["osm"],
+            "y": d.get("y"), "f": d.get("f"), "src": d.get("src"), "alts": d.get("alts"),
+            "h": b["h"], "levels": t.get("building:levels"), "osm": b["osm"],
+            "kind": t.get("building") if t.get("building") != "yes" else None,
             "grade": best.get("Grade"), "listEntry": best.get("ListEntry"), "listName": best.get("Name"),
             "listUrl": best.get("hyperlink"), "qid": info.get("qid") or t.get("wikidata"),
             "image": info.get("image"), "article": article, "architect": info.get("architect") or t.get("architect"),
@@ -61,8 +62,8 @@ def main(city_id):
     stats = {
         "buildings": n, "dated": len(dated),
         "byPrecision": {f: sum(d["f"] == f for d in dated) for f in ("exact", "approx", "century")},
-        "bySource": {s: sum(d["src"] == s for d in dated) for s in ("OpenStreetMap", "Wikidata")},
-        "conflicts": sum("alt" in d for d in dated),
+        "bySource": {s: sum(d["src"] == s for d in dated) for s in ("OpenStreetMap", "Wikipedia", "Wikidata")},
+        "conflicts": sum("alts" in d for d in dated),
         "listed": sum(1 for es in listing.values() if es),
         "stories": len(cur["entries"]), "storiesDropped": len(cur["dropped"]),
     }
@@ -82,7 +83,7 @@ def main(city_id):
         f"| With a year | {stats['dated']:,} | {pct(stats['dated'])} |",
         *[f"| precision: {f} | {c:,} | {pct(c)} |" for f, c in stats["byPrecision"].items()],
         *[f"| source: {s} | {c:,} | {pct(c)} |" for s, c in stats["bySource"].items()],
-        f"| sources disagree by more than 25 years | {stats['conflicts']:,} | {pct(stats['conflicts'])} |",
+        f"| sources disagree (all dates shown) | {stats['conflicts']:,} | {pct(stats['conflicts'])} |",
         "", "## Layers", "", "| Layer | Kind | Buildings |", "|---|---|---:|",
         *[f"| {L['title']} | {L['kind']} | {L['count']:,} |" for L in lay["meta"]],
         "", "## Stories dropped by the checks", "",

@@ -8,7 +8,7 @@ Live site: https://varmara.github.io/walk-through-time/
 
 | City | Page | Status |
 |---|---|---|
-| Nottingham | [`nottingham/`](nottingham/) | Prototype: city centre in 3D, coloured by construction year |
+| Nottingham | [`nottingham/`](nottingham/) | Prototype: city centre, the Meadows, and south of the Trent (Wilford, West Bridgford, Clifton) in 3D, coloured by construction year |
 
 ## How it works
 
@@ -23,8 +23,8 @@ open data ──► pipeline/ (Python, numbered steps) ──► data/<city>.jso
 | `s01_buildings` | Building outlines and heights, the base map, named places matched to buildings |
 | `s02_listing` | Listed-building points matched to outlines |
 | `s03_wikidata` | Names, dates, architects, photos and Wikipedia links from Wikidata |
-| `s04_dates` | One year per building with its precision (exact, approximate, century) and source; keeps a second date where sources disagree |
-| `s05_curated` | Hand-written stories (`stories/<city>.py`) checked against Wikipedia and placed on buildings |
+| `s04_curated` | Hand-written stories (`stories/<city>.py`) checked against Wikipedia and placed on buildings |
+| `s05_dates` | One year per building with its precision (exact, approximate, century) and source; keeps every date that disagrees with it |
 | `s06_layers` | Every layer resolved to its buildings: story layers and rule layers (`pipeline/layers.py`) |
 | `s07_package` | Writes `data/<city>.json` and the data report `data/<city>-report.md` |
 
@@ -33,7 +33,7 @@ pipeline, stories or city settings change, and on demand from the **Actions** ta
 Downloads are kept in `work/` while it runs and are not committed.
 
 ```
-cities/<id>.json          city settings: area (bounding box) and starting view
+cities/<id>.json          city settings: area (polygon and bounding box) and starting view
 stories/<id>.py           hand-written story layers for the city
 app/city.js, app/city.css the shared city page
 <id>/index.html           one page per city
@@ -42,13 +42,15 @@ lib/                      MapLibre GL JS (BSD-3-Clause)
 
 ### How a building's year is chosen
 
-- **Sources:** OpenStreetMap `start_date` on the building outline, and Wikidata inception (`P571`) of the item linked
-  to the building by its OpenStreetMap tag or its Historic England list entry (`P1216`).
+- **Sources:** OpenStreetMap `start_date` on the building outline; a year given in a story, checked against its
+  Wikipedia article; and Wikidata inception (`P571`) of the item linked to the building by its OpenStreetMap tag or
+  its Historic England list entry (`P1216`).
 - **Precision:** *exact* (one year), *approximate* (circa, a decade, a short range) or *century*. Less precise dates
   are drawn paler; buildings with no date are grey.
-- **Order of trust:** a more precise date wins. At equal precision OpenStreetMap wins, because its date is tagged on
-  the outline itself, while a Wikidata item can describe an older institution or site. Where the two disagree by more
-  than 25 years, the card shows both.
+- **Order of trust:** a more precise date wins. At equal precision OpenStreetMap comes first, because its date is
+  tagged on the outline itself, then Wikipedia, then Wikidata, whose item can describe an older institution or site.
+- **Disagreements:** when sources give dates that cannot both be right (their ranges do not overlap), the card shows
+  all of them with their sources. They often describe different moments, such as a founding and a rebuilding.
 
 ### Layers
 

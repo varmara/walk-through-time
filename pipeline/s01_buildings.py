@@ -39,7 +39,9 @@ def height_of(t):
 
 
 def feature(kind, coords, props=None):
-    geom = {"type": kind, "coordinates": rnd(coords) if kind == "LineString" else [rnd(coords)]}
+    # the base map is drawn faintly: five decimals (about a metre) is plenty and keeps the file small
+    c = [[round(x, 5), round(y, 5)] for x, y in coords]
+    geom = {"type": kind, "coordinates": c if kind == "LineString" else [c]}
     return {"type": "Feature", "properties": props or {}, "geometry": geom}
 
 
@@ -56,7 +58,7 @@ def main(city_id):
                 if len(c) >= 4:
                     buildings.append({"osm": f"way/{el['id']}", "rings": [rnd(c)], "tags": t})
             elif t.get("highway"):
-                k = "minor" if t["highway"] in ("footway", "service", "pedestrian") else "major"
+                k = "minor" if t["highway"] in ("service", "pedestrian", "residential", "living_street") else "major"
                 roads.append(feature("LineString", c, {"k": k}))
             elif t.get("waterway"):
                 water.append(feature("LineString", c))

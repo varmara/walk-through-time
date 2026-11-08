@@ -12,11 +12,15 @@ OVERPASS = [
 
 
 def main(city_id):
-    b = city(city_id)["bbox"]
-    bb = f"{b['s']},{b['w']},{b['n']},{b['e']}"
-    q = f"""[out:json][timeout:180];(
+    c = city(city_id)
+    if c.get("polygon"):   # Overpass wants "lat lon lat lon ..."
+        bb = 'poly:"' + " ".join(f"{y} {x}" for x, y in c["polygon"]) + '"'
+    else:
+        b = c["bbox"]
+        bb = f"{b['s']},{b['w']},{b['n']},{b['e']}"
+    q = f"""[out:json][timeout:300][maxsize:1073741824];(
       way["building"]({bb}); relation["building"]["type"="multipolygon"]({bb});
-      way["highway"~"^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|pedestrian|service|footway)$"]({bb});
+      way["highway"~"^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|pedestrian|service)$"]({bb});
       way["natural"="water"]({bb}); way["waterway"~"^(canal|river)$"]({bb}); relation["natural"="water"]({bb});
       way["leisure"~"^(park|garden)$"]({bb}); way["landuse"="grass"]({bb});
       node["name"]["amenity"]({bb}); node["name"]["historic"]({bb}); node["name"]["tourism"]({bb});

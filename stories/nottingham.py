@@ -6,8 +6,11 @@ nothing the article does not say. Name legends as legends. See CONTRIBUTING.md.
 """
 
 
-def E(name, source, story, facts, at=None):
-    return {"name": name, "source": source, "story": story, "facts": facts, **({"at": at} if at else {})}
+def E(name, source, story, facts, at=None, year=None):
+    """year: when the building standing today was built or opened ("1855", "c. 1420", "1841..1844").
+    Its digits must appear in the article; it becomes a date source next to OpenStreetMap and Wikidata."""
+    return {"name": name, "source": source, "story": story, "facts": facts,
+            **({"at": at} if at else {}), **({"year": year} if year else {})}
 
 
 CURATED = [
@@ -23,11 +26,11 @@ CURATED = [
             E("The Bell Inn", "en:The Bell Inn, Nottingham",
               "Claims to be the oldest pub in the city. Tree-ring dating of its timbers suggests it was built "
               "around 1420, and its cellars are cut into the sandstone.",
-              ("oldest", "dendrochronological", "1420", "sandstone")),
+              ("oldest", "dendrochronological", "1420", "sandstone"), year="c. 1420"),
             E("Ye Olde Salutation Inn", "en:Ye Olde Salutation Inn",
               "Another claimant to the title of the city's oldest pub. The core of the building dates from "
               "around 1360, and unusually large caves lie beneath it.",
-              ("oldest", "1360", "caves")),
+              ("oldest", "1360", "caves"), year="c. 1360"),
         ]),
     dict(
         id="churches", title="Churches",
@@ -40,14 +43,14 @@ CURATED = [
             E("St Peter's Church", "en:St Peter's Church, Nottingham",
               "One of the three medieval parish churches of Nottingham. Parts of the building date from "
               "about 1180.",
-              ("mediaeval", "1180")),
+              ("mediaeval", "1180"), year="c. 1180"),
             E("St Nicholas' Church", "en:St Nicholas' Church, Nottingham",
               "The medieval church was pulled down during the Civil War; the brick church standing today "
               "was finished in 1678.",
-              ("Civil War", "1678")),
+              ("Civil War", "1678"), year="1678"),
             E("Cathedral of St Barnabas", "en:Nottingham Cathedral",
               "The Catholic cathedral, designed by Augustus Pugin and built between 1841 and 1844.",
-              ("Pugin", "1841", "1844")),
+              ("Pugin", "1841", "1844"), year="1841..1844"),
         ]),
     dict(
         id="lace", title="Lace and trade",
@@ -57,14 +60,14 @@ CURATED = [
             E("Adams Building", "en:Adams Building, Nottingham",
               "A lace showroom and warehouse built for Thomas Adams to a design by Thomas Chambers Hine, "
               "opened in 1855.",
-              ("Thomas Adams", "Thomas Chambers Hine", "1855")),
+              ("Thomas Adams", "Thomas Chambers Hine", "1855"), year="1855"),
             E("Severn's Building", "en:Severn's Building",
               "A medieval timber-framed building, moved to its present site on Castle Road.",
               ("Castle Road",)),
             E("Victoria Centre", "en:Victoria Centre",
               "A shopping centre opened in 1972 on the site of Nottingham Victoria railway station, "
               "whose clock tower still stands beside it.",
-              ("1972", "clock tower")),
+              ("1972", "clock tower"), year="1972"),
         ]),
     dict(
         id="civic", title="Civic Nottingham",
@@ -73,17 +76,17 @@ CURATED = [
             E("Council House", "en:Council House, Nottingham",
               "Designed by Thomas Cecil Howitt and opened in 1929, on the site of the old Exchange "
               "at the head of the Old Market Square.",
-              ("Howitt", "1929", "Exchange")),
+              ("Howitt", "1929", "Exchange"), year="1929"),
             E("Guildhall", "en:Nottingham Guildhall",
               "The Victorian Guildhall, completed in 1888, held the city's courts and police station.",
-              ("1888",)),
+              ("1888",), year="1888"),
             E("Shire Hall", "en:Shire Hall, Nottingham",
               "The county courthouse and gaol, rebuilt to a design by James Gandon. "
               "It is now the National Justice Museum.",
               ("Gandon", "National Justice Museum")),
             E("Nottingham station", "en:Nottingham railway station",
               "The station building of red brick and terracotta opened in 1904.",
-              ("1904", "terracotta")),
+              ("1904", "terracotta"), year="1904"),
         ]),
     dict(
         id="culture", title="Theatres and culture",
@@ -97,21 +100,21 @@ CURATED = [
             E("Bromley House", "en:Bromley House Library",
               "A Georgian town house built in 1752. The Nottingham Subscription Library, founded in 1816, "
               "moved in during 1821.",
-              ("1752", "1816", "1821")),
+              ("1752", "1816", "1821"), year="1752"),
             E("Theatre Royal", "en:Theatre Royal, Nottingham",
               "Opened in 1865 and designed by Charles J. Phipps.",
-              ("1865", "Phipps")),
+              ("1865", "Phipps"), year="1865"),
             E("Royal Concert Hall", "en:Royal Concert Hall, Nottingham",
               "A concert hall built next to the Theatre Royal and opened in 1982.",
-              ("1982",)),
+              ("1982",), year="1982"),
             E("Albert Hall", "en:Albert Hall, Nottingham",
               "Built as a Methodist mission hall and opened in 1909.",
-              ("Methodist", "1909")),
+              ("Methodist", "1909"), year="1909"),
             E("Nottingham Playhouse", "en:Nottingham Playhouse",
               "A modernist theatre designed by Peter Moro, opened in 1963.",
-              ("Moro", "1963")),
+              ("Moro", "1963"), year="1963"),
             E("Nottingham Contemporary", "en:Nottingham Contemporary",
               "An art centre designed by Caruso St John and opened in 2009, its walls patterned with lace.",
-              ("Caruso St John", "2009", "lace")),
+              ("Caruso St John", "2009", "lace"), year="2009"),
         ]),
 ]

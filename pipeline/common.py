@@ -89,11 +89,35 @@ def metres(a, b):
     return math.hypot((a[0] - b[0]) * kx, (a[1] - b[1]) * 110540)
 
 
+CELL = 0.002   # grid cell in degrees (about 140 x 220 m)
+_grids = {}
+
+
+def _grid(buildings):
+    """Spatial index: grid cell -> building indexes whose bounding box touches it. Cached per list."""
+    key = id(buildings)
+    if key not in _grids or _grids[key][0] is not buildings:
+        g = {}
+        for i, b in enumerate(buildings):
+            bb = b["bb"]
+            for cx in range(int(bb[0] // CELL), int(bb[2] // CELL) + 1):
+                for cy in range(int(bb[1] // CELL), int(bb[3] // CELL) + 1):
+                    g.setdefault((cx, cy), []).append(i)
+        _grids[key] = (buildings, g)
+    return _grids[key][1]
+
+
 def building_at(buildings, x, y, near=0):
     """Index of the building containing (x, y); with near > 0, else the closest within `near` metres."""
     pad = near / 70000 if near else 0
     best, best_d = None, None
-    for i, b in enumerate(buildings):
+    g = _grid(buildings)
+    cand = set()
+    for cx in range(int((x - pad) // CELL), int((x + pad) // CELL) + 1):
+        for cy in range(int((y - pad) // CELL), int((y + pad) // CELL) + 1):
+            cand.update(g.get((cx, cy), ()))
+    for i in sorted(cand):
+        b = buildings[i]
         bb = b["bb"]
         if not (bb[0] - pad <= x <= bb[2] + pad and bb[1] - pad <= y <= bb[3] + pad):
             continue

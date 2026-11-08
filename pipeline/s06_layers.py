@@ -1,6 +1,6 @@
 """Resolve every layer to the buildings it contains.
 
-Rule layers come from pipeline/layers.py, story layers from step s05. Writes layers.json:
+Rule layers come from pipeline/layers.py, story layers from step s04. Writes layers.json:
   meta    [{id, title, intro, kind, groups, source?, count}]  in display order: stories first, then rules
   member  {building index: [group keys]}
   stories {building index: [{layer, text, source}]}
