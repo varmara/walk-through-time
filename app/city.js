@@ -80,6 +80,7 @@ let city, data, features = [], selectedId = null, map, playing = null, stats;
 let layers = [];                 // layer metadata from the data file
 const groups = new Map();        // group key -> { key, title, count, items, layer }
 let active = new Set();          // ticked group keys
+const entitiesAt = {};           // building index -> [{name, bs}] for people and stories with several places
 try { active = new Set(JSON.parse(store.get('layers:' + CITY_ID) || '[]')); } catch {}
 const saveActive = () => store.set('layers:' + CITY_ID, JSON.stringify([...active]));
 const isArea = key => groups.get(key)?.layer.kind === 'areas';
@@ -97,6 +98,10 @@ async function main(){
 
   layers = (data.layers || []).map(L => ({ ...L, groups: (L.groups || []).map(g => Array.isArray(g) ? { key: g[0], title: g[1] } : g) }));
   layers.forEach(L => L.groups.forEach(g => groups.set(g.key, { ...g, layer: L })));
+  layers.forEach(L => L.groups.forEach(g => (g.items || []).forEach(it => {
+    const [name, bs] = typeof it[0] === 'number' ? [it[1], [it[0]]] : it;
+    if (bs.length > 1) bs.forEach(b => (entitiesAt[b] = entitiesAt[b] || []).some(x => x.name === name) || entitiesAt[b].push({ name, bs }));
+  })));
   active = new Set([...active].filter(k => groups.has(k)));
   renderLayers();
 
@@ -116,11 +121,15 @@ function isDark(){
 
 // ================= Map =================
 function buildingColour(){
-  const base = ['case', ['boolean', ['feature-state', 'sel'], false], tok('--accent'), ['get', 'c']];
+  const base = ['case', ['boolean', ['feature-state', 'sel'], false], tok('--accent'),
+    ['boolean', ['feature-state', 'hl'], false], tok('--hl'), ['get', 'c']];
+  if (places) return ['case', ['boolean', ['feature-state', 'sel'], false], tok('--accent'),
+    ['boolean', ['feature-state', 'hl'], false], tok('--hl'), tok('--ghost')];   // only this person's places stand out
   const keys = [...active].filter(k => !isArea(k));
   if (!keys.length) return base;
   const inLayer = ['any', ...keys.map(k => ['in', ',' + k + ',', ['coalesce', ['get', 'L'], '']])];
-  return ['case', ['boolean', ['feature-state', 'sel'], false], tok('--accent'), inLayer, ['get', 'c'], tok('--ghost')];
+  return ['case', ['boolean', ['feature-state', 'sel'], false], tok('--accent'),
+    ['boolean', ['feature-state', 'hl'], false], tok('--hl'), inLayer, ['get', 'c'], tok('--ghost')];
 }
 const natureColour = () => ['match', ['get', 't'], ...NATURE_TYPES.flatMap(t => [t, tok('--n-' + t)]), tok('--n-reserve')];
 
@@ -163,7 +172,14 @@ function drawMap(){
         'fill-extrusion-height':['get', 'h'], 'fill-extrusion-base':0, 'fill-extrusion-opacity':0.95,
         'fill-extrusion-vertical-gradient':true } });
 
+      map.addSource('places', { type:'geojson', data:{ type:'FeatureCollection', features:[] },
+        cluster:true, clusterRadius:44, clusterMaxZoom:18 });
+      // invisible layer: keeps the clustered source loaded so the HTML pins can read it
+      map.addLayer({ id:'places-probe', type:'circle', source:'places', paint:{ 'circle-radius':1, 'circle-opacity':0 } });
+      map.on('moveend', drawPins); map.on('sourcedata', e => { if (e.sourceId === 'places' && e.isSourceLoaded) drawPins(); });
+
       map.on('click', e => {
+        if (e.originalEvent && e.originalEvent.target.closest('.pin')) return;
         const hit = map.queryRenderedFeatures(e.point, { layers:['b'] })[0];
         if (hit) return selectBuilding(hit.id);
         const area = map.getLayer('nature-fill') && map.getLayoutProperty('nature-fill', 'visibility') === 'visible'
@@ -237,6 +253,7 @@ function closeSheet(){
   sheet.hidden = true; sheetKind = null;
   $('bLayers').setAttribute('aria-expanded', false);
   $('bMap').setAttribute('aria-expanded', false);
+  if (places) { setPlace(places.i, false); return; }   // back to the places strip, its building still selected
   if (selectedId != null && map) { map.setFeatureState({ source:'b', id:selectedId }, { sel:false }); selectedId = null; }
 }
 $('sClose').onclick = closeSheet;
@@ -280,7 +297,9 @@ function renderLayers(){
     box.hidden = !open; btn.setAttribute('aria-expanded', open);
   });
   $('lSections').querySelectorAll('[data-b]').forEach(btn => btn.onclick = e => {
-    e.preventDefault(); selectBuilding(+btn.dataset.b);
+    e.preventDefault();
+    const bs = btn.dataset.b.split(',').map(Number);
+    bs.length > 1 ? showPlaces(btn.dataset.name, bs) : selectBuilding(bs[0]);
   });
   updateSummary();
 }
@@ -290,7 +309,7 @@ function infoHtml(L, g, withIntro = true){
   if (g && g.items && g.items.length) parts.push(`<div class="items">${g.items.map(it => {
     // items are [name, [buildings]] (older data: [building, name])
     const [name, bs] = typeof it[0] === 'number' ? [it[1], [it[0]]] : it;
-    return `<button class="item" data-b="${bs[0]}">${esc(name)}${bs.length > 1 ? `<span class="cnt">${bs.length}</span>` : ''}</button>`;
+    return `<button class="item" data-b="${bs.join(',')}" data-name="${esc(name)}">${esc(name)}${bs.length > 1 ? `<span class="cnt">${bs.length}</span>` : ''}</button>`;
   }).join('')}</div>`);
   if (L.kind === 'stories') parts.push('<p class="src">Each entry is checked against its Wikipedia article.</p>');
   else if (L.source) parts.push(`<p class="src">Source: <a href="${esc(L.source.url)}" target="_blank" rel="noopener">${esc(L.source.title)}</a></p>`);
@@ -368,6 +387,11 @@ function selectBuilding(id){
   $('cStories').innerHTML = (p.stories || []).map(s => `<div class="story"><div class="seclbl">${esc(layerTitle(s.layer))}</div>
     <p>${esc(s.text)}</p>${s.source ? `<p class="src">${esc(s.source.kind || 'Wikipedia')}: ${link(s.source)}${s.place ? ` · ${esc(s.place.kind || 'Wikipedia')}: ` + link(s.place) : ''}</p>` : ''}</div>`).join('');
 
+  const many = entitiesAt[id] || [];
+  $('cStories').insertAdjacentHTML('beforeend', many.map(m =>
+    `<button class="textbtn allplaces" data-name="${esc(m.name)}" data-b="${m.bs.join(',')}">All ${m.bs.length} places: ${esc(m.name)} →</button>`).join(''));
+  $('cStories').querySelectorAll('.allplaces').forEach(btn => btn.onclick = () => showPlaces(btn.dataset.name, btn.dataset.b.split(',').map(Number)));
+
   const links = [];
   if (p.listUrl || p.listEntry) links.push(`<a href="${esc(p.listUrl || 'https://historicengland.org.uk/listing/the-list/list-entry/' + p.listEntry)}" target="_blank" rel="noopener">Historic England list entry →</a>`);
   if (p.article) links.push(`<a href="${esc(p.article)}" target="_blank" rel="noopener">Wikipedia →</a>`);
@@ -389,6 +413,110 @@ function showArea(p){
     ? '<a href="https://designatedsites.naturalengland.org.uk/" target="_blank" rel="noopener">Natural England designated sites →</a>'
     : '<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>';
   openSheet('card', p.name);
+}
+
+// ================= Places: one person or story with several buildings =================
+// Numbered pins on the map (grouped into bubbles when close together) and a strip of cards that swipe
+// sideways; the pin, the card and the map move together.
+let places = null;             // { name, bs, i }
+const pins = {};               // marker key -> maplibregl.Marker
+const centreOf = b => {
+  const g = features[b].geometry, ring = g.type === 'Polygon' ? g.coordinates[0] : g.coordinates[0][0];
+  return [ring.reduce((a, c) => a + c[0], 0) / ring.length, ring.reduce((a, c) => a + c[1], 0) / ring.length];
+};
+function storyFor(b, name){
+  const ss = features[b].properties.stories || [];
+  return ss.find(s => s.text.includes(name) || (s.source && s.source.title === name)) || ss.find(s => s.layer === 'people') || ss[0];
+}
+function showPlaces(name, bs){
+  closeSheet();
+  clearPlaces(false);
+  places = { name, bs, i: 0 };
+  bs.forEach(b => map.setFeatureState({ source:'b', id:b }, { hl:true }));
+  map.setPaintProperty('b', 'fill-extrusion-color', buildingColour());
+  map.getSource('places').setData({ type:'FeatureCollection', features: bs.map((b, i) =>
+    ({ type:'Feature', properties:{ n: i + 1 }, geometry:{ type:'Point', coordinates: centreOf(b) } })) });
+  $('pName').textContent = name;
+  $('pCards').innerHTML = bs.map((b, i) => {
+    const p = features[b].properties, st = storyFor(b, name), era = p.y != null ? eraOf(p.y) : null;
+    return `<article class="pcard" data-i="${i}">
+      <div class="pnum">${i + 1}</div>
+      <h3>${esc(p.name || p.listName || 'Unnamed building')}</h3>
+      ${p.y != null ? `<div class="pmeta">${esc(dateText(p.y, p.f))}<span class="pill" style="border-color:${era[3]}">${esc(era[2])}</span></div>` : ''}
+      ${st ? `<p>${esc(st.text)}</p>` : ''}
+      <button class="textbtn" data-open="${b}">Details →</button></article>`;
+  }).join('');
+  $('pCards').querySelectorAll('[data-open]').forEach(btn => btn.onclick = () => selectBuilding(+btn.dataset.open));
+  $('placesbar').hidden = false; $('timebar').hidden = true;
+  $('pCards').scrollLeft = 0;
+  setPlace(0, false);
+  const pts = bs.map(centreOf), lons = pts.map(p => p[0]), lats = pts.map(p => p[1]);
+  map.fitBounds([[Math.min(...lons), Math.min(...lats)], [Math.max(...lons), Math.max(...lats)]],
+    { padding: { top: 90, left: 40, right: 70, bottom: $('placesbar').offsetHeight + 40 }, maxZoom: 16.5, duration: 900 });
+}
+function setPlace(i, fly = true){
+  if (!places) return;
+  places.i = i;
+  $('pCount').textContent = `${i + 1} of ${places.bs.length}`;
+  if (selectedId != null) map.setFeatureState({ source:'b', id:selectedId }, { sel:false });
+  selectedId = places.bs[i];
+  map.setFeatureState({ source:'b', id:selectedId }, { sel:true });
+  Object.entries(pins).forEach(([k, m]) => m.getElement().classList.toggle('on', k === 'p' + (i + 1)));
+  $('pCards').querySelectorAll('.pcard').forEach(c => c.classList.toggle('on', +c.dataset.i === i));
+  if (fly) map.easeTo({ center: centreOf(places.bs[i]), zoom: Math.max(map.getZoom(), 16.5), duration: 700,
+    padding: { bottom: $('placesbar').offsetHeight + 20 } });
+}
+function goToCard(i){
+  const card = $('pCards').querySelector(`[data-i="${i}"]`);
+  if (card) $('pCards').scrollTo({ left: card.offsetLeft - 12, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+}
+let scrollTimer;
+$('pCards').addEventListener('scroll', () => {
+  clearTimeout(scrollTimer);
+  scrollTimer = setTimeout(() => {
+    const cards = [...$('pCards').querySelectorAll('.pcard')], x = $('pCards').scrollLeft;
+    let best = 0;
+    cards.forEach((c, i) => { if (Math.abs(c.offsetLeft - 12 - x) < Math.abs(cards[best].offsetLeft - 12 - x)) best = i; });
+    if (places && best !== places.i) setPlace(best);
+  }, 120);
+});
+$('pPrev').onclick = () => places && goToCard(Math.max(0, places.i - 1));
+$('pNext').onclick = () => places && goToCard(Math.min(places.bs.length - 1, places.i + 1));
+$('pClose').onclick = () => clearPlaces(true);
+function clearPlaces(showTime){
+  if (places) places.bs.forEach(b => map.setFeatureState({ source:'b', id:b }, { hl:false }));
+  if (selectedId != null) { map.setFeatureState({ source:'b', id:selectedId }, { sel:false }); selectedId = null; }
+  places = null;
+  if (map && map.getLayer('b')) map.setPaintProperty('b', 'fill-extrusion-color', buildingColour());
+  if (map && map.getSource('places')) map.getSource('places').setData({ type:'FeatureCollection', features:[] });
+  Object.keys(pins).forEach(k => { pins[k].remove(); delete pins[k]; });
+  $('placesbar').hidden = true;
+  if (showTime) $('timebar').hidden = false;
+}
+function drawPins(){
+  if (!map || !map.getSource('places')) return;
+  const seen = new Set();
+  for (const f of map.querySourceFeatures('places')) {
+    const pr = f.properties, cl = pr.cluster;
+    const key = cl ? 'c' + pr.cluster_id : 'p' + pr.n;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    if (!pins[key]) {
+      const el = document.createElement('button');
+      el.className = cl ? 'pin cluster' : 'pin';
+      el.textContent = cl ? pr.point_count : pr.n;
+      el.setAttribute('aria-label', cl ? `${pr.point_count} places here: zoom in` : `Place ${pr.n}`);
+      el.onclick = e => {
+        e.stopPropagation();
+        if (cl) map.getSource('places').getClusterExpansionZoom(pr.cluster_id)
+          .then(z => map.easeTo({ center: f.geometry.coordinates, zoom: z + 0.3 }));
+        else goToCard(pr.n - 1);
+      };
+      pins[key] = new maplibregl.Marker({ element: el }).setLngLat(f.geometry.coordinates).addTo(map);
+    }
+    if (!cl) pins[key].getElement().classList.toggle('on', places && pr.n === places.i + 1);
+  }
+  Object.keys(pins).forEach(k => { if (!seen.has(k)) { pins[k].remove(); delete pins[k]; } });
 }
 
 // ================= Layout =================
