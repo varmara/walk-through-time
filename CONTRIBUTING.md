@@ -24,7 +24,7 @@ Rules, checked by step `s04_curated` every time the pipeline runs:
 - **Every story rests on a source:** a Wikipedia article (`"en:Title"`) or a Historic England list entry
   (`"he:1254566"`), whose official description is checked the same way. Use a list entry for a listed building
   with no Wikipedia article.
-- **Every story rests on a Wikipedia article or list entry.** `facts` are short strings (a year, a name, a key word) that must
+  `facts` are short strings (a year, a name, a key word) that must
   appear in the article. If one is missing, the story is dropped. If the article does not say it, the story
   should not either.
 - **The story must be placed on a building.** The pipeline tries, in order: an explicit `at="osm:way/123"`, the
