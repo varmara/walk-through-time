@@ -9,7 +9,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="../lib/maplibre-gl.css">
-<link rel="stylesheet" href="../app/city.css">
+<script>
+  // Load the page's own script and styles fresh at least every 10 minutes: GitHub Pages lets browsers cache files
+  // for 10 minutes, so without this a visitor can see an old version after an update.
+  window.__v = Math.floor(Date.now() / 6e5);
+  document.write('<link rel="stylesheet" href="../app/city.css?v=' + window.__v + '">');
+</script>
 </head>
 <body data-city="nottingham">
 <div id="map" aria-label="3D map of Nottingham"></div>
@@ -96,6 +101,6 @@ window.addEventListener('error', e => { const s = document.getElementById('statu
 window.addEventListener('unhandledrejection', e => { const s = document.getElementById('status'); if (s) s.textContent = 'Error: ' + ((e.reason && e.reason.message) || e.reason); });
 </script>
 <script src="../lib/maplibre-gl.js"></script>
-<script src="../app/city.js"></script>
+<script>document.write('<script src="../app/city.js?v=' + window.__v + '"><\/script>');</script>
 </body>
 </html>
