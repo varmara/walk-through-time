@@ -66,13 +66,16 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # The data files are rebuilt in full, so this run's files replace whatever is on main now
+          # (another run may have pushed while this one was working).
+          git fetch -q origin main
+          git reset -q FETCH_HEAD
           git add data
           if git diff --cached --quiet; then
             echo "No changes to data."
           else
             git commit -m "Update city data"
-            git pull --rebase
-            git push
+            git push origin HEAD:main
           fi
 
       - name: Save new OpenStreetMap downloads

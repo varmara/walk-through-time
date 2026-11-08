@@ -9,6 +9,8 @@ Stories live in stories/<city>.py (see CONTRIBUTING.md). For every entry:
        the item's Historic England list entry (P1216), matched in step s02
        the article's coordinates, inside (or within 15 m of) a building outline
        at="name:..." or the entry's name, matching a building name or a named place inside one
+       at="near:120"             the building nearest the article's coordinates within that many metres
+                                 (for grounds and parks, whose coordinates fall on open space)
      Entries that cannot be placed are dropped.
   People layers (kind="people") pair a person's article (`source`) with a place's article (`place`).
      The facts must appear in the two articles together, the place's article decides the building, and
@@ -177,8 +179,9 @@ def main(city_id):
                             b, how = by_nhle[n], "Historic England list entry"
                             break
                 if b is None and a["coords"]:
-                    b = building_at(buildings, *a["coords"], near=15)
-                    how = "article coordinates" if b is not None else None
+                    radius = int(at[5:]) if at.startswith("near:") and at[5:].isdigit() else 15
+                    b = building_at(buildings, *a["coords"], near=radius)
+                    how = f"article coordinates (within {radius} m)" if b is not None else None
                 if b is None:
                     key = norm(at[5:] if at.startswith("name:") else e["name"])
                     if key in names:

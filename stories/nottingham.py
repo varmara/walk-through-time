@@ -156,7 +156,7 @@ CURATED = [
               ("Bromley House", "George Green")),
             P("Brian Clough", "en:Brian Clough", "en:City Ground",
               "Brian Clough managed Nottingham Forest at the City Ground.",
-              ("City Ground", "Clough")),
+              ("City Ground", "Clough"), at="near:120"),
             P("Torvill and Dean", "en:Torvill and Dean", "en:National Ice Centre",
               "The ice dancers Jayne Torvill and Christopher Dean come from Nottingham. The square outside the ice "
               "centre is named Bolero Square after their Olympic routine.",
