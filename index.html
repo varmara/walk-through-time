@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: one narrow column; the clock-and-footpath mark beside the name, then the list of cities. */
+/* Layout: one narrow column; the clock-and-skyline mark beside the name, then the list of cities. */
 :root{ --bg:#e9e5dd; --paper:#f8f6f2; --ink:#20262b; --muted:#6e6a62; --line:#d6d0c4; --trail:#c4472d;
   --sans:"IBM Plex Sans Condensed",system-ui,-apple-system,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace; }
 @media (prefers-color-scheme: dark){ :root{ --bg:#15191c; --paper:#1e2428; --ink:#ebe6dc; --muted:#9d978b; --line:#343c42; --trail:#e0734f; color-scheme:dark } }
@@ -17,9 +17,6 @@ body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--sans)}
 main{max-width:640px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + 48px) 16px calc(env(safe-area-inset-bottom,0px) + 48px);display:grid;gap:32px}
 header{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;align-items:center}
 .mark{width:76px;height:76px;grid-row:span 2;color:var(--ink)}
-.mark .face{fill:var(--paper)}
-.mark .trail{stroke:var(--trail)}
-.mark .stop{fill:var(--trail)}
 h1{font-size:40px;line-height:1.05;margin:0;text-wrap:balance}
 .lead{color:var(--muted);margin:0;max-width:34em;grid-column:2}
 @media (max-width:420px){ header{grid-template-columns:1fr} .mark{grid-row:auto;width:64px;height:64px} .lead{grid-column:1} }
@@ -39,16 +36,7 @@ footer a{color:inherit}
 <body>
 <main>
   <header>
-    <svg class="mark" viewBox="0 0 64 64" aria-hidden="true">
-      <circle class="face" cx="32" cy="32" r="27" stroke="currentColor" stroke-width="3.5"/>
-      <g stroke="currentColor" stroke-width="3" stroke-linecap="round">
-        <path d="M32 9.5v4M54.5 32h-4M32 54.5v-4M9.5 32h4"/>
-        <path d="M32 32l8.5 6"/>
-      </g>
-      <path class="trail" d="M32 32c-9-1-9-8-1-9.5s8-7 1-8.5" fill="none" stroke-width="3" stroke-linecap="round" stroke-dasharray="0.1 4.4"/>
-      <circle class="stop" cx="32" cy="14" r="3.4"/>
-      <circle cx="32" cy="32" r="3.2" fill="currentColor"/>
-    </svg>
+    <img class="mark" src="app/logo.svg" alt="">
     <h1>Walk Through Time</h1>
     <p class="lead">Explore cities building by building: when each one was built, what stood there before, and the stories behind them.</p>
   </header>
