@@ -22,16 +22,27 @@
   <div id="controls" style="display:grid;gap:10px">
     <div class="yearrow">
       <div><div class="yearlbl">The city in</div><div class="year" id="yearOut">2026</div></div>
+      <button class="fold" id="fold" aria-expanded="true" aria-label="Show fewer controls">▾</button>
       <button class="play" id="play" aria-label="Play the city's growth">▶</button>
     </div>
-    <div>
+    <div class="sliderwrap">
       <input type="range" id="year" min="0" max="1000" step="1" value="1000" aria-label="Year">
       <div class="ticks" id="ticks"></div>
     </div>
     <div class="legend" id="legend"></div>
-    <div class="chips" role="group" aria-label="Layers">
+    <p class="note">Paler colours mean the date is approximate.</p>
+    <div id="layerSection" class="section" hidden>
+      <div class="seclbl">Stories and layers</div>
+      <div class="chips" id="layerChips" role="group" aria-label="Stories and layers"></div>
+      <div class="layerinfo" id="layerInfo" hidden>
+        <p id="lIntro"></p>
+        <div class="items" id="lItems"></div>
+        <p class="src" id="lSource"></p>
+      </div>
+    </div>
+    <div class="seclbl">Map</div>
+    <div class="chips" role="group" aria-label="Map options">
       <button class="chip" id="tUnknown" aria-pressed="true">Undated</button>
-      <button class="chip" id="tListed" aria-pressed="false">Listed buildings</button>
       <button class="chip" data-base="none" aria-pressed="true">No basemap</button>
       <button class="chip" data-base="osm" aria-pressed="false">Street map</button>
       <button class="chip" data-base="nls" aria-pressed="false">1888–1913 map</button>
@@ -47,6 +58,7 @@
     <div class="head"><h2 id="cTitle"></h2><button class="close" id="cClose" aria-label="Close">✕</button></div>
     <img id="cImg" alt="" hidden>
     <dl class="facts" id="cFacts"></dl>
+    <div id="cStories"></div>
     <div id="cLinks" style="display:flex;flex-wrap:wrap;gap:12px"></div>
   </article>
 </section>

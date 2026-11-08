@@ -1,16 +1,8 @@
-// Walk Through Time: city page.
-// Loads ../data/<city>.json (built by GitHub Actions). If that file is missing,
-// falls back to fetching OpenStreetMap, Historic England and Wikidata live.
+// Walk Through Time: city page. Loads ../cities/<city>.json and ../data/<city>.json
+// (the data file is built by the pipeline in pipeline/ and committed by GitHub Actions).
 (() => {
 const CITY_ID = document.body.dataset.city;
 const MAX_YEAR = new Date().getFullYear();
-const OVERPASS = [
-  'https://overpass-api.de/api/interpreter',
-  'https://overpass.private.coffee/api/interpreter',
-  'https://overpass.kumi.systems/api/interpreter',
-];
-const NHLE = 'https://services-eu1.arcgis.com/ZOdPfBS3aqqDYPUQ/arcgis/rest/services/National_Heritage_List_for_England_NHLE_v02_VIEW/FeatureServer/0/query';
-const WDQS = 'https://query.wikidata.org/sparql';
 
 // Eras: [from, to, label, colour]. Warm = old, cool = new.
 const ERAS = [
@@ -24,6 +16,8 @@ const ERAS = [
   [1980, 1999, '1980–99',     '#3a76b6'],
   [2000, 9999, '2000+',       '#6c5cc6'],
 ];
+// How much each date precision is faded towards the background
+const FADE = { exact: 0, approx: 0.4, century: 0.62 };
 
 const $ = id => document.getElementById(id);
 const store = { get(k){ try { return localStorage.getItem(k); } catch { return null; } },
@@ -34,239 +28,48 @@ const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;
 const fmt = n => n.toLocaleString('en-GB');
 function progress(p, step){ $('lpct').textContent = Math.round(p) + '%'; if (step) $('lstep').textContent = step; }
 
-async function fetchJSON(url, opts = {}, ms = 60000){
+async function fetchJSON(url, ms = 60000){
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), ms);
   try {
-    const r = await fetch(url, { ...opts, signal: ctrl.signal });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const r = await fetch(url, { cache:'no-cache', signal: ctrl.signal });
+    if (!r.ok) throw new Error(r.status === 404 ? 'the data file has not been built yet' : 'HTTP ' + r.status);
     return await r.json();
   } catch (e) {
     throw new Error(e.name === 'AbortError' ? 'timed out' : e.message);
   } finally { clearTimeout(timer); }
 }
 
-// ================= Year parsing (OSM start_date and similar) =================
-function parseYear(raw){
-  if (raw == null) return null;
-  const s = String(raw).trim().toLowerCase();
-  let m;
-  if ((m = s.match(/(\d{4})\s*(?:\.\.|–|-|to)\s*(\d{4})/))) return { y: Math.round((+m[1] + +m[2]) / 2), a: true };
-  if ((m = s.match(/\b(\d{3})0s\b/))) return { y: +(m[1] + '5'), a: true };
-  if (!/\d{4}/.test(s)) {
-    m = s.match(/\bc\s?(\d{1,2})\b/) || s.match(/\b(\d{1,2})(?:st|nd|rd|th)?\s*c(?:entury)?\b/);
-    if (m) {
-      const base = (+m[1] - 1) * 100;
-      const off = /early|first half/.test(s) ? 20 : /late|second half/.test(s) ? 80 : 50;
-      return { y: base + off, a: true };
-    }
-    return null;
-  }
-  const y = +s.match(/(\d{4})/)[1];
-  if (y < 1000 || y > MAX_YEAR) return null;
-  const a = /^(c|ca|circa|about|~|before|after|early|mid|late|pre)/.test(s) || /[?~]/.test(s);
-  return { y, a };
-}
-
-// ================= Colour =================
+// ================= Colour and date wording =================
 function hexToRgb(h){ const n = parseInt(h.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; }
 function mix(a, b, t){ const A = hexToRgb(a), B = hexToRgb(b);
   return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * t).toString(16).padStart(2, '0')).join(''); }
 const eraOf = y => ERAS.find(e => y >= e[0] && y <= e[1]);
 function colourFor(p){
   if (p.y == null) return tok('--unknown');
-  const base = eraOf(p.y)[3];
-  return p.ya ? mix(base, tok('--bg'), 0.45) : base;   // approximate dates are paler
+  return mix(eraOf(p.y)[3], tok('--bg'), FADE[p.f] || 0);
 }
-
-// ================= Geometry helpers =================
-function stitchRings(ways){
-  const rings = [], open = ways.map(w => w.slice());
-  const same = (a, b) => a[0] === b[0] && a[1] === b[1];
-  while (open.length) {
-    let ring = open.shift(), guard = 0;
-    while (!(ring.length > 3 && same(ring[0], ring[ring.length-1])) && guard++ < 500) {
-      const end = ring[ring.length-1];
-      const i = open.findIndex(w => same(w[0], end) || same(w[w.length-1], end));
-      if (i < 0) break;
-      let next = open.splice(i, 1)[0];
-      if (!same(next[0], end)) next = next.reverse();
-      ring = ring.concat(next.slice(1));
-    }
-    if (ring.length > 3) rings.push(ring);
-  }
-  return rings;
+function ordinal(n){ const s = ['th','st','nd','rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
+function dateText(y, f){
+  if (f === 'century') return `${ordinal(Math.floor(y / 100) + 1)} century`;
+  return (f === 'approx' ? 'c. ' : '') + y;
 }
-function pointInRing(x, y, ring){
-  let inside = false;
-  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-    const [xi, yi] = ring[i], [xj, yj] = ring[j];
-    if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) inside = !inside;
-  }
-  return inside;
-}
-function heightOf(t){
-  const h = parseFloat(t.height || t['building:height']);
-  if (h > 0 && h < 400) return h;
-  const lv = parseFloat(t['building:levels']), rl = parseFloat(t['roof:levels']) || 0;
-  if (lv > 0) return lv * 3.2 + rl * 1.6 + 1;
-  const k = t.building;
-  if (['house','detached','semidetached_house','terrace','residential'].includes(k)) return 8;
-  if (['garage','garages','shed','hut','kiosk','roof','carport'].includes(k)) return 3;
-  if (['church','chapel'].includes(k)) return 16;
-  if (k === 'cathedral') return 28;
-  return 10;
-}
-
-// ================= Live fallback (same logic as scripts/build_city.py) =================
-async function liveData(city){
-  const b = city.bbox, bb = `${b.s},${b.w},${b.n},${b.e}`;
-  const q = `[out:json][timeout:90];(
-    way["building"](${bb}); relation["building"]["type"="multipolygon"](${bb});
-    way["highway"~"^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|pedestrian|service|footway)$"](${bb});
-    way["natural"="water"](${bb}); way["waterway"~"^(canal|river)$"](${bb}); relation["natural"="water"](${bb});
-    way["leisure"~"^(park|garden)$"](${bb}); way["landuse"="grass"](${bb});
-  ); out tags geom qt;`;
-  let osm = null, errs = [];
-  for (const url of OVERPASS) {
-    progress(10, `requesting buildings from OpenStreetMap (${new URL(url).host})…`);
-    try { osm = await fetchJSON(url + '?data=' + encodeURIComponent(q), {}, 90000); break; }
-    catch (e) { errs.push(new URL(url).host + ': ' + e.message); }
-  }
-  if (!osm) throw new Error('OpenStreetMap servers did not respond (' + errs.join('; ') + ')');
-
-  progress(40, 'reading buildings…');
-  const buildings = [], roads = [], water = [], parks = [];
-  for (const el of osm.elements) {
-    const t = el.tags || {};
-    if (el.type === 'way' && el.geometry) {
-      const c = el.geometry.map(g => [g.lon, g.lat]);
-      if (t.building) { if (c.length >= 4) buildings.push({ rings:[c], tags:t, osm:'way/' + el.id }); }
-      else if (t.highway) roads.push({ type:'Feature', properties:{ k: ['footway','service','pedestrian'].includes(t.highway) ? 'minor' : 'major' }, geometry:{ type:'LineString', coordinates:c } });
-      else if (t.waterway) water.push({ type:'Feature', properties:{}, geometry:{ type:'LineString', coordinates:c } });
-      else if (t.natural === 'water' && c.length > 3) water.push({ type:'Feature', properties:{}, geometry:{ type:'Polygon', coordinates:[c] } });
-      else if ((t.leisure || t.landuse) && c.length > 3) parks.push({ type:'Feature', properties:{}, geometry:{ type:'Polygon', coordinates:[c] } });
-    } else if (el.type === 'relation' && el.members) {
-      const rings = stitchRings(el.members.filter(m => m.role === 'outer' && m.geometry).map(m => m.geometry.map(g => [g.lon, g.lat])));
-      if (!rings.length) continue;
-      if (t.building) buildings.push({ rings, tags:t, osm:'relation/' + el.id });
-      else if (t.natural === 'water') rings.forEach(r => water.push({ type:'Feature', properties:{}, geometry:{ type:'Polygon', coordinates:[r] } }));
-    }
-  }
-
-  progress(50, 'listed buildings from Historic England…');
-  let listed = [];
-  try {
-    const qs = new URLSearchParams({ where:'1=1', geometry:`${b.w},${b.s},${b.e},${b.n}`, geometryType:'esriGeometryEnvelope',
-      inSR:'4326', spatialRel:'esriSpatialRelIntersects', outFields:'ListEntry,Name,Grade,hyperlink', outSR:'4326',
-      returnGeometry:'true', resultRecordCount:'2000', f:'geojson' });
-    const gj = await fetchJSON(NHLE + '?' + qs);
-    for (const f of gj.features || []) {
-      const g = f.geometry; if (!g) continue;
-      (g.type === 'MultiPoint' ? g.coordinates : g.type === 'Point' ? [g.coordinates] : []).forEach(c => listed.push({ x:c[0], y:c[1], p:f.properties }));
-    }
-  } catch (e) { say('Historic England unavailable: ' + e.message); }
-
-  buildings.forEach(bd => {
-    const xs = bd.rings[0].map(c => c[0]), ys = bd.rings[0].map(c => c[1]);
-    bd.bb = [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)]; bd.listed = [];
-  });
-  for (const pt of listed) {
-    const hit = buildings.find(bd => pt.x >= bd.bb[0] && pt.x <= bd.bb[2] && pt.y >= bd.bb[1] && pt.y <= bd.bb[3]
-                                  && bd.rings.some(r => pointInRing(pt.x, pt.y, r)));
-    if (hit) hit.listed.push(pt.p);
-  }
-
-  progress(62, 'dates and stories from Wikidata…');
-  const qids = [...new Set(buildings.map(bd => bd.tags.wikidata).filter(q => /^Q\d+$/.test(q || '')))];
-  const nhleIds = [...new Set(buildings.flatMap(bd => bd.listed.map(p => String(p.ListEntry))))];
-  let wd = new Map();
-  try { wd = await loadWikidata(qids, nhleIds); } catch (e) { say('Wikidata unavailable: ' + e.message); }
-
-  const rank = g => g === 'I' ? 3 : g === 'II*' ? 2 : 1;
-  const feats = buildings.map(bd => {
-    const t = bd.tags;
-    const best = bd.listed.slice().sort((a, c) => rank(c.Grade) - rank(a.Grade))[0];
-    const info = (t.wikidata && wd.get(t.wikidata)) || (best && wd.get('nhle:' + best.ListEntry)) || null;
-    const osmY = parseYear(t.start_date || t['building:start_date'] || t.construction_date || t.year_of_construction);
-    const wdY = wdYear(info);
-    let yr = null, src = null;
-    for (const [c, s] of [[wdY, 'Wikidata'], [osmY, 'OpenStreetMap']]) if (c && !c.a && !yr) { yr = c; src = s; }
-    for (const [c, s] of [[wdY, 'Wikidata'], [osmY, 'OpenStreetMap']]) if (c && !yr) { yr = c; src = s; }
-    const p = {
-      name: t.name || info?.label || best?.Name, y: yr?.y, ya: yr?.a || undefined, ysrc: src || undefined,
-      h: heightOf(t), osm: bd.osm, kind: t.building, levels: t['building:levels'],
-      grade: best?.Grade, listEntry: best?.ListEntry, listName: best?.Name, listUrl: best?.hyperlink,
-      qid: info?.qid || t.wikidata, image: info?.image,
-      article: info?.article || (t.wikipedia?.startsWith('en:') ? 'https://en.wikipedia.org/wiki/' + t.wikipedia.slice(3) : undefined),
-      architect: info?.architect || t.architect,
-    };
-    Object.keys(p).forEach(k => p[k] == null && delete p[k]);
-    return { type:'Feature', properties:p, geometry: bd.rings.length > 1
-      ? { type:'MultiPolygon', coordinates: bd.rings.map(r => [r]) } : { type:'Polygon', coordinates:[bd.rings[0]] } };
-  });
-  const fc = f => ({ type:'FeatureCollection', features:f });
-  return { built:null, buildings:fc(feats), roads:fc(roads), water:fc(water), parks:fc(parks),
-    listed:fc(listed.map(p => ({ type:'Feature', properties:{ g:p.p.Grade }, geometry:{ type:'Point', coordinates:[p.x, p.y] } }))) };
-}
-
-async function sparql(query){
-  const d = await fetchJSON(WDQS, { method:'POST', body:'format=json&query=' + encodeURIComponent(query),
-    headers:{ 'Content-Type':'application/x-www-form-urlencoded', 'Accept':'application/sparql-results+json' } });
-  return d.results.bindings;
-}
-const WD_FIELDS = `
-  OPTIONAL { ?item p:P571/psv:P571 ?iv . ?iv wikibase:timeValue ?inception ; wikibase:timePrecision ?prec . }
-  OPTIONAL { ?item wdt:P18 ?image }
-  OPTIONAL { ?article schema:about ?item ; schema:isPartOf <https://en.wikipedia.org/> }
-  OPTIONAL { ?item wdt:P84 ?architect . ?architect rdfs:label ?architectLabel . FILTER(LANG(?architectLabel) = "en") }
-  OPTIONAL { ?item rdfs:label ?label . FILTER(LANG(?label) = "en") }`;
-async function loadWikidata(qids, nhleIds){
-  const out = new Map();
-  const take = (rows, keyFn) => rows.forEach(b => {
-    const k = keyFn(b), prev = out.get(k) || {};
-    const info = { qid: b.item.value.split('/').pop(), label: prev.label || b.label?.value, image: prev.image || b.image?.value,
-      article: prev.article || b.article?.value, architect: prev.architect || b.architectLabel?.value,
-      inception: prev.inception, prec: prev.prec };
-    if (b.inception && (!prev.inception || +b.prec.value > +prev.prec)) { info.inception = b.inception.value; info.prec = +b.prec.value; }
-    out.set(k, info);
-  });
-  const chunk = (a, n) => Array.from({ length: Math.ceil(a.length / n) }, (_, i) => a.slice(i * n, i * n + n));
-  for (const c of chunk(qids, 200))
-    take(await sparql(`SELECT ?item ?inception ?prec ?image ?article ?architectLabel ?label WHERE { VALUES ?item { ${c.map(q => 'wd:' + q).join(' ')} } ${WD_FIELDS} }`),
-      b => b.item.value.split('/').pop());
-  for (const c of chunk(nhleIds, 200))
-    take(await sparql(`SELECT ?item ?nhle ?inception ?prec ?image ?article ?architectLabel ?label WHERE { VALUES ?nhle { ${c.map(n => '"' + n + '"').join(' ')} } ?item wdt:P1216 ?nhle . ${WD_FIELDS} }`),
-      b => 'nhle:' + b.nhle.value);
-  return out;
-}
-function wdYear(info){
-  if (!info || !info.inception) return null;
-  const m = info.inception.match(/^([+-]?\d+)-/); if (!m) return null;
-  const y = parseInt(m[1], 10), p = info.prec;
-  if (p >= 9) return { y, a:false };
-  if (p === 8) return { y: y + 5, a:true };
-  if (p === 7) return { y: (Math.ceil(y / 100) - 1) * 100 + 50, a:true };
-  return null;
-}
+const PRECISION = { exact: 'exact year', approx: 'approximate', century: 'only the century is known' };
 
 // ================= Main =================
-let city, data, features = [], selectedId = null, map, playing = null, stats;
+let city, data, features = [], selectedId = null, map, playing = null, stats, activeLayer = null;
 
 async function main(){
-  progress(3, 'loading map data…');
-  city = await fetchJSON(`../cities/${CITY_ID}.json`, { cache:'no-cache' }, 20000);
-  try {
-    data = await fetchJSON(`../data/${CITY_ID}.json`, { cache:'no-cache' }, 60000);
-    progress(70, 'colouring by year…');
-  } catch {
-    data = await liveData(city);   // no prepared data yet: build it in the browser
-  }
+  progress(5, 'loading map data…');
+  city = await fetchJSON(`../cities/${CITY_ID}.json`, 20000);
+  data = await fetchJSON(`../data/${CITY_ID}.json`);
+  progress(70, 'colouring by year…');
   features = data.buildings.features;
-  if (!features.length) throw new Error('No buildings in the map data');
+  if (!features.length) throw new Error('no buildings in the map data');
   let known = 0;
   features.forEach((f, i) => { f.id = i; if (f.properties.y != null) known++; f.properties.c = colourFor(f.properties); });
   stats = { total: features.length, known };
+  buildLayerChips();
 
   progress(90, 'drawing the map…');
   await drawMap();
@@ -281,6 +84,13 @@ function isDark(){
   return t === 'dark' || (t !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
 }
 
+function buildingColour(){
+  const base = ['case', ['boolean', ['feature-state', 'sel'], false], tok('--accent'), ['get', 'c']];
+  if (!activeLayer) return base;
+  const inLayer = ['any', ...activeLayer.groups.map(g => ['in', ',' + g[0] + ',', ['coalesce', ['get', 'L'], '']])];
+  return ['case', ['boolean', ['feature-state', 'sel'], false], tok('--accent'), inLayer, ['get', 'c'], tok('--ghost')];
+}
+
 function drawMap(){
   return new Promise(resolve => {
     const b = city.bbox;
@@ -292,7 +102,7 @@ function drawMap(){
         light:{ anchor:'map', position:[1.4, 210, 35], intensity: isDark() ? 0.35 : 0.45 } }
     });
     map.addControl(new maplibregl.AttributionControl({ compact:true, customAttribution:
-      '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors · Historic England (OGL) · Wikidata (CC0)' }), 'bottom-right');
+      '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors · Historic England (OGL) · Wikidata (CC0) · Wikipedia (CC BY-SA)' }), 'bottom-right');
 
     map.on('load', () => {
       map.addSource('osm', { type:'raster', tiles:['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize:256, maxzoom:19 });
@@ -310,15 +120,9 @@ function drawMap(){
 
       map.addSource('b', { type:'geojson', data:{ type:'FeatureCollection', features } });
       map.addLayer({ id:'b', type:'fill-extrusion', source:'b', paint:{
-        'fill-extrusion-color':['case', ['boolean', ['feature-state', 'sel'], false], tok('--accent'), ['get', 'c']],
+        'fill-extrusion-color':buildingColour(),
         'fill-extrusion-height':['get', 'h'], 'fill-extrusion-base':0, 'fill-extrusion-opacity':0.95,
         'fill-extrusion-vertical-gradient':true } });
-
-      map.addSource('listed', { type:'geojson', data:data.listed });
-      map.addLayer({ id:'listed', type:'circle', source:'listed', layout:{ visibility:'none' }, paint:{
-        'circle-radius':['interpolate', ['linear'], ['zoom'], 14, 2.5, 18, 7],
-        'circle-color':['match', ['get', 'g'], 'I', '#b3261e', 'II*', '#d9822b', '#1f5f7a'],
-        'circle-stroke-color':'#fff', 'circle-stroke-width':1.2, 'circle-pitch-alignment':'map' } });
 
       map.on('click', 'b', e => { const f = e.features[0]; if (f) select(f.id); });
       map.on('mouseenter', 'b', () => map.getCanvas().style.cursor = 'pointer');
@@ -370,10 +174,46 @@ $('play').onclick = () => {
   }, 70);
 };
 
+// ================= Fold the panel =================
+function setFolded(on){
+  $('sheet').classList.toggle('folded', on);
+  $('fold').setAttribute('aria-expanded', !on);
+  $('fold').setAttribute('aria-label', on ? 'Show all controls' : 'Show fewer controls');
+  $('fold').textContent = on ? '▴' : '▾';
+  store.set('folded', on ? '1' : '0');
+}
+$('fold').onclick = () => setFolded(!$('sheet').classList.contains('folded'));
+setFolded(store.get('folded') === '1');
+
+// ================= Layers and stories =================
+function buildLayerChips(){
+  const layers = (data.layers || []).filter(L => L.count > 0);
+  $('layerChips').innerHTML = layers.map(L =>
+    `<button class="chip" data-layer="${esc(L.id)}" aria-pressed="false">${esc(L.title)}<small>${fmt(L.count)}</small></button>`).join('');
+  $('layerChips').querySelectorAll('[data-layer]').forEach(btn => btn.onclick = () => {
+    const L = layers.find(x => x.id === btn.dataset.layer);
+    setLayer(activeLayer && activeLayer.id === L.id ? null : L);
+  });
+  $('layerSection').hidden = !layers.length;
+}
+function setLayer(L){
+  activeLayer = L;
+  $('layerChips').querySelectorAll('[data-layer]').forEach(b => b.setAttribute('aria-pressed', !!L && b.dataset.layer === L.id));
+  $('layerInfo').hidden = !L;
+  if (L) {
+    $('lIntro').textContent = L.intro || '';
+    $('lItems').innerHTML = (L.items || []).map(([b, name]) => `<button class="item" data-b="${b}">${esc(name)}</button>`).join('');
+    $('lItems').querySelectorAll('[data-b]').forEach(btn => btn.onclick = () => select(+btn.dataset.b));
+    $('lSource').innerHTML = L.kind === 'stories'
+      ? 'Each story is checked against its Wikipedia article. Tap a building to read it.'
+      : L.source ? `Source: <a href="${esc(L.source.url)}" target="_blank" rel="noopener">${esc(L.source.title)}</a>` : '';
+  }
+  if (map && map.getLayer('b')) map.setPaintProperty('b', 'fill-extrusion-color', buildingColour());
+}
+
 // ================= Toggles =================
 function toggle(btn, fn){ btn.onclick = () => { const on = btn.getAttribute('aria-pressed') !== 'true'; btn.setAttribute('aria-pressed', on); fn(on); }; }
 toggle($('tUnknown'), on => { showUnknown = on; updateYear(); });
-toggle($('tListed'), on => map && map.setLayoutProperty('listed', 'visibility', on ? 'visible' : 'none'));
 
 document.querySelectorAll('[data-base]').forEach(btn => btn.onclick = () => setBase(btn.dataset.base));
 function setBase(kind){
@@ -392,6 +232,7 @@ $('mtSave').onclick = () => {
 
 // ================= Building card =================
 const sheet = $('sheet');
+const layerTitle = id => (data.layers || []).find(L => L.id === id)?.title || id;
 function select(id){
   if (selectedId != null) map.setFeatureState({ source:'b', id:selectedId }, { sel:false });
   selectedId = id;
@@ -405,14 +246,18 @@ function select(id){
   const rows = [];
   if (p.y != null) {
     const era = eraOf(p.y);
-    rows.push(['Built', `${p.ya ? 'c. ' : ''}${p.y}<span class="pill" style="border-color:${era[3]}">${esc(era[2])}</span>`]);
-    rows.push(['Date source', esc(p.ysrc)]);
+    rows.push(['Built', `${esc(dateText(p.y, p.f))}<span class="pill" style="border-color:${era[3]}">${esc(era[2])}</span>`]);
+    rows.push(['Date', `${esc(PRECISION[p.f] || '')} · from ${esc(p.src)}`]);
+    if (p.alt) rows.push(['Also given', `${esc(dateText(p.alt.y, p.alt.f))} in ${esc(p.alt.src)}. The sources may describe different buildings on the site.`]);
   } else rows.push(['Built', '<span style="color:var(--muted)">not in open data yet</span>']);
   if (p.architect) rows.push(['Architect', esc(p.architect)]);
   if (p.grade) rows.push(['Listing', `Grade ${esc(p.grade)} listed`]);
   rows.push(['Height', `≈ ${Math.round(p.h)} m${p.levels ? ' · ' + esc(p.levels) + (p.levels === '1' ? ' storey' : ' storeys') : ''}`]);
   if (p.kind && p.kind !== 'yes') rows.push(['Type (OSM)', esc(p.kind.replace(/_/g, ' '))]);
   $('cFacts').innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
+
+  $('cStories').innerHTML = (p.stories || []).map(s => `<div class="story"><div class="seclbl">${esc(layerTitle(s.layer))}</div>
+    <p>${esc(s.text)}</p>${s.source ? `<p class="src">Source: <a href="${esc(s.source.url)}" target="_blank" rel="noopener">${esc(s.source.title)}, Wikipedia</a></p>` : ''}</div>`).join('');
 
   const links = [];
   if (p.listUrl || p.listEntry) links.push(`<a href="${esc(p.listUrl || 'https://historicengland.org.uk/listing/the-list/list-entry/' + p.listEntry)}" target="_blank" rel="noopener">Historic England list entry →</a>`);
@@ -424,7 +269,7 @@ function select(id){
   const img = $('cImg');
   if (p.image) { img.src = p.image.replace(/^http:/, 'https:') + '?width=640'; img.alt = p.name || ''; img.hidden = false; img.onerror = () => img.hidden = true; }
   else { img.hidden = true; img.removeAttribute('src'); }
-  $('controls').hidden = true; $('card').hidden = false;
+  $('controls').hidden = true; $('card').hidden = false; sheet.scrollTop = 0;
 }
 $('cClose').onclick = () => {
   if (selectedId != null) map.setFeatureState({ source:'b', id:selectedId }, { sel:false });

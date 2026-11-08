@@ -13,34 +13,68 @@ Live site: https://varmara.github.io/walk-through-time/
 ## How it works
 
 ```
+open data ──► pipeline/ (Python, numbered steps) ──► data/<city>.json ──► <city>/index.html (MapLibre)
+```
+
+| Step | What it does |
+|---|---|
+| `s00_fetch_osm` | Buildings, roads, water, parks and named places from OpenStreetMap |
+| `s00_fetch_heritage` | Listed buildings and scheduled monuments from Historic England |
+| `s01_buildings` | Building outlines and heights, the base map, named places matched to buildings |
+| `s02_listing` | Listed-building points matched to outlines |
+| `s03_wikidata` | Names, dates, architects, photos and Wikipedia links from Wikidata |
+| `s04_dates` | One year per building with its precision (exact, approximate, century) and source; keeps a second date where sources disagree |
+| `s05_curated` | Hand-written stories (`stories/<city>.py`) checked against Wikipedia and placed on buildings |
+| `s06_layers` | Every layer resolved to its buildings: story layers and rule layers (`pipeline/layers.py`) |
+| `s07_package` | Writes `data/<city>.json` and the data report `data/<city>-report.md` |
+
+A GitHub Actions workflow (`.github/workflows/build-data.yml`) runs the pipeline every Monday, whenever the
+pipeline, stories or city settings change, and on demand from the **Actions** tab, then commits the results.
+Downloads are kept in `work/` while it runs and are not committed.
+
+```
 cities/<id>.json          city settings: area (bounding box) and starting view
-scripts/build_city.py     fetches and joins the data for one city
-data/<id>.json            the prepared map data (written by GitHub Actions)
+stories/<id>.py           hand-written story layers for the city
 app/city.js, app/city.css the shared city page
 <id>/index.html           one page per city
 lib/                      MapLibre GL JS (BSD-3-Clause)
 ```
 
-A GitHub Actions workflow (`.github/workflows/build-data.yml`) runs every Monday, whenever the script or a city file changes, and on demand from the **Actions** tab. It fetches the sources, joins them and commits `data/<id>.json`. The page loads that file, so visitors don't wait for the source servers. If the file doesn't exist yet, the page fetches the sources live in the browser instead.
+### How a building's year is chosen
 
-### Sources and how a building's year is chosen
+- **Sources:** OpenStreetMap `start_date` on the building outline, and Wikidata inception (`P571`) of the item linked
+  to the building by its OpenStreetMap tag or its Historic England list entry (`P1216`).
+- **Precision:** *exact* (one year), *approximate* (circa, a decade, a short range) or *century*. Less precise dates
+  are drawn paler; buildings with no date are grey.
+- **Order of trust:** a more precise date wins. At equal precision OpenStreetMap wins, because its date is tagged on
+  the outline itself, while a Wikidata item can describe an older institution or site. Where the two disagree by more
+  than 25 years, the card shows both.
 
-- **Buildings, heights, roads, water, parks**: OpenStreetMap via the Overpass API
-- **Construction year**, in order of preference: an exact Wikidata date (`P571` inception), an exact OpenStreetMap `start_date`, then approximate dates from either. Approximate dates are drawn paler; buildings with no date are grey.
-- **Listed buildings**: Historic England National Heritage List for England. Wikidata items are also matched by list entry number (`P1216`).
-- **Historic basemap (optional)**: National Library of Scotland OS six-inch map, 1888–1913, via MapTiler. Needs a free MapTiler key, which is stored only in the visitor's browser.
+### Layers
+
+Story layers are hand-written and every story is checked against its Wikipedia article. Rule layers are built from
+open data: listed buildings by grade, buildings on scheduled monuments, and pubs. See [CONTRIBUTING.md](CONTRIBUTING.md)
+to add one.
 
 ## Adding a city
 
 1. Add `cities/<id>.json` with the city's bounding box and starting view.
-2. Copy `nottingham/index.html` to `<id>/index.html` and change `data-city` and the titles.
-3. Add the city to the list on the landing page `index.html`.
+2. Optionally add `stories/<id>.py` with story layers.
+3. Copy `nottingham/index.html` to `<id>/index.html` and change `data-city` and the titles.
+4. Add the city to the list on the landing page `index.html`.
 
 The workflow builds the new city's data on the next push.
+
+## Acknowledgements
+
+The pipeline structure, the checks on stories and the rule layers follow
+[Amsterdam, building by building](https://github.com/alexbarakov/amsterdam-by-building) by Alex Barakov (MIT),
+itself inspired by Sasha Bogachev's [Paris, building by building](https://paris.bogachev.fr).
 
 ## Data licences
 
 - OpenStreetMap data © OpenStreetMap contributors, [ODbL](https://www.openstreetmap.org/copyright). The prepared files in `data/` are derived from OpenStreetMap and are available under the same licence.
 - Historic England data, [Open Government Licence](https://historicengland.org.uk/terms/website-terms-conditions/open-data-hub/)
 - Wikidata, CC0
+- Wikipedia text, CC BY-SA; stories link to the articles they rest on
 - Historic maps reproduced with the permission of the [National Library of Scotland](https://maps.nls.uk/)
