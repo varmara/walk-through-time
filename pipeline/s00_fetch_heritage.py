@@ -5,6 +5,8 @@ work/<city>/conservation.json (conservation areas, from Historic England's natio
 from local planning authorities; "indicative, not definitive").
 Licence: Open Government Licence, © Historic England.
 """
+import re
+
 from .common import city, http, log, point_in_ring, save
 
 NHLE = ("https://services-eu1.arcgis.com/ZOdPfBS3aqqDYPUQ/arcgis/rest/services/"
@@ -79,7 +81,7 @@ def main(city_id):
                 date = _dt.datetime.fromtimestamp(date / 1000, _dt.timezone.utc).strftime("%Y")
             areas.append({"type": "Feature", "geometry": g, "properties": {
                 "t": "conservation", "name": (pr.get("NAME") or "Conservation area").strip(),
-                "designated": str(date)[:4] if date else None, "lpa": pr.get("LPA"), "source": "Historic England"}})
+                "designated": (re.search(r"(1[89]\d\d|20\d\d)", str(date)) or [None])[0] if date else None, "lpa": pr.get("LPA"), "source": "Historic England"}})
     except Exception as e:  # noqa: BLE001 - optional layer
         log(f"    failed, continuing without: {e}")
     save(city_id, "conservation", areas)
