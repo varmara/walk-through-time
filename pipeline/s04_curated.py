@@ -12,7 +12,8 @@ Historic England list entry ("he:1254566"), whose official description is checke
        at="name:..." or the entry's name, matching a building name or a named place inside one
        at="near:120"             the building nearest the article's coordinates within that many metres
                                  (for grounds and parks, whose coordinates fall on open space)
-     Entries that cannot be placed are dropped.
+     An entry that matches no building but whose article has coordinates becomes a pin on the map
+     (bridges, grounds, squares). Entries with neither are dropped.
   People layers (kind="people") pair a person's article (`source`) with a place's article (`place`).
      The facts must appear in the two articles together, the place's article decides the building, and
      the person's occupations on Wikidata (P106) decide the group: architects, writers, sport and so on.
@@ -210,8 +211,10 @@ def main(city_id):
                     key = norm(at[5:] if at.startswith("name:") else e["name"])
                     if key in names:
                         b, how = names[key], "name in OpenStreetMap"
-                if b is None:
-                    why = "could not place it on a building"
+                if b is None and a["coords"]:
+                    how = "pin at the article's coordinates (no building there: a bridge, a ground, a square)"
+                elif b is None:
+                    why = "could not place it on a building, and the article has no coordinates"
             if why:
                 dropped.append({"layer": L["id"], "name": e["name"], "why": why})
                 continue
@@ -220,6 +223,7 @@ def main(city_id):
                 group = "people-" + (e.get("group") or people_group(occ.get(src["qid"], [])) or "other")
             kept += 1
             entries.append({"layer": L["id"], "group": group, "b": b, "name": e["name"],
+                            **({"pin": list(a["coords"])} if b is None else {}),
                             "story": e["story"], "how": how,
                             "source": {"title": src["title"], "url": src["url"], "kind": src["kind"]},
                             **({"place": {"title": a["title"], "url": a["url"], "kind": a["kind"]}} if e.get("place") else {}),

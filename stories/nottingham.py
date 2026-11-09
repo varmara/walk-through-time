@@ -1,4 +1,4 @@
-"""Story layers for Nottingham city centre.
+"""Story layers for Nottingham: the centre and the suburbs either side of the Trent.
 
 Every entry rests on a Wikipedia article. `facts` are strings the article must contain; step s05 checks
 them and drops the entry if any is missing. Keep stories to one or two plain sentences, and claim
@@ -124,6 +124,76 @@ CURATED = [
             E("Nottingham Contemporary", "en:Nottingham Contemporary",
               "An art centre designed by Caruso St John and opened in 2009, its walls patterned with lace.",
               ("Caruso St John", "2009", "lace"), year="2009"),
+        ]),
+    dict(
+        id="wilford", title="Wilford",
+        intro="A village on the south bank of the Trent, reached for centuries by ferry and, since the 1870s, by bridge.",
+        entries=[
+            E("Wilford Toll Bridge", "en:Wilford Toll Bridge",
+              "Opened in 1870, replacing a ferry that had crossed here for some 400 years. Pedestrians paid a "
+              "halfpenny toll. It was closed to traffic in 1974.",
+              ("1870", "ferry", "400 years", "1974"), year="1870"),
+            E("Wilford Suspension Bridge", "en:Wilford Suspension Bridge",
+              "A footbridge built by the city's water department, mainly to carry water pipes across the Trent to "
+              "the reservoir on Wilford Hill. The engineer was Arthur Brown.",
+              ("Arthur Brown", "Wilford Hill reservoir", "water")),
+        ]),
+    dict(
+        id="bridgford", title="West Bridgford and Trent Bridge",
+        intro="South of the river: Test cricket, Nottingham Forest and the county's headquarters.",
+        entries=[
+            E("Trent Bridge cricket ground", "en:Trent Bridge",
+              "The first recorded match was played on ground behind the Trent Bridge Inn in 1838, and William Clarke "
+              "opened the ground in 1841. It hosted its first Test match, England against Australia, in 1899.",
+              ("1838", "Trent Bridge Inn", "William Clarke", "1841", "1899")),
+            E("County Hall", "en:County Hall, Nottinghamshire",
+              "Nottinghamshire County Council's headquarters, designed by Vincent Harris. Building paused during the "
+              "Second World War, and it was only completed in 1954.",
+              ("Vincent Harris", "Second World War", "1954")),
+        ]),
+    dict(
+        id="meadows", title="The Meadows and the river",
+        intro="The low ground between the city and the Trent, with two football grounds facing each other across the river.",
+        entries=[
+            E("Trent Bridge", "en:Trent Bridge (bridge)",
+              "The iron bridge was designed by Marriott Ogle Tarbotton and built between 1868 and 1871. A medieval "
+              "bridge of more than 20 stone arches, begun in 1156, crossed the river nearby.",
+              ("Tarbotton", "1156", "stone arches"), year="1868..1871"),
+            E("Meadow Lane", "en:Meadow Lane",
+              "Notts County moved here on 3 September 1910. Divided by the Trent, Meadow Lane and the City Ground are "
+              "the closest pair of football grounds in England.",
+              ("3 September 1910", "closest")),
+        ]),
+    dict(
+        id="clifton", title="Clifton",
+        intro="An old village above the Trent, and next to it one of the largest housing estates ever built by a council.",
+        entries=[
+            E("Clifton Hall", "en:Clifton, Nottingham",
+              "For 700 years the Clifton family owned the manor of Clifton, and Clifton Hall was their manor house.",
+              ("700 years", "Clifton Hall"), at="name:Clifton Hall"),
+            E("Clifton estate", "en:Clifton, Nottingham",
+              "Planned from 1950, the Clifton council estate was at one time the largest council estate in Europe. "
+              "Since the 1980s most of its houses have passed into private ownership.",
+              ("1950", "largest council estate in europe", "private ownership")),
+        ]),
+    dict(
+        id="sneinton", title="Sneinton",
+        intro="The hill east of the city: a windmill, cave dwellings, a market and the birthplace of the Salvation Army's founder.",
+        entries=[
+            E("Green's Windmill", "en:Green's Mill, Sneinton",
+              "A tower mill built shortly after 1807 by the baker George Green. It burned in 1947, was restored and "
+              "reopened in 1986, and is now part of a science centre.",
+              ("1807", "George Green", "1947", "1986"), year="c. 1807"),
+            E("St Stephen's Church", "en:St Stephen's Church, Sneinton",
+              "The present church was designed by Thomas Rickman and dates from 1837. It was extended between 1909 "
+              "and 1912 to designs by George Frederick Bodley.",
+              ("Thomas Rickman", "1837", "Bodley"), year="1837"),
+            E("Sneinton Market", "en:Sneinton",
+              "In the 1930s the city's wholesale fruit and vegetable market moved here from the Old Market Square.",
+              ("1930s", "wholesale fruit and vegetable market"), at="name:Sneinton Market"),
+            E("William Booth Birthplace Museum", "en:Sneinton",
+              "William Booth, founder of the Salvation Army, was born in this house on Notintone Place.",
+              ("William Booth Birthplace Museum", "Notintone Place"), at="name:William Booth Birthplace Museum"),
         ]),
     dict(
         id="people", title="People", kind="people",

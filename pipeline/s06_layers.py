@@ -9,6 +9,8 @@ Writes layers.json:
           kind: stories | people | rule (buildings) or areas (nature, drawn on the ground)
   member  {building index: [group keys]}
   stories {building index: [{layer, text, source, place?}]}
+  pins    [{x, y, name, layer, group, text, source?, place?}]  places that are not buildings (bridges,
+          grounds) and plaques not on a building; layer items refer to them as "p<index>"
 """
 from .common import building_at, load, log, save, work
 from .layers import LAYERS, Context
@@ -38,7 +40,12 @@ def main(city_id):
     ctx = Context(load(city_id, "buildings"), load(city_id, "listing"), load(city_id, "places"),
                   load(city_id, "monuments"))
     cur = load(city_id, "curated")
-    meta, member, stories = [], {}, {}
+    meta, member, stories, pins = [], {}, {}, []
+
+    def pin(x, y, name, layer_id, group, text, source=None, place=None):
+        pins.append({"x": round(x, 6), "y": round(y, 6), "name": name, "layer": layer_id, "group": group, "text": text,
+                     **({"source": source} if source else {}), **({"place": place} if place else {})})
+        return f"p{len(pins) - 1}"
 
     def add(i, group, layer_id, story=None, source=None, place=None):
         member.setdefault(str(i), [])
@@ -52,7 +59,10 @@ def main(city_id):
     for L in cur["layers"]:
         es = [e for e in cur["entries"] if e["layer"] == L["id"]]
         for e in es:
-            add(e["b"], e["group"], L["id"], e["story"], e["source"], e.get("place"))
+            if e["b"] is None:   # not a building: a pin
+                e["b"] = pin(*e["pin"], e["name"], L["id"], e["group"], e["story"], e["source"], e.get("place"))
+            else:
+                add(e["b"], e["group"], L["id"], e["story"], e["source"], e.get("place"))
         people = L.get("kind") == "people"
         groups = L.get("groups") or [[L["id"], L["title"]]]
         meta.append({"id": L["id"], "title": L["title"], "intro": L.get("intro", ""),
@@ -77,21 +87,23 @@ def main(city_id):
     titles = {k: t for k, t, _ in PEOPLE_GROUPS} | {"events": "Plaques to events and places"}
     pg = {g["key"]: g for g in people["groups"]}
 
-    def person(b, key, name, story, source):
+    def person(b, key, name, story, source, xy=None):
         k = "people-" + key
         if k not in pg:
             pg[k] = {"key": k, "title": titles.get(key, key), "count": 0, "items": []}
-        add(b, k, "people", story, source)
+        if b is None:   # a plaque on no building: a pin
+            b = pin(*xy, name, "people", k, story, source)
+        else:
+            add(b, k, "people", story, source)
         pg[k]["items"].append([b, name])
 
     plaques = load(city_id, "plaques") if work(city_id, "plaques").exists() else []
     placed, names = 0, {}
     for p in plaques:
         b = building_at(ctx.buildings, p["x"], p["y"], near=12)
-        if b is None:
-            continue
-        placed += 1
-        if p.get("address"):
+        if b is not None:
+            placed += 1
+        if b is not None and p.get("address"):
             names.setdefault(str(b), p["address"])
         kind = (p.get("type") or "person").lower()
         roles = [r.strip().lower() for r in (p.get("primary") or "").split(",") + (p.get("roles") or "").split(",") if r.strip()]
@@ -107,8 +119,8 @@ def main(city_id):
         url = f"https://openplaques.org/plaques/{p['id']}" if p.get("id") else "https://openplaques.org/"
         label = p.get("subject") or (text[:40] + "…" if len(text) > 40 else text) or "Plaque"
         person(b, key, label, story,
-               {"title": "Open Plaques", "url": url, "kind": "Open Plaques"})
-    log(f"s06 plaques: {placed}/{len(plaques)} placed on a building")
+               {"title": "Open Plaques", "url": url, "kind": "Open Plaques"}, xy=(p["x"], p["y"]))
+    log(f"s06 plaques: {placed}/{len(plaques)} placed on a building, the rest shown as pins")
 
     wd = load(city_id, "wikidata")
     told = {(int(i), s2["source"]["title"]) for i, ss in stories.items() for s2 in ss if s2.get("source")}
@@ -169,4 +181,18 @@ def main(city_id):
                  "groups": [g for g in groups if g["count"]]})
     log(f"s06 nature: {len(nature)} areas")
 
-    save(city_id, "layers", {"meta": meta, "member": member, "stories": stories, "names": names})
+    # conservation areas follow the nature areas in the packaged areas collection: items refer to them as a<index>
+    cons = load(city_id, "conservation") if work(city_id, "conservation").exists() else []
+    if cons:
+        meta.append({"id": "conservation", "title": "Conservation areas", "section": "Heritage", "kind": "areas",
+                     "intro": "Areas of special architectural or historic interest, where the council manages change "
+                              "to protect their character. The outlines are indicative; the council's own maps are "
+                              "definitive.",
+                     "source": {"title": "Historic England, conservation areas", "url": "https://historicengland.org.uk/listing/what-is-designation/local/conservation-areas/"},
+                     "groups": [{"key": "conservation", "title": "Conservation areas", "count": len(cons),
+                                 "items": sorted([[f["properties"]["name"], [f"a{len(nature) + j}"]] for j, f in enumerate(cons)],
+                                                key=lambda x: x[0].lower())}]})
+    log(f"s06 conservation areas: {len(cons)}")
+
+
+    save(city_id, "layers", {"meta": meta, "member": member, "stories": stories, "names": names, "pins": pins})

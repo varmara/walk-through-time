@@ -177,6 +177,7 @@ def rnd(coords):
 # ---------------------------------------------------------------- dates
 # Flags describe how precise a building's year is. The page draws less precise dates paler.
 EXACT, APPROX, CENTURY = "exact", "approx", "century"
+AREA = "area"   # not a date for the building: the build period most homes in its small area share (Council Tax)
 
 
 def parse_year(raw):

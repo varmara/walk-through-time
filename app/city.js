@@ -16,9 +16,9 @@ const ERAS = [
   [1980, 1999, '1980–99',     '#3a76b6'],
   [2000, 9999, '2000+',       '#6c5cc6'],
 ];
-const FADE = { exact: 0, approx: 0.4, century: 0.62 };   // how far each precision fades towards the background
+const FADE = { exact: 0, approx: 0.4, century: 0.62, area: 0.74 };   // how far each precision fades towards the background
 const SECTIONS = ['Stories', 'People', 'Heritage', 'Nature', 'Today'];
-const NATURE_TYPES = ['nnr', 'lnr', 'sssi', 'ancient', 'reserve'];
+const AREA_TYPES = ['nnr', 'lnr', 'sssi', 'ancient', 'reserve', 'conservation'];   // areas drawn on the ground
 
 const $ = id => document.getElementById(id);
 const store = { get(k){ try { return localStorage.getItem(k); } catch { return null; } },
@@ -69,11 +69,12 @@ function colourFor(p){
   return mix(eraOf(p.y)[3], tok('--bg'), FADE[p.f] || 0);
 }
 function ordinal(n){ const s = ['th','st','nd','rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
-function dateText(y, f){
+function dateText(y, f, per){
+  if (f === 'area') return 'probably ' + (per || y);
   if (f === 'century') return `${ordinal(Math.floor(y / 100) + 1)} century`;
   return (f === 'approx' ? 'c. ' : '') + y;
 }
-const PRECISION = { exact: 'exact year', approx: 'approximate', century: 'only the century is known' };
+const PRECISION = { exact: 'exact year', approx: 'approximate', century: 'only the century is known', area: 'estimate for the area' };
 
 // ================= State =================
 let city, data, features = [], selectedId = null, map, playing = null, stats;
@@ -93,14 +94,19 @@ async function main(){
   features = data.buildings.features;
   if (!features.length) throw new Error('no buildings in the map data');
   let known = 0;
-  features.forEach((f, i) => { f.id = i; if (f.properties.y != null) known++; f.properties.c = colourFor(f.properties); });
-  stats = { total: features.length, known };
+  let estimated = 0;
+  features.forEach((f, i) => {
+    f.id = i;
+    if (f.properties.y != null) f.properties.f === 'area' ? estimated++ : known++;
+    f.properties.c = colourFor(f.properties);
+  });
+  stats = { total: features.length, known, estimated };
 
   layers = (data.layers || []).map(L => ({ ...L, groups: (L.groups || []).map(g => Array.isArray(g) ? { key: g[0], title: g[1] } : g) }));
   layers.forEach(L => L.groups.forEach(g => groups.set(g.key, { ...g, layer: L })));
   layers.forEach(L => L.groups.forEach(g => (g.items || []).forEach(it => {
     const [name, bs] = typeof it[0] === 'number' ? [it[1], [it[0]]] : it;
-    if (bs.length > 1) bs.forEach(b => (entitiesAt[b] = entitiesAt[b] || []).some(x => x.name === name) || entitiesAt[b].push({ name, bs }));
+    if (bs.length > 1) bs.filter(b => typeof b === 'number').forEach(b => (entitiesAt[b] = entitiesAt[b] || []).some(x => x.name === name) || entitiesAt[b].push({ name, bs }));
   })));
   active = new Set([...active].filter(k => groups.has(k)));
   renderLayers();
@@ -133,7 +139,7 @@ function buildingColour(){
     ['boolean', ['feature-state', 'hl'], false], tok('--hl'),
     inLayer, ['case', ['has', 'y'], ['get', 'c'], tok('--marked')], tok('--ghost')];
 }
-const natureColour = () => ['match', ['get', 't'], ...NATURE_TYPES.flatMap(t => [t, tok('--n-' + t)]), tok('--n-reserve')];
+const natureColour = () => ['match', ['get', 't'], ...AREA_TYPES.flatMap(t => [t, tok('--n-' + t)]), tok('--n-reserve')];
 
 function drawMap(){
   return new Promise(resolve => {
@@ -174,6 +180,10 @@ function drawMap(){
         'fill-extrusion-height':['get', 'h'], 'fill-extrusion-base':0, 'fill-extrusion-opacity':0.95,
         'fill-extrusion-vertical-gradient':true } });
 
+      map.addSource('storypins', { type:'geojson', data: data.pins || { type:'FeatureCollection', features:[] } });
+      map.addLayer({ id:'storypins', type:'circle', source:'storypins', layout:{ visibility:'none' }, paint:{
+        'circle-radius':['interpolate', ['linear'], ['zoom'], 13, 4, 18, 9], 'circle-color':tok('--marked'),
+        'circle-stroke-color':'#fff', 'circle-stroke-width':2, 'circle-pitch-alignment':'map' } });
       map.addSource('places', { type:'geojson', data:{ type:'FeatureCollection', features:[] },
         cluster:true, clusterRadius:44, clusterMaxZoom:18 });
       // invisible layer: keeps the clustered source loaded so the HTML pins can read it
@@ -182,6 +192,9 @@ function drawMap(){
 
       map.on('click', e => {
         if (e.originalEvent && e.originalEvent.target.closest('.pin')) return;
+        const pinHit = map.getLayoutProperty('storypins', 'visibility') === 'visible'
+          && map.queryRenderedFeatures([[e.point.x - 8, e.point.y - 8], [e.point.x + 8, e.point.y + 8]], { layers:['storypins'] })[0];
+        if (pinHit) return showPin(pinHit.properties);
         const hit = map.queryRenderedFeatures(e.point, { layers:['b'] })[0];
         if (hit) return selectBuilding(hit.id);
         const area = map.getLayer('nature-fill') && map.getLayoutProperty('nature-fill', 'visibility') === 'visible'
@@ -225,7 +238,8 @@ function updateYear(){
   if (showUnknown) f.push(['!', ['has', 'y']]);
   map.setFilter('b', f);
   const shown = features.filter(x => x.properties.y != null ? x.properties.y <= Y : showUnknown).length;
-  $('count').textContent = `${fmt(shown)} of ${fmt(stats.total)} buildings · year known for ${Math.round(stats.known / stats.total * 100)}%`;
+  $('count').textContent = `${fmt(shown)} of ${fmt(stats.total)} buildings · year known for ${Math.round(stats.known / stats.total * 100)}%`
+    + (stats.estimated ? `, estimated for ${Math.round(stats.estimated / stats.total * 100)}%` : '');
 }
 yearIn.addEventListener('input', updateYear);
 
@@ -308,8 +322,8 @@ function renderLayers(){
   });
   $('lSections').querySelectorAll('[data-b]').forEach(btn => btn.onclick = e => {
     e.preventDefault();
-    const bs = btn.dataset.b.split(',').map(Number);
-    bs.length > 1 ? showPlaces(btn.dataset.name, bs) : selectBuilding(bs[0]);
+    const bs = btn.dataset.b.split(',').map(parseRef);
+    bs.length > 1 ? showPlaces(btn.dataset.name, bs) : openRef(bs[0]);
   });
   updateSummary();
 }
@@ -346,6 +360,9 @@ function applyLayers(){
   updateSummary();
   if (!map || !map.getLayer('b')) return;
   map.setPaintProperty('b', 'fill-extrusion-color', buildingColour());
+  const pinGroups = [...active].filter(k => !isArea(k));
+  map.setLayoutProperty('storypins', 'visibility', pinGroups.length ? 'visible' : 'none');
+  map.setFilter('storypins', ['in', ['get', 'group'], ['literal', pinGroups.length ? pinGroups : ['none']]]);
   const types = [...active].filter(isArea);
   const vis = types.length ? 'visible' : 'none';
   ['nature-fill', 'nature-line'].forEach(id => {
@@ -373,6 +390,7 @@ $('mtSave').onclick = () => {
 $('legend').innerHTML = ERAS.map(e => `<div><i style="background:${e[3]}"></i>${e[2]}</div>`).join('')
   + `<div><i style="background:var(--unknown)"></i>no date</div>`
   + `<div><i style="background:var(--marked)"></i>in a ticked layer, no date</div>`;
+$('legend').insertAdjacentHTML('afterend', '<p class="note">Palest of all: no date for the building, only the period most homes in its small area were built (Council Tax records).</p>');
 
 // ================= Cards =================
 const layerTitle = id => layers.find(L => L.id === id)?.title || id;
@@ -389,8 +407,10 @@ function selectBuilding(id){
   const rows = [];
   if (p.y != null) {
     const era = eraOf(p.y);
-    rows.push(['Built', `${esc(dateText(p.y, p.f))}<span class="pill" style="border-color:${era[3]}">${esc(era[2])}</span>`]);
-    rows.push(['Date', `${esc(PRECISION[p.f] || '')} · from ${esc(p.src)}`]);
+    rows.push(['Built', `${esc(dateText(p.y, p.f, p.per))}<span class="pill" style="border-color:${era[3]}">${esc(era[2])}</span>`]);
+    if (p.f === 'area') rows.push(['Date', `<span class="muted">No date for this building yet. ${esc(p.sh)}% of homes in its small `
+      + `area were built ${esc(p.per)}, according to Council Tax records (Valuation Office Agency).</span>`]);
+    else rows.push(['Date', `${esc(PRECISION[p.f] || '')} · from ${esc(p.src)}`]);
     const alts = p.alts || (p.alt ? [p.alt] : []);
     if (alts.length) rows.push(['Other dates', alts.map(a => `${esc(dateText(a.y, a.f))} <span class="muted">from ${esc(a.src)}</span>`).join('<br>')
       + '<div class="hint">Sources disagree. They may describe different moments, such as a founding and a rebuilding.</div>']);
@@ -408,7 +428,7 @@ function selectBuilding(id){
   const many = entitiesAt[id] || [];
   $('cStories').insertAdjacentHTML('beforeend', many.map(m =>
     `<button class="textbtn allplaces" data-name="${esc(m.name)}" data-b="${m.bs.join(',')}">All ${m.bs.length} places: ${esc(m.name)} →</button>`).join(''));
-  $('cStories').querySelectorAll('.allplaces').forEach(btn => btn.onclick = () => showPlaces(btn.dataset.name, btn.dataset.b.split(',').map(Number)));
+  $('cStories').querySelectorAll('.allplaces').forEach(btn => btn.onclick = () => showPlaces(btn.dataset.name, btn.dataset.b.split(',').map(parseRef)));
 
   const links = [];
   if (p.listUrl || p.listEntry) links.push(`<a href="${esc(p.listUrl || 'https://historicengland.org.uk/listing/the-list/list-entry/' + p.listEntry)}" target="_blank" rel="noopener">Historic England list entry →</a>`);
@@ -425,11 +445,55 @@ function selectBuilding(id){
 function showArea(p){
   const type = (groups.get(p.t) || {}).title || 'Nature area';
   $('cImg').hidden = true;
-  $('cFacts').innerHTML = `<dt>Type</dt><dd>${esc(type.replace(/s$/, ''))}</dd><dt>Source</dt><dd>${esc(p.source)}</dd>`;
-  $('cStories').innerHTML = '';
+  $('cFacts').innerHTML = `<dt>Type</dt><dd>${esc(type.replace(/s$/, ''))}</dd>`
+    + (p.designated ? `<dt>Designated</dt><dd>${esc(p.designated)}</dd>` : '')
+    + (p.lpa ? `<dt>Council</dt><dd>${esc(p.lpa)}</dd>` : '')
+    + `<dt>Source</dt><dd>${esc(p.source)}</dd>`;
+  $('cStories').innerHTML = p.t === 'conservation'
+    ? '<p class="src">The outline is indicative. The council\'s own conservation area maps are definitive.</p>' : '';
   $('cLinks').innerHTML = p.source === 'Natural England'
     ? '<a href="https://designatedsites.naturalengland.org.uk/" target="_blank" rel="noopener">Natural England designated sites →</a>'
+    : p.source === 'Historic England'
+    ? '<a href="https://historicengland.org.uk/listing/what-is-designation/local/conservation-areas/" target="_blank" rel="noopener">About conservation areas →</a>'
     : '<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>';
+  openSheet('card', p.name);
+}
+
+// ================= Place references =================
+// Layer items point at buildings (a number), pins ("p<index>": places that are not buildings, plaques on no
+// building) or areas ("a<index>": conservation and nature areas).
+const parseRef = x => typeof x === 'number' ? x : /^\d+$/.test(x) ? +x : x;
+const isB = r => typeof r === 'number';
+const pinOf = r => data.pins.features[+r.slice(1)];
+const areaOf = r => data.nature.features[+r.slice(1)];
+function ringsOf(g){ return g.type === 'Polygon' ? [g.coordinates[0]] : g.type === 'MultiPolygon' ? g.coordinates.map(p => p[0]) : []; }
+function refCentre(r){
+  if (isB(r)) return centreOf(r);
+  if (r[0] === 'p') return pinOf(r).geometry.coordinates;
+  const pts = ringsOf(areaOf(r).geometry).flat();
+  return [pts.reduce((a, c) => a + c[0], 0) / pts.length, pts.reduce((a, c) => a + c[1], 0) / pts.length];
+}
+function refName(r){
+  if (isB(r)) { const p = features[r].properties; return p.name || p.listName || 'Unnamed building'; }
+  return (r[0] === 'p' ? pinOf(r) : areaOf(r)).properties.name;
+}
+function openRef(r){
+  if (isB(r)) return selectBuilding(r);
+  if (r[0] === 'p') return showPin(pinOf(r).properties);
+  const f = areaOf(r), pts = ringsOf(f.geometry).flat();
+  if (!active.has(f.properties.t)) { active.add(f.properties.t); saveActive(); renderLayers(); applyLayers(); }
+  map.fitBounds([[Math.min(...pts.map(p => p[0])), Math.min(...pts.map(p => p[1]))], [Math.max(...pts.map(p => p[0])), Math.max(...pts.map(p => p[1]))]],
+    { padding: innerWidth >= 760 ? { top: 60, bottom: 60, left: 60, right: 420 } : { top: 80, left: 30, right: 70, bottom: innerHeight * 0.45 }, maxZoom: 17, duration: 800 });
+  showArea(f.properties);
+}
+function showPin(p){
+  const link = s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>`;
+  $('cImg').hidden = true;
+  $('cFacts').innerHTML = `<dt>Layer</dt><dd>${esc((groups.get(p.group) || {}).title || layerTitle(p.layer))}</dd>`;
+  const src = typeof p.source === 'string' ? JSON.parse(p.source) : p.source;
+  const place = typeof p.place === 'string' ? JSON.parse(p.place) : p.place;
+  $('cStories').innerHTML = `<div class="story"><p>${esc(p.text)}</p>${src ? `<p class="src">${esc(src.kind || 'Wikipedia')}: ${link(src)}${place ? ` · ${esc(place.kind || 'Wikipedia')}: ` + link(place) : ''}</p>` : ''}</div>`;
+  $('cLinks').innerHTML = '';
   openSheet('card', p.name);
 }
 
@@ -450,25 +514,30 @@ function showPlaces(name, bs){
   closeSheet();
   clearPlaces(false);
   places = { name, bs, i: 0 };
-  bs.forEach(b => map.setFeatureState({ source:'b', id:b }, { hl:true }));
+  bs.filter(isB).forEach(b => map.setFeatureState({ source:'b', id:b }, { hl:true }));
   map.setPaintProperty('b', 'fill-extrusion-color', buildingColour());
   map.getSource('places').setData({ type:'FeatureCollection', features: bs.map((b, i) =>
-    ({ type:'Feature', properties:{ n: i + 1 }, geometry:{ type:'Point', coordinates: centreOf(b) } })) });
+    ({ type:'Feature', properties:{ n: i + 1 }, geometry:{ type:'Point', coordinates: refCentre(b) } })) });
   $('pName').textContent = name;
   $('pCards').innerHTML = bs.map((b, i) => {
+    if (!isB(b)) {
+      const pp = (b[0] === 'p' ? pinOf(b) : areaOf(b)).properties;
+      return `<article class="pcard" data-i="${i}"><div class="pnum">${i + 1}</div><h3>${esc(refName(b))}</h3>
+        ${pp.text ? `<p>${esc(pp.text)}</p>` : ''}<button class="textbtn" data-open="${b}">Details →</button></article>`;
+    }
     const p = features[b].properties, st = storyFor(b, name), era = p.y != null ? eraOf(p.y) : null;
     return `<article class="pcard" data-i="${i}">
       <div class="pnum">${i + 1}</div>
-      <h3>${esc(p.name || p.listName || 'Unnamed building')}</h3>
-      ${p.y != null ? `<div class="pmeta">${esc(dateText(p.y, p.f))}<span class="pill" style="border-color:${era[3]}">${esc(era[2])}</span></div>` : ''}
+      <h3>${esc(refName(b))}</h3>
+      ${p.y != null ? `<div class="pmeta">${esc(dateText(p.y, p.f, p.per))}<span class="pill" style="border-color:${era[3]}">${esc(era[2])}</span></div>` : ''}
       ${st ? `<p>${esc(st.text)}</p>` : ''}
       <button class="textbtn" data-open="${b}">Details →</button></article>`;
   }).join('');
-  $('pCards').querySelectorAll('[data-open]').forEach(btn => btn.onclick = () => selectBuilding(+btn.dataset.open));
+  $('pCards').querySelectorAll('[data-open]').forEach(btn => btn.onclick = () => openRef(parseRef(btn.dataset.open)));
   $('placesbar').hidden = false; $('timebar').hidden = true;
   $('pCards').scrollLeft = 0;
   setPlace(0, false);
-  const pts = bs.map(centreOf), lons = pts.map(p => p[0]), lats = pts.map(p => p[1]);
+  const pts = bs.map(refCentre), lons = pts.map(p => p[0]), lats = pts.map(p => p[1]);
   map.fitBounds([[Math.min(...lons), Math.min(...lats)], [Math.max(...lons), Math.max(...lats)]],
     { padding: { top: 90, left: 40, right: 70, bottom: $('placesbar').offsetHeight + 40 }, maxZoom: 16.5, duration: 900 });
 }
@@ -477,11 +546,11 @@ function setPlace(i, fly = true){
   places.i = i;
   $('pCount').textContent = `${i + 1} of ${places.bs.length}`;
   if (selectedId != null) map.setFeatureState({ source:'b', id:selectedId }, { sel:false });
-  selectedId = places.bs[i];
-  map.setFeatureState({ source:'b', id:selectedId }, { sel:true });
+  selectedId = isB(places.bs[i]) ? places.bs[i] : null;
+  if (selectedId != null) map.setFeatureState({ source:'b', id:selectedId }, { sel:true });
   Object.entries(pins).forEach(([k, m]) => m.getElement().classList.toggle('on', k === 'p' + (i + 1)));
   $('pCards').querySelectorAll('.pcard').forEach(c => c.classList.toggle('on', +c.dataset.i === i));
-  if (fly) map.easeTo({ center: centreOf(places.bs[i]), zoom: Math.max(map.getZoom(), 16.5), duration: 700,
+  if (fly) map.easeTo({ center: refCentre(places.bs[i]), zoom: Math.max(map.getZoom(), 16.5), duration: 700,
     padding: { bottom: $('placesbar').offsetHeight + 20 } });
 }
 function goToCard(i){
@@ -502,7 +571,7 @@ $('pPrev').onclick = () => places && goToCard(Math.max(0, places.i - 1));
 $('pNext').onclick = () => places && goToCard(Math.min(places.bs.length - 1, places.i + 1));
 $('pClose').onclick = () => clearPlaces(true);
 function clearPlaces(showTime){
-  if (places) places.bs.forEach(b => map.setFeatureState({ source:'b', id:b }, { hl:false }));
+  if (places) places.bs.filter(isB).forEach(b => map.setFeatureState({ source:'b', id:b }, { hl:false }));
   if (selectedId != null) { map.setFeatureState({ source:'b', id:selectedId }, { sel:false }); selectedId = null; }
   places = null;
   if (map && map.getLayer('b')) map.setPaintProperty('b', 'fill-extrusion-color', buildingColour());

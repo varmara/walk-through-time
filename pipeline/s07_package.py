@@ -45,6 +45,7 @@ def main(city_id):
         p = {
             "name": t.get("name") or info.get("label") or fallback.get(k) or best.get("Name"),
             "y": d.get("y"), "f": d.get("f"), "src": d.get("src"), "alts": d.get("alts"),
+            "per": d.get("period"), "sh": d.get("share"),
             "h": b["h"], "levels": t.get("building:levels"), "osm": b["osm"],
             "kind": t.get("building") if t.get("building") != "yes" else None,
             "grade": best.get("Grade"), "listEntry": best.get("ListEntry"), "listName": best.get("Name"),
@@ -60,19 +61,24 @@ def main(city_id):
         feats.append({"type": "Feature", "properties": p, "geometry": geom})
 
     n = len(feats)
-    dated = [d for d in dates.values()]
+    dated = [d for d in dates.values() if d["f"] != "area"]
+    estimated = sum(1 for d in dates.values() if d["f"] == "area")
     stats = {
         "buildings": n, "dated": len(dated),
         "byPrecision": {f: sum(d["f"] == f for d in dated) for f in ("exact", "approx", "century")},
         "bySource": {s: sum(d["src"] == s for d in dated) for s in ("OpenStreetMap", "Wikipedia", "Wikidata")},
-        "conflicts": sum("alts" in d for d in dated),
+        "conflicts": sum("alts" in d for d in dated), "estimated": estimated,
         "listed": sum(1 for es in listing.values() if es),
         "stories": len(cur["entries"]), "storiesDropped": len(cur["dropped"]),
     }
     fc = lambda f: {"type": "FeatureCollection", "features": f}  # noqa: E731
     built = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     nature = load(city_id, "nature") if work(city_id, "nature").exists() else []
-    out = {"city": city_id, "built": built, "stats": stats, "layers": lay["meta"], "nature": fc(nature),
+    # areas drawn on the ground (nature and conservation areas) travel together; "t" says which kind
+    nature += load(city_id, "conservation") if work(city_id, "conservation").exists() else []
+    pins = [{"type": "Feature", "properties": {"i": k, **{kk: v for kk, v in pn.items() if kk not in ("x", "y")}},
+             "geometry": {"type": "Point", "coordinates": [pn["x"], pn["y"]]}} for k, pn in enumerate(lay.get("pins", []))]
+    out = {"city": city_id, "built": built, "stats": stats, "layers": lay["meta"], "nature": fc(nature), "pins": fc(pins),
            "buildings": fc(feats), "roads": fc(base["roads"]), "water": fc(base["water"]), "parks": fc(base["parks"])}
     Path("data").mkdir(exist_ok=True)
     Path(f"data/{city_id}.json").write_text(json.dumps(out, separators=(",", ":"), ensure_ascii=False))
@@ -87,6 +93,7 @@ def main(city_id):
         *[f"| precision: {f} | {c:,} | {pct(c)} |" for f, c in stats["byPrecision"].items()],
         *[f"| source: {s} | {c:,} | {pct(c)} |" for s, c in stats["bySource"].items()],
         f"| sources disagree (all dates shown) | {stats['conflicts']:,} | {pct(stats['conflicts'])} |",
+        f"| no date, area estimate from Council Tax | {estimated:,} | {pct(estimated)} |",
         "", "## Layers", "", "| Section | Layer | Group | Count |", "|---|---|---|---:|",
         *[f"| {L['section']} | {L['title']} | {g['title']} | {g['count']:,} |" for L in lay["meta"] for g in L["groups"]],
         "", "## Stories dropped by the checks", "",
