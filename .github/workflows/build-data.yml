@@ -31,8 +31,11 @@ jobs:
     env:
       # Scheduled runs and "refresh" runs download everything again; others reuse the saved download.
       REFRESH: ${{ github.event_name == 'schedule' || inputs.refresh == true }}
+      WTT_CACHE: ${{ github.workspace }}/cache    # saved answers from web services (pipeline/common.py)
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 50      # to see which files a push changed
 
       - uses: actions/setup-python@v5
         with:
@@ -52,6 +55,39 @@ jobs:
           else
             echo "No saved download yet; the pipeline will fetch one."
           fi
+
+      # Saved answers from web services, and the last build's intermediate files (work/), from earlier builds.
+      # Scheduled and "refresh" builds start without them, so they fetch and compute everything afresh.
+      # (GitHub drops a cache that no build has used for 7 days; the next build then simply fetches again.)
+      - name: Restore saved web answers
+        if: env.REFRESH != 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: cache
+          key: web-${{ github.run_id }}
+          restore-keys: web-
+
+      - name: Restore the last build's work files
+        id: work
+        if: env.REFRESH != 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: work
+          key: work-${{ github.run_id }}
+          restore-keys: work-
+
+      # Start at the earliest step whose code changed (stories: the stories step), when the last build's work
+      # files are here; otherwise run everything (pipeline/plan.py).
+      - name: Choose where to start
+        id: plan
+        run: |
+          start=all
+          if [ "${{ github.event_name }}" = push ] && [ -n "${{ steps.work.outputs.cache-matched-key }}" ] \
+             && git cat-file -e "${{ github.event.before }}^{commit}" 2>/dev/null; then
+            start=$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" | python -m pipeline.plan)
+          fi
+          echo "Starting at: $start"
+          echo "start=$start" >> "$GITHUB_OUTPUT"
 
       # tippecanoe turns the buildings into vector tiles (step s10_tiles); built once, then kept in the cache
       - name: Restore tippecanoe
@@ -74,11 +110,26 @@ jobs:
           TIPPECANOE: /home/runner/tippecanoe/tippecanoe
         run: |
           cities=$(ls cities/*.json | xargs -n1 basename | sed 's/\.json$//')
+          start="${{ steps.plan.outputs.start }}"
           if [ "$REFRESH" = "true" ]; then
             python -m pipeline.run $cities
+          elif [ "$start" != all ]; then
+            python -m pipeline.run $cities --from "$start" --reuse-downloads
           else
             python -m pipeline.run $cities --reuse-downloads
           fi
+
+      - name: Save web answers for the next build
+        uses: actions/cache/save@v4
+        with:
+          path: cache
+          key: web-${{ github.run_id }}
+
+      - name: Save work files for the next build
+        uses: actions/cache/save@v4
+        with:
+          path: work
+          key: work-${{ github.run_id }}
 
       - name: Commit updated data
         run: |

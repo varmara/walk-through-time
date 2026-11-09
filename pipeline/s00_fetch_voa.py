@@ -16,7 +16,7 @@ import time
 import urllib.request
 import zipfile
 
-from .common import UA, city, http, log, point_in_ring, save
+from .common import UA, cached, city, http, keep, log, point_in_ring, save
 
 CTSOP = "https://assets.publishing.service.gov.uk/media/648affc9b32b9e0012a96867/CTSOP4_1_2020-2023_03_31.zip"
 LSOA = ("https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/"
@@ -79,7 +79,8 @@ def main(city_id):
 
     try:
         req = urllib.request.Request(CTSOP, headers={"User-Agent": UA})
-        for attempt in range(3):
+        raw = cached("zip", CTSOP)
+        for attempt in range(0 if raw else 3):
             try:
                 with urllib.request.urlopen(req, timeout=300) as r:
                     raw = r.read()
@@ -89,6 +90,7 @@ def main(city_id):
                     raise
                 log(f"    CTSOP download: {e}; retrying")
                 time.sleep(15)
+        keep("zip", CTSOP, None, raw)
         z = zipfile.ZipFile(io.BytesIO(raw))
         names = [n for n in z.namelist() if n.lower().endswith(".csv")]
         name = max(names, key=lambda n: max([int(y) for y in re.findall(r"(?<!\d)(20\d\d)(?!\d)", n)] or [0]))

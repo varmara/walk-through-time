@@ -43,7 +43,11 @@ A GitHub Actions workflow (`.github/workflows/build-data.yml`) runs the pipeline
 Downloading OpenStreetMap takes most of an hour, so the last download is kept, compressed, on the `downloads` branch.
 Runs triggered by a change reuse it, as long as the city's area and the download query are unchanged, and finish in a
 few minutes. The twice-yearly runs, and manual runs with **refresh** ticked, download everything again and replace it.
-Historic England, Wikidata and Wikipedia are fetched on every run; they take a minute or two.
+Answers from the other web services (Wikipedia, Wikidata, Commons, Historic England, Natural England, Council Tax)
+are saved too, in the Actions cache, and a build triggered by a change reuses them, asking only for what is new.
+It also starts at the earliest step whose code changed (a story change starts at `s04_curated`), reusing the last
+build's intermediate files (`pipeline/plan.py`). Changes to `common.py`, `run.py`, the workflow or a city's settings
+run every step. The twice-yearly and **refresh** runs start from nothing.
 
 ```
 cities/<id>.json          city settings: area (polygon and bounding box) and starting view
