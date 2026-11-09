@@ -5,7 +5,8 @@ JavaScript, so the map itself cannot describe a building. Each page carries the 
 and its photo (or the site's picture) and sends a visitor straight on to the map at that building
 (<city>/?b=<index>&osm=way/123). Pages are keyed by OpenStreetMap id, which stays the same between data builds.
 
-Writes data/share/<city>/<type>-<id>.html (the folder is rebuilt each time, so removed buildings disappear).
+Writes data/share/<city>/<type>-<id>.html (the folder is rebuilt each time, so removed buildings disappear;
+a shared link keeps working, as the page is keyed by OpenStreetMap id).
 """
 import html
 import json
