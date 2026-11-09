@@ -56,7 +56,7 @@ def main(city_id):
         p = {
             "name": name or best.get("Name"), "today": today,
             "y": d.get("y"), "f": d.get("f"), "src": d.get("src"), "alts": d.get("alts"),
-            "per": d.get("period"), "sh": d.get("share"),
+            "per": d.get("period"), "sh": d.get("share"), "dt": d.get("text"),
             "h": b["h"], "base": b.get("base"), "levels": t.get("building:levels"), "osm": b["osm"],
             "kind": t.get("building") if t.get("building") != "yes" else None,
             "grade": best.get("Grade"), "listEntry": best.get("ListEntry"), "listName": best.get("Name"),

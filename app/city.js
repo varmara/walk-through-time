@@ -69,7 +69,8 @@ function colourFor(p){
   return mix(eraOf(p.y)[3], tok('--bg'), FADE[p.f] || 0);
 }
 function ordinal(n){ const s = ['th','st','nd','rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
-function dateText(y, f, per){
+function dateText(y, f, per, dt){
+  if (dt) return dt.charAt(0).toUpperCase() + dt.slice(1);    // as the listing words it: "Late 14th century"
   if (f === 'area') return 'probably ' + (per || y);
   if (f === 'century') return `${ordinal(Math.floor(y / 100) + 1)} century`;
   return (f === 'approx' ? 'c. ' : '') + y;
@@ -449,12 +450,12 @@ function selectBuilding(id){
   if (p.today) rows.push(['Today', esc(p.today)]);    // the current occupier; the title is what the building was
   if (p.y != null) {
     const era = eraOf(p.y);
-    rows.push(['Built', `${esc(dateText(p.y, p.f, p.per))}<span class="pill" style="border-color:${era[3]}">${esc(era[2])}</span>`]);
+    rows.push(['Built', `${esc(dateText(p.y, p.f, p.per, p.dt))}<span class="pill" style="border-color:${era[3]}">${esc(era[2])}</span>`]);
     if (p.f === 'area') rows.push(['Date', `<span class="muted">No date for this building yet. ${esc(p.sh)}% of homes in its small `
       + `area were built ${esc(p.per)}, according to Council Tax records (Valuation Office Agency).</span>`]);
     else rows.push(['Date', `${esc(PRECISION[p.f] || '')} · from ${esc(p.src)}`]);
     const alts = p.alts || (p.alt ? [p.alt] : []);
-    if (alts.length) rows.push(['Other dates', alts.map(a => `${esc(dateText(a.y, a.f))} <span class="muted">from ${esc(a.src)}</span>`).join('<br>')
+    if (alts.length) rows.push(['Other dates', alts.map(a => `${esc(dateText(a.y, a.f, null, a.text))} <span class="muted">from ${esc(a.src)}</span>`).join('<br>')
       + '<div class="hint">Sources disagree. They may describe different moments, such as a founding and a rebuilding.</div>']);
   } else rows.push(['Built', '<span class="muted">not in open data yet</span>']);
   if (p.architect) rows.push(['Architect', esc(p.architect)]);
@@ -598,7 +599,7 @@ function showPlaces(name, bs){
     return `<article class="pcard" data-i="${i}">
       <div class="pnum">${i + 1}</div>
       <h3>${esc(refName(b))}</h3>
-      ${p.y != null ? `<div class="pmeta">${esc(dateText(p.y, p.f, p.per))}<span class="pill" style="border-color:${era[3]}">${esc(era[2])}</span></div>` : ''}
+      ${p.y != null ? `<div class="pmeta">${esc(dateText(p.y, p.f, p.per, p.dt))}<span class="pill" style="border-color:${era[3]}">${esc(era[2])}</span></div>` : ''}
       ${st ? `<p>${esc(st.text)}</p>` : ''}
       <button class="textbtn" data-open="${b}">Details →</button></article>`;
   }).join('');

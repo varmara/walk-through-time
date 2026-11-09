@@ -3,6 +3,8 @@
 Candidates:
   OpenStreetMap  start_date (or building:start_date, construction_date) tagged on the outline itself
   Wikipedia      a `year` given in a story (stories/<city>.py); the year must appear in the article (step s04)
+  Historic England  the date in the building's list entry, as Wikipedia's lists of listed buildings give it
+                 (step s02_listing_dates): "Late 14th century", "c. 1720", "1736"
   Wikidata       inception (P571) of the item linked to the building
 
 Flags (see common.parse_year): exact (a single year), approx (circa, a decade, a short range),
@@ -49,7 +51,15 @@ def footprint_m2(ring):
 def is_home(b):
     kind = b["tags"].get("building")
     return kind in HOMES or (kind == "yes" and 25 <= footprint_m2(b["rings"][0]) <= 220)
-ORDER = {"OpenStreetMap": 0, "Wikipedia": 1, "Wikidata": 2}
+LISTING = "Historic England (via Wikipedia)"
+ORDER = {"OpenStreetMap": 0, LISTING: 1, "Wikipedia": 2, "Wikidata": 3}
+
+
+def listing_year(text):
+    """A list's date -> (year, flag): '1890–92' is a short range; '1736 and 1868' is the first build."""
+    from .common import parse_year
+    t = re.sub(r"\b(\d{2})(\d{2})\s*[–-]\s*(\d{2})\b(?!\d)", lambda m: f"{m[1]}{m[2]}–{m[1]}{m[3]}", text)
+    return parse_year(t)
 
 
 def span(y, f):
@@ -112,6 +122,7 @@ def main(city_id):
         if e.get("year") and e["b"] is not None:
             story_years.setdefault(e["b"], []).append({"y": e["year"][0], "f": e["year"][1], "src": "Wikipedia"})
 
+    listdates = load(city_id, "listdates") if work(city_id, "listdates").exists() else {}
     voa = load(city_id, "voa") if work(city_id, "voa").exists() else []
     for a in voa:
         a["bb"] = [bbox(r) for r in a["rings"]]
@@ -137,6 +148,12 @@ def main(city_id):
                          or t.get("year_of_construction"))
         if osm:
             cands.append({"y": osm[0], "f": osm[1], "src": "OpenStreetMap"})
+        for e in listing.get(str(i), []):
+            ld = listdates.get(str(e["ListEntry"]))
+            got = listing_year(ld["text"]) if ld else None
+            if got:
+                cands.append({"y": got[0], "f": got[1], "src": LISTING, "text": ld["text"]})
+                break
         cands += story_years.get(i, [])
         w = wikidata_year(info_for(b, i, wd, listing))
         if w:
