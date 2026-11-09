@@ -26,17 +26,20 @@ button,input{font:inherit;color:inherit}
 a{color:var(--accent)}
 
 #graph{position:fixed;inset:0;touch-action:none}
-#graph .edge{stroke:var(--edge);stroke-width:1}
+#graph .edge{stroke:var(--edge);stroke-width:1;vector-effect:non-scaling-stroke}
 #graph .edge.mention{stroke-dasharray:3 3}
 #graph .node{cursor:pointer}
-#graph .node .shape{stroke:var(--bg);stroke-width:1.5}
-#graph .node text{font:12px var(--sans);fill:var(--ink);paint-order:stroke;stroke:var(--bg);stroke-width:3px;pointer-events:none}
+#graph .node .shape{stroke:var(--bg);stroke-width:1.5;vector-effect:non-scaling-stroke}
+#graph .node .hit{fill:transparent;stroke:none}
+#graph g{font-family:var(--sans)}
+#graph .node text{fill:var(--ink);paint-order:stroke;stroke:var(--bg);stroke-linejoin:round;pointer-events:none}
 #graph .node.place text{fill:var(--muted)}
 #graph.focus .edge{opacity:.12}
-#graph.focus .edge.on{opacity:1;stroke:var(--ink);stroke-width:1.6}
+#graph.focus .edge.on{opacity:1;stroke:var(--ink);stroke-width:1.8}
 #graph.focus .node{opacity:.18}
 #graph.focus .node.on{opacity:1}
 #graph .node.sel .shape{stroke:var(--ink);stroke-width:2.5}
+#graph .node.sel text{font-weight:600}
 
 .top{position:fixed;top:0;left:0;right:0;z-index:5;padding:calc(env(safe-area-inset-top,0px) + 10px) 12px 8px;
   display:flex;flex-direction:column;gap:8px;pointer-events:none}

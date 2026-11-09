@@ -39,7 +39,13 @@ function init(data){
   const root = svg.append('g');
   G.edgeG = root.append('g');
   G.nodeG = root.append('g');
-  const zoom = d3.zoom().scaleExtent([0.2, 6]).on('zoom', e => { root.attr('transform', e.transform); zoomK = e.transform.k; labels(); });
+  // Zooming moves the drawing but keeps text, lines and points about the same size on screen (as in Obsidian),
+  // so zooming in spreads points apart instead of blowing up the labels. Labels are updated once per frame.
+  let frame = 0;
+  const zoom = d3.zoom().scaleExtent([0.2, 8]).clickDistance(6).on('zoom', e => {
+    root.attr('transform', e.transform); zoomK = e.transform.k;
+    if (!frame) frame = requestAnimationFrame(() => { frame = 0; sizes(); labels(); });
+  });
   svg.call(zoom);
   svg.on('click', e => { if (e.target === svg.node()) select(null); });
   G.zoomTo = (x, y) => svg.transition().duration(600).call(zoom.transform,
@@ -93,22 +99,33 @@ function draw(){
       else if (d.type === 'theme') s.append('path').attr('class', 'shape').attr('d', `M0,${-r * 1.3}L${r * 1.3},0L0,${r * 1.3}L${-r * 1.3},0Z`);
       else s.append('circle').attr('class', 'shape').attr('r', r);
       s.select('.shape').attr('fill', colour(d.type));
-      s.append('text').attr('x', r + 4).attr('y', 4).text(d.label);
+      s.append('circle').attr('class', 'hit').attr('r', Math.max(14, r + 6));   // a bigger target for fingers
+      s.append('text').attr('y', 4).text(d.label);
     });
     g.on('click', (e, d) => { e.stopPropagation(); select(d.id); });
-    g.call(d3.drag()
-      .on('start', (e, d) => { if (!e.active) sim.alphaTarget(0.2).restart(); d.fx = d.x; d.fy = d.y; })
+    g.call(d3.drag().clickDistance(6)
+      .on('start', (e, d) => { if (!e.active) sim.alphaTarget(0.06).restart(); d.fx = d.x; d.fy = d.y; })
       .on('drag', (e, d) => { d.fx = e.x; d.fy = e.y; })
       .on('end', (e, d) => { if (!e.active) sim.alphaTarget(0); d.fx = d.fy = null; }));
     return g;
   });
   sim.nodes(ns); sim.force('link').links(ls); sim.alpha(0.8).restart();
-  highlight(); labels();
+  sizes(); highlight(); labels();
 }
 
 function tick(){
   G.edges.attr('x1', l => l.source.x).attr('y1', l => l.source.y).attr('x2', l => l.target.x).attr('y2', l => l.target.y);
   G.nodesSel.attr('transform', d => `translate(${d.x},${d.y})`);
+}
+
+// Screen-constant sizes: text stays 12 px and points grow only slightly as you zoom in.
+function sizes(){
+  if (!G.nodesSel) return;
+  const k = zoomK, shape = Math.pow(k, -0.8);
+  G.nodeG.style('font-size', (12 / k) + 'px').style('stroke-width', (3 / k) + 'px');
+  G.nodesSel.select('.shape').attr('transform', `scale(${shape})`);
+  G.nodesSel.select('.hit').attr('transform', `scale(${1 / k})`);
+  G.nodesSel.select('text').attr('x', d => radius(d) * shape + 4 / k).attr('y', 4 / k);
 }
 
 // Labels: story themes and well-linked points always; the rest once zoomed in, or when next to the selection.
