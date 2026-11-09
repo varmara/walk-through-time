@@ -502,7 +502,7 @@ function selectBuilding(id){
   $('cArch').innerHTML = arch.length ? '<h3>Old photographs</h3><div class="strip">' + arch.map(f => {
     const src = 'https://commons.wikimedia.org/wiki/Special:FilePath/' + encodeURIComponent(f.file.replace(/ /g, '_')) + '?width=320';
     return `<a class="shot" href="${esc(filePage(f.file))}" target="_blank" rel="noopener" title="${esc(f.file)}">
-      <img loading="lazy" src="${esc(src)}" alt="${esc(f.file.replace(/\.\w+$/, ''))}" onerror="this.parentNode.remove()">
+      <img loading="lazy" src="${esc(src)}" alt="${esc(f.file.replace(/\.\w+$/, ''))}" onerror="const a=this.closest('#cArch');this.parentNode.remove();if(a&&!a.querySelector('.shot'))a.hidden=true">
       <span><b>${esc(f.year)}</b>${credit(f) ? ' · ' + credit(f) : ''}</span></a>`;
   }).join('') + '</div>' : '';
   openSheet('card', p.name || p.listName || 'Unnamed building');
