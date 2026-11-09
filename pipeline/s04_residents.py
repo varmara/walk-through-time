@@ -28,6 +28,8 @@ VERBS = re.compile(r"\b(lived|lives|living|born|died|home|house|resided|residenc
                    r"rented|bought|stayed|settled|workshop|studio|practice|shop|premises|address)\b", re.I)
 TYPES = (r"Street|Road|Gate|Lane|Place|Terrace|Square|Row|Avenue|Drive|Crescent|Walk|Hill|Grove|Park|Close|Way|"
          r"Pavement|Parade|Rise|Mount|Yard|Court|Gardens|Boulevard|Embankment|Side")
+NOT_PLACES = {"england", "nottinghamshire", "uk", "united kingdom", "and", "where", "which", "in", "the", "he", "she",
+              "they", "his", "her", "until", "before", "after", "from", "with", "near", "on", "at"}
 ADDRESS = re.compile(r"\b(\d{1,3})[a-z]?(?:\s*(?:-|–|and|&)\s*\d{1,3}[a-z]?)?,?\s+((?:St\.?\s|[A-Z][a-z'’]+\s){0,3}(?:" + TYPES + r"))\b")
 
 
@@ -136,6 +138,9 @@ def main(city_id):
             for m in ADDRESS.finditer(s):
                 num, street = m[1], m[2].replace("St. ", "St ").strip()
                 key = (num.lower(), street.lower())
+                after = re.match(r",?\s+([A-Z][a-z]+(?:\s[A-Z][a-z]+)?)", s[m.end():])
+                if after and after[1].lower() not in cfg["words"] and after[1].lower() not in NOT_PLACES:
+                    continue       # "6 Lilac Grove, Beeston": the same street name in another town
                 b = addr.get(key)
                 if b is None and street.lower().startswith("st "):
                     b = addr.get((num.lower(), "saint " + street.lower()[3:]))

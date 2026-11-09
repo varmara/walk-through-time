@@ -1,4 +1,4 @@
-"""Names, dates, architects, photos and Wikipedia links from Wikidata.
+"""Names, dates, architects, photos, Commons categories and Wikipedia links from Wikidata.
 
 Items are found two ways: the building's OpenStreetMap `wikidata` tag, and the Historic England
 list entry number (Wikidata property P1216). Writes wikidata.json: {"Q123": info, "nhle:1234567": info}.
@@ -13,6 +13,7 @@ WDQS = "https://query.wikidata.org/sparql"
 FIELDS = """
   OPTIONAL { ?item p:P571/psv:P571 ?iv . ?iv wikibase:timeValue ?inception ; wikibase:timePrecision ?prec . }
   OPTIONAL { ?item wdt:P18 ?image }
+  OPTIONAL { ?item wdt:P373 ?commonscat }
   OPTIONAL { ?article schema:about ?item ; schema:isPartOf <https://en.wikipedia.org/> }
   OPTIONAL { ?item wdt:P84 ?architect . ?architect rdfs:label ?architectLabel . FILTER(LANG(?architectLabel) = "en")
              OPTIONAL { ?architectArticle schema:about ?architect ; schema:isPartOf <https://en.wikipedia.org/> } }
@@ -38,6 +39,7 @@ def main(city_id):
                 "qid": r["item"]["value"].rsplit("/", 1)[-1],
                 "label": prev.get("label") or r.get("label", {}).get("value"),
                 "image": prev.get("image") or r.get("image", {}).get("value"),
+                "commonscat": prev.get("commonscat") or r.get("commonscat", {}).get("value"),
                 "article": prev.get("article") or r.get("article", {}).get("value"),
                 "architect": prev.get("architect") or r.get("architectLabel", {}).get("value"),
                 "architectQid": prev.get("architectQid") or (r["architect"]["value"].rsplit("/", 1)[-1] if "architect" in r else None),
@@ -52,13 +54,13 @@ def main(city_id):
     try:
         for i in range(0, len(qids), 200):
             c = qids[i:i + 200]
-            take(sparql(f"SELECT ?item ?inception ?prec ?image ?article ?architect ?architectLabel ?architectArticle ?label WHERE {{ "
+            take(sparql(f"SELECT ?item ?inception ?prec ?image ?commonscat ?article ?architect ?architectLabel ?architectArticle ?label WHERE {{ "
                         f"VALUES ?item {{ {' '.join('wd:' + q for q in c)} }} {FIELDS} }}"),
                  lambda r: r["item"]["value"].rsplit("/", 1)[-1])
             time.sleep(1)
         for i in range(0, len(nhle), 200):
             c = nhle[i:i + 200]
-            take(sparql(f"SELECT ?item ?nhle ?inception ?prec ?image ?article ?architect ?architectLabel ?architectArticle ?label WHERE {{ "
+            take(sparql(f"SELECT ?item ?nhle ?inception ?prec ?image ?commonscat ?article ?architect ?architectLabel ?architectArticle ?label WHERE {{ "
                         f"VALUES ?nhle {{ {' '.join(chr(34) + n + chr(34) for n in c)} }} ?item wdt:P1216 ?nhle . {FIELDS} }}"),
                  lambda r: "nhle:" + r["nhle"]["value"])
             time.sleep(1)

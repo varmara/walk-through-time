@@ -9,6 +9,8 @@ England ("… - geograph.org.uk - 1234567.jpg"), and old photographs and postcar
    an old photograph: per building up to SIX, one per decade, not older than the building itself (an older
    picture shows whatever stood there before). The newest other file is the building's current photo, used
    only where Wikidata has none.
+4. Buildings with a Commons category on Wikidata: files there (and in its history or old-picture subcategories)
+   whose title suggests an old picture are added too, as the category already says what they show.
 The app shows files from Commons with their author and licence, and links to each file's page.
 
 Writes work/<city>/photos.json: {building index: {"photo": file, "archive": [file, ...]}},
@@ -49,6 +51,29 @@ def geosearch(lat, lon, radius, out, depth=0):
         for a in (-1, 1):
             for b in (-1, 1):
                 geosearch(lat + a * d_lat, lon + b * d_lon, radius // 2 + 20, out, depth + 1)
+
+
+STREETISH = re.compile(r" (street|road|gate|lane|place|terrace|square|row|avenue|drive|crescent|walk|hill|grove|close|way|"
+                       r"boulevard|yard|court|gardens|embankment|bay|park|estate) $")
+NOT_BUILDING = re.compile(r" (close up|performing|concert|gig|choir|band|team|match|crowd|protest|parade|interior detail) ")
+OLD_HINT = re.compile(r"(1[89]\d\d|19[0-6]\d)|postcard|photochrom|old |historic|victorian|edwardian|archive|lantern slide", re.I)
+OLD_CAT = re.compile(r"histor|old |postcard|in the 1[89]th century|in the 1[89]\d0s|in the 19[0-6]0s|before 19|archive|photochrom", re.I)
+
+
+def category_files(cat, depth=0):
+    """Files in a Commons category, and in its subcategories about history or old pictures (one level down)."""
+    files, cont = [], {}
+    while True:
+        r = http(API, params={"action": "query", "list": "categorymembers", "cmtitle": "Category:" + cat,
+                              "cmtype": "file|subcat", "cmlimit": "500", "format": "json", **cont})
+        for m in r.get("query", {}).get("categorymembers", []):
+            if m["ns"] == 6:
+                files.append(m["title"])
+            elif m["ns"] == 14 and depth == 0 and OLD_CAT.search(m["title"]):
+                files += category_files(m["title"][9:], 1)
+        if "continue" not in r or len(files) > 3000:
+            return files
+        cont = {"cmcontinue": r["continue"]["cmcontinue"]}
 
 
 def metadata(titles):
@@ -100,6 +125,7 @@ def main(city_id):
     from .s05_dates import info_for
     dates = load(city_id, "dates")
     # what each building can be recognised by in a file title
+    streets = {norm(b["tags"]["addr:street"]).strip() for b in buildings if b["tags"].get("addr:street")}
     keys = []      # (phrase, building index)
     for i, bl in enumerate(buildings):
         t = bl["tags"]
@@ -110,7 +136,8 @@ def main(city_id):
             if not n:
                 continue
             k = norm(re.sub(r",?\s*nottingham$", "", n, flags=re.I)).strip()
-            if len(k) >= 6 and k not in GENERIC and (" " in k or len(k) >= 9):
+            if (len(k) >= 6 and k not in GENERIC and (" " in k or len(k) >= 9) and k not in streets
+                    and not STREETISH.search(f" {k} ")):    # a street's or district's name is not a building's
                 keys.append((f" {k} ", i))
         if t.get("addr:housenumber") and t.get("addr:street"):
             keys.append((norm(f"{t['addr:housenumber']} {t['addr:street']}"), i))
@@ -122,6 +149,8 @@ def main(city_id):
     matches = {}
     for title, (x, y) in files.items():
         nt = norm(title[5:])
+        if NOT_BUILDING.search(nt):
+            continue
         cand = set()
         for w in set(nt.split()):
             cand.update(by_word.get(w, ()))
@@ -134,6 +163,25 @@ def main(city_id):
     # a title that names many buildings is a street view, not a photo of one
     matches = {t: s for t, s in matches.items() if len(s) <= 2}
     log(f"    {len(matches)} files name a building near where they were taken")
+    # old pictures in each building's own Commons category (from Wikidata): no geotag needed, the category says what it shows
+    cats = {}
+    for i, bl in enumerate(buildings):
+        cat = (info_for(bl, i, wd, listing) or {}).get("commonscat")
+        if cat:
+            cats.setdefault(cat, set()).add(i)
+    n_cat = 0
+    for cat, bs in cats.items():
+        try:
+            fs = category_files(cat)
+        except Exception as e:  # noqa: BLE001
+            log(f"    Commons category {cat} failed: {e}")
+            continue
+        for f in fs:
+            if OLD_HINT.search(f[5:]):
+                matches.setdefault(f, set()).update(bs)
+                n_cat += 1
+        time.sleep(0.05)
+    log(f"    {len(cats)} buildings' Commons categories read: {n_cat} files that look old")
     md = metadata(sorted(matches))
 
     out = {}
@@ -145,7 +193,8 @@ def main(city_id):
             out.setdefault(str(i), []).append(m)
     result, n_photo, n_arch = {}, 0, 0
     for k, fs in out.items():
-        built = (dates.get(k) or {}).get("y")
+        d = dates.get(k) or {}
+        built = d.get("y") if d.get("f") in ("exact", "approx") else None    # an area's estimate is too rough to rule out
         old = [f for f in fs if f["year"] and f["year"] < ARCHIVE_BEFORE and not (built and f["year"] < built)]
         decades = {}
         for f in sorted(old, key=lambda f: f["year"]):
