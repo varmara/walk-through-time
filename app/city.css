@@ -106,6 +106,9 @@ input[type=range]{width:100%;accent-color:var(--ink);height:28px;margin:0}
 .pill{display:inline-block;font:500 11px var(--mono);padding:1px 6px;border-radius:4px;border:1px solid var(--line);margin-left:6px}
 .hint{margin-top:4px;font-size:12px;color:var(--muted)}
 #cStories{display:grid;gap:10px}
+.summary{display:grid;gap:4px;margin:0 0 10px}
+.summary p{margin:0;font-size:14.5px}
+a.fab{display:grid;place-items:center;text-decoration:none;color:inherit}
 .story{border-top:1px solid var(--line);padding-top:8px;display:grid;gap:4px}
 .story p{margin:0;font-size:14px}
 .links{display:flex;flex-wrap:wrap;gap:12px}

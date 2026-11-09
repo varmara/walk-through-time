@@ -1,0 +1,156 @@
+// Walk Through Time: the graph page. People and story themes, linked to the places where a checked story ties
+// them (pipeline/s08_graph.py). Tap a point to see its links and the stories behind them; open them on the map
+// with ./?focus=<place>,<place>.
+(() => {
+const CITY = document.body.dataset.city;
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+const KINDS = [
+  ['theme', 'Story themes'], ['architects', 'Architects'], ['writers', 'Writers'], ['science', 'Science'],
+  ['industry', 'Industry'], ['sport', 'Sport'], ['arts', 'Arts'], ['faith', 'Faith'], ['military', 'Military'],
+  ['public', 'Public life'], ['events', 'Events'], ['other', 'Other people'], ['place', 'Places'],
+];
+const KIND_TITLE = Object.fromEntries(KINDS);
+const colour = k => `var(--k-${KIND_TITLE[k] ? k : 'other'})`;
+const off = new Set();
+let G, sel = null, sim, zoomK = 1;
+
+fetch(`../data/${CITY}-graph.json?v=${window.__v || ''}`).then(r => r.json()).then(init)
+  .catch(() => { $('loading').textContent = 'The graph could not be loaded.'; });
+
+function init(data){
+  G = data;
+  $('loading').hidden = true;
+  const byId = new Map(G.nodes.map(n => [n.id, n]));
+  G.links = G.links.filter(l => byId.has(l.s) && byId.has(l.t)).map(l => ({ ...l, source: l.s, target: l.t }));
+  G.nodes.forEach(n => { n.deg = 0; n.nb = new Set(); });
+  G.links.forEach(l => { const a = byId.get(l.s), b = byId.get(l.t); a.deg++; b.deg++; a.nb.add(b.id); b.nb.add(a.id); });
+  G.byId = byId;
+
+  const present = new Set(G.nodes.map(n => n.type));
+  $('kinds').innerHTML = KINDS.filter(([k]) => present.has(k)).map(([k, t]) =>
+    `<button class="kind" data-k="${k}"><i style="background:${colour(k)}"></i>${t}</button>`).join('');
+  $('kinds').querySelectorAll('.kind').forEach(b => b.onclick = () => {
+    off.has(b.dataset.k) ? off.delete(b.dataset.k) : off.add(b.dataset.k);
+    b.classList.toggle('off', off.has(b.dataset.k)); draw();
+  });
+
+  const svg = d3.select('#graph');
+  const root = svg.append('g');
+  G.edgeG = root.append('g');
+  G.nodeG = root.append('g');
+  const zoom = d3.zoom().scaleExtent([0.2, 6]).on('zoom', e => { root.attr('transform', e.transform); zoomK = e.transform.k; labels(); });
+  svg.call(zoom);
+  svg.on('click', e => { if (e.target === svg.node()) select(null); });
+  G.zoomTo = (x, y) => svg.transition().duration(600).call(zoom.transform,
+    d3.zoomIdentity.translate(innerWidth / 2, innerHeight * (innerWidth >= 760 ? 0.5 : 0.3)).scale(Math.max(zoomK, 1.4)).translate(-x, -y));
+  // once the layout settles the first time, fit the whole graph on the screen
+  let fitted = false;
+  G.fit = () => {
+    const ns = sim.nodes(); if (!ns.length) return;
+    const xs = ns.map(n => n.x), ys = ns.map(n => n.y), top = 110;
+    const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+    const k = Math.max(0.7, Math.min(3, 0.92 * Math.min(innerWidth / (x1 - x0 || 1), (innerHeight - top - 40) / (y1 - y0 || 1))));
+    svg.transition().duration(700).call(zoom.transform, d3.zoomIdentity
+      .translate(innerWidth / 2, top + (innerHeight - top - 40) / 2).scale(k).translate(-(x0 + x1) / 2, -(y0 + y1) / 2));
+  };
+
+  sim = d3.forceSimulation()
+    .force('link', d3.forceLink().id(d => d.id).distance(l => l.how === 'mention' ? 60 : 38).strength(0.6))
+    .force('charge', d3.forceManyBody().strength(d => d.type === 'theme' ? -220 : d.deg > 1 ? -60 : -25).distanceMax(220))
+    .force('collide', d3.forceCollide(d => radius(d) + 2))
+    .force('x', d3.forceX(innerWidth / 2).strength(0.09)).force('y', d3.forceY(innerHeight / 2).strength(0.11))
+    .on('tick', tick).on('end', () => { if (!fitted) { fitted = true; if (!sel) G.fit(); } });
+  draw();
+
+  $('find').oninput = () => {
+    const q = $('find').value.trim().toLowerCase();
+    if (q.length < 2) return;
+    // people and themes before places; a word that starts with the text before a match inside a word
+    const score = n => (n.type === 'place' ? 2 : 0) + (n.label.toLowerCase().startsWith(q) ? 0 : new RegExp('\\b' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(n.label.toLowerCase()) ? 0.5 : 1);
+    const n = G.nodes.filter(n => !off.has(n.type) && n.label.toLowerCase().includes(q)).sort((a, b) => score(a) - score(b) || b.deg - a.deg)[0];
+    if (n) { select(n.id); G.zoomTo(n.x, n.y); }
+  };
+  $('find').onkeydown = e => { if (e.key === 'Enter') $('find').blur(); };
+  $('close').onclick = () => select(null);
+  const start = new URLSearchParams(location.search).get('node');
+  if (start && byId.has(start)) setTimeout(() => { select(start); const n = byId.get(start); G.zoomTo(n.x, n.y); }, 900);
+}
+
+function radius(d){ return d.type === 'theme' ? 11 : d.type === 'place' ? 4 + Math.min(4, d.deg) : 5 + Math.min(7, d.deg * 1.2); }
+function shown(){ const ns = G.nodes.filter(n => !off.has(n.type)), ids = new Set(ns.map(n => n.id));
+  return { ns, ls: G.links.filter(l => ids.has(l.s) && ids.has(l.t)) }; }
+
+function draw(){
+  const { ns, ls } = shown();
+  G.edges = G.edgeG.selectAll('line').data(ls, l => l.s + '|' + l.t)
+    .join('line').attr('class', l => 'edge' + (l.how === 'mention' ? ' mention' : ''));
+  G.nodesSel = G.nodeG.selectAll('g.node').data(ns, d => d.id).join(enter => {
+    const g = enter.append('g').attr('class', d => 'node ' + d.type);
+    g.each(function(d){
+      const s = d3.select(this), r = radius(d);
+      if (d.type === 'place') s.append('rect').attr('class', 'shape').attr('x', -r).attr('y', -r).attr('width', 2 * r).attr('height', 2 * r).attr('rx', 1.5);
+      else if (d.type === 'theme') s.append('path').attr('class', 'shape').attr('d', `M0,${-r * 1.3}L${r * 1.3},0L0,${r * 1.3}L${-r * 1.3},0Z`);
+      else s.append('circle').attr('class', 'shape').attr('r', r);
+      s.select('.shape').attr('fill', colour(d.type));
+      s.append('text').attr('x', r + 4).attr('y', 4).text(d.label);
+    });
+    g.on('click', (e, d) => { e.stopPropagation(); select(d.id); });
+    g.call(d3.drag()
+      .on('start', (e, d) => { if (!e.active) sim.alphaTarget(0.2).restart(); d.fx = d.x; d.fy = d.y; })
+      .on('drag', (e, d) => { d.fx = e.x; d.fy = e.y; })
+      .on('end', (e, d) => { if (!e.active) sim.alphaTarget(0); d.fx = d.fy = null; }));
+    return g;
+  });
+  sim.nodes(ns); sim.force('link').links(ls); sim.alpha(0.8).restart();
+  highlight(); labels();
+}
+
+function tick(){
+  G.edges.attr('x1', l => l.source.x).attr('y1', l => l.source.y).attr('x2', l => l.target.x).attr('y2', l => l.target.y);
+  G.nodesSel.attr('transform', d => `translate(${d.x},${d.y})`);
+}
+
+// Labels: story themes and well-linked points always; the rest once zoomed in, or when next to the selection.
+function labels(){
+  if (!G.nodesSel) return;
+  const near = sel ? G.byId.get(sel).nb : new Set();
+  G.nodesSel.select('text').attr('display', d =>
+    d.type === 'theme' || d.id === sel || near.has(d.id) || zoomK >= 2.2 || (zoomK >= 1.2 && d.deg >= 2) || d.deg >= 4 ? null : 'none');
+}
+
+function highlight(){
+  const near = sel ? G.byId.get(sel).nb : null;
+  d3.select('#graph').classed('focus', !!sel);
+  G.nodesSel.classed('on', d => !!sel && (d.id === sel || near.has(d.id))).classed('sel', d => d.id === sel);
+  G.edges.classed('on', l => !!sel && (l.s === sel || l.t === sel));
+}
+
+function select(id){
+  sel = id;
+  highlight(); labels();
+  if (!id) { $('sheet').hidden = true; $('hint').hidden = false; return; }
+  const n = G.byId.get(id);
+  $('hint').hidden = true; $('sheet').hidden = false;
+  $('sTitle').textContent = n.label;
+  $('sType').textContent = n.type === 'place'
+    ? 'Place' + (n.year != null ? ' · ' + (n.f === 'area' ? 'probably ' : n.f === 'exact' ? '' : 'c. ') + n.year : '')
+    : KIND_TITLE[n.type] ? KIND_TITLE[n.type].replace(/s$/, '').replace('Story theme', 'Story theme') : n.type;
+  const mine = G.links.filter(l => l.s === id || l.t === id);
+  const places = n.type === 'place' ? [id] : mine.map(l => (l.s === id ? l.t : l.s)).filter(x => G.byId.get(x).type === 'place');
+  $('go').hidden = !places.length;
+  $('go').textContent = places.length > 1 ? `Show ${places.length} places on the map` : 'Show on the map';
+  $('go').onclick = () => { location.href = `./?focus=${places.join(',')}&name=${encodeURIComponent(n.label)}`; };
+  const groups = {};
+  mine.forEach(l => { const o = G.byId.get(l.s === id ? l.t : l.s); (groups[o.type] = groups[o.type] || []).push([o, l]); });
+  $('links').innerHTML = `<h3>Linked to ${mine.length}</h3>` + Object.entries(groups)
+    .sort((a, b) => KINDS.findIndex(k => k[0] === a[0]) - KINDS.findIndex(k => k[0] === b[0]))
+    .map(([k, xs]) => xs.map(([o, l]) => `<div class="link">
+      <button data-id="${esc(o.id)}"><i style="background:${colour(o.type)}"></i>${esc(o.label)}</button>
+      ${l.text ? `<p>${esc(l.text)}</p>` : ''}
+      ${l.src && l.src.url ? `<div class="src">${l.how === 'mention' ? 'Named in this story · ' : ''}${esc(l.src.kind || 'Source')}: <a href="${esc(l.src.url)}" target="_blank" rel="noopener">${esc(l.src.title)}</a></div>` : ''}
+    </div>`).join('')).join('');
+  $('links').scrollTop = 0;
+  $('links').querySelectorAll('[data-id]').forEach(b => b.onclick = () => { const o = G.byId.get(b.dataset.id); select(o.id); G.zoomTo(o.x, o.y); });
+}
+})();

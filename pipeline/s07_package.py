@@ -5,7 +5,8 @@
 
 Building properties: name, y (year), f (exact | approx | century), src, alts [{y, f, src}],
 h (height, m), base (bridges: deck height above the ground), levels, kind, osm, grade, listEntry, listName, listUrl, qid, image, article,
-architect, L (",group,group," for map filters), stories [{layer, text, source}].
+architect, L (",group,group," for map filters), stories [{layer, text, source}],
+sum (one to three sentences) and sumSrc {title, url?, kind}.
 """
 from datetime import datetime, timezone
 from pathlib import Path
@@ -23,6 +24,7 @@ def main(city_id):
     dates = load(city_id, "dates")
     lay = load(city_id, "layers")
     cur = load(city_id, "curated")
+    sums = load(city_id, "summaries") if work(city_id, "summaries").exists() else {}
     # names for outlines that have none in OpenStreetMap: a story's name, then a named place inside
     fallback = {}
     for e in cur["entries"]:
@@ -53,6 +55,7 @@ def main(city_id):
             "image": info.get("image"), "article": article, "architect": info.get("architect") or t.get("architect"),
             "L": ("," + ",".join(lay["member"][k]) + ",") if k in lay["member"] else None,
             "stories": lay["stories"].get(k),
+            "sum": (sums.get(k) or {}).get("text"), "sumSrc": (sums.get(k) or {}).get("src"),
         }
         p = {kk: v for kk, v in p.items() if v not in (None, "", [])}
         rings = b["rings"]

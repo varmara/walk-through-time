@@ -32,6 +32,9 @@
     <button class="fab" id="bNorth" aria-label="Turn the map to face north">
       <svg viewBox="0 0 24 24" aria-hidden="true" id="needle"><path d="M12 3 8.5 12h7L12 3Z" fill="var(--hl)" stroke="var(--hl)"/><path d="M12 21l3.5-9h-7L12 21Z"/></svg>
     </button>
+    <a class="fab" id="bGraph" href="graph.html" aria-label="Graph of people, stories and places">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="7" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="17" r="2.5"/><circle cx="19" cy="16" r="1.8"/><path d="M8.3 7.9 10.6 15M15.6 6.6 8.4 6.8M13.5 15.3l3.3-7.2M14.5 16.8l2.7-.6"/></svg>
+    </a>
     <button class="fab" id="bHome" aria-label="Back to the starting view">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
     </button>
@@ -88,6 +91,7 @@
 
   <article class="panel card" id="pCard" hidden>
     <img id="cImg" alt="" hidden>
+    <div class="summary" id="cSum" hidden></div>
     <dl class="facts" id="cFacts"></dl>
     <div id="cStories"></div>
     <div class="links" id="cLinks"></div>

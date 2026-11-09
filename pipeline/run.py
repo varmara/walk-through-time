@@ -10,7 +10,7 @@ import argparse
 import importlib
 
 STEPS = ["s00_fetch_osm", "s00_fetch_bridges", "s00_fetch_heritage", "s00_fetch_nature", "s00_fetch_plaques", "s00_fetch_voa", "s01_buildings", "s02_listing", "s03_wikidata",
-         "s04_curated", "s05_dates", "s06_layers", "s07_package"]
+         "s04_curated", "s05_dates", "s06_layers", "s06_summaries", "s07_package", "s08_graph"]
 
 
 def main():

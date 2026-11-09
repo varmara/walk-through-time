@@ -118,6 +118,14 @@ async function main(){
   if (data.built) $('dataNote').textContent = 'Data updated ' + new Date(data.built).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' }) + '.';
   applyLayers();
   updateYear();
+  // ?focus=b12,p3&name=… (from the graph page): open those places, as a set when there are several
+  const q = new URLSearchParams(location.search), focus = q.get('focus');
+  if (focus) {
+    const refs = focus.split(',').map(x => x[0] === 'b' ? +x.slice(1) : x)
+      .filter(r => typeof r === 'number' ? r < features.length : r[0] === 'p' ? data.pins && pinOf(r) : areaOf(r));
+    if (refs.length > 1) showPlaces(q.get('name') || 'Selected places', refs);
+    else if (refs.length) openRef(refs[0]);
+  }
 }
 
 function isDark(){
@@ -436,6 +444,10 @@ function selectBuilding(id){
   $('cFacts').innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
 
   const link = s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>`;
+  const sumSrc = typeof p.sumSrc === 'string' ? JSON.parse(p.sumSrc) : p.sumSrc;
+  $('cSum').hidden = !p.sum;
+  $('cSum').innerHTML = p.sum ? `<p>${esc(p.sum)}</p><p class="src">${esc(sumSrc?.kind || '')}${sumSrc?.url ? ': ' + link(sumSrc)
+    : sumSrc?.title ? ' (' + esc(sumSrc.title) + ')' : ''}</p>` : '';
   $('cStories').innerHTML = (p.stories || []).map(s => `<div class="story"><div class="seclbl">${esc(layerTitle(s.layer))}</div>
     <p>${esc(s.text)}</p>${s.source ? `<p class="src">${esc(s.source.kind || 'Wikipedia')}: ${link(s.source)}${s.place ? ` · ${esc(s.place.kind || 'Wikipedia')}: ` + link(s.place) : ''}</p>` : ''}</div>`).join('');
 
@@ -457,6 +469,7 @@ function selectBuilding(id){
   openSheet('card', p.name || p.listName || 'Unnamed building');
 }
 function showArea(p){
+  $('cSum').hidden = true;
   const type = (groups.get(p.t) || {}).title || 'Nature area';
   $('cImg').hidden = true;
   $('cFacts').innerHTML = `<dt>Type</dt><dd>${esc(type.replace(/s$/, ''))}</dd>`
@@ -501,6 +514,7 @@ function openRef(r){
   showArea(f.properties);
 }
 function showPin(p){
+  $('cSum').hidden = true;
   const link = s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>`;
   $('cImg').hidden = true;
   $('cFacts').innerHTML = `<dt>Layer</dt><dd>${esc((groups.get(p.group) || {}).title || layerTitle(p.layer))}</dd>`;
