@@ -255,6 +255,10 @@ def building_name(tags, story=None, label=None, listing_name=None, place=None):
     if old and (";" in old or not BUILDINGISH.search(old)):
         old = None
     he = tidy_listing(listing_name)
+    if label:   # Wikidata labels of listed buildings copy Historic England's: tidy them the same way
+        label = re.sub(r"\b(And|Of|The|At|To|On|In|For)\b", lambda m: m[1].lower(),
+                       _HE_TAIL.sub("", label).strip(" ,")) or label
+        label = label[0].upper() + label[1:]
     if story:
         name = story
     elif own:
@@ -263,5 +267,6 @@ def building_name(tags, story=None, label=None, listing_name=None, place=None):
         name = osm
     else:
         name = he or label or old or osm or place
-    today = osm if osm and name and osm.strip().lower() != name.strip().lower() and (occupied(tags) or own) else None
+    today = (osm if osm and name and osm.strip().lower() not in name.strip().lower() and (occupied(tags) or own)
+             else None)   # not "Newton" for the Newton Building
     return name, today
