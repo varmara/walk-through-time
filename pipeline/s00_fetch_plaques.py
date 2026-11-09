@@ -4,17 +4,14 @@ Source: Open Plaques, the community record of plaques (public domain), as republ
 Nottingham City Council ("Commemorative Plaques" layer). Each plaque names its lead subject, the subject's
 type (person, place, thing...) and roles, which decide the People group it goes into.
 Only Nottingham has such a layer so far; other cities simply get none. Places the council layer does not
-cover (West Bridgford is in Rushcliffe, not the city) are read from Open Plaques' own area pages; that
-format is not documented, so the reader accepts the likely shapes and logs what it found.
+cover (West Bridgford is in Rushcliffe, not the city) come from plaques mapped in OpenStreetMap (ODbL),
+many of them linked to Open Plaques by an openplaques:id tag.
 
 Writes work/<city>/plaques.json: [{x, y, title, inscription, address, year, photo, colour, org,
 subject, type, roles, primary}].
 """
 from .common import city, http, log, point_in_ring, save
 
-OPEN_PLAQUES_AREAS = {   # extra areas read from openplaques.org, per city
-    "nottingham": ["west-bridgford"],
-}
 SOURCES = {
     "nottingham": "https://maps164.nottinghamcity.gov.uk/server/rest/services/Core_services/Housing_and_Property/MapServer/34/query",
 }
@@ -50,50 +47,40 @@ def main(city_id):
             p[v] = val.strip() if isinstance(val, str) else val
         out.append(p)
     log(f"s00 plaques: {len(out)} in the area from the council layer (of {len(r.get('features', []))})")
-    out += open_plaques(city_id, poly, out)
+    out += osm_plaques(city_id, c["bbox"], poly, out)
     save(city_id, "plaques", out)
 
 
-def open_plaques(city_id, poly, have):
-    """Plaques from openplaques.org area pages, skipping any already within 15 m of one we have."""
+def osm_plaques(city_id, b, poly, have):
+    """Plaques mapped in OpenStreetMap (memorial=plaque / blue_plaque), skipping any within 15 m of one we have.
+    One small query for plaque nodes only; it does not touch the saved building download."""
     from .common import metres
+    from .s00_fetch_osm import OVERPASS
+    q = (f'[out:json][timeout:120];(node["memorial"~"^(plaque|blue_plaque)$"]({b["s"]},{b["w"]},{b["n"]},{b["e"]});'
+         f'node["openplaques:id"]({b["s"]},{b["w"]},{b["n"]},{b["e"]}););out;')
+    data = None
+    for url in OVERPASS:
+        try:
+            data = http(url, data={"data": q}, tries=2, timeout=180)
+            break
+        except Exception as e:  # noqa: BLE001
+            log(f"    OSM plaques via {url.split('/')[2]}: {e}")
+    if data is None:
+        return []
     extra = []
-    for slug in OPEN_PLAQUES_AREAS.get(city_id, []):
-        data = None
-        for ext in ("geojson", "json"):
-            try:
-                data = http(f"https://openplaques.org/places/gb/areas/{slug}/plaques.{ext}", tries=2, timeout=60)
-                break
-            except Exception as e:  # noqa: BLE001
-                log(f"    Open Plaques {slug}.{ext}: {e}")
-        if data is None:
+    for el in data.get("elements", []):
+        x, y, t = el.get("lon"), el.get("lat"), el.get("tags", {})
+        if x is None or (poly and not point_in_ring(x, y, poly)):
             continue
-        rows = data.get("features") if isinstance(data, dict) and "features" in data else data
-        if isinstance(rows, dict):
-            rows = rows.get("plaques") or rows.get("data") or []
-        n = 0
-        for row in rows or []:
-            row = row.get("plaque", row) if isinstance(row, dict) else {}
-            props = row.get("properties", row)
-            geo = (row.get("geometry") or {}).get("coordinates") if row.get("geometry") else None
-            x = geo[0] if geo else props.get("longitude")
-            y = geo[1] if geo else props.get("latitude")
-            if x is None or y is None:
-                continue
-            x, y = float(x), float(y)
-            if poly and not point_in_ring(x, y, poly):
-                continue
-            if any(metres([x, y], [h["x"], h["y"]]) < 15 for h in have + extra):
-                continue
-            people = props.get("people") or props.get("subjects") or []
-            lead = people[0] if people and isinstance(people[0], dict) else {}
-            extra.append({"x": x, "y": y, "id": props.get("id"), "title": props.get("title"),
-                          "inscription": props.get("inscription"), "address": props.get("address"),
-                          "year": (str(props.get("erected_at") or "")[:4] or None), "photo": None,
-                          "colour": props.get("colour_name") or props.get("colour"), "org": None,
-                          "subject": lead.get("full_name") or lead.get("name"), "type": lead.get("type") or "person",
-                          "roles": ", ".join(r.get("name", "") if isinstance(r, dict) else str(r) for r in lead.get("roles", [])),
-                          "primary": None})
-            n += 1
-        log(f"s00 Open Plaques {slug}: {n} more plaques (keys seen: {sorted(props)[:12] if rows else 'none'})")
+        if any(metres([x, y], [h["x"], h["y"]]) < 15 for h in have + extra):
+            continue
+        text = t.get("inscription") or t.get("description")
+        if not (text or t.get("name")):
+            continue
+        extra.append({"x": x, "y": y, "id": t.get("openplaques:id"), "title": t.get("name"), "inscription": text,
+                      "address": None, "year": (t.get("start_date") or "")[:4] or None, "photo": None,
+                      "colour": t.get("colour"), "org": t.get("operator"),
+                      "subject": t.get("subject") or t.get("subject:name"), "type": "person" if t.get("subject:wikidata") else None,
+                      "roles": None, "primary": None, "osm": el["id"]})
+    log(f"s00 plaques: {len(extra)} more from OpenStreetMap (of {len(data.get('elements', []))} plaque nodes)")
     return extra

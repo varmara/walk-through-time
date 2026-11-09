@@ -174,11 +174,11 @@ CURATED = [
             E("Clifton estate", "en:Clifton, Nottingham",
               "Planned from 1950, the Clifton council estate was at one time the largest council estate in Europe. "
               "Since the 1980s most of its houses have passed into private ownership.",
-              ("1950", "largest council estate in europe", "private ownership")),
+              ("1950", "largest council estate in europe", "private ownership"), at="pin:-1.1745,52.9045"),
         ]),
     dict(
         id="sneinton", title="Sneinton",
-        intro="The hill east of the city: a windmill, cave dwellings, a market and the birthplace of the Salvation Army's founder.",
+        intro="The hill east of the city: a windmill, cave dwellings, a church by Thomas Rickman and the old wholesale market.",
         entries=[
             E("Green's Windmill", "en:Green's Mill, Sneinton",
               "A tower mill built shortly after 1807 by the baker George Green. It burned in 1947, was restored and "
@@ -190,10 +190,7 @@ CURATED = [
               ("Thomas Rickman", "1837", "Bodley"), year="1837"),
             E("Sneinton Market", "en:Sneinton",
               "In the 1930s the city's wholesale fruit and vegetable market moved here from the Old Market Square.",
-              ("1930s", "wholesale fruit and vegetable market"), at="name:Sneinton Market"),
-            E("William Booth Birthplace Museum", "en:Sneinton",
-              "William Booth, founder of the Salvation Army, was born in this house on Notintone Place.",
-              ("William Booth Birthplace Museum", "Notintone Place"), at="name:William Booth Birthplace Museum"),
+              ("1930s", "wholesale fruit and vegetable market"), at="pin:-1.1399,52.9531"),
         ]),
     dict(
         id="people", title="People", kind="people",

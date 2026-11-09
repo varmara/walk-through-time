@@ -117,9 +117,11 @@ def main(city_id):
         story = f"{(p.get('colour') or '').capitalize() + ' p' if p.get('colour') else 'P'}laque" \
                 f"{' put up in ' + str(p['year']) if p.get('year') else ''}{' by ' + p['org'] if p.get('org') else ''}: “{text}”"
         url = f"https://openplaques.org/plaques/{p['id']}" if p.get("id") else "https://openplaques.org/"
+        src = {"title": "Open Plaques", "url": url, "kind": "Open Plaques"}
+        if p.get("osm") and not p.get("id"):
+            src = {"title": "OpenStreetMap", "url": f"https://www.openstreetmap.org/node/{p['osm']}", "kind": "Plaque mapped in"}
         label = p.get("subject") or (text[:40] + "…" if len(text) > 40 else text) or "Plaque"
-        person(b, key, label, story,
-               {"title": "Open Plaques", "url": url, "kind": "Open Plaques"}, xy=(p["x"], p["y"]))
+        person(b, key, label, story, src, xy=(p["x"], p["y"]))
     log(f"s06 plaques: {placed}/{len(plaques)} placed on a building, the rest shown as pins")
 
     wd = load(city_id, "wikidata")

@@ -194,25 +194,32 @@ def main(city_id):
             b = how = None
             if not why:
                 at = e.get("at", "")
-                if at.startswith("osm:") and at[4:] in by_osm:
+                if at.startswith("pin:"):       # an explicit point "lon,lat", for places the article does not locate
+                    a = {**a, "coords": tuple(float(v) for v in at[4:].split(","))}
+                    at = "pinned"
+                if at.startswith("name:") and norm(at[5:]) in names:
+                    b, how = names[norm(at[5:])], "name in OpenStreetMap"
+                if at == "pinned":
+                    pass
+                elif b is None and at.startswith("osm:") and at[4:] in by_osm:
                     b, how = by_osm[at[4:]], "OpenStreetMap outline"
-                if b is None and a["qid"] in by_qid:
+                if b is None and at != "pinned" and a["qid"] in by_qid:
                     b, how = by_qid[a["qid"]], "Wikidata tag on the outline"
-                if b is None:
+                if b is None and at != "pinned":
                     for n in a["nhle"] + nhle.get(a["qid"], []):
                         if n in by_nhle:
                             b, how = by_nhle[n], "Historic England list entry"
                             break
-                if b is None and a["coords"]:
+                if b is None and at != "pinned" and a["coords"]:
                     radius = int(at[5:]) if at.startswith("near:") and at[5:].isdigit() else 15
                     b = building_at(buildings, *a["coords"], near=radius)
                     how = f"article coordinates (within {radius} m)" if b is not None else None
-                if b is None:
+                if b is None and at != "pinned":
                     key = norm(at[5:] if at.startswith("name:") else e["name"])
                     if key in names:
                         b, how = names[key], "name in OpenStreetMap"
                 if b is None and a["coords"]:
-                    how = "pin at the article's coordinates (no building there: a bridge, a ground, a square)"
+                    how = "pin where the story file puts it" if at == "pinned" else "pin at the article's coordinates (no building there: a bridge, a ground, a square)"
                 elif b is None:
                     why = "could not place it on a building, and the article has no coordinates"
             if why:
