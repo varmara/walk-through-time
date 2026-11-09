@@ -11,7 +11,7 @@ Writes work/<city>/summaries.json: {building index: {"text", "src": {title, url,
 import re
 import urllib.parse
 
-from .common import building_name, http, load, log, save
+from .common import building_name, http, tidy_listing, load, log, save
 from .s05_dates import info_for, osm_article
 
 WIKI = "https://en.wikipedia.org/w/api.php"
@@ -132,7 +132,8 @@ def written(name, tags_list, d, listing, architect, address=False, today=None):
     if listing:
         g = listing.get("Grade")
         ln = (listing.get("Name") or "").strip()
-        as_ = f" as {tidy(ln)}" if ln and not address and name and ln.lower() not in name.lower() and name.lower() not in ln.lower() else ""
+        he = tidy_listing(ln) or ""
+        as_ = f" as {tidy(ln)}" if ln and not address and name and he.lower() != name.lower() and ln.lower() not in name.lower() and name.lower() not in ln.lower() else ""
         if g:
             bits.append(f"it is Grade {g} listed{as_}")
     if architect:

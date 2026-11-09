@@ -237,22 +237,31 @@ def tidy_listing(name):
     return n[0].upper() + n[1:]
 
 
+BUILDINGISH = re.compile(r"\b(house|hall|chapel|church|school|mill|bank|inn|arms|hotel|theatre|cinema|picture|station|works|"
+                         r"factory|warehouse|baths|library|exchange|buildings?|chambers|court|lodge|cottages?|almshouses?|"
+                         r"institute|club|tavern|brewery|market|offices|mission|tabernacle|hospital|asylum|gaol|barracks)\b", re.I)
+
+
 def building_name(tags, story=None, label=None, listing_name=None, place=None):
     """(name, today): the name to show and, if different, who or what uses the building today.
 
-    Prefer what the building was: a story's name, a historic name in OpenStreetMap (old_name, historic:name,
-    building:name), the Wikidata item for the building, Historic England's name; the OpenStreetMap name only
-    when it is the building's own name, otherwise it becomes 'today'."""
+    Prefer what the building was: a story's name, the building's own name in OpenStreetMap (building:name,
+    historic:name), Historic England's name, the listed building's Wikidata item, an old_name that names a
+    building ("Kings Arms", "Albert Hall"; old_name is more often just the previous shop, which is skipped);
+    the OpenStreetMap name only when it is the building's own name, otherwise it becomes 'today'."""
     osm = tags.get("name")
-    hist = tags.get("building:name") or tags.get("historic:name") or tags.get("name:historic") or tags.get("old_name")
+    own = tags.get("building:name") or tags.get("historic:name") or tags.get("name:historic")
+    old = tags.get("old_name")
+    if old and (";" in old or not BUILDINGISH.search(old)):
+        old = None
     he = tidy_listing(listing_name)
     if story:
         name = story
-    elif hist:
-        name = hist
+    elif own:
+        name = own
     elif osm and not occupied(tags):
         name = osm
     else:
-        name = label or he or osm or place
-    today = osm if osm and name and osm.strip().lower() != name.strip().lower() and (occupied(tags) or hist) else None
+        name = he or label or old or osm or place
+    today = osm if osm and name and osm.strip().lower() != name.strip().lower() and (occupied(tags) or own) else None
     return name, today
