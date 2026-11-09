@@ -16,7 +16,7 @@ const ERAS = [
   [1980, 1999, '1980–99',     '#3a76b6'],
   [2000, 9999, '2000+',       '#6c5cc6'],
 ];
-const FADE = { exact: 0, approx: 0.4, century: 0.62, area: 0.74 };   // how far each precision fades towards the background
+const FADE = { exact: 0, approx: 0.2, century: 0.35, area: 0.45 };   // how far each precision fades towards the background
 const SECTIONS = ['Stories', 'People', 'Heritage', 'Nature', 'Today'];
 const AREA_TYPES = ['nnr', 'lnr', 'sssi', 'ancient', 'reserve', 'conservation'];   // areas drawn on the ground
 
@@ -243,16 +243,30 @@ function updateYear(){
 }
 yearIn.addEventListener('input', updateYear);
 
+// Play: the next year is drawn only once the map has finished drawing the last one, so the slider never runs
+// ahead of the buildings. A slow phone takes bigger steps instead of falling behind; the whole run lasts ~25 s.
+const PLAY_MS = 25000;
+function stopPlay(){ playing = null; $('play').textContent = '▶'; }
 $('play').onclick = () => {
-  if (playing) { clearInterval(playing); playing = null; $('play').textContent = '▶'; return; }
+  if (playing) return stopPlay();
   if (+yearIn.value >= 1000) yearIn.value = 0;
   $('play').textContent = '❚❚';
-  playing = setInterval(() => {
-    const y = curYear(), step = y < 1700 ? 15 : y < 1850 ? 3 : 2;
-    yearIn.value = Math.min(1000, Math.ceil(y2s(Math.min(MAX_YEAR, y + step)) * 1000)); updateYear();
-    if (+yearIn.value >= 1000) { clearInterval(playing); playing = null; $('play').textContent = '▶'; }
-  }, 70);
+  const run = playing = {};
+  let last = performance.now();
+  const step = () => {
+    if (playing !== run) return;
+    const now = performance.now(), dt = Math.min(now - last, 1500); last = now;
+    yearIn.value = Math.min(1000, +yearIn.value + Math.max(1, Math.round(dt / PLAY_MS * 1000)));
+    updateYear();
+    if (+yearIn.value >= 1000) return stopPlay();
+    let done = false;
+    const next = () => { if (!done) { done = true; setTimeout(step, 40); } };
+    map.once('idle', next);
+    setTimeout(next, 1500);   // never wait for ever (tiles still loading, tab in background)
+  };
+  step();
 };
+yearIn.addEventListener('pointerdown', () => playing && stopPlay());
 
 // ================= The sheet =================
 const sheet = $('sheet');
@@ -390,7 +404,7 @@ $('mtSave').onclick = () => {
 $('legend').innerHTML = ERAS.map(e => `<div><i style="background:${e[3]}"></i>${e[2]}</div>`).join('')
   + `<div><i style="background:var(--unknown)"></i>no date</div>`
   + `<div><i style="background:var(--marked)"></i>in a ticked layer, no date</div>`;
-$('legend').insertAdjacentHTML('afterend', '<p class="note">Palest of all: no date for the building, only the period most homes in its small area were built (Council Tax records).</p>');
+$('legend').insertAdjacentHTML('afterend', '<p class="note">Palest of all: no date for the building itself, only the period when most homes in its small area were built (Council Tax records).</p>');
 
 // ================= Cards =================
 const layerTitle = id => layers.find(L => L.id === id)?.title || id;
