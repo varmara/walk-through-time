@@ -496,10 +496,10 @@ function selectBuilding(id){
   const dyk = J(p.dyk) || [];
   $('cDyk').hidden = !dyk.length;
   $('cDyk').innerHTML = dyk.length ? '<h3>Did you know?</h3>' + dyk.map(d => `<p>${esc(d.text)} <span class="src"><a href="${esc(d.source.url)}" target="_blank" rel="noopener">${esc(d.source.kind || 'Source')}</a></span></p>`).join('') : '';
-  // old photographs, oldest first, from Commons
+  // old photographs, postcards and prints, oldest first, from Commons
   const arch = J(p.archive) || [];
   $('cArch').hidden = !arch.length;
-  $('cArch').innerHTML = arch.length ? '<h3>Old photographs</h3><div class="strip">' + arch.map(f => {
+  $('cArch').innerHTML = arch.length ? '<h3>Old pictures</h3><div class="strip">' + arch.map(f => {
     const src = 'https://commons.wikimedia.org/wiki/Special:FilePath/' + encodeURIComponent(f.file.replace(/ /g, '_')) + '?width=320';
     return `<a class="shot" href="${esc(filePage(f.file))}" target="_blank" rel="noopener" title="${esc(f.file)}">
       <img loading="lazy" src="${esc(src)}" alt="${esc(f.file.replace(/\.\w+$/, ''))}" onerror="const a=this.closest('#cArch');this.parentNode.remove();if(a&&!a.querySelector('.shot'))a.hidden=true">

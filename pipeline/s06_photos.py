@@ -56,6 +56,7 @@ def geosearch(lat, lon, radius, out, depth=0):
 STREETISH = re.compile(r" (street|road|gate|lane|place|terrace|square|row|avenue|drive|crescent|walk|hill|grove|close|way|"
                        r"boulevard|yard|court|gardens|embankment|bay|park|estate) $")
 NOT_BUILDING = re.compile(r" (close up|performing|concert|gig|choir|band|team|match|crowd|protest|parade|interior detail) ")
+ARTWORK = re.compile(r"\(c?\.?\d{4}[-–]\d{4}|\bNCM\b|\(after\)|\bportrait of\b", re.I)   # paintings in a museum's collection
 OLD_HINT = re.compile(r"(1[89]\d\d|19[0-6]\d)|postcard|photochrom|old |historic|victorian|edwardian|archive|lantern slide", re.I)
 OLD_CAT = re.compile(r"histor|old |postcard|in the 1[89]th century|in the 1[89]\d0s|in the 19[0-6]0s|before 19|archive|photochrom", re.I)
 
@@ -177,7 +178,7 @@ def main(city_id):
             log(f"    Commons category {cat} failed: {e}")
             continue
         for f in fs:
-            if OLD_HINT.search(f[5:]):
+            if OLD_HINT.search(f[5:]) and not ARTWORK.search(f[5:]) and not NOT_BUILDING.search(norm(f[5:])):
                 matches.setdefault(f, set()).update(bs)
                 n_cat += 1
         time.sleep(0.05)
