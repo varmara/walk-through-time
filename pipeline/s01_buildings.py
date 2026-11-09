@@ -80,11 +80,20 @@ def main(city_id):
     for b in buildings:
         b["bb"] = bbox(b["rings"][0])
         b["h"] = height_of(b["tags"])
+    # bridges are drawn and dated like buildings: a thin deck raised above the river or road
+    try:
+        bridges = load(city_id, "bridges")
+    except FileNotFoundError:
+        bridges = []
+    for br in bridges:
+        tags = {**br["tags"], "building": "bridge"}
+        buildings.append({"osm": br["osm"], "rings": br["rings"], "tags": tags, "bb": bbox(br["rings"][0]),
+                          "h": br["base"] + 1.5, "base": br["base"]})
     for n in nodes:
         n["b"] = building_at(buildings, n["x"], n["y"], near=10)   # points are often drawn just outside the outline
 
     save(city_id, "buildings", buildings)
     save(city_id, "base", {"roads": roads, "water": water, "parks": parks})
     save(city_id, "places", nodes)
-    log(f"s01 {len(buildings)} buildings, {len(nodes)} named places "
+    log(f"s01 {len(buildings)} buildings and bridges ({len(bridges)} bridges), {len(nodes)} named places "
         f"({sum(n['b'] is not None for n in nodes)} inside a building)")

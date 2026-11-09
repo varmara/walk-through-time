@@ -177,7 +177,7 @@ function drawMap(){
       map.addSource('b', { type:'geojson', data:{ type:'FeatureCollection', features } });
       map.addLayer({ id:'b', type:'fill-extrusion', source:'b', paint:{
         'fill-extrusion-color':buildingColour(),
-        'fill-extrusion-height':['get', 'h'], 'fill-extrusion-base':0, 'fill-extrusion-opacity':0.95,
+        'fill-extrusion-height':['get', 'h'], 'fill-extrusion-base':['coalesce', ['get', 'base'], 0], 'fill-extrusion-opacity':0.95,
         'fill-extrusion-vertical-gradient':true } });
 
       map.addSource('storypins', { type:'geojson', data: data.pins || { type:'FeatureCollection', features:[] } });
@@ -431,7 +431,7 @@ function selectBuilding(id){
   } else rows.push(['Built', '<span class="muted">not in open data yet</span>']);
   if (p.architect) rows.push(['Architect', esc(p.architect)]);
   if (p.grade) rows.push(['Listing', `Grade ${esc(p.grade)} listed`]);
-  rows.push(['Height', `≈ ${Math.round(p.h)} m${p.levels ? ' · ' + esc(p.levels) + (p.levels === '1' ? ' storey' : ' storeys') : ''}`]);
+  if (p.kind !== 'bridge') rows.push(['Height', `≈ ${Math.round(p.h)} m${p.levels ? ' · ' + esc(p.levels) + (p.levels === '1' ? ' storey' : ' storeys') : ''}`]);
   if (p.kind && p.kind !== 'yes') rows.push(['Type (OSM)', esc(p.kind.replace(/_/g, ' '))]);
   $('cFacts').innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
 

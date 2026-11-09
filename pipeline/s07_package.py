@@ -4,7 +4,7 @@
   data/<city>-report.md   coverage of dates by precision and source, conflicts, layers, dropped stories
 
 Building properties: name, y (year), f (exact | approx | century), src, alts [{y, f, src}],
-h (height, m), levels, kind, osm, grade, listEntry, listName, listUrl, qid, image, article,
+h (height, m), base (bridges: deck height above the ground), levels, kind, osm, grade, listEntry, listName, listUrl, qid, image, article,
 architect, L (",group,group," for map filters), stories [{layer, text, source}].
 """
 from datetime import datetime, timezone
@@ -46,7 +46,7 @@ def main(city_id):
             "name": t.get("name") or info.get("label") or fallback.get(k) or best.get("Name"),
             "y": d.get("y"), "f": d.get("f"), "src": d.get("src"), "alts": d.get("alts"),
             "per": d.get("period"), "sh": d.get("share"),
-            "h": b["h"], "levels": t.get("building:levels"), "osm": b["osm"],
+            "h": b["h"], "base": b.get("base"), "levels": t.get("building:levels"), "osm": b["osm"],
             "kind": t.get("building") if t.get("building") != "yes" else None,
             "grade": best.get("Grade"), "listEntry": best.get("ListEntry"), "listName": best.get("Name"),
             "listUrl": best.get("hyperlink"), "qid": info.get("qid") or t.get("wikidata"),
