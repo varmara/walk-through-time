@@ -11,8 +11,8 @@ Writes work/<city>/summaries.json: {building index: {"text", "src": {title, url,
 import re
 import urllib.parse
 
-from .common import http, load, log, save
-from .s05_dates import info_for
+from .common import building_name, http, load, log, save
+from .s05_dates import info_for, osm_article
 
 WIKI = "https://en.wikipedia.org/w/api.php"
 SENTENCES = 3
@@ -109,12 +109,15 @@ def date_sentence(d):
     return s + "."
 
 
-def written(name, tags_list, d, listing, architect, address=False):
-    use, occupant = use_of(tags_list, name)
+def written(name, tags_list, d, listing, architect, address=False, today=None):
+    use, occupant = use_of(tags_list, today or name)
     street = street_of(tags_list)
     on = f" on {street}" if street else ""
     out = []
-    if address and use:      # the only name is the listing's address: "A shop at 3 and 5, Hounds Gate."
+    if today:                # "Newcastle House, on Castle Boulevard. Today it houses Gala Coral Group, an office."
+        out.append(f"{name}{',' + on if on else ''}. Today it houses {today}"
+                   + (f", {ARTICLE(use)} {use}." if use and occupant else "."))
+    elif address and use:      # the only name is the listing's address: "A shop at 3 and 5, Hounds Gate."
         out.append(f"{ARTICLE(use).capitalize()} {use} at {name}.")
     elif address:
         pass
@@ -182,7 +185,8 @@ def main(city_id):
     for pl in load(city_id, "places"):
         if pl["b"] is not None:
             inside.setdefault(pl["b"], []).append(pl["tags"])
-    cur = {str(e["b"]): e["name"] for e in load(city_id, "curated")["entries"] if e["b"] is not None}
+    cur = {str(e["b"]): e["name"] for e in load(city_id, "curated")["entries"]
+           if e["b"] is not None and e.get("layer") != "people"}
 
     titles = {}
     for i, b in enumerate(buildings):
@@ -190,8 +194,8 @@ def main(city_id):
         url = info.get("article")
         if url:
             titles[i] = urllib.parse.unquote(url.rsplit("/wiki/", 1)[1]).replace("_", " ")
-        elif b["tags"].get("wikipedia", "").startswith("en:"):
-            titles[i] = b["tags"]["wikipedia"][3:]
+        elif osm_article(b["tags"]):
+            titles[i] = osm_article(b["tags"])
     intros = extracts(titles.values()) if titles else {}
 
     out, n_wiki, n_data = {}, 0, 0
@@ -208,12 +212,13 @@ def main(city_id):
         best = (listing.get(k) or [None])[0]
         tags_list = [t] + inside.get(i, [])
         info = info_for(b, i, wd, listing) or {}
-        name = t.get("name") or info.get("label") or cur.get(k) or next((p.get("name") for p in inside.get(i, []) if p.get("name")), None)
+        place = next((p.get("name") for p in inside.get(i, []) if p.get("name")), None)
+        name, today = building_name(t, cur.get(k), info.get("label"), (best or {}).get("Name"), place)
         if not name and not best:
             continue
         address = not name
         text = written(name or tidy((best or {}).get("Name", "")), tags_list, dates.get(k), best,
-                       info.get("architect") or t.get("architect"), address=address)
+                       info.get("architect") or t.get("architect"), address=address, today=today)
         if text:
             srcs = ["OpenStreetMap"] + (["Historic England"] if best else []) + (["Wikidata"] if info.get("architect") else [])
             out[k] = {"text": text, "src": {"title": " · ".join(srcs), "kind": "Written from the map's data"}}

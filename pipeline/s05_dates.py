@@ -84,13 +84,22 @@ def wikidata_year(info):
 
 
 def info_for(b, i, wd, listing):
+    """The building's Wikidata item: the one Historic England's list entry points to, else the outline's
+    wikidata tag (unless a business occupies the outline: then the tag is often the company, not the building)."""
+    from .common import occupied
     t = b["tags"]
-    if t.get("wikidata") in wd:
-        return wd[t["wikidata"]]
     for e in listing.get(str(i), []):
         if f"nhle:{e['ListEntry']}" in wd:
             return wd[f"nhle:{e['ListEntry']}"]
-    return None
+    qid = t.get("building:wikidata") or (t.get("wikidata") if not occupied(t) else None)
+    return wd.get(qid) if qid else None
+
+
+def osm_article(t):
+    """English Wikipedia title from the outline's tags, unless it probably describes the occupier."""
+    from .common import occupied
+    w = t.get("building:wikipedia") or (t.get("wikipedia") if not occupied(t) else None)
+    return w[3:] if w and w.startswith("en:") else None
 
 
 def main(city_id):

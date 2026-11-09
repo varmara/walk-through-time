@@ -207,3 +207,52 @@ def parse_year(raw):
         return None
     approx = re.match(r"^(c|ca|circa|about|~|before|after|early|mid|late|pre)", s) or re.search(r"[?~]", s)
     return y, (APPROX if approx else EXACT)
+
+
+# ---------------------------------------------------------------- names: what a building was, not who is in it now
+OCCUPANT_KEYS = ("shop", "office", "brand", "brand:wikidata", "operator", "craft", "healthcare")
+OCCUPANT_AMENITY = {"bank", "restaurant", "cafe", "fast_food", "bar", "pub", "nightclub", "pharmacy", "doctors",
+                    "dentist", "post_office", "bureau_de_change", "money_transfer", "betting", "gambling", "casino"}
+_HE_TAIL = re.compile(r"\s*(?:,|\bAND\b|\bWITH\b|\bINCLUDING\b)\s*(?:THE\s+)?(?:ATTACHED|ADJOINING|ADJACENT|FRONT|BOUNDARY|"
+                      r"GATES?|GATEPIERS?|RAILINGS?|WALLS?|PIERS|FORECOURT|LAMP|STEPS|AREA)\b.*$", re.I)
+
+
+def occupied(tags):
+    """True when the outline's name is probably a business inside it (a shop, an office, a brand) rather than
+    the building's own name: OpenStreetMap often puts the occupier's tags on the building."""
+    return any(tags.get(k) for k in OCCUPANT_KEYS) or tags.get("amenity") in OCCUPANT_AMENITY
+
+
+def tidy_listing(name):
+    """Historic England's name for a building, readable: 'NEWCASTLE HOUSE AND ATTACHED BOUNDARY WALL' ->
+    'Newcastle House'. None when it is only an address ('3 AND 5, HOUNDS GATE')."""
+    if not name:
+        return None
+    n = _HE_TAIL.sub("", re.sub(r"\s*\([^)]*\)", "", name.strip())).strip(" ,")
+    if not n or re.match(r"^\d", n) or re.match(r"^(?:NOS?\.?|NUMBERS?)\s*\d", n, re.I):
+        return None
+    if n.isupper():
+        n = n.title()
+    n = re.sub(r"\b(And|Of|The|At|To|On|In|For)\b", lambda m: m[1].lower(), n).replace("'S ", "'s ")
+    return n[0].upper() + n[1:]
+
+
+def building_name(tags, story=None, label=None, listing_name=None, place=None):
+    """(name, today): the name to show and, if different, who or what uses the building today.
+
+    Prefer what the building was: a story's name, a historic name in OpenStreetMap (old_name, historic:name,
+    building:name), the Wikidata item for the building, Historic England's name; the OpenStreetMap name only
+    when it is the building's own name, otherwise it becomes 'today'."""
+    osm = tags.get("name")
+    hist = tags.get("building:name") or tags.get("historic:name") or tags.get("name:historic") or tags.get("old_name")
+    he = tidy_listing(listing_name)
+    if story:
+        name = story
+    elif hist:
+        name = hist
+    elif osm and not occupied(tags):
+        name = osm
+    else:
+        name = label or he or osm or place
+    today = osm if osm and name and osm.strip().lower() != name.strip().lower() and (occupied(tags) or hist) else None
+    return name, today

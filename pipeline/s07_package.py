@@ -12,8 +12,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 import json
 
-from .common import load, log, work
-from .s05_dates import info_for
+from .common import building_name, load, log, work
+from .s05_dates import info_for, osm_article
 
 
 def main(city_id):
@@ -26,9 +26,10 @@ def main(city_id):
     cur = load(city_id, "curated")
     sums = load(city_id, "summaries") if work(city_id, "summaries").exists() else {}
     # names for outlines that have none in OpenStreetMap: a story's name, then a named place inside
-    fallback = {}
+    fallback, story_name = {}, {}
     for e in cur["entries"]:
-        fallback.setdefault(str(e["b"]), e["name"])
+        if e.get("layer") != "people":      # a person's name is not the building's
+            story_name.setdefault(str(e["b"]), e["name"])
     for k, v in lay.get("names", {}).items():   # plaque addresses
         fallback.setdefault(k, v)
     for pl in load(city_id, "places"):
@@ -42,10 +43,11 @@ def main(city_id):
         info = info_for(b, i, wd, listing) or {}
         d = dates.get(k, {})
         article = info.get("article")
-        if not article and t.get("wikipedia", "").startswith("en:"):
-            article = "https://en.wikipedia.org/wiki/" + t["wikipedia"][3:].replace(" ", "_")
+        if not article and osm_article(t):
+            article = "https://en.wikipedia.org/wiki/" + osm_article(t).replace(" ", "_")
+        name, today = building_name(t, story_name.get(k), info.get("label"), best.get("Name"), fallback.get(k))
         p = {
-            "name": t.get("name") or info.get("label") or fallback.get(k) or best.get("Name"),
+            "name": name or best.get("Name"), "today": today,
             "y": d.get("y"), "f": d.get("f"), "src": d.get("src"), "alts": d.get("alts"),
             "per": d.get("period"), "sh": d.get("share"),
             "h": b["h"], "base": b.get("base"), "levels": t.get("building:levels"), "osm": b["osm"],

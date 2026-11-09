@@ -427,6 +427,7 @@ function selectBuilding(id){
     padding: innerWidth >= 760 ? { right: 400 } : { bottom: innerHeight * 0.45 } });
 
   const rows = [];
+  if (p.today) rows.push(['Today', esc(p.today)]);    // the current occupier; the title is what the building was
   if (p.y != null) {
     const era = eraOf(p.y);
     rows.push(['Built', `${esc(dateText(p.y, p.f, p.per))}<span class="pill" style="border-color:${era[3]}">${esc(era[2])}</span>`]);
