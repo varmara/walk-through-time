@@ -103,7 +103,9 @@ def plain(s):
     s = re.sub(r"<ref[^>/]*/>|<ref[^>]*>.*?</ref>", " ", s or "", flags=re.S)
     for a, b in reversed(templates(s)):
         p = params(s[a:b])
-        keep = ("c. " + p.get("1", "")) if p["_name"] in ("circa", "c.") else p.get("1", "") if p["_name"] in ("nowrap", "small") else " "
+        name = p["_name"]
+        keep = (("c. " + p.get("1", "")) if name in ("circa", "c.") else p.get("1", "") if name in ("nowrap", "small")
+                else p.get("2", p.get("1", "")) if name in ("sort", "sortname", "hs") else " ")   # {{sort|1650|17th century}}
         s = s[:a] + keep + s[b:]
     s = re.sub(r"\[\[(?:[^\]|]*\|)?([^\]]*)\]\]", r"\1", s)
     s = re.sub(r"<[^>]+>|'{2,}", " ", s)
@@ -205,10 +207,13 @@ def main(city_id):
             n_rows += 1
             hit = [n for n in r["nums"] if n in by_num]
             if not hit and r["xy"]:
-                near = [p for p in listed if abs(p["x"] - r["xy"][0]) < 0.0005 and abs(p["y"] - r["xy"][1]) < 0.0004
-                        and metres([p["x"], p["y"]], r["xy"]) <= MAX_M and (not r["grade"] or p.get("Grade") == r["grade"])]
-                if len(near) == 1:
-                    hit = [int(near[0]["ListEntry"])]
+                near = sorted((metres([p["x"], p["y"]], r["xy"]), int(p["ListEntry"])) for p in listed
+                              if abs(p["x"] - r["xy"][0]) < 0.0005 and abs(p["y"] - r["xy"][1]) < 0.0004
+                              and (not r["grade"] or p.get("Grade") == r["grade"]))
+                near = [n for n in near if n[0] <= MAX_M]
+                # the nearest listed point, if it is clearly the nearest (a terrace has several entries side by side)
+                if near and (len(near) == 1 or near[0][0] <= 8 or near[0][0] * 2 <= near[1][0]):
+                    hit = [near[0][1]]
                     by_xy += 1
             for n in hit:
                 out.setdefault(str(n), {"text": r["date"][:80], "page": title})
