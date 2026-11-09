@@ -75,12 +75,14 @@ def osm_plaques(city_id, b, poly, have):
         if any(metres([x, y], [h["x"], h["y"]]) < 15 for h in have + extra):
             continue
         text = t.get("inscription") or t.get("description")
-        if not (text or t.get("name")):
+        # Only plaques that are recorded by Open Plaques or name their subject in Wikidata: OpenStreetMap also maps
+        # private memorials, tree plantings and opening stones, which do not belong in a history map.
+        if not (text or t.get("name")) or not (t.get("openplaques:id") or t.get("subject:wikidata")):
             continue
         extra.append({"x": x, "y": y, "id": t.get("openplaques:id"), "title": t.get("name"), "inscription": text,
                       "address": None, "year": (t.get("start_date") or "")[:4] or None, "photo": None,
                       "colour": t.get("colour"), "org": t.get("operator"),
-                      "subject": t.get("subject") or t.get("subject:name"), "type": "person" if t.get("subject:wikidata") else None,
+                      "subject": t.get("subject") or t.get("subject:name"), "type": "person" if (t.get("subject:wikidata") or t.get("subject")) else "thing",
                       "roles": None, "primary": None, "osm": el["id"]})
     log(f"s00 plaques: {len(extra)} more from OpenStreetMap (of {len(data.get('elements', []))} plaque nodes)")
     return extra
