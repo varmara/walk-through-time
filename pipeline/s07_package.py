@@ -1,6 +1,7 @@
 """Write the files the page loads, and a data report.
 
-  data/<city>.json        buildings (GeoJSON with all attributes), base map, layers, stats
+  work/<city>/package.json  everything the page shows: buildings (GeoJSON with all attributes), base map, layers,
+                            stats. Step s10_tiles turns it into what the page loads (tiles, a small index, card files).
   data/<city>-report.md   coverage of dates by precision and source, conflicts, layers, dropped stories
 
 Building properties: name, y (year), f (exact | approx | century), src, alts [{y, f, src}],
@@ -13,7 +14,7 @@ from pathlib import Path
 import json
 import urllib.parse
 
-from .common import building_name, load, log, work
+from .common import building_name, load, log, save, work
 from .s05_dates import info_for, osm_article
 
 
@@ -95,7 +96,7 @@ def main(city_id):
     out = {"city": city_id, "built": built, "stats": stats, "layers": lay["meta"], "nature": fc(nature), "pins": fc(pins),
            "buildings": fc(feats), "roads": fc(base["roads"]), "water": fc(base["water"]), "parks": fc(base["parks"])}
     Path("data").mkdir(exist_ok=True)
-    Path(f"data/{city_id}.json").write_text(json.dumps(out, separators=(",", ":"), ensure_ascii=False))
+    save(city_id, "package", out)
 
     pct = lambda a: f"{100 * a / n:.1f}%" if n else "–"  # noqa: E731
     rows = [
@@ -116,4 +117,4 @@ def main(city_id):
         *[f"- {e['layer']} / {e['name']}: {e['how']}" for e in cur["entries"]],
     ]
     Path(f"data/{city_id}-report.md").write_text("\n".join(rows) + "\n")
-    log(f"s07 wrote data/{city_id}.json ({n} buildings, {stats['dated']} dated, {stats['stories']} stories)")
+    log(f"s07 packaged ({n} buildings, {stats['dated']} dated, {stats['stories']} stories)")

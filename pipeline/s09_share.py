@@ -3,7 +3,7 @@
 Twitter (X), Telegram, WhatsApp and others read Open Graph tags from the page at the link and do not run
 JavaScript, so the map itself cannot describe a building. Each page carries the building's name, its summary
 and its photo (or the site's picture) and sends a visitor straight on to the map at that building
-(<city>/?osm=way/123). Pages are keyed by OpenStreetMap id, which stays the same between data builds.
+(<city>/?b=<index>&osm=way/123). Pages are keyed by OpenStreetMap id, which stays the same between data builds.
 
 Writes data/share/<city>/<type>-<id>.html (the folder is rebuilt each time, so removed buildings disappear).
 """
@@ -13,7 +13,7 @@ import os
 import shutil
 from pathlib import Path
 
-from .common import city, log
+from .common import load, city, log
 
 
 def site_url():
@@ -37,9 +37,9 @@ def describe(p, city_name):
     return text if len(text) <= 300 else text[:297].rsplit(" ", 1)[0] + "…"
 
 
-def page(p, city_id, city_name, site):
+def page(p, i, city_id, city_name, site):
     osm = p["osm"]
-    target = f"{site}{city_id}/?osm={osm}"
+    target = f"{site}{city_id}/?b={i}&osm={osm}"    # the index is this build's; the page is rebuilt with it
     image = (p["image"].replace("http://", "https://") + "?width=1200") if p.get("image") else f"{site}app/share.png"
     title = f"{p['name']} · {city_name} · Walk Through Time"
     e = lambda s: html.escape(str(s), quote=True)  # noqa: E731
@@ -70,14 +70,14 @@ def page(p, city_id, city_name, site):
 
 def main(city_id):
     c = city(city_id)
-    data = json.loads(Path(f"data/{city_id}.json").read_text())
+    data = load(city_id, "package")
     out = Path("data/share") / city_id
     shutil.rmtree(out, ignore_errors=True)
     out.mkdir(parents=True)
     site, n = site_url(), 0
-    for f in data["buildings"]["features"]:
+    for i, f in enumerate(data["buildings"]["features"]):
         p = f["properties"]
         if p.get("name") and p.get("osm"):
-            (out / (p["osm"].replace("/", "-") + ".html")).write_text(page(p, city_id, c["name"], site))
+            (out / (p["osm"].replace("/", "-") + ".html")).write_text(page(p, i, city_id, c["name"], site))
             n += 1
     log(f"s09 share pages: {n} named buildings (data/share/{city_id}/)")

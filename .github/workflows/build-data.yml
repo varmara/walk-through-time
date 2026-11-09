@@ -53,7 +53,25 @@ jobs:
             echo "No saved download yet; the pipeline will fetch one."
           fi
 
+      # tippecanoe turns the buildings into vector tiles (step s10_tiles); built once, then kept in the cache
+      - name: Restore tippecanoe
+        id: tippecanoe
+        uses: actions/cache@v4
+        with:
+          path: ~/tippecanoe
+          key: tippecanoe-2.79.0-${{ runner.os }}
+
+      - name: Build tippecanoe
+        if: steps.tippecanoe.outputs.cache-hit != 'true'
+        run: |
+          sudo apt-get install -y -q libsqlite3-dev zlib1g-dev
+          git clone -q --depth 1 -b 2.79.0 https://github.com/felt/tippecanoe.git /tmp/tippecanoe
+          make -C /tmp/tippecanoe -j4 tippecanoe
+          mkdir -p ~/tippecanoe && cp /tmp/tippecanoe/tippecanoe ~/tippecanoe/
+
       - name: Run the pipeline for every city
+        env:
+          TIPPECANOE: /home/runner/tippecanoe/tippecanoe
         run: |
           cities=$(ls cities/*.json | xargs -n1 basename | sed 's/\.json$//')
           if [ "$REFRESH" = "true" ]; then

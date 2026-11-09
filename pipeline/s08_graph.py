@@ -8,11 +8,11 @@ the Lace Market story of a warehouse Hine designed) is linked there too, as in a
 import json
 from pathlib import Path
 
-from .common import log
+from .common import load, log
 
 
 def main(city_id):
-    data = json.loads(Path(f"data/{city_id}.json").read_text())
+    data = load(city_id, "package")
     feats, pins, areas = data["buildings"]["features"], data["pins"]["features"], data["nature"]["features"]
 
     def ref(x):

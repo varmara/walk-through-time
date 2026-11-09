@@ -83,6 +83,49 @@ let layers = [];                 // layer metadata from the data file
 const groups = new Map();        // group key -> { key, title, count, items, layer }
 let active = new Set();          // ticked group keys
 const entitiesAt = {};           // building index -> [{name, bs}] for people and stories with several places
+// The index (see pipeline/s10_tiles.py): one column per field, one value per building. Outlines come from the
+// vector tiles; the rest of a card's details from a card file, when the card opens (loadCard).
+const FLAGS = { e:'exact', a:'approx', c:'century', r:'area' };
+function fromIndex(ix){
+  const out = new Array(ix.n);
+  let x = 0, y = 0;
+  for (let i = 0; i < ix.n; i++) {
+    x += ix.dxy[2 * i]; y += ix.dxy[2 * i + 1];
+    const p = { ...(ix.props[i] || {}) };
+    if (ix.y[i] != null) { p.y = ix.y[i]; p.f = FLAGS[ix.f[i]]; }
+    if (ix.per[i] >= 0) { p.per = ix.periods[ix.per[i]]; p.sh = ix.sh[i]; }
+    out[i] = { properties: p, xy: [ix.origin[0] + x / ix.scale, ix.origin[1] + y / ix.scale] };
+  }
+  return out;
+}
+const tiled = () => !!data.index;
+const fstate = (id, st) => map.setFeatureState(tiled() ? { source:'b', sourceLayer:'b', id } : { source:'b', id }, st);
+const cardFiles = {};
+function loadCard(id){       // the card's details, merged into the building's properties
+  if (!tiled() || features[id].full) return Promise.resolve();
+  const n = Math.floor(id / data.tiles.chunk);
+  cardFiles[n] = cardFiles[n] || fetchJSON(`../data/${CITY_ID}/cards/${n}.json?v=${data.build}`).catch(e => { delete cardFiles[n]; throw e; });
+  return cardFiles[n].then(chunk => {
+    for (const [i, extra] of Object.entries(chunk)) if (!features[i].full) { Object.assign(features[i].properties, extra); features[i].full = true; }
+    features[id].full = true;
+  });
+}
+let osmIds = null;           // for links that name an OpenStreetMap id
+async function byOsm(osm){
+  if (!tiled()) return features.findIndex(f => f.properties.osm === osm);
+  osmIds = osmIds || await fetchJSON(`../data/${CITY_ID}/osm.json?v=${data.build}`);
+  return osmIds.indexOf(osm);
+}
+// Gzipped vector tiles: GitHub Pages serves them as they are, so the page unpacks them itself.
+if (window.DecompressionStream) maplibregl.addProtocol('gzt', async (params, abort) => {
+  const r = await fetch(params.url.replace(/^gzt:/, location.protocol), { signal: abort.signal });
+  if (r.status === 404 || r.status === 204) return { data: new ArrayBuffer(0) };      // no buildings in that tile
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const bytes = new Uint8Array(await r.arrayBuffer());
+  if (bytes[0] !== 0x1f || bytes[1] !== 0x8b) return { data: bytes.buffer };          // already unpacked
+  const out = await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
+  return { data: out };
+});
 try { active = new Set(JSON.parse(store.get('layers:' + CITY_ID) || '[]')); } catch {}
 const saveActive = () => store.set('layers:' + CITY_ID, JSON.stringify([...active]));
 const isArea = key => groups.get(key)?.layer.kind === 'areas';
@@ -91,15 +134,14 @@ async function main(){
   progress(5, 'loading map data…');
   city = await fetchJSON(`../cities/${CITY_ID}.json`);
   data = await fetchData(`../data/${CITY_ID}.json`);
-  progress(70, 'colouring by year…');
-  features = data.buildings.features;
+  progress(70, 'reading buildings…');
+  features = data.index ? fromIndex(data.index) : data.buildings.features;
   if (!features.length) throw new Error('no buildings in the map data');
   let known = 0;
   let estimated = 0;
   features.forEach((f, i) => {
     f.id = i;
     if (f.properties.y != null) f.properties.f === 'area' ? estimated++ : known++;
-    f.properties.c = colourFor(f.properties);
   });
   stats = { total: features.length, known, estimated };
 
@@ -121,10 +163,9 @@ async function main(){
   updateYear();
   // ?focus=b12,p3&name=… (from the graph page): open those places, as a set when there are several
   const q = new URLSearchParams(location.search), focus = q.get('focus'), osm = q.get('osm');
-  if (osm) {   // a shared building
-    const i = features.findIndex(f => f.properties.osm === osm);
-    if (i >= 0) selectBuilding(i);
-  }
+  const bq = q.get('b');
+  if (bq != null && +bq < features.length) selectBuilding(+bq);       // a shared building (its index in this build)
+  else if (osm) { const i = await byOsm(osm).catch(() => -1); if (i >= 0) selectBuilding(i); }
   if (focus) {
     const refs = focus.split(',').map(x => x[0] === 'b' ? +x.slice(1) : x)
       .filter(r => typeof r === 'number' ? r < features.length : r[0] === 'p' ? data.pins && pinOf(r) : areaOf(r));
@@ -139,9 +180,15 @@ function isDark(){
 }
 
 // ================= Map =================
+// era colour by year, faded towards the background by how precise the date is (as colourFor)
+function eraColour(){
+  const step = t => ['step', ['get', 'y'], mix(ERAS[0][3], tok('--bg'), t), ...ERAS.slice(1).flatMap(e => [e[0], mix(e[3], tok('--bg'), t)])];
+  return ['case', ['!', ['has', 'y']], tok('--unknown'),
+    ['match', ['coalesce', ['get', 'f'], 'exact'], ...['approx', 'century', 'area'].flatMap(f => [f, step(FADE[f])]), step(0)]];
+}
 function buildingColour(){
   const base = ['case', ['boolean', ['feature-state', 'sel'], false], tok('--accent'),
-    ['boolean', ['feature-state', 'hl'], false], tok('--hl'), ['get', 'c']];
+    ['boolean', ['feature-state', 'hl'], false], tok('--hl'), eraColour()];
   if (places) return ['case', ['boolean', ['feature-state', 'sel'], false], tok('--accent'),
     ['boolean', ['feature-state', 'hl'], false], tok('--hl'), tok('--ghost')];   // only this person's places stand out
   const keys = [...active].filter(k => !isArea(k));
@@ -150,7 +197,7 @@ function buildingColour(){
   // in a ticked layer: era colour when dated, a strong neutral when not (plain grey would vanish into the faded rest)
   return ['case', ['boolean', ['feature-state', 'sel'], false], tok('--accent'),
     ['boolean', ['feature-state', 'hl'], false], tok('--hl'),
-    inLayer, ['case', ['has', 'y'], ['get', 'c'], tok('--marked')], tok('--ghost')];
+    inLayer, ['case', ['has', 'y'], eraColour(), tok('--marked')], tok('--ghost')];
 }
 const natureColour = () => ['match', ['get', 't'], ...AREA_TYPES.flatMap(t => [t, tok('--n-' + t)]), tok('--n-reserve')];
 
@@ -171,14 +218,17 @@ function drawMap(){
       map.addSource('osm', { type:'raster', tiles:['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize:256, maxzoom:19 });
       map.addLayer({ id:'osm', type:'raster', source:'osm', layout:{ visibility:'none' }, paint:{ 'raster-opacity':0.75, 'raster-saturation':-0.6 } });
       const key = store.get('mtKey'); if (key) addNls(key);
-      map.addSource('parks', { type:'geojson', data:data.parks });
-      map.addLayer({ id:'parks', type:'fill', source:'parks', paint:{ 'fill-color':tok('--park') } });
-      map.addSource('water', { type:'geojson', data:data.water });
-      map.addLayer({ id:'water', type:'fill', source:'water', filter:['==', ['geometry-type'], 'Polygon'], paint:{ 'fill-color':tok('--water') } });
-      map.addLayer({ id:'waterline', type:'line', source:'water', filter:['==', ['geometry-type'], 'LineString'],
+      // the city's tiles (outlines of buildings, roads, water, parks), or the old single file's GeoJSON
+      const T = data.tiles, tileUrl = T && new URL(`../data/${CITY_ID}/tiles/{z}/{x}/{y}.pbf?v=${data.build}`, location.href).href
+        .replace(/^https?:/, window.DecompressionStream ? 'gzt:' : location.protocol).replace('%7Bz%7D', '{z}').replace('%7Bx%7D', '{x}').replace('%7By%7D', '{y}');
+      const src = (name, extra = {}) => T ? { source:'city', 'source-layer':name, ...extra } : { source:name, ...extra };
+      if (T) map.addSource('city', { type:'vector', tiles:[tileUrl], minzoom:T.minzoom, maxzoom:T.maxzoom });
+      else ['parks', 'water', 'roads'].forEach(k => map.addSource(k, { type:'geojson', data:data[k] }));
+      map.addLayer({ id:'parks', type:'fill', ...src('parks'), paint:{ 'fill-color':tok('--park') } });
+      map.addLayer({ id:'water', type:'fill', ...src('water'), filter:['==', ['geometry-type'], 'Polygon'], paint:{ 'fill-color':tok('--water') } });
+      map.addLayer({ id:'waterline', type:'line', ...src('water'), filter:['==', ['geometry-type'], 'LineString'],
         paint:{ 'line-color':tok('--water'), 'line-width':['interpolate', ['linear'], ['zoom'], 13, 2, 17, 10] } });
-      map.addSource('roads', { type:'geojson', data:data.roads });
-      map.addLayer({ id:'roads', type:'line', source:'roads', layout:{ 'line-cap':'round', 'line-join':'round' },
+      map.addLayer({ id:'roads', type:'line', ...src('roads'), layout:{ 'line-cap':'round', 'line-join':'round' },
         paint:{ 'line-color':tok('--road'), 'line-width':['interpolate', ['linear'], ['zoom'], 13, ['match', ['get','k'], 'major', 1.5, 0.4], 18, ['match', ['get','k'], 'major', 14, 3]] } });
 
       map.addSource('nature', { type:'geojson', data: data.nature || { type:'FeatureCollection', features:[] } });
@@ -187,8 +237,9 @@ function drawMap(){
       map.addLayer({ id:'nature-line', type:'line', source:'nature', layout:{ visibility:'none' },
         paint:{ 'line-color':natureColour(), 'line-width':2, 'line-dasharray':[2, 1] } });
 
-      map.addSource('b', { type:'geojson', data:{ type:'FeatureCollection', features } });
-      map.addLayer({ id:'b', type:'fill-extrusion', source:'b', paint:{
+      if (T) map.addSource('b', { type:'vector', tiles:[tileUrl], minzoom:T.minzoom, maxzoom:T.maxzoom });
+      else map.addSource('b', { type:'geojson', data:{ type:'FeatureCollection', features } });
+      map.addLayer({ id:'b', type:'fill-extrusion', source:'b', ...(T ? { 'source-layer':'b' } : {}), paint:{
         'fill-extrusion-color':buildingColour(),
         'fill-extrusion-height':['get', 'h'], 'fill-extrusion-base':['coalesce', ['get', 'base'], 0], 'fill-extrusion-opacity':0.95,
         'fill-extrusion-vertical-gradient':true } });
@@ -297,7 +348,7 @@ function openSheet(kind, title){
 // Share a building: named buildings get a small page of their own with a preview (pipeline/s09_share.py),
 // the rest a plain link to the map. The phone's share sheet where there is one, else the link is copied.
 function shareLink(p){
-  const site = new URL('../', location.href).href, osm = p.osm;
+  const site = new URL('../', location.href).href, osm = p.osm || '';
   return p.name ? `${site}data/share/${CITY_ID}/${osm.replace('/', '-')}.html` : `${site}${CITY_ID}/?osm=${osm}`;
 }
 function toast(text){ const t = $('toast'); t.textContent = text; t.hidden = false; clearTimeout(t._h); t._h = setTimeout(() => t.hidden = true, 2200); }
@@ -313,7 +364,7 @@ function closeSheet(){
   $('bLayers').setAttribute('aria-expanded', false);
   $('bMap').setAttribute('aria-expanded', false);
   if (places) { setPlace(places.i, false); return; }   // back to the places strip, its building still selected
-  if (selectedId != null && map) { map.setFeatureState({ source:'b', id:selectedId }, { sel:false }); selectedId = null; }
+  if (selectedId != null && map) { fstate(selectedId, { sel:false }); selectedId = null; }
 }
 $('sClose').onclick = closeSheet;
 addEventListener('keydown', e => { if (e.key === 'Escape' && !sheet.hidden) closeSheet(); });
@@ -437,14 +488,21 @@ $('legend').insertAdjacentHTML('afterend', '<p class="note">Palest of all: no da
 // ================= Cards =================
 const layerTitle = id => layers.find(L => L.id === id)?.title || id;
 function selectBuilding(id){
-  if (selectedId != null) map.setFeatureState({ source:'b', id:selectedId }, { sel:false });
+  if (selectedId != null) fstate(selectedId, { sel:false });
   selectedId = id;
-  map.setFeatureState({ source:'b', id }, { sel:true });
-  const f = features[id], p = f.properties;
-  const ring = f.geometry.type === 'Polygon' ? f.geometry.coordinates[0] : f.geometry.coordinates[0][0];
-  const cx = ring.reduce((a, c) => a + c[0], 0) / ring.length, cy = ring.reduce((a, c) => a + c[1], 0) / ring.length;
-  map.easeTo({ center:[cx, cy], zoom:Math.max(map.getZoom(), 16.5), duration:700,
+  fstate(id, { sel:true });
+  map.easeTo({ center:centreOf(id), zoom:Math.max(map.getZoom(), 16.5), duration:700,
     padding: innerWidth >= 760 ? { right: 400 } : { bottom: innerHeight * 0.45 } });
+  if (features[id].full || !tiled()) return showCard(id);
+  openSheet('card', refName(id));                  // the title at once, the details when their file arrives
+  $('cFacts').innerHTML = '<dt>Loading…</dt><dd></dd>';
+  ['cImg', 'cSum', 'cCredit', 'cDyk', 'cArch'].forEach(k => $(k).hidden = true);
+  $('cStories').innerHTML = ''; $('cLinks').innerHTML = '';
+  loadCard(id).then(() => selectedId === id && showCard(id))
+    .catch(() => { if (selectedId === id) $('cFacts').innerHTML = '<dt>Could not load</dt><dd>Check the connection and tap the building again.</dd>'; });
+}
+function showCard(id){
+  const f = features[id], p = f.properties;
 
   const rows = [];
   if (p.today) rows.push(['Today', esc(p.today)]);    // the current occupier; the title is what the building was
@@ -573,6 +631,7 @@ function showPin(p){
 let places = null;             // { name, bs, i }
 const pins = {};               // marker key -> maplibregl.Marker
 const centreOf = b => {
+  if (features[b].xy) return features[b].xy;
   const g = features[b].geometry, ring = g.type === 'Polygon' ? g.coordinates[0] : g.coordinates[0][0];
   return [ring.reduce((a, c) => a + c[0], 0) / ring.length, ring.reduce((a, c) => a + c[1], 0) / ring.length];
 };
@@ -584,7 +643,7 @@ function showPlaces(name, bs){
   closeSheet();
   clearPlaces(false);
   places = { name, bs, i: 0 };
-  bs.filter(isB).forEach(b => map.setFeatureState({ source:'b', id:b }, { hl:true }));
+  bs.filter(isB).forEach(b => fstate(b, { hl:true }));
   map.setPaintProperty('b', 'fill-extrusion-color', buildingColour());
   map.getSource('places').setData({ type:'FeatureCollection', features: bs.map((b, i) =>
     ({ type:'Feature', properties:{ n: i + 1 }, geometry:{ type:'Point', coordinates: refCentre(b) } })) });
@@ -615,9 +674,9 @@ function setPlace(i, fly = true){
   if (!places) return;
   places.i = i;
   $('pCount').textContent = `${i + 1} of ${places.bs.length}`;
-  if (selectedId != null) map.setFeatureState({ source:'b', id:selectedId }, { sel:false });
+  if (selectedId != null) fstate(selectedId, { sel:false });
   selectedId = isB(places.bs[i]) ? places.bs[i] : null;
-  if (selectedId != null) map.setFeatureState({ source:'b', id:selectedId }, { sel:true });
+  if (selectedId != null) fstate(selectedId, { sel:true });
   Object.entries(pins).forEach(([k, m]) => m.getElement().classList.toggle('on', k === 'p' + (i + 1)));
   $('pCards').querySelectorAll('.pcard').forEach(c => c.classList.toggle('on', +c.dataset.i === i));
   if (fly) map.easeTo({ center: refCentre(places.bs[i]), zoom: Math.max(map.getZoom(), 16.5), duration: 700,
@@ -641,8 +700,8 @@ $('pPrev').onclick = () => places && goToCard(Math.max(0, places.i - 1));
 $('pNext').onclick = () => places && goToCard(Math.min(places.bs.length - 1, places.i + 1));
 $('pClose').onclick = () => clearPlaces(true);
 function clearPlaces(showTime){
-  if (places) places.bs.filter(isB).forEach(b => map.setFeatureState({ source:'b', id:b }, { hl:false }));
-  if (selectedId != null) { map.setFeatureState({ source:'b', id:selectedId }, { sel:false }); selectedId = null; }
+  if (places) places.bs.filter(isB).forEach(b => fstate(b, { hl:false }));
+  if (selectedId != null) { fstate(selectedId, { sel:false }); selectedId = null; }
   places = null;
   if (map && map.getLayer('b')) map.setPaintProperty('b', 'fill-extrusion-color', buildingColour());
   if (map && map.getSource('places')) map.getSource('places').setData({ type:'FeatureCollection', features:[] });
