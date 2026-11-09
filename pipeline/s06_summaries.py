@@ -85,6 +85,14 @@ def street_of(tags_list):
     return None
 
 
+def tidy(listing_name):
+    """Historic England names are often in capitals: ' 3 AND 5, HOUNDS GATE' -> '3 and 5, Hounds Gate'."""
+    n = listing_name.strip()
+    if n.isupper():
+        n = n.title()
+    return re.sub(r"\b(And|Of|The|At|To|On|In)\b", lambda m: m[1].lower(), n).replace("'S ", "'s ")
+
+
 def ordinal(n):
     return f"{n}{'th' if 10 <= n % 100 <= 20 else {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')}"
 
@@ -101,12 +109,16 @@ def date_sentence(d):
     return s + "."
 
 
-def written(name, tags_list, d, listing, architect):
+def written(name, tags_list, d, listing, architect, address=False):
     use, occupant = use_of(tags_list, name)
     street = street_of(tags_list)
     on = f" on {street}" if street else ""
     out = []
-    if name and use:
+    if address and use:      # the only name is the listing's address: "A shop at 3 and 5, Hounds Gate."
+        out.append(f"{ARTICLE(use).capitalize()} {use} at {name}.")
+    elif address:
+        pass
+    elif name and use:
         out.append(f"{name}: {ARTICLE(use)} {use}{on}." if occupant else f"{name} is {ARTICLE(use)} {use}{on}.")
     elif name and street:
         out.append(f"{name}, on {street}.")
@@ -117,7 +129,7 @@ def written(name, tags_list, d, listing, architect):
     if listing:
         g = listing.get("Grade")
         ln = (listing.get("Name") or "").strip()
-        as_ = f" as {ln.title() if ln.isupper() else ln}" if ln and name and ln.lower() not in name.lower() and name.lower() not in ln.lower() else ""
+        as_ = f" as {tidy(ln)}" if ln and not address and name and ln.lower() not in name.lower() and name.lower() not in ln.lower() else ""
         if g:
             bits.append(f"it is Grade {g} listed{as_}")
     if architect:
@@ -199,8 +211,9 @@ def main(city_id):
         name = t.get("name") or info.get("label") or cur.get(k) or next((p.get("name") for p in inside.get(i, []) if p.get("name")), None)
         if not name and not best:
             continue
-        text = written(name or (best or {}).get("Name", "").title(), tags_list, dates.get(k), best,
-                       info.get("architect") or t.get("architect"))
+        address = not name
+        text = written(name or tidy((best or {}).get("Name", "")), tags_list, dates.get(k), best,
+                       info.get("architect") or t.get("architect"), address=address)
         if text:
             srcs = ["OpenStreetMap"] + (["Historic England"] if best else []) + (["Wikidata"] if info.get("architect") else [])
             out[k] = {"text": text, "src": {"title": " · ".join(srcs), "kind": "Written from the map's data"}}
