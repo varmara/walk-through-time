@@ -483,12 +483,32 @@ function selectBuilding(id){
   links.push(`<a href="https://www.openstreetmap.org/${esc(p.osm)}" target="_blank" rel="noopener">OpenStreetMap</a>`);
   $('cLinks').innerHTML = links.join('');
 
-  const img = $('cImg');
-  if (p.image) { img.src = p.image.replace(/^http:/, 'https:') + '?width=640'; img.alt = p.name || ''; img.hidden = false; img.onerror = () => img.hidden = true; }
+  const img = $('cImg'), J = v => typeof v === 'string' ? JSON.parse(v) : v;
+  const filePage = f => 'https://commons.wikimedia.org/wiki/File:' + encodeURIComponent(f.replace(/ /g, '_'));
+  const credit = f => [f.author, f.licence].filter(Boolean).map(esc).join(' · ');
+  if (p.image) { img.src = p.image.replace(/^http:/, 'https:') + '?width=640'; img.alt = p.name || ''; img.hidden = false; img.onerror = () => { img.hidden = true; $('cCredit').hidden = true; }; }
   else { img.hidden = true; img.removeAttribute('src'); }
+  // every photo is credited and links to its page on Commons (author and licence)
+  const cr = J(p.credit), file = p.image && decodeURIComponent(p.image.split('/Special:FilePath/')[1] || '').replace(/_/g, ' ');
+  $('cCredit').hidden = !p.image;
+  $('cCredit').innerHTML = p.image ? `Photo${cr && credit(cr) ? ': ' + credit(cr) : ''} · <a href="${esc(filePage(file))}" target="_blank" rel="noopener">Wikimedia Commons</a>` : '';
+  // 'Did you know', each with its source
+  const dyk = J(p.dyk) || [];
+  $('cDyk').hidden = !dyk.length;
+  $('cDyk').innerHTML = dyk.length ? '<h3>Did you know?</h3>' + dyk.map(d => `<p>${esc(d.text)} <span class="src"><a href="${esc(d.source.url)}" target="_blank" rel="noopener">${esc(d.source.kind || 'Source')}</a></span></p>`).join('') : '';
+  // old photographs, oldest first, from Commons
+  const arch = J(p.archive) || [];
+  $('cArch').hidden = !arch.length;
+  $('cArch').innerHTML = arch.length ? '<h3>Old photographs</h3><div class="strip">' + arch.map(f => {
+    const src = 'https://commons.wikimedia.org/wiki/Special:FilePath/' + encodeURIComponent(f.file.replace(/ /g, '_')) + '?width=320';
+    return `<a class="shot" href="${esc(filePage(f.file))}" target="_blank" rel="noopener" title="${esc(f.file)}">
+      <img loading="lazy" src="${esc(src)}" alt="${esc(f.file.replace(/\.\w+$/, ''))}" onerror="this.parentNode.remove()">
+      <span><b>${esc(f.year)}</b>${credit(f) ? ' · ' + credit(f) : ''}</span></a>`;
+  }).join('') + '</div>' : '';
   openSheet('card', p.name || p.listName || 'Unnamed building');
 }
 function showArea(p){
+  ['cCredit', 'cDyk', 'cArch'].forEach(id => $(id).hidden = true);
   $('cSum').hidden = true;
   const type = (groups.get(p.t) || {}).title || 'Nature area';
   $('cImg').hidden = true;
@@ -534,6 +554,7 @@ function openRef(r){
   showArea(f.properties);
 }
 function showPin(p){
+  ['cCredit', 'cDyk', 'cArch'].forEach(id => $(id).hidden = true);
   $('cSum').hidden = true;
   const link = s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>`;
   $('cImg').hidden = true;

@@ -28,6 +28,8 @@ open data ──► pipeline/ (Python, numbered steps) ──► data/<city>.jso
 | `s04_curated` | Hand-written stories (`stories/<city>.py`) checked against Wikipedia and placed on buildings |
 | `s05_dates` | One year per building with its precision (exact, approximate, century) and source; keeps every date that disagrees with it |
 | `s06_layers` | Every layer resolved to its buildings: story layers and rule layers (`pipeline/layers.py`) |
+| `s04_residents` | Well-known residents: people tied to the city in Wikidata whose Wikipedia article names a house number and street here, matched to the building by its OpenStreetMap address |
+| `s06_photos` | Photos from Wikimedia Commons (many imported from Geograph): a current photo where Wikidata has none, and up to six old photographs per building, one per decade, never older than the building |
 | `s06_summaries` | One to three sentences per named or listed building: the start of its Wikipedia article, or written only from facts in the data (use and street, date, listing, architect) |
 | `s07_package` | Writes `data/<city>.json` and the data report `data/<city>-report.md` |
 | `s08_graph` | Writes `data/<city>-graph.json` for the graph page (`<city>/graph.html`): people and story themes linked to places by checked stories |

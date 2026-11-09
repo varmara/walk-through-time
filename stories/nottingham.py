@@ -21,6 +21,12 @@ def P(name, person, place, story, facts, at=None, group=None, quote=None):
             **({"at": at} if at else {}), **({"group": group} if group else {}), **({"quote": quote} if quote else {})}
 
 
+def F(name, source, fact, facts, at=None):
+    """A 'Did you know' fact about one building, shown on its card. Same checks and placement as a story: the
+    facts must appear in the article, and the article (or `at`) decides the building."""
+    return {"name": name, "source": source, "story": fact, "facts": facts, **({"at": at} if at else {})}
+
+
 CURATED = [
     dict(
         id="inns", title="Old inns",
@@ -191,6 +197,42 @@ CURATED = [
             E("Sneinton Market", "en:Sneinton",
               "In the 1930s the city's wholesale fruit and vegetable market moved here from the Old Market Square.",
               ("1930s", "wholesale fruit and vegetable market"), at="pin:-1.1399,52.9531"),
+        ]),
+    dict(
+        id="facts", kind="facts", title="Did you know",
+        intro="Short facts shown on building cards, each checked against its article.",
+        entries=[
+            F("Council House", "en:Nottingham Council House",
+              "The sculptor Joseph Else named the two stone lions on its steps Agamemnon and Menelaus.",
+              ("Joseph Else", "Agamemnon", "Menelaus")),
+            F("Council House", "en:Nottingham Council House",
+              "Little John, the hour bell in the dome, weighs over 10 tonnes, and its strike can be heard 7 miles away.",
+              ("Little John", "10 tonnes", "7 miles")),
+            F("Bromley House", "en:Bromley House Library",
+              "The longcase clock in the library is still set to Nottingham time, 4 minutes and 33 seconds behind "
+              "Greenwich, by a meridian line laid in 1836.",
+              ("4 minutes and 33 seconds", "meridian line", "1836")),
+            F("Bromley House", "en:Bromley House Library",
+              "In 1841 Alfred Barber opened the first photographic studio in the Midlands in its attics.",
+              ("Alfred Barber", "first photographic studio in the Midlands", "1841")),
+            F("Theatre Royal", "en:Theatre Royal, Nottingham",
+              "The world premiere of Agatha Christie's The Mousetrap took place here, in October 1952.",
+              ("world premiere", "Mousetrap", "1952")),
+            F("Nottingham Castle", "en:Nottingham Castle",
+              "Rioters burnt the Duke of Newcastle's mansion here in 1831, over his opposition to the Reform Bill. "
+              "It reopened in 1878 as the first municipal art gallery in the UK outside London.",
+              ("1831", "Reform Bill", "1878", "first municipal art gallery")),
+            F("National Justice Museum", "en:National Justice Museum",
+              "The last public execution here was in 1864, when Richard Thomas Parker was hanged on a scaffold above "
+              "the front steps.",
+              ("1864", "Richard Thomas Parker", "steps")),
+            F("National Justice Museum", "en:National Justice Museum",
+              "Its courtrooms date back to the 14th century, and Nottingham's courts sat here until 1991.",
+              ("14th century", "1991")),
+            F("Malt Cross", "en:Malt Cross",
+              "It takes its name from a monument that once stood in the market square; before it, the site was an "
+              "inn called the Roebuck.",
+              ("monument", "Roebuck")),
         ]),
     dict(
         id="people", title="People", kind="people",

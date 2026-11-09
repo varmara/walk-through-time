@@ -57,6 +57,8 @@ def main(city_id):
                                                    **({"place": place} if place else {})})
 
     for L in cur["layers"]:
+        if L.get("kind") == "facts":    # 'Did you know' facts go on the cards (s07), not into a layer
+            continue
         es = [e for e in cur["entries"] if e["layer"] == L["id"]]
         for e in es:
             if e["b"] is None:   # not a building: a pin
@@ -123,6 +125,15 @@ def main(city_id):
         label = p.get("subject") or (text[:40] + "…" if len(text) > 40 else text) or "Plaque"
         person(b, key, label, story, src, xy=(p["x"], p["y"]))
     log(f"s06 plaques: {placed}/{len(plaques)} placed on a building, the rest shown as pins")
+
+    # well-known residents found in their Wikipedia articles (s04_residents)
+    residents = load(city_id, "residents") if work(city_id, "residents").exists() else []
+    for r in residents:
+        person(r["b"], r["group"], r["name"],
+               f"Lived or worked at {r['address']}, according to Wikipedia: “{r['sentence']}” "
+               f"(House numbers have sometimes changed since.)",
+               {"title": r["title"], "url": r["url"], "kind": "Wikipedia"})
+    log(f"s06 residents: {len(residents)} addresses of well-known people")
 
     wd = load(city_id, "wikidata")
     told = {(int(i), s2["source"]["title"]) for i, ss in stories.items() for s2 in ss if s2.get("source")}

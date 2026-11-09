@@ -11,6 +11,7 @@ sum (one to three sentences) and sumSrc {title, url?, kind}.
 from datetime import datetime, timezone
 from pathlib import Path
 import json
+import urllib.parse
 
 from .common import building_name, load, log, work
 from .s05_dates import info_for, osm_article
@@ -25,6 +26,12 @@ def main(city_id):
     lay = load(city_id, "layers")
     cur = load(city_id, "curated")
     sums = load(city_id, "summaries") if work(city_id, "summaries").exists() else {}
+    photos = load(city_id, "photos") if work(city_id, "photos").exists() else {}
+    dyk = {}
+    for e in cur["entries"]:
+        if e["layer"] == "facts" and e["b"] is not None:
+            dyk.setdefault(str(e["b"]), []).append({"text": e["story"], "source": e["source"]})
+    commons = lambda f: "http://commons.wikimedia.org/wiki/Special:FilePath/" + urllib.parse.quote(f.replace(" ", "_"))  # noqa: E731
     # names for outlines that have none in OpenStreetMap: a story's name, then a named place inside
     fallback, story_name = {}, {}
     for e in cur["entries"]:
@@ -54,7 +61,9 @@ def main(city_id):
             "kind": t.get("building") if t.get("building") != "yes" else None,
             "grade": best.get("Grade"), "listEntry": best.get("ListEntry"), "listName": best.get("Name"),
             "listUrl": best.get("hyperlink"), "qid": info.get("qid") or t.get("wikidata"),
-            "image": info.get("image"), "article": article, "architect": info.get("architect") or t.get("architect"),
+            "image": info.get("image") or ((photos.get(k) or {}).get("photo") and commons(photos[k]["photo"]["file"])),
+            "credit": None if info.get("image") else (photos.get(k) or {}).get("photo"),
+            "archive": (photos.get(k) or {}).get("archive"), "dyk": dyk.get(k), "article": article, "architect": info.get("architect") or t.get("architect"),
             "L": ("," + ",".join(lay["member"][k]) + ",") if k in lay["member"] else None,
             "stories": lay["stories"].get(k),
             "sum": (sums.get(k) or {}).get("text"), "sumSrc": (sums.get(k) or {}).get("src"),
