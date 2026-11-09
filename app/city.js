@@ -119,7 +119,11 @@ async function main(){
   applyLayers();
   updateYear();
   // ?focus=b12,p3&name=… (from the graph page): open those places, as a set when there are several
-  const q = new URLSearchParams(location.search), focus = q.get('focus');
+  const q = new URLSearchParams(location.search), focus = q.get('focus'), osm = q.get('osm');
+  if (osm) {   // a shared building
+    const i = features.findIndex(f => f.properties.osm === osm);
+    if (i >= 0) selectBuilding(i);
+  }
   if (focus) {
     const refs = focus.split(',').map(x => x[0] === 'b' ? +x.slice(1) : x)
       .filter(r => typeof r === 'number' ? r < features.length : r[0] === 'p' ? data.pins && pinOf(r) : areaOf(r));
@@ -281,6 +285,7 @@ const sheet = $('sheet');
 let sheetKind = null;
 function openSheet(kind, title){
   sheetKind = kind;
+  $('sShare').hidden = !(kind === 'card' && selectedId != null && features[selectedId]?.properties.osm);
   $('sTitle').textContent = title;
   ['pLayers', 'pMap', 'pCard'].forEach(id => $(id).hidden = true);
   $({ layers:'pLayers', map:'pMap', card:'pCard' }[kind]).hidden = false;
@@ -288,6 +293,20 @@ function openSheet(kind, title){
   $('bLayers').setAttribute('aria-expanded', kind === 'layers');
   $('bMap').setAttribute('aria-expanded', kind === 'map');
 }
+// Share a building: named buildings get a small page of their own with a preview (pipeline/s09_share.py),
+// the rest a plain link to the map. The phone's share sheet where there is one, else the link is copied.
+function shareLink(p){
+  const site = new URL('../', location.href).href, osm = p.osm;
+  return p.name ? `${site}data/share/${CITY_ID}/${osm.replace('/', '-')}.html` : `${site}${CITY_ID}/?osm=${osm}`;
+}
+function toast(text){ const t = $('toast'); t.textContent = text; t.hidden = false; clearTimeout(t._h); t._h = setTimeout(() => t.hidden = true, 2200); }
+$('sShare').onclick = async () => {
+  const p = features[selectedId]?.properties; if (!p) return;
+  const url = shareLink(p), title = (p.name || 'A building') + ' · Walk Through Time';
+  if (navigator.share) { try { await navigator.share({ title, url }); } catch (e) { /* closed */ } return; }
+  try { await navigator.clipboard.writeText(url); toast('Link copied'); }
+  catch (e) { prompt('Copy this link', url); }
+};
 function closeSheet(){
   sheet.hidden = true; sheetKind = null;
   $('bLayers').setAttribute('aria-expanded', false);

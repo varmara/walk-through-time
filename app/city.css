@@ -138,6 +138,10 @@ a.fab{display:grid;place-items:center;text-decoration:none;color:inherit}
 .pcount{display:flex;align-items:center;gap:2px;font:500 13px var(--mono);font-variant-numeric:tabular-nums}
 .parrow{border:0;background:transparent;width:32px;height:36px;font-size:22px;cursor:pointer;color:var(--ink)}
 .phead .close{width:36px;height:36px}
+.close.share{display:grid;place-items:center;color:var(--ink)}
+.close.share svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 24px);z-index:50;
+  background:var(--ink);color:var(--paper);padding:8px 14px;border-radius:999px;font-size:14px;box-shadow:0 4px 16px #0004}
 .pcards{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 12px 6px;scrollbar-width:none;overscroll-behavior-x:contain}
 .pcards::-webkit-scrollbar{display:none}
 .pcard{flex:0 0 82%;max-width:360px;scroll-snap-align:start;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:10px 12px;
