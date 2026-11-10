@@ -147,7 +147,10 @@ def main(city_id):
                     or (name and any(name.lower() in e["properties"]["name"].lower() for e in feats))):
                 continue    # "Holme Pit" is "Holme Pit SSSI", drawn with a slightly different outline
             feats.append({"type": "Feature", "geometry": rnd(g),
-                          "properties": {"t": key, "name": name or "Local Wildlife Site", "source": publisher}})
+                          "properties": {"t": key, "name": name or "Local Wildlife Site", "source": publisher,
+                                         "url": url.rsplit("/query", 1)[0],
+                                         "credit": f"© {publisher}. Contains Ordnance Survey data © Crown copyright "
+                                                   "and database rights."}})
             n += 1
         log(f"s00 {publisher} Local Wildlife Sites: {n} more areas")
     save(city_id, "nature", feats)

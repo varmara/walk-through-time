@@ -601,11 +601,16 @@ function showArea(p){
     + (p.lpa ? `<dt>Council</dt><dd>${esc(p.lpa)}</dd>` : '')
     + `<dt>Source</dt><dd>${esc(p.source)}</dd>`;
   $('cStories').innerHTML = p.t === 'conservation'
-    ? '<p class="src">The outline is indicative. The council\'s own conservation area maps are definitive.</p>' : '';
+    ? '<p class="src">The outline is indicative. The council\'s own conservation area maps are definitive.</p>'
+    : p.t === 'lws'
+    ? '<p>A Local Wildlife Site: a place of local importance for wildlife, chosen by the county\'s Local Wildlife Sites partnership. Most are not nature reserves and have no legal protection, but planning decisions take them into account.</p>'
+      + (p.credit ? `<p class="src">${esc(p.credit)}</p>` : '') : '';
   $('cLinks').innerHTML = p.source === 'Natural England'
     ? '<a href="https://designatedsites.naturalengland.org.uk/" target="_blank" rel="noopener">Natural England designated sites →</a>'
     : p.source === 'Historic England'
     ? '<a href="https://historicengland.org.uk/listing/what-is-designation/local/conservation-areas/" target="_blank" rel="noopener">About conservation areas →</a>'
+    : p.url
+    ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.source)}: the map data →</a>`
     : '<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>';
   openSheet('card', p.name);
 }

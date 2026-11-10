@@ -307,7 +307,8 @@ def main(city_id):
                  "intro": "Protected and managed nature areas. National and Local Nature Reserves, Sites of Special "
                           "Scientific Interest and ancient woodland come from Natural England; other reserves from "
                           "OpenStreetMap. Local Wildlife Sites, places of local importance for wildlife such as stream "
-                          "corridors and old railway lines, come from Nottingham City Council.",
+                          "corridors and old railway lines, come from Nottingham City Council's map data "
+                          "(© Nottingham City Council; contains Ordnance Survey data © Crown copyright).",
                  "source": {"title": "Natural England open data", "url": "https://naturalengland-defra.opendata.arcgis.com/"},
                  "groups": [g for g in groups if g["count"]]})
     log(f"s06 nature: {len(nature)} areas")
