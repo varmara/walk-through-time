@@ -76,6 +76,10 @@ jobs:
           key: work-${{ github.run_id }}
           restore-keys: work-
 
+      # "osm.fresh" marks a download made by this build; one in the restored files is an earlier build's
+      - name: Forget earlier builds' download marks
+        run: rm -f work/*/osm.fresh
+
       # Start at the earliest step whose code changed (stories: the stories step), when the last build's work
       # files are here; otherwise run everything (pipeline/plan.py).
       - name: Choose where to start
@@ -170,5 +174,8 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           printf '# Saved downloads\n\nOpenStreetMap data (ODbL, © OpenStreetMap contributors) as last downloaded by the\npipeline, reused by later runs. Replaced on every fresh download; not part of the site.\n' > README.md
           git add . && git commit -q -m "OpenStreetMap downloads"
-          git push -q -f "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" downloads
+          for t in 1 2 3; do       # a large push can time out (HTTP 408): try again
+            git push -q -f "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" downloads && break
+            sleep 20
+          done
           ls -la
