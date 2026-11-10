@@ -186,8 +186,10 @@ def main(city_id):
     for pl in load(city_id, "places"):
         if pl["b"] is not None:
             inside.setdefault(pl["b"], []).append(pl["tags"])
-    cur = {str(e["b"]): e["name"] for e in load(city_id, "curated")["entries"]
-           if e["b"] is not None and e.get("layer") != "people"}
+    curated = load(city_id, "curated")
+    hand = curated.get("names", {})          # names chosen by hand in the stories file
+    cur = {str(e["b"]): e["name"] for e in curated["entries"]
+           if e["b"] is not None and e.get("layer") not in ("people", "facts") and e.get("names", True)}
 
     titles = {}
     for i, b in enumerate(buildings):
@@ -211,10 +213,10 @@ def main(city_id):
                 n_wiki += 1
                 continue
         best = (listing.get(k) or [None])[0]
-        tags_list = [t] + inside.get(i, [])
+        tags_list = [t] + [pt for pt in inside.get(i, []) if not marker(pt)]   # a war memorial inside is not its use
         info = info_for(b, i, wd, listing) or {}
         place = next((p.get("name") for p in inside.get(i, []) if p.get("name") and not marker(p)), None)
-        name, today = building_name(t, cur.get(k), info.get("label"), (best or {}).get("Name"), place)
+        name, today = building_name(t, hand.get(b["osm"]) or cur.get(k), info.get("label"), (best or {}).get("Name"), place)
         if not name and not best:
             continue
         address = not name

@@ -94,7 +94,8 @@ NAMES = {
 TAG_FIXES = {
     # the porte-cochère opened with the station's forebuildings in 1904 (Albert Edward Lambert, architect);
     # 1839 is when the first station, on Carrington Street, opened
-    "way/363152364": {"start_date": "1904", "architect": "Albert Edward Lambert", "historic": None},
+    "way/363152364": {"start_date": "1904", "start_date:source": "Wikipedia (Nottingham railway station)",
+                      "architect": "Albert Edward Lambert", "historic": None},
 }
 
 CURATED = [

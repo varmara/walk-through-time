@@ -147,7 +147,8 @@ def main(city_id):
         osm = parse_year(t.get("start_date") or t.get("building:start_date") or t.get("construction_date")
                          or t.get("year_of_construction"))
         if osm:
-            cands.append({"y": osm[0], "f": osm[1], "src": "OpenStreetMap"})
+            # a date corrected in the stories file (TAG_FIXES) says where it comes from
+            cands.append({"y": osm[0], "f": osm[1], "src": b["tags"].get("start_date:source") or "OpenStreetMap"})
         for e in listing.get(str(i), []):
             ld = listdates.get(str(e["ListEntry"]))
             got = listing_year(ld["text"]) if ld else None
@@ -164,7 +165,7 @@ def main(city_id):
                 out[str(i)] = est
                 estimated += 1
             continue
-        cands.sort(key=lambda c: (c["src"] == "Wikidata", -RANK[c["f"]], ORDER[c["src"]]))
+        cands.sort(key=lambda c: (c["src"] == "Wikidata", -RANK[c["f"]], ORDER.get(c["src"], 0)))
         best = dict(cands[0])
         alts, seen = [], set()
         for c in cands[1:]:
