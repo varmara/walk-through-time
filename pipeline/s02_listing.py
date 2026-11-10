@@ -40,7 +40,7 @@ def main(city_id):
     for i, b in enumerate(buildings):
         t = b["tags"]
         for n in re.findall(r"\d{7}", ";".join(t.get(k, "") for k in ("ref:GB:nhle", "HE_ref", "heritage:ref"))):
-            by_nhle.setdefault(n, i)
+            by_nhle.setdefault(n, []).append(i)      # one listing can cover several outlines (the station's parts)
     grid = {}
     for i in names:
         x, y = centroid(buildings[i]["rings"][0])
@@ -49,29 +49,32 @@ def main(city_id):
     out, missed, how = {}, 0, {"nhle": 0, "name": 0, "point": 0}
     for p in listed:
         n = str(p.get("ListEntry"))
-        i = by_nhle.get(n)
-        if i is not None:
+        many = by_nhle.get(n)
+        if many:
             how["nhle"] += 1
+            for j in many:
+                out.setdefault(str(j), []).append({k: p.get(k) for k in ("ListEntry", "Name", "Grade", "hyperlink")})
+            continue
+        i = None
+        own = words(tidy_listing(p.get("Name")) or "")
+        best = None
+        if own:
+            gx, gy = round(p["x"] * 200), round(p["y"] * 300)
+            for dx in (-1, 0, 1):
+                for dy in (-1, 0, 1):
+                    for j, x, y in grid.get((gx + dx, gy + dy), []):
+                        common = own & names[j]
+                        if common and len(common) * 2 >= len(own):
+                            d = metres([p["x"], p["y"]], [x, y])
+                            if d <= NEAR_NAME and (best is None or d < best[0]):
+                                best = (d, j)
+        if best:
+            i = best[1]
+            how["name"] += 1
         else:
-            own = words(tidy_listing(p.get("Name")) or "")
-            best = None
-            if own:
-                gx, gy = round(p["x"] * 200), round(p["y"] * 300)
-                for dx in (-1, 0, 1):
-                    for dy in (-1, 0, 1):
-                        for j, x, y in grid.get((gx + dx, gy + dy), []):
-                            common = own & names[j]
-                            if common and len(common) * 2 >= len(own):
-                                d = metres([p["x"], p["y"]], [x, y])
-                                if d <= NEAR_NAME and (best is None or d < best[0]):
-                                    best = (d, j)
-            if best:
-                i = best[1]
-                how["name"] += 1
-            else:
-                i = building_at(buildings, p["x"], p["y"], near=8)
-                if i is not None:
-                    how["point"] += 1
+            i = building_at(buildings, p["x"], p["y"], near=8)
+            if i is not None:
+                how["point"] += 1
         if i is None:
             missed += 1
             continue

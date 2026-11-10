@@ -106,23 +106,6 @@ def main(city_id):
     def _former(a):
         return bool(re.search(r"\bformer\b", a, re.I))
 
-    # an unnamed part of a station takes the station's name ("Nottingham station", not a booth inside it)
-    hand = cur.get("names", {})
-    stations = [(centroid(b["rings"][0]), hand.get(b["osm"]) or b["tags"]["name"]) for b in buildings
-                if b["tags"].get("name")      # the railway station, not a part (its main outline may be tagged as a roof)
-                and (b["tags"].get("building") in ("train_station", "roof", "transportation")
-                     or b["tags"].get("railway") or b["tags"].get("public_transport"))
-                and re.search(r"\bstation$", hand.get(b["osm"]) or b["tags"]["name"], re.I)
-                and not re.search(r"\b(police|fire|bus|ambulance|petrol|filling|power|pumping|coach)\b",
-                                  hand.get(b["osm"]) or b["tags"]["name"], re.I)]
-
-    def station_of(t, xy):
-        if t.get("building") != "train_station" or t.get("name"):
-            return None
-        near = [(metres(xy, c), n) for c, n in stations]
-        near = [x for x in near if x[0] <= 250]
-        return min(near)[1] if near else None
-
     feats = []
     for i, b in enumerate(buildings):
         t, k = b["tags"], str(i)
@@ -133,7 +116,7 @@ def main(city_id):
         if not article and osm_article(t):
             article = "https://en.wikipedia.org/wiki/" + osm_article(t).replace(" ", "_")
         name, today = building_name(t, cur.get("names", {}).get(b["osm"]) or story_name.get(k), info.get("label"),
-                                    best.get("Name"), station_of(t, centroid(b["rings"][0])) or fallback.get(k))
+                                    best.get("Name"), fallback.get(k))
         p = {
             "name": name or (None if re.match(r"^(railings|walls?|gates?|gate piers|steps|boundary)\b", best.get("Name") or "", re.I)
                              else best.get("Name")), "today": today,
