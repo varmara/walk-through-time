@@ -10,6 +10,8 @@ many of them linked to Open Plaques by an openplaques:id tag.
 Writes work/<city>/plaques.json: [{x, y, title, inscription, address, year, photo, colour, org,
 subject, type, roles, primary}].
 """
+import re
+
 from .common import city, http, log, point_in_ring, save
 
 SOURCES = {
@@ -51,6 +53,16 @@ def main(city_id):
     save(city_id, "plaques", out)
 
 
+def words(text):
+    return set(re.findall(r"[a-z0-9]{3,}", (text or "").lower().replace("’", "'")))
+
+
+def same_words(a, b):
+    """Two inscriptions of one plaque, typed differently ('Samual Bourne / 1834 - 1912 / Photographer')."""
+    wa, wb = words(a), words(b)
+    return bool(wa and wb) and len(wa & wb) / min(len(wa), len(wb)) >= 0.6
+
+
 def osm_plaques(city_id, b, poly, have):
     """Plaques mapped in OpenStreetMap (memorial=plaque / blue_plaque), skipping any within 15 m of one we have.
     One small query for plaque nodes only; it does not touch the saved building download."""
@@ -75,6 +87,13 @@ def osm_plaques(city_id, b, poly, have):
         if any(metres([x, y], [h["x"], h["y"]]) < 15 for h in have + extra):
             continue
         text = t.get("inscription") or t.get("description")
+        # the same plaque in the council's list, often placed up to 200 m away: keep the council's record (its
+        # subject and their roles) at the point mapped on the spot
+        same = next((h for h in have + extra if text and same_words(text, h.get("inscription") or h.get("title"))
+                     and metres([x, y], [h["x"], h["y"]]) < 400), None)
+        if same:
+            same.update({"x": x, "y": y, "osm": el["id"], "qid": same.get("qid") or t.get("subject:wikidata")})
+            continue
         # Only plaques that are recorded by Open Plaques or name their subject in Wikidata: OpenStreetMap also maps
         # private memorials, tree plantings and opening stones, which do not belong in a history map.
         if not (text or t.get("name")) or not (t.get("openplaques:id") or t.get("subject:wikidata")):

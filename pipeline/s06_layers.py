@@ -40,6 +40,19 @@ def grouped(pairs):
     return [[n, bs] for n, bs in out.items()]
 
 
+def plaque_label(text):
+    """A short name for a plaque to a place or an event: 'The Dungeon Club 1964-1968 spiritual home…' -> 'The Dungeon
+    Club'; 'Ibuprofen. In recognition…' -> 'Ibuprofen'; 'This was the site of the Moot Hall…' -> 'Moot Hall'."""
+    t = re.sub(r"\s+", " ", text).strip(" “”\"'")
+    m = re.search(r"\b(?:site (?:off?|occupied by)|stood) (?:the |a )?([A-Z][\w'’&.-]*(?: (?:of|and|the|[A-Z][\w'’&.-]*))*)", t)
+    if m and len(m[1]) <= 45:
+        return m[1].strip(" .,;")
+    m = re.match(r"([A-Z][\w'’&. -]{2,45}?)(?= was | is | \d|[,.;:/(]| - )", t)
+    if m:
+        return m[1].strip()
+    return t[:40].rsplit(" ", 1)[0] + "…" if len(t) > 40 else t
+
+
 def c_words(city_id):
     """Words that tie an article to the city: its name and its districts (as for well-known residents)."""
     from .s04_residents import PLACES
@@ -215,6 +228,7 @@ def main(city_id):
         pg[k]["items"].append([b, name])
 
     plaques = load(city_id, "plaques") if work(city_id, "plaques").exists() else []
+    plaque_fix = cur.get("plaques", {})          # the stories file's corrections, by inscription or subject
     placed, names = 0, {}
     for p in plaques:
         b = building_at(ctx.buildings, p["x"], p["y"], near=12)
@@ -222,13 +236,20 @@ def main(city_id):
             placed += 1
         if b is not None and p.get("address"):
             names.setdefault(str(b), p["address"])
-        kind = (p.get("type") or "person").lower()
-        roles = [r.strip().lower() for r in (p.get("primary") or "").split(",") + (p.get("roles") or "").split(",") if r.strip()]
-        # roles first; if they say nothing we recognise, the plaque's own words
-        words = roles or []
-        key = (people_group(words) or people_group([(p.get("inscription") or "").lower()]) or "other") \
-            if kind in ("person", "man", "woman", "") else "events"
         text = (p.get("inscription") or p.get("title") or "").strip()
+        fix = next((v for k2, v in plaque_fix.items() if text.lower().startswith(k2.lower())
+                    or (p.get("subject") or "").lower() == k2.lower()), {})
+        subject = fix.get("subject", p.get("subject"))
+        if not subject and re.fullmatch(r"[A-Z][a-z]+(?: [A-Z][a-z]+){1,2}", text):
+            subject = text                    # an inscription that is only a name: "Jesse Boot"
+        kind = (fix.get("type") or p.get("type") or ("person" if subject else "thing")).lower()
+        roles = [r.strip(' "').lower() for r in (p.get("roles") or "").split(",") if r.strip(' "')]
+        primary = (p.get("primary") or "").strip(' "').lower()
+        # the primary role first (Bendigo was a prize-fighter before he was an evangelist), then the other roles,
+        # then the plaque's own words
+        key = fix.get("group") or ((people_group([primary]) if primary else None) or people_group(roles)
+                                   or people_group([text.lower()]) or "other") \
+            if kind in ("person", "man", "woman") else "events"
         if isinstance(p.get("year"), float):
             p["year"] = int(p["year"])
         story = f"{(p.get('colour') or '').capitalize() + ' p' if p.get('colour') else 'P'}laque" \
@@ -237,9 +258,9 @@ def main(city_id):
         src = {"title": "Open Plaques", "url": url, "kind": "Open Plaques"}
         if p.get("osm") and not p.get("id"):
             src = {"title": "OpenStreetMap", "url": f"https://www.openstreetmap.org/node/{p['osm']}", "kind": "Plaque mapped in"}
-        label = p.get("subject") or (text[:40] + "…" if len(text) > 40 else text) or "Plaque"
+        label = fix.get("label") or subject or plaque_label(text) or "Plaque"
         person(b, key, label, story, src, xy=(p["x"], p["y"]), qid=p.get("qid"),
-               who=bool(p.get("subject")) and key != "events")
+               who=bool(subject) and key != "events")
     log(f"s06 plaques: {placed}/{len(plaques)} placed on a building, the rest shown as pins")
 
     # well-known residents found in their Wikipedia articles (s04_residents)

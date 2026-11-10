@@ -43,6 +43,15 @@ WIKIPEDIA = {
     "William Thompson": "William Thompson (boxer)",            # "Bendigo"
 }
 
+# Corrections to plaques (Nottingham City Council's list and OpenStreetMap), by the start of the inscription or
+# the subject's name: a label for a plaque to an event, or the group a person belongs in.
+PLAQUES = {
+    "Commemorating 'the most Dreadful": {"label": "The canal warehouse explosion"},
+    "Midland Counties Railway": {"label": "Beeston Station"},
+    "George Green": {"group": "science"},        # a miller by trade, remembered as a mathematician
+    "The World's Oldest Professional League Club": {"label": "Notts County Football Club", "type": "group"},
+}
+
 CURATED = [
     dict(
         id="inns", title="Old inns",
