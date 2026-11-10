@@ -314,8 +314,9 @@ def other_names(tags, name, today, label=None, listing_name=None):
               tags.get("alt_name"), tags.get("name") if tags.get("name") != today else None):
         for part in (n or "").split(";"):
             part = part.strip()
-            if part and part.lower() not in seen and not any(part.lower() in s or s in part.lower() for s in seen if s):
-                seen.add(part.lower())
+            key = re.sub(r"\s*\([^)]*\)", "", part).lower()      # "D34 (Fire Station) At …" is "D34 at …"
+            if part and key not in seen and not any(key in s or s in key for s in seen if s):
+                seen.add(key)
                 out.append(part)
     return out or None
 
@@ -350,6 +351,8 @@ def building_name(tags, story=None, label=None, listing_name=None, place=None):
     if old and (";" in old or not BUILDINGISH.search(old)):
         old = None
     he = tidy_listing(listing_name)
+    if label and re.match(r"^(?:railings|walls?|gates?|gate piers|steps|boundary)\b", label, re.I):
+        label = None                      # a listing of railings names no building
     if label:   # Wikidata labels of listed buildings copy Historic England's: tidy them the same way
         label = re.sub(r"\b(And|Of|The|At|To|On|In|For)\b", lambda m: m[1].lower(),
                        _HE_TAIL.sub("", label).strip(" ,")) or label
@@ -366,7 +369,9 @@ def building_name(tags, story=None, label=None, listing_name=None, place=None):
                                                                            and not BUILDINGISH.search(osm)):
         name = osm
     else:
-        name = he or label or old or address or osm or place
+        # a pub's name, or a name that says what the building is ("Kings Arms", "Albert Hall"), beats the address
+        keep = osm and (tags.get("amenity") == "pub" or BUILDINGISH.search(osm))
+        name = he or label or old or (osm if keep else address) or osm or place
     m = re.match(r"^(?:Numbers?|Nos?\.?)\s+(\d.*)$", name or "")
     if m:                                 # "Numbers 119 and 121" -> "119 and 121 Derby Road"
         street = tags.get("addr:street")
