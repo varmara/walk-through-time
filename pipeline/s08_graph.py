@@ -49,7 +49,7 @@ def main(city_id):
                         info, stories = place_info(r)
                         nodes.setdefault(r, {"id": r, "type": "place", **info})
                         st = next((s for s in stories if s.get("layer") == L["id"]), None)
-                        link(tid, r, st and st["text"], st and st.get("source"))
+                        link(tid, r, st and st.get("text"), st and st.get("source"))
         if L["id"] == "people":
             for g in L["groups"]:
                 for name, refs in g["items"]:
@@ -66,7 +66,7 @@ def main(city_id):
                         st = (next((s for s in ps if name.lower() in (s.get("text") or "").lower()
                                     or name.lower() in ((s.get("source") or {}).get("title") or "").lower()), None)
                               or next((s for s in ps if last in (s.get("text") or "").lower()), None))
-                        link(eid, r, st and st["text"], st and st.get("source"))
+                        link(eid, r, st and st.get("text"), st and st.get("source"))
 
     # mentions: a person's full name in the story of a place they are not yet linked to
     texts = []

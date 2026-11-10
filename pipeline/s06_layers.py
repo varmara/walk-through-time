@@ -154,7 +154,9 @@ def main(city_id):
         member.setdefault(str(i), [])
         if group not in member[str(i)]:
             member[str(i)].append(group)
-        if story:
+        if pin_ref:          # a plaque on this building: its words are stored once, on the plaque's pin
+            stories.setdefault(str(i), []).append({"layer": layer_id, "pin": pin_ref, **({"who": who} if who else {})})
+        elif story:
             stories.setdefault(str(i), []).append({"layer": layer_id, "text": story,
                                                    **({"source": source} if source else {}),
                                                    **({"place": place} if place else {}),

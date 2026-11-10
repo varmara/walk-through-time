@@ -176,9 +176,16 @@ async function main(){
   updateYear();
   // ?focus=b12,p3&name=… (from the graph page): open those places, as a set when there are several
   const q = new URLSearchParams(location.search), focus = q.get('focus'), osm = q.get('osm');
+  // a shared building: the OpenStreetMap id is the lasting key; ?b= is its place in the build the link was made
+  // from, used only if it still points at the same building (positions change between builds)
   const bq = q.get('b');
-  if (bq != null && +bq < features.length) selectBuilding(+bq);       // a shared building (its index in this build)
-  else if (osm) { const i = await byOsm(osm).catch(() => -1); if (i >= 0) selectBuilding(i); }
+  if (osm) {
+    let i = bq != null && +bq < features.length ? +bq : -1;
+    if (i >= 0 && tiled()) { await loadCard(i).catch(() => {}); if (features[i].properties.osm !== osm) i = -1; }
+    else if (i >= 0 && features[i].properties.osm !== osm) i = -1;
+    if (i < 0) i = await byOsm(osm).catch(() => -1);
+    if (i >= 0) selectBuilding(i);
+  } else if (bq != null && +bq < features.length) selectBuilding(+bq);
   if (focus) {
     const refs = focus.split(',').map(x => x[0] === 'b' ? +x.slice(1) : x)
       .filter(r => typeof r === 'number' ? r < features.length : r[0] === 'p' ? data.pins && pinOf(r) : areaOf(r));
@@ -558,7 +565,7 @@ function showCard(id){
   $('cSum').hidden = !p.sum;
   $('cSum').innerHTML = p.sum ? `<p>${esc(p.sum)}</p><p class="src">${esc(sumSrc?.kind || '')}${sumSrc?.url ? ': ' + link(sumSrc)
     : sumSrc?.title ? ' (' + esc(sumSrc.title) + ')' : ''}</p>` : '';
-  $('cStories').innerHTML = (p.stories || []).map(s => `<div class="story"><div class="seclbl">${esc(layerTitle(s.layer))}</div>
+  $('cStories').innerHTML = (p.stories || []).map(storyOf).map(s => `<div class="story"><div class="seclbl">${esc(layerTitle(s.layer))}</div>
     <p>${esc(s.text)}</p>${s.source ? `<p class="src">${esc(s.source.kind || 'Wikipedia')}: ${link(s.source)}${s.place ? ` · ${esc(s.place.kind || 'Wikipedia')}: ` + link(s.place) : ''}</p>` : ''}${aboutHtml(s.who, s.source)}${s.pin ? `<p class="go"><a href="#" data-ref="${esc(s.pin)}">See the plaque on the map →</a></p>` : ''}</div>`).join('');
   $('cStories').querySelectorAll('[data-ref]').forEach(a => a.onclick = e => { e.preventDefault(); openRef(a.dataset.ref); });
 
@@ -720,11 +727,21 @@ const centreOf = b => {
   const g = features[b].geometry, ring = g.type === 'Polygon' ? g.coordinates[0] : g.coordinates[0][0];
   return [ring.reduce((a, c) => a + c[0], 0) / ring.length, ring.reduce((a, c) => a + c[1], 0) / ring.length];
 };
+// a story as shown: a plaque's words are stored once, on its pin, and shown on its building's card too
+function storyOf(s){
+  if (!s.pin || s.text) return s;
+  const pp = pinOf(s.pin)?.properties || {};
+  const J = v => typeof v === 'string' ? JSON.parse(v) : v;
+  return { ...s, text: pp.text || '', source: J(pp.source), who: s.who || pp.who };
+}
 function storyFor(b, name){
-  const ss = features[b].properties.stories || [];
+  const ss = (features[b].properties.stories || []).map(storyOf).filter(s => s.text);
   return ss.find(s => s.text.includes(name) || (s.source && s.source.title === name)) || ss.find(s => s.layer === 'people') || ss[0];
 }
 function showPlaces(name, bs){
+  // the stories' words are in the card files: fetch those first (one or two files for most people and stories)
+  const need = bs.filter(isB).filter(b => !features[b].full);
+  if (need.length) return Promise.all(need.map(b => loadCard(b).catch(() => {}))).then(() => showPlaces(name, bs));
   closeSheet();
   clearPlaces(false);
   places = { name, bs, i: 0 };

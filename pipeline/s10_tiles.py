@@ -62,7 +62,13 @@ def index(props, centres):
             "y": [p.get("y") for p in props], "f": "".join(FLAG.get(p.get("f"), "-") for p in props),
             "periods": periods, "per": [periods.index(p["per"]) if p.get("per") else -1 for p in props],
             "sh": [p.get("sh") or 0 for p in props],
-            "props": {str(i): s for i, p in enumerate(props) if (s := {k: p[k] for k in SPARSE if k in p})}}
+            "props": {str(i): s for i, p in enumerate(props) if (s := {k: brief(p[k]) if k == "stories" else p[k]
+                                                                        for k in SPARSE if k in p})}}
+
+
+def brief(stories):
+    """A building's stories as the index keeps them: the layer, the person, the plaque, not the words."""
+    return [{k: st[k] for k in ("layer", "who", "pin") if k in st} for st in stories]
 
 
 def main(city_id):
@@ -90,6 +96,8 @@ def main(city_id):
         props.append(p)
         centres.append((x, y))
         rest = {k: v for k, v in p.items() if k not in INDEX_PROPS}
+        if p.get("stories"):      # the stories' words go in the card file; the index keeps which layers and people
+            rest["stories"] = p["stories"]
         if rest:
             cards.setdefault(i // CHUNK, {})[i] = rest
     write_fc(tmp / "b.json", tile_feats)
