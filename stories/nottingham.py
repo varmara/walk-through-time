@@ -47,9 +47,19 @@ WIKIPEDIA = {
 # the subject's name: a label for a plaque to an event, or the group a person belongs in.
 PLAQUES = {
     "Commemorating 'the most Dreadful": {"label": "The canal warehouse explosion"},
-    "Midland Counties Railway": {"label": "Beeston Station"},
+    "Midland Counties Railway": {"label": "Beeston Station", "type": "thing"},
     "George Green": {"group": "science"},        # a miller by trade, remembered as a mathematician
     "The World's Oldest Professional League Club": {"label": "Notts County Football Club", "type": "group"},
+    "Thomas Adams": {"group": "industry"},       # "Lace Manufacturer, Christian Philanthropist"
+    "William Thompson": {"group": "sport"},      # Bendigo: a prize-fighter first, an evangelist later
+    "Jesse Boot": {"group": "industry"},
+    "Samuel Bourne": {"group": "arts"},          # photographer
+    "John Player": {"group": "industry"},
+    "James Sadler": {"group": "science"},        # balloonist and chemist
+    "Thomas Smith": {"group": "industry"},       # banker: Smith's Bank
+    "Eric Irons": {"group": "public"},           # magistrate
+    "Constance Shacklock": {"group": "arts"},    # contralto
+    "Benjamin Mayo": {"group": "other"},         # 'The Old General', a local character, not a soldier
 }
 
 # Collections of old pictures that are not openly licensed, so the map links to them instead of showing their

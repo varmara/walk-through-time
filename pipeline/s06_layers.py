@@ -44,7 +44,7 @@ def plaque_label(text):
     """A short name for a plaque to a place or an event: 'The Dungeon Club 1964-1968 spiritual home…' -> 'The Dungeon
     Club'; 'Ibuprofen. In recognition…' -> 'Ibuprofen'; 'This was the site of the Moot Hall…' -> 'Moot Hall'."""
     t = re.sub(r"\s+", " ", text).strip(" “”\"'")
-    m = re.search(r"\b(?:site (?:off?|occupied by)|stood) (?:the |a )?([A-Z][\w'’&.-]*(?: (?:of|and|the|[A-Z][\w'’&.-]*))*)", t)
+    m = re.search(r"\b(?:site (?:off?|occupied by)|stood) (?:the |a )?([A-Z][\w'’&-]*(?: (?:of|and|the|[A-Z][\w'’&-]*))*)", t)
     if m and len(m[1]) <= 45:
         return m[1].strip(" .,;")
     m = re.match(r"([A-Z][\w'’&. -]{2,45}?)(?= was | is | \d|[,.;:/(]| - )", t)
@@ -234,8 +234,8 @@ def main(city_id):
         b = building_at(ctx.buildings, p["x"], p["y"], near=12)
         if b is not None:
             placed += 1
-        if b is not None and p.get("address"):
-            names.setdefault(str(b), p["address"])
+        if b is not None and p.get("address") and (p.get("type") or "").lower() in ("man", "woman", "person"):
+            names.setdefault(str(b), p["address"])     # a plaque to a place names that place, not this building
         text = (p.get("inscription") or p.get("title") or "").strip()
         fix = next((v for k2, v in plaque_fix.items() if text.lower().startswith(k2.lower())
                     or (p.get("subject") or "").lower() == k2.lower()), {})
@@ -243,7 +243,8 @@ def main(city_id):
         if not subject and re.fullmatch(r"[A-Z][a-z]+(?: [A-Z][a-z]+){1,2}", text):
             subject = text                    # an inscription that is only a name: "Jesse Boot"
         kind = (fix.get("type") or p.get("type") or ("person" if subject else "thing")).lower()
-        roles = [r.strip(' "').lower() for r in (p.get("roles") or "").split(",") if r.strip(' "')]
+        roles = [r.strip(' "').lower() for r in (p.get("roles") or "").split(",") if r.strip(' "')
+                 and "order of" not in r.lower()]    # an OBE is not a military rank
         primary = (p.get("primary") or "").strip(' "').lower()
         # the primary role first (Bendigo was a prize-fighter before he was an evangelist), then the other roles,
         # then the plaque's own words
