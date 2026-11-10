@@ -215,7 +215,7 @@ CURATED = [
             E("Malt Cross", "en:Malt Cross",
               "Built in 1877 to designs credited to Edwin Hill, it is one of the few surviving Victorian music "
               "halls, under a high arched glass roof on laminated wooden arches.",
-              ("1877", "Edwin Hill", "music hall"), at="name:Malt Cross", year="1877"),
+              ("1877", "Edwin Hill", "music hall"), at="osm:way/291697300", year="1877"),
             E("Rock City", "en:Rock City (venue)",
               "The building opened in 1876 as the Alexandra Skating Rink. Rock City opened in December 1980, with "
               "the Undertones playing the first gig, and holds 2,000 people.",

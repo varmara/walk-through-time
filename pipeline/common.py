@@ -285,6 +285,8 @@ def tidy_listing(name):
     n = re.sub(r",\s*Nottingham$", "", n, flags=re.I)
     if not n or re.match(r"^\d", n) or re.match(r"^(?:NOS?\.?|NUMBERS?)\s*\d", n, re.I):
         return None
+    if re.match(r"^(?:railings|walls?|gates?|gate piers|steps|boundary|lamp|bollards?|kerb)\b", n, re.I):
+        return None                       # a listing of railings or a wall names no building
     if n.isupper():
         n = n.title()
     n = re.sub(r"\b(And|Of|The|At|To|On|In|For)\b", lambda m: m[1].lower(), n).replace("'S ", "'s ")
@@ -345,6 +347,10 @@ def building_name(tags, story=None, label=None, listing_name=None, place=None):
         name = osm
     else:
         name = he or label or old or osm or place
+    m = re.match(r"^(?:Numbers?|Nos?\.?)\s+(\d.*)$", name or "")
+    if m:                                 # "Numbers 119 and 121" -> "119 and 121 Derby Road"
+        street = tags.get("addr:street")
+        name = m[1] + (f" {street}" if street and street.lower() not in m[1].lower() else "")
     today = (osm if osm and name and osm.strip().lower() not in name.strip().lower()
              and (occupied(tags) or own or he_names_more(he, osm)) else None)   # not "Newton" for the Newton Building
     return name, today

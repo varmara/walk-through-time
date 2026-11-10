@@ -32,7 +32,7 @@ import time
 from pathlib import Path
 from urllib.parse import quote
 
-from .common import building_at, http, http_text, load, log, parse_year, save
+from .common import marker, building_at, http, http_text, load, log, parse_year, save
 
 
 def stories(city_id):
@@ -169,7 +169,8 @@ def main(city_id):
             names.setdefault(norm(b["tags"]["name"]), i)
     for p in places:
         if p["b"] is not None and p["name"]:
-            names.setdefault(norm(p["name"]), p["b"])
+            if not marker(p["tags"]):          # a plaque or market cross inside a building is not its name
+                names.setdefault(norm(p["name"]), p["b"])
 
     entries, dropped = [], []
     arts = {}
