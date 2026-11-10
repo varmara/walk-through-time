@@ -143,6 +143,23 @@ CURATED = [
               "A footbridge built by the city's water department, mainly to carry water pipes across the Trent to "
               "the reservoir on Wilford Hill. The engineer was Arthur Brown.",
               ("Arthur Brown", "Wilford Hill reservoir", "water")),
+            E("St Wilfrid's Church", "en:St Wilfrid's Church, Wilford",
+              "The church dates from the late 14th century and is thought to have been founded by Gervase de Wilford "
+              "in around 1361. Inside are two memorials to the poet Henry Kirke White, who drew much inspiration "
+              "from Wilford and Clifton.",
+              ("late 14th century", "Gervase de Wilford", "1361", "Henry Kirke White", "inspiration"),
+              at="name:St Wilfrid's Church"),
+            E("The poet in the churchyard", "en:Wilford",
+              "Henry Kirke White is said to have spent much of his time writing poems in the churchyard, sitting "
+              "under his favourite tree.",
+              ("Henry Kirke White", "churchyard", "favourite tree"), at="name:St Wilfrid's Church"),
+            E("Wilford House", "en:Wilford",
+              "Thomas Forman, who founded the Nottingham Post, bought Wilford House from the Smith family after the "
+              "newspaper's successful launch.",
+              ("Thomas Forman", "Wilford House", "Smith family"), at="name:Wilford House"),
+            E("Ferry Inn", "en:Wilford",
+              "The Notts County goalkeeper Albert Iremonger was landlord of the Ferry Inn until his death in 1958.",
+              ("Ferry Inn", "Iremonger", "1958"), at="name:Ferry Inn"),
         ]),
     dict(
         id="bridgford", title="West Bridgford and Trent Bridge",
@@ -156,6 +173,11 @@ CURATED = [
               "Nottinghamshire County Council's headquarters, designed by Vincent Harris. Building paused during the "
               "Second World War, and it was only completed in 1954.",
               ("Vincent Harris", "Second World War", "1954")),
+            E("City Ground", "en:City Ground",
+              "Nottingham Forest moved here in 1898, to their seventh home. The name dates from 1897, when Nottingham "
+              "was granted city status, and Notts County's Meadow Lane is only three hundred yards away, on the "
+              "other side of the Trent.",
+              ("1898", "seventh home", "city status", "three hundred yards")),
         ]),
     dict(
         id="meadows", title="The Meadows and the river",
@@ -181,6 +203,14 @@ CURATED = [
               "Planned from 1950, the Clifton council estate was at one time the largest council estate in Europe. "
               "Since the 1980s most of its houses have passed into private ownership.",
               ("1950", "largest council estate in europe", "private ownership"), at="pin:-1.1745,52.9045"),
+            E("St Mary's Church", "en:St Mary's Church, Clifton",
+              "A medieval church, listed Grade I. Lewis Nockalls Cottingham restored it in 1846, and much of the "
+              "decoration is by George Frederick Bodley.",
+              ("medieval", "Cottingham", "1846", "Bodley")),
+            E("Clifton Grove", "en:Henry Kirke White",
+              "The Nottingham poet Henry Kirke White, a butcher's son, published Clifton Grove, a Sketch in Verse, "
+              "in 1803, aged 17. He died in 1806, aged 21.",
+              ("Clifton Grove", "1803", "butcher", "1806"), at="pin:-1.1876,52.9140"),
         ]),
     dict(
         id="sneinton", title="Sneinton",
@@ -239,6 +269,13 @@ CURATED = [
         intro="People connected with buildings on the map: who designed them, who worked in them and who played "
               "in them. Each link is checked against the Wikipedia articles on the person and the place.",
         entries=[
+            P("Albert Iremonger", "en:Albert Iremonger", "en:Wilford",
+              "Born in Wilford, the 6 ft 5 in goalkeeper played 564 matches for Notts County. In the 1940s he ran "
+              "the Ferry Inn.",
+              ("Wilford", "564", "Ferry Inn"), at="name:Ferry Inn", group="sport"),
+            P("Henry Kirke White", "en:Henry Kirke White", "en:St Wilfrid's Church, Wilford",
+              "The poet lived in Wilford in 1804–1805; the church holds two memorials to him.",
+              ("Henry Kirke White", "Wilford", "1804"), at="name:St Wilfrid's Church"),
             P("Thomas Chambers Hine", "en:Thomas Chambers Hine", "en:Adams Building, Nottingham",
               "The Nottingham architect Thomas Chambers Hine designed this lace showroom and warehouse.",
               ("Thomas Chambers Hine", "Adams")),
