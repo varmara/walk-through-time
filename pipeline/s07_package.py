@@ -12,6 +12,7 @@ sum (one to three sentences) and sumSrc {title, url?, kind}.
 from datetime import datetime, timezone
 from pathlib import Path
 import json
+import re
 from collections import Counter
 import urllib.parse
 
@@ -76,7 +77,8 @@ def main(city_id):
         name, today = building_name(t, cur.get("names", {}).get(b["osm"]) or story_name.get(k), info.get("label"),
                                     best.get("Name"), fallback.get(k))
         p = {
-            "name": name or best.get("Name"), "today": today,
+            "name": name or (None if re.match(r"^(railings|walls?|gates?|gate piers|steps|boundary)\b", best.get("Name") or "", re.I)
+                             else best.get("Name")), "today": today,
             "aka": other_names(t, name, today, info.get("label"), best.get("Name")),
             "y": d.get("y"), "f": d.get("f"), "src": d.get("src"), "alts": d.get("alts"),
             "per": d.get("period"), "sh": d.get("share"), "dt": d.get("text"),
