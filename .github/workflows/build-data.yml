@@ -81,10 +81,13 @@ jobs:
       - name: Choose where to start
         id: plan
         run: |
+          # compare with the commit the restored work files were built from (a queued build can be replaced by a
+          # newer one, so the push's own "before" commit may not be what was last built)
           start=all
+          last=$(cat work/.source_sha 2>/dev/null || echo "${{ github.event.before }}")
           if [ "${{ github.event_name }}" = push ] && [ -n "${{ steps.work.outputs.cache-matched-key }}" ] \
-             && git cat-file -e "${{ github.event.before }}^{commit}" 2>/dev/null; then
-            start=$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" | python -m pipeline.plan)
+             && git cat-file -e "$last^{commit}" 2>/dev/null; then
+            start=$(git diff --name-only "$last" "${{ github.sha }}" | python -m pipeline.plan)
           fi
           echo "Starting at: $start"
           echo "start=$start" >> "$GITHUB_OUTPUT"
@@ -126,7 +129,9 @@ jobs:
           key: web-${{ github.run_id }}
 
       - name: Save work files for the next build
-        uses: actions/cache/save@v4
+        run: echo "${{ github.sha }}" > work/.source_sha
+
+      - uses: actions/cache/save@v4
         with:
           path: work
           key: work-${{ github.run_id }}

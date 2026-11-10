@@ -49,7 +49,8 @@ CURATED = [
     dict(
         id="churches", title="Churches",
         intro="Medieval Nottingham had three parishes: St Mary's, St Peter's and St Nicholas'. "
-              "Each still has its church, joined in the 1840s by a Catholic cathedral.",
+              "Each still has its church, joined in the 1840s by a Catholic cathedral, and by chapels of the "
+              "Nonconformists, such as the Unitarians on High Pavement.",
         entries=[
             E("St Mary's Church", "en:St Mary's Church, Nottingham",
               "One of the three medieval parish churches of Nottingham, on a site mentioned in the Domesday Book.",
@@ -65,6 +66,12 @@ CURATED = [
             E("Cathedral of St Barnabas", "en:Nottingham Cathedral",
               "The Catholic cathedral, designed by Augustus Pugin and built between 1841 and 1844.",
               ("Pugin", "1841", "1844"), year="1841..1844"),
+            E("High Pavement Chapel", "en:High Pavement Chapel",
+              "Built in 1876 to designs by Stuart Colman for a congregation that goes back to 1690 and became "
+              "Unitarian in 1802. Worship ended in 1982; the chapel then housed a lace museum and is now a "
+              "Pitcher & Piano.",
+              ("1876", "Stuart Colman", "1690", "1802", "1982", "Pitcher"), at="name:Former Unitarian Chapel",
+              year="1876"),
         ]),
     dict(
         id="lace", title="Lace and trade",
@@ -101,6 +108,10 @@ CURATED = [
             E("Nottingham station", "en:Nottingham railway station",
               "The station building of red brick and terracotta opened in 1904.",
               ("1904", "terracotta"), year="1904"),
+            E("Old Market Square", "en:Old Market Square, Nottingham",
+              "One of the largest paved squares in the United Kingdom. The two towns were once divided by a wall "
+              "across it, whose line a stainless steel channel now marks; Goose Fair was held here until 1928.",
+              ("largest paved squares", "divided by a wall", "stainless steel", "1928"), at="pin:-1.1497,52.9529"),
         ]),
     dict(
         id="culture", title="Theatres and culture",
@@ -130,6 +141,14 @@ CURATED = [
             E("Nottingham Contemporary", "en:Nottingham Contemporary",
               "An art centre designed by Caruso St John and opened in 2009, its walls patterned with lace.",
               ("Caruso St John", "2009", "lace"), year="2009"),
+            E("Malt Cross", "en:Malt Cross",
+              "Built in 1877 to designs credited to Edwin Hill, it is one of the few surviving Victorian music "
+              "halls, under a high arched glass roof on laminated wooden arches.",
+              ("1877", "Edwin Hill", "music hall"), at="name:Malt Cross", year="1877"),
+            E("Rock City", "en:Rock City (venue)",
+              "The building opened in 1876 as the Alexandra Skating Rink. Rock City opened in December 1980, with "
+              "the Undertones playing the first gig, and holds 2,000 people.",
+              ("1876", "Alexandra Skating Rink", "December 1980", "Undertones"), at="name:Rock City"),
         ]),
     dict(
         id="wilford", title="Wilford",
@@ -178,6 +197,14 @@ CURATED = [
               "was granted city status, and Notts County's Meadow Lane is only three hundred yards away, on the "
               "other side of the Trent.",
               ("1898", "seventh home", "city status", "three hundred yards")),
+            E("The Trent Bridge Inn", "en:Trent Bridge Inn",
+              "The cricketer William Clarke married Mary Chapman, the inn's landlady, and the Trent Bridge cricket "
+              "ground began in a field behind the pub.",
+              ("William Clarke", "Mary Chapman", "landlady", "field behind"), at="name:The Trent Bridge Inn"),
+            E("St Giles' Church", "en:St Giles Church, West Bridgford",
+              "A medieval church of which little remains. Thomas Chambers Hine restored it in 1872, and in 1896 a "
+              "new nave and chancel were begun, their foundation stone laid by Lady Byron of Thrumpton Hall.",
+              ("little remains", "1872", "1896", "Lady Byron"), at="name:St Giles'"),
         ]),
     dict(
         id="meadows", title="The Meadows and the river",
@@ -191,6 +218,10 @@ CURATED = [
               "Notts County moved here on 3 September 1910. Divided by the Trent, Meadow Lane and the City Ground are "
               "the closest pair of football grounds in England.",
               ("3 September 1910", "closest")),
+            E("City War Memorial", "en:City War Memorial, Nottingham",
+              "Designed by the City Engineer Thomas Wallis Gordon, on land beside the Trent given by Sir Jesse Boot, "
+              "and unveiled on 11 November 1927. It remembers the men of Nottingham who died in both World Wars.",
+              ("Thomas Wallis Gordon", "Jesse Boot", "11 November 1927"), at="name:Memorial Arch", year="1927"),
         ]),
     dict(
         id="clifton", title="Clifton",
@@ -227,6 +258,10 @@ CURATED = [
             E("Sneinton Market", "en:Sneinton",
               "In the 1930s the city's wholesale fruit and vegetable market moved here from the Old Market Square.",
               ("1930s", "wholesale fruit and vegetable market"), at="pin:-1.1399,52.9531"),
+            E("William Booth's birthplace", "en:William Booth",
+              "William Booth, who founded the Salvation Army, was born in Sneinton on 10 April 1829. At 13 he was "
+              "apprenticed to a pawnbroker. His birthplace is now a museum.",
+              ("10 April 1829", "Sneinton", "pawnbroker", "now a museum"), at="name:William Booth Memorial Social Centre"),
         ]),
     dict(
         id="facts", kind="facts", title="Did you know",
@@ -319,5 +354,9 @@ CURATED = [
               "The ice dancers Jayne Torvill and Christopher Dean come from Nottingham. The square outside the ice "
               "centre is named Bolero Square after their Olympic routine.",
               ("Torvill", "Bolero"), group="sport"),
+            P("D. H. Lawrence", "en:D. H. Lawrence", "en:Arkwright Building",
+              "Built between 1877 and 1881 for University College Nottingham, where D. H. Lawrence studied during "
+              "his teacher-training years.",
+              ("1877", "University College", "Lawrence")),
         ]),
 ]
