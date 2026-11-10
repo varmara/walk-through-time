@@ -1,10 +1,13 @@
-from pipeline.common import http
+from pipeline.common import city, http
 from pipeline.s00_fetch_osm import OVERPASS
-q = """[out:json][timeout:60];(way(around:60,52.95722,-1.15222)["building"];relation(around:60,52.95722,-1.15222)["building"];
-way(around:60,52.95722,-1.15222)["name"~"Arkwright"];relation(around:120,52.95722,-1.15222)["name"~"Arkwright"];);out tags center;"""
-for url in OVERPASS:
-    try:
-        r = http(url, {"data": q}, tries=2); break
-    except Exception as e: print(url, e)
-for el in r["elements"]:
-    print(el["type"], el["id"], el.get("center"), {k: v for k, v in el["tags"].items() if k in ("name", "building", "type", "building:part", "amenity")})
+c = city("nottingham")
+poly = '(poly:"' + " ".join(f"{y} {x}" for x, y in c["polygon"]) + '")'
+box = "(52.955,-1.156,52.959,-1.149)"
+for name, area in [("poly+box", poly + box), ("box", box)]:
+    q = f'[out:json][timeout:120];(relation["building"]["type"="multipolygon"]{area};); out tags geom qt;'
+    for url in OVERPASS:
+        try:
+            r = http(url, {"data": q}, tries=1, timeout=200); break
+        except Exception as e: print(url, e); r = {"elements": []}
+    els = r["elements"]
+    print(name, len(els), [(e["id"], e["tags"].get("name"), len(e.get("members", [])), [m.get("role") for m in e.get("members", [])][:4], bool(e.get("members") and e["members"][0].get("geometry"))) for e in els][:8])
