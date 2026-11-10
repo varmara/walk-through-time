@@ -172,13 +172,10 @@ CURATED = [
               "Henry Kirke White is said to have spent much of his time writing poems in the churchyard, sitting "
               "under his favourite tree.",
               ("Henry Kirke White", "churchyard", "favourite tree"), at="name:St Wilfrid's Church"),
-            E("Wilford House", "en:Wilford",
-              "Thomas Forman, who founded the Nottingham Post, bought Wilford House from the Smith family after the "
-              "newspaper's successful launch.",
-              ("Thomas Forman", "Wilford House", "Smith family"), at="name:Wilford House"),
             E("Ferry Inn", "en:Wilford",
-              "The Notts County goalkeeper Albert Iremonger was landlord of the Ferry Inn until his death in 1958.",
-              ("Ferry Inn", "Iremonger", "1958"), at="name:Ferry Inn"),
+              "Wilford stayed a village until the later 19th century. With woods around it and riverside amenities "
+              "such as the Ferry Inn, it attracted many visitors from Nottingham.",
+              ("later 19th century", "wilford ferry inn", "many visitors from nottingham"), at="name:Ferry Inn"),
         ]),
     dict(
         id="bridgford", title="West Bridgford and Trent Bridge",
@@ -261,7 +258,7 @@ CURATED = [
             E("William Booth's birthplace", "en:William Booth",
               "William Booth, who founded the Salvation Army, was born in Sneinton on 10 April 1829. At 13 he was "
               "apprenticed to a pawnbroker. His birthplace is now a museum.",
-              ("10 April 1829", "Sneinton", "pawnbroker", "now a museum"), at="name:William Booth Memorial Social Centre"),
+              ("10 April 1829", "Sneinton", "pawnbroker", "now a museum"), at="osm:way/123120708"),
         ]),
     dict(
         id="caves", title="Caves",
@@ -270,8 +267,9 @@ CURATED = [
         entries=[
             E("City of Caves", "en:City of Caves",
               "Caves under the old town, used over the years as a tannery, pub cellars and an air raid shelter. "
-              "The tannery was in use from 1500 to 1640.",
-              ("tannery", "air raid shelter", "1500", "1640")),
+              "Two caves opening onto the cliff face held the only known underground tannery in Britain, set up "
+              "in 1500.",
+              ("tannery", "air raid shelter", "only known underground tannery", "1500")),
             E("Mortimer's Hole", "en:Nottingham Castle",
               "A long passage to the bottom of the castle rock is known as Mortimer's Hole. In October 1330 Edward "
               "III's men came in by a secret tunnel, and Roger Mortimer was led out bound and gagged.",
