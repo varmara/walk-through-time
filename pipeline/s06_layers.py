@@ -260,9 +260,10 @@ def main(city_id):
         if p.get("osm") and not p.get("id"):
             src = {"title": "OpenStreetMap", "url": f"https://www.openstreetmap.org/node/{p['osm']}", "kind": "Plaque mapped in"}
         label = fix.get("label") or subject or plaque_label(text) or "Plaque"
-        person(b, key, label, story, src, xy=(p["x"], p["y"]), qid=p.get("qid"),
+        # every plaque is a pin where it hangs: on a building's card it read as the building's own story
+        person(None, key, label, story, src, xy=(p["x"], p["y"]), qid=p.get("qid"),
                who=bool(subject) and key != "events")
-    log(f"s06 plaques: {placed}/{len(plaques)} placed on a building, the rest shown as pins")
+    log(f"s06 plaques: {len(plaques)} shown as pins ({placed} on or by a building)")
 
     # well-known residents found in their Wikipedia articles (s04_residents)
     residents = load(city_id, "residents") if work(city_id, "residents").exists() else []
