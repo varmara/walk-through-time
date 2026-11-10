@@ -1,18 +1,18 @@
-from pipeline.common import city, http, point_in_ring
-from pipeline.s00_fetch_nature import OVERPASS, centre, reaches
-c = city("nottingham"); b = c["bbox"]; poly = c["polygon"]
-print("polygon", poly)
-q = f"""[out:json][timeout:120];(
-  nwr["leisure"="nature_reserve"]({b['s']},{b['w']},{b['n']},{b['e']});
-  nwr["boundary"="protected_area"]({b['s']},{b['w']},{b['n']},{b['e']});
-  nwr["designation"]({b['s']},{b['w']},{b['n']},{b['e']});
-  nwr["name"~"Fairham",i]({b['s']},{b['w']},{b['n']},{b['e']});
-); out tags center qt;"""
-for url in OVERPASS:
+from pipeline.common import city, http
+from pipeline.s00_fetch_nature import centre
+c = city("nottingham"); b = c["bbox"]
+U = "https://maps164.nottinghamcity.gov.uk/server/rest/services/Core_services/Environment/MapServer/{}/query"
+for lid in (7, 8, 9, 40):
     try:
-        r = http(url, {"data": q}, tries=2, timeout=180); break
-    except Exception as e: print(url, e)
-for el in r["elements"]:
-    ce = el.get("center") or {"lon": el.get("lon"), "lat": el.get("lat")}
-    inside = ce["lon"] is not None and point_in_ring(ce["lon"], ce["lat"], poly)
-    print(el["type"], el["id"], round(ce["lon"] or 0, 4), round(ce["lat"] or 0, 4), "inside" if inside else "OUT", {k: v for k, v in el["tags"].items() if k in ("name", "leisure", "boundary", "designation", "protect_class", "natural", "landuse", "operator", "protection_title")})
+        gj = http(U.format(lid), params={"where": "1=1", "geometry": f"{b['w']},{b['s']},{b['e']},{b['n']}",
+            "geometryType": "esriGeometryEnvelope", "inSR": "4326", "spatialRel": "esriSpatialRelIntersects",
+            "outFields": "*", "outSR": "4326", "returnGeometry": "true", "geometryPrecision": "5", "f": "geojson"})
+    except Exception as e:
+        print(lid, "failed", e); continue
+    fs = gj.get("features", [])
+    print("== layer", lid, len(fs))
+    for f in fs:
+        x, y = centre(f["geometry"]) if f.get("geometry") else (0, 0)
+        print(lid, round(x, 4), round(y, 4), {k: v for k, v in f["properties"].items() if v and k not in ("OBJECTID", "SHAPE", "Shape_Area", "Shape_Length", "SHAPE.STArea()", "SHAPE.STLength()")})
+r = http("https://maps164.nottinghamcity.gov.uk/server/rest/services/Core_services/Environment/MapServer/7", params={"f": "json"})
+print("LWS layer:", {k: r.get(k) for k in ("name", "description", "copyrightText", "maxRecordCount")})
