@@ -15,7 +15,8 @@ import json
 from collections import Counter
 import urllib.parse
 
-from .common import building_name, marker, load, log, save, work
+from .common import building_name, centroid, load, log, marker, point_in_ring, save, work
+from .s00_fetch_nature import rings_of
 from .s05_dates import info_for, osm_article
 
 
@@ -45,6 +46,23 @@ def main(city_id):
         if pl["b"] is not None and pl["name"] and not marker(pl["tags"]):
             fallback.setdefault(str(pl["b"]), pl["name"])
 
+    # links to collections of old pictures that cannot be copied here (see COLLECTIONS in the stories file)
+    colls = cur.get("collections", [])
+    cons = [(f["properties"]["name"], rings_of(f["geometry"]))
+            for f in (load(city_id, "conservation") if work(city_id, "conservation").exists() else [])]
+
+    def collections_for(name, layer_keys, whos, xy):
+        n = (name or "").lower()
+        areas = {a for a, rs in cons if xy and any(point_in_ring(xy[0], xy[1], r) for r in rs)} if colls else set()
+        out = []
+        for c in colls:
+            if (any(x in n for x in c.get("names", [])) or areas & set(c.get("areas", []))
+                    or any(("," + L + "-") in (layer_keys or "") or ("," + L + ",") in (layer_keys or "")
+                           for L in c.get("layers", []))
+                    or set(whos) & set(c.get("who", []))):
+                out.append({"title": c["title"], "url": c["url"]})
+        return out or None
+
     feats = []
     for i, b in enumerate(buildings):
         t, k = b["tags"], str(i)
@@ -70,6 +88,8 @@ def main(city_id):
             "stories": lay["stories"].get(k),
             "sum": (sums.get(k) or {}).get("text"), "sumSrc": (sums.get(k) or {}).get("src"),
         }
+        p["coll"] = collections_for(name, p["L"], [s2.get("who") for s2 in p["stories"] or [] if s2.get("who")],
+                                    centroid(b["rings"][0]))
         p = {kk: v for kk, v in p.items() if v not in (None, "", [])}
         rings = b["rings"]
         geom = ({"type": "Polygon", "coordinates": [rings[0]]} if len(rings) == 1
@@ -94,6 +114,12 @@ def main(city_id):
     nature += load(city_id, "conservation") if work(city_id, "conservation").exists() else []
     pins = [{"type": "Feature", "properties": {"i": k, **{kk: v for kk, v in pn.items() if kk not in ("x", "y")}},
              "geometry": {"type": "Point", "coordinates": [pn["x"], pn["y"]]}} for k, pn in enumerate(lay.get("pins", []))]
+    for f in pins:          # pins: their layer's group, their person, where they stand
+        pp = f["properties"]
+        c = collections_for(pp.get("name"), f",{pp.get('group', '')},", [pp["who"]] if pp.get("who") else [],
+                            f["geometry"]["coordinates"])
+        if c:
+            pp["coll"] = c
     out = {"city": city_id, "built": built, "stats": stats, "layers": lay["meta"], "nature": fc(nature), "pins": fc(pins),
            "people": lay.get("people", {}),
            "buildings": fc(feats), "roads": fc(base["roads"]), "water": fc(base["water"]), "parks": fc(base["parks"])}

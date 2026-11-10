@@ -44,9 +44,11 @@ def stories(city_id):
     spec.loader.exec_module(mod)
     _wiki[city_id] = getattr(mod, "WIKIPEDIA", {})
     _plaques[city_id] = getattr(mod, "PLAQUES", {})
+    _collections[city_id] = getattr(mod, "COLLECTIONS", [])
     return mod.CURATED
 
 
+_collections = {}   # per city: picture collections linked, not copied (their pictures are not openly licensed)
 _plaques = {}   # per city: corrections to plaques, by the start of their inscription or their subject
 _wiki = {}      # per city: {person's name as a plaque or Wikidata gives it: their English Wikipedia article}
 
@@ -273,4 +275,5 @@ def main(city_id):
             m["groups"] = [["people-" + k, t] for k, t, _ in PEOPLE_GROUPS if "people-" + k in used]
         meta.append(m)
     save(city_id, "curated", {"layers": meta, "entries": entries, "dropped": dropped,
-                              "wikipedia": _wiki.get(city_id, {}), "plaques": _plaques.get(city_id, {})})
+                              "wikipedia": _wiki.get(city_id, {}), "plaques": _plaques.get(city_id, {}),
+                              "collections": _collections.get(city_id, [])})

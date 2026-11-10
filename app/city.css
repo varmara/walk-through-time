@@ -182,3 +182,6 @@ a.fab{display:grid;place-items:center;text-decoration:none;color:inherit}
 .about{margin:8px 0 2px;padding:8px 10px;border-left:3px solid var(--accent);background:var(--bg);border-radius:0 8px 8px 0;font-size:14px}
 .about b{font-weight:600}
 .about .src{margin-top:4px}
+.coll h3{margin:12px 0 4px;font:600 12px var(--mono);text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.coll p{margin:4px 0}
+.coll a{margin-right:12px;white-space:nowrap}

@@ -52,6 +52,24 @@ PLAQUES = {
     "The World's Oldest Professional League Club": {"label": "Notts County Football Club", "type": "group"},
 }
 
+# Collections of old pictures that are not openly licensed, so the map links to them instead of showing their
+# pictures: a building or pin gets the link when it is in the area, the layer, or has the name or person given.
+PN = "https://picturenottingham.co.uk/image-themes/"
+COLLECTIONS = [
+    {"title": "Nottingham Castle", "url": PN + "nottingham-castle.html", "areas": ["Castle"],
+     "names": ["nottingham castle", "castle gatehouse", "mortimer's hole"], "who": ["John Hutchinson"]},
+    {"title": "The Lace Market", "url": PN + "lace-market.html", "areas": ["Lace Market"]},
+    {"title": "Nottingham's lace industry", "url": PN + "nottinghams-lace-industry.html", "layers": ["lace"]},
+    {"title": "Old Market Square", "url": PN + "nottinghams-old-market-square.html", "areas": ["Old Market Square"]},
+    {"title": "Goose Fair", "url": PN + "goose-fair.html", "names": ["old market square"]},
+    {"title": "Trent Bridge", "url": PN + "trent-bridge.html", "names": ["trent bridge", "city ground", "county hall"]},
+    {"title": "Wilford", "url": PN + "wilford.html", "areas": ["Wilford Village", "Wilford House"], "layers": ["wilford"]},
+    {"title": "Robin Hood", "url": PN + "robin-hood.html", "who": ["Robin Hood"]},
+    {"title": "D. H. Lawrence", "url": PN + "dh-lawrence.html", "who": ["D. H. Lawrence"]},
+    {"title": "Lord Byron", "url": PN + "lord-byron-and-newstead-abbey.html", "who": ["George Gordon Byron"]},
+    {"title": "Sport", "url": PN + "sport.html", "names": ["city ground", "meadow lane", "trent bridge cricket ground"]},
+]
+
 CURATED = [
     dict(
         id="inns", title="Old inns",

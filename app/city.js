@@ -521,7 +521,7 @@ function selectBuilding(id){
   if (features[id].full || !tiled()) return showCard(id);
   openSheet('card', refName(id));                  // the title at once, the details when their file arrives
   $('cFacts').innerHTML = '<dt>Loading…</dt><dd></dd>';
-  ['cImg', 'cSum', 'cCredit', 'cDyk', 'cArch'].forEach(k => $(k).hidden = true);
+  ['cImg', 'cSum', 'cCredit', 'cDyk', 'cArch', 'cColl'].forEach(k => $(k).hidden = true);
   $('cStories').innerHTML = ''; $('cLinks').innerHTML = '';
   loadCard(id).then(() => selectedId === id && showCard(id))
     .catch(() => { if (selectedId === id) $('cFacts').innerHTML = '<dt>Could not load</dt><dd>Check the connection and tap the building again.</dd>'; });
@@ -589,10 +589,19 @@ function showCard(id){
       <img loading="lazy" src="${esc(src)}" alt="${esc(f.file.replace(/\.\w+$/, ''))}" onerror="const a=this.closest('#cArch');this.parentNode.remove();if(a&&!a.querySelector('.shot'))a.hidden=true">
       <span><b>${esc(f.year)}</b>${credit(f) ? ' · ' + credit(f) : ''}</span></a>`;
   }).join('') + '</div>' : '';
+  collHtml(J(p.coll));
   openSheet('card', p.name || p.listName || 'Unnamed building');
 }
+// links to collections of old pictures that are not openly licensed (so not shown here)
+function collHtml(cs){
+  cs = cs || [];
+  $('cColl').hidden = !cs.length;
+  $('cColl').innerHTML = cs.length ? '<h3>More old pictures</h3><p>' + cs.map(c =>
+    `<a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.title)} →</a>`).join(' ')
+    + '</p><p class="src">Picture Nottingham: photographs from Nottingham Local Studies Library, © picturenottingham.co.uk. Linked, not shown, as they are not openly licensed.</p>' : '';
+}
 function showArea(p){
-  ['cCredit', 'cDyk', 'cArch'].forEach(id => $(id).hidden = true);
+  ['cCredit', 'cDyk', 'cArch', 'cColl'].forEach(id => $(id).hidden = true);
   $('cSum').hidden = true;
   const type = (groups.get(p.t) || {}).title || 'Nature area';
   $('cImg').hidden = true;
@@ -653,6 +662,7 @@ function aboutHtml(who, source){
 }
 function showPin(p){
   ['cCredit', 'cDyk', 'cArch'].forEach(id => $(id).hidden = true);
+  collHtml(typeof p.coll === 'string' ? JSON.parse(p.coll) : p.coll);
   $('cSum').hidden = true;
   const link = s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>`;
   $('cImg').hidden = true;
