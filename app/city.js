@@ -374,6 +374,7 @@ $('sShare').onclick = async () => {
 };
 function closeSheet(){
   sheet.hidden = true; sheetKind = null;
+  unlight();
   $('bLayers').setAttribute('aria-expanded', false);
   $('bMap').setAttribute('aria-expanded', false);
   if (places) { setPlace(places.i, false); return; }   // back to the places strip, its building still selected
@@ -513,6 +514,7 @@ $('legend').insertAdjacentHTML('afterend', '<p class="note">Palest of all: no da
 // ================= Cards =================
 const layerTitle = id => layers.find(L => L.id === id)?.title || id;
 function selectBuilding(id){
+  unlight();
   if (selectedId != null) fstate(selectedId, { sel:false });
   selectedId = id;
   fstate(id, { sel:true });
@@ -555,7 +557,8 @@ function showCard(id){
   $('cSum').innerHTML = p.sum ? `<p>${esc(p.sum)}</p><p class="src">${esc(sumSrc?.kind || '')}${sumSrc?.url ? ': ' + link(sumSrc)
     : sumSrc?.title ? ' (' + esc(sumSrc.title) + ')' : ''}</p>` : '';
   $('cStories').innerHTML = (p.stories || []).map(s => `<div class="story"><div class="seclbl">${esc(layerTitle(s.layer))}</div>
-    <p>${esc(s.text)}</p>${s.source ? `<p class="src">${esc(s.source.kind || 'Wikipedia')}: ${link(s.source)}${s.place ? ` · ${esc(s.place.kind || 'Wikipedia')}: ` + link(s.place) : ''}</p>` : ''}${aboutHtml(s.who, s.source)}</div>`).join('');
+    <p>${esc(s.text)}</p>${s.source ? `<p class="src">${esc(s.source.kind || 'Wikipedia')}: ${link(s.source)}${s.place ? ` · ${esc(s.place.kind || 'Wikipedia')}: ` + link(s.place) : ''}</p>` : ''}${aboutHtml(s.who, s.source)}${s.pin ? `<p class="go"><a href="#" data-ref="${esc(s.pin)}">See the plaque on the map →</a></p>` : ''}</div>`).join('');
+  $('cStories').querySelectorAll('[data-ref]').forEach(a => a.onclick = e => { e.preventDefault(); openRef(a.dataset.ref); });
 
   const many = entitiesAt[id] || [];
   $('cStories').insertAdjacentHTML('beforeend', many.map(m =>
@@ -680,6 +683,29 @@ function showPin(p){
   $('cStories').innerHTML = `<div class="story"><p>${esc(p.text)}</p>${src ? `<p class="src">${esc(src.kind || 'Wikipedia')}: ${link(src)}${place ? ` · ${esc(place.kind || 'Wikipedia')}: ` + link(place) : ''}</p>` : ''}${aboutHtml(p.who, src)}</div>`;
   $('cLinks').innerHTML = '';
   openSheet('card', p.name);
+  plaqueOn(p.on == null || p.on === '' ? null : +p.on);
+}
+// a plaque's building: lit up while the plaque is open, and shown inside the plaque's card
+let litOn = null;
+function unlight(){ if (litOn != null && map) fstate(litOn, { hl:false }); litOn = null; }
+function plaqueOn(b){
+  unlight();
+  if (b == null || !features[b]) return;
+  litOn = b; fstate(b, { hl:true });
+  const box = document.createElement('div');
+  box.className = 'onbuilding';
+  $('cStories').appendChild(box);
+  const draw = () => {
+    const q = features[b].properties;
+    const when = q.y != null ? dateText(q.y, q.f, q.per, q.dt) : null;
+    box.innerHTML = `<div class="seclbl">On this building</div>
+      <p><b>${esc(q.full || q.name || placeName(q))}</b>${when ? ` · ${esc(when)}` : ''}${q.grade ? ` · Grade ${esc(q.grade)} listed` : ''}</p>
+      ${q.sum ? `<p>${esc(q.sum)}</p>` : ''}
+      <p class="go"><a href="#">Open the building →</a></p>`;
+    box.querySelector('a').onclick = e => { e.preventDefault(); unlight(); selectBuilding(b); };
+  };
+  draw();
+  loadCard(b).then(() => box.isConnected && draw()).catch(() => {});
 }
 
 // ================= Places: one person or story with several buildings =================

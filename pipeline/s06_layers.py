@@ -144,13 +144,13 @@ def main(city_id):
     cur = load(city_id, "curated")
     meta, member, stories, pins = [], {}, {}, []
 
-    def pin(x, y, name, layer_id, group, text, source=None, place=None, who=None):
+    def pin(x, y, name, layer_id, group, text, source=None, place=None, who=None, on=None):
         pins.append({"x": round(x, 6), "y": round(y, 6), "name": name, "layer": layer_id, "group": group, "text": text,
                      **({"source": source} if source else {}), **({"place": place} if place else {}),
-                     **({"who": who} if who else {})})
+                     **({"who": who} if who else {}), **({"on": on} if on is not None else {})})
         return f"p{len(pins) - 1}"
 
-    def add(i, group, layer_id, story=None, source=None, place=None, who=None):
+    def add(i, group, layer_id, story=None, source=None, place=None, who=None, pin_ref=None):
         member.setdefault(str(i), [])
         if group not in member[str(i)]:
             member[str(i)].append(group)
@@ -158,7 +158,8 @@ def main(city_id):
             stories.setdefault(str(i), []).append({"layer": layer_id, "text": story,
                                                    **({"source": source} if source else {}),
                                                    **({"place": place} if place else {}),
-                                                   **({"who": who} if who else {})})
+                                                   **({"who": who} if who else {}),
+                                                   **({"pin": pin_ref} if pin_ref else {})})
 
     want = {}       # person's name -> what may find their Wikipedia article: {"title"} or {"qid"} or {} (by name)
 
@@ -214,15 +215,17 @@ def main(city_id):
     titles = {k: t for k, t, _ in PEOPLE_GROUPS} | {"events": "Plaques to events and places"}
     pg = {g["key"]: g for g in people["groups"]}
 
-    def person(b, key, name, story, source, xy=None, qid=None, who=True):
+    def person(b, key, name, story, source, xy=None, qid=None, who=True, on=None):
         k = "people-" + key
         if k not in pg:
             pg[k] = {"key": k, "title": titles.get(key, key), "count": 0, "items": []}
         who = name if who else None
         if who:
             wiki_hint(name, source, qid, story)
-        if b is None:   # a plaque on no building: a pin
-            b = pin(*xy, name, "people", k, story, source, who=who)
+        if b is None:   # a plaque: a pin where it hangs; on a building, the building is in the layer too and its card
+            b = pin(*xy, name, "people", k, story, source, who=who, on=on)     # quotes the plaque
+            if on is not None:
+                add(on, k, "people", story, source, who=who, pin_ref=b)
         else:
             add(b, k, "people", story, source, who=who)
         pg[k]["items"].append([b, name])
@@ -260,9 +263,9 @@ def main(city_id):
         if p.get("osm") and not p.get("id"):
             src = {"title": "OpenStreetMap", "url": f"https://www.openstreetmap.org/node/{p['osm']}", "kind": "Plaque mapped in"}
         label = fix.get("label") or subject or plaque_label(text) or "Plaque"
-        # every plaque is a pin where it hangs: on a building's card it read as the building's own story
+        # every plaque is a pin where it hangs, linked both ways to the building it is on (if any)
         person(None, key, label, story, src, xy=(p["x"], p["y"]), qid=p.get("qid"),
-               who=bool(subject) and key != "events")
+               who=bool(subject) and key != "events", on=b)
     log(f"s06 plaques: {len(plaques)} shown as pins ({placed} on or by a building)")
 
     # well-known residents found in their Wikipedia articles (s04_residents)
