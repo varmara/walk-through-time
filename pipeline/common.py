@@ -321,6 +321,21 @@ def other_names(tags, name, today, label=None, listing_name=None):
     return out or None
 
 
+LANDMARK = re.compile(r"\b(museum|gallery|theatre|cinema|college|university|school|church|cathedral|chapel|"
+                      r"mosque|synagogue|temple|station|library|hospital|court|arts centre|concert hall|arena)\b", re.I)
+LANDMARK_USE = {"amenity": {"theatre", "cinema", "arts_centre", "library", "college", "university", "school",
+                            "place_of_worship", "townhall", "courthouse", "hospital", "concert_hall"},
+                "tourism": {"museum", "gallery"}, "building": {"train_station", "church", "cathedral", "chapel",
+                                                               "university", "college", "museum"},
+                "railway": {"station"}, "public_transport": {"station"}}
+
+
+def landmark(tags_list, now):
+    """A lasting public institution (a museum, theatre, college, church, station), whose current name belongs in
+    the title next to what the building was: 'Shire Hall and County Gaol · National Justice Museum'."""
+    return bool(now and (LANDMARK.search(now) or any(t.get(k) in v for t in tags_list for k, v in LANDMARK_USE.items())))
+
+
 def marker(tags):
     """A plaque, memorial or sign on a building names something else ("Near this site stood the Malt Cross")."""
     return ((tags.get("historic") and tags["historic"] not in ("building", "castle", "church", "manor", "house"))

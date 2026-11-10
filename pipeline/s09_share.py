@@ -47,7 +47,7 @@ def page(p, i, city_id, city_name, site):
     osm = p["osm"]
     target = f"{site}{city_id}/?b={i}&osm={osm}"    # the index is this build's; the page is rebuilt with it
     image = (p["image"].replace("http://", "https://") + "?width=1200") if p.get("image") else f"{site}app/share.png"
-    title = f"{p['name']} · {city_name} · Walk Through Time"
+    title = f"{p.get('full') or p['name']} · {city_name} · Walk Through Time"
     e = lambda s: html.escape(str(s), quote=True)  # noqa: E731
     desc = describe(p, city_name)
     return f"""<!doctype html>
@@ -57,12 +57,12 @@ def page(p, i, city_id, city_name, site):
 <meta name="description" content="{e(desc)}">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Walk Through Time">
-<meta property="og:title" content="{e(p['name'])}">
+<meta property="og:title" content="{e(p.get('full') or p['name'])}">
 <meta property="og:description" content="{e(desc)}">
 <meta property="og:image" content="{e(image)}">
 <meta property="og:url" content="{e(site)}data/share/{city_id}/{osm.replace('/', '-')}.html">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="{e(p['name'])}">
+<meta name="twitter:title" content="{e(p.get('full') or p['name'])}">
 <meta name="twitter:description" content="{e(desc)}">
 <meta name="twitter:image" content="{e(image)}">
 <link rel="canonical" href="{e(target)}">

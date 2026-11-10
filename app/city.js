@@ -530,7 +530,7 @@ function showCard(id){
   const f = features[id], p = f.properties;
 
   const rows = [];
-  if (p.today) rows.push(['Today', esc(p.today)]);    // the current occupier; the title is what the building was
+  if (p.today && !(p.full && p.full.endsWith(p.today))) rows.push(['Today', esc(p.today)]);    // the current occupier; the title is what the building was
   const aka = typeof p.aka === 'string' ? JSON.parse(p.aka) : p.aka;
   if (aka && aka.length) rows.push(['Other names', aka.map(esc).join(' · ')]);   // old names, Historic England's, alternatives
   if (p.y != null) {
@@ -592,7 +592,7 @@ function showCard(id){
       <span><b>${esc(f.year)}</b>${credit(f) ? ' · ' + credit(f) : ''}</span></a>`;
   }).join('') + '</div>' : '';
   collHtml(J(p.coll));
-  openSheet('card', p.name || placeName(p));
+  openSheet('card', p.full || p.name || placeName(p));     // landmarks: what it was · what it is
 }
 // links to collections of old pictures that are not openly licensed (so not shown here)
 function collHtml(cs){

@@ -16,7 +16,7 @@ import re
 from collections import Counter
 import urllib.parse
 
-from .common import building_name, centroid, metres, other_names, load, log, marker, point_in_ring, save, work
+from .common import BUILDINGISH, LANDMARK, building_name, centroid, landmark, metres, other_names, load, log, marker, point_in_ring, save, work
 from .s00_fetch_nature import rings_of
 from .s05_dates import info_for, osm_article
 
@@ -44,7 +44,10 @@ def main(city_id):
             story_name.setdefault(str(e["b"]), e["name"])
     for k, v in lay.get("names", {}).items():   # plaque addresses
         fallback.setdefault(k, v)
+    inside = {}
     for pl in load(city_id, "places"):
+        if pl["b"] is not None:
+            inside.setdefault(str(pl["b"]), []).append(pl["tags"])
         if pl["b"] is not None and pl["name"] and not marker(pl["tags"]):
             fallback.setdefault(str(pl["b"]), pl["name"])
 
@@ -87,6 +90,19 @@ def main(city_id):
                         best = (d, n)
         return best and best[1]
 
+    def full_title(name, today, aka, tags_list):
+        """What it was, then what it is, for landmarks: 'Shire Hall · National Justice Museum'; a station known by
+        its modern name shows its old one first: 'Midland Railway Station · Nottingham station'."""
+        if not name:
+            return None
+        if today and landmark(tags_list, today):
+            return f"{name} · {today}"
+        if not today and aka and landmark(tags_list, name):
+            old = [a for a in aka if BUILDINGISH.search(a) or LANDMARK.search(a)]
+            if old and not (set(old[0].lower().split()) >= set(name.lower().split())):
+                return f"{old[0]} · {name}"
+        return None
+
     feats = []
     for i, b in enumerate(buildings):
         t, k = b["tags"], str(i)
@@ -103,6 +119,8 @@ def main(city_id):
                              else best.get("Name")), "today": today,
             "aka": other_names(t, name, today, info.get("label"), best.get("Name")),
             "where": None if name else where(t, centroid(b["rings"][0])),
+            "full": full_title(name, today, other_names(t, name, today, info.get("label"), best.get("Name")),
+                               [t] + inside.get(k, [])),
             "y": d.get("y"), "f": d.get("f"), "src": d.get("src"), "alts": d.get("alts"),
             "per": d.get("period"), "sh": d.get("share"), "dt": d.get("text"),
             "h": b["h"], "base": b.get("base"), "levels": t.get("building:levels"), "osm": b["osm"],
