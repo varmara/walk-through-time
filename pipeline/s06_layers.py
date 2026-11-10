@@ -23,6 +23,7 @@ NATURE = [
     ("sssi", "Sites of Special Scientific Interest"),
     ("ancient", "Ancient woodland"),
     ("reserve", "Other nature reserves"),
+    ("lws", "Local Wildlife Sites"),
 ]
 
 
@@ -189,7 +190,8 @@ def main(city_id):
     meta.append({"id": "nature", "title": "Nature", "section": "Nature", "kind": "areas",
                  "intro": "Protected and managed nature areas. National and Local Nature Reserves, Sites of Special "
                           "Scientific Interest and ancient woodland come from Natural England; other reserves from "
-                          "OpenStreetMap.",
+                          "OpenStreetMap. Local Wildlife Sites, places of local importance for wildlife such as stream "
+                          "corridors and old railway lines, come from Nottingham City Council.",
                  "source": {"title": "Natural England open data", "url": "https://naturalengland-defra.opendata.arcgis.com/"},
                  "groups": [g for g in groups if g["count"]]})
     log(f"s06 nature: {len(nature)} areas")

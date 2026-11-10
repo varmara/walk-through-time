@@ -18,7 +18,7 @@ const ERAS = [
 ];
 const FADE = { exact: 0, approx: 0.2, century: 0.35, area: 0.45 };   // how far each precision fades towards the background
 const SECTIONS = ['Stories', 'People', 'Heritage', 'Nature', 'Today'];
-const AREA_TYPES = ['nnr', 'lnr', 'sssi', 'ancient', 'reserve', 'conservation'];   // areas drawn on the ground
+const AREA_TYPES = ['nnr', 'lnr', 'sssi', 'ancient', 'reserve', 'lws', 'conservation'];   // areas drawn on the ground
 
 const $ = id => document.getElementById(id);
 const store = { get(k){ try { return localStorage.getItem(k); } catch { return null; } },

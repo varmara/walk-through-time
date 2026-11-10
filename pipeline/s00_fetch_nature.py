@@ -4,6 +4,11 @@ Natural England (Open Government Licence): National Nature Reserves, Local Natur
 Special Scientific Interest, and the Ancient Woodland Inventory. OpenStreetMap (ODbL): other areas
 tagged leisure=nature_reserve, such as reserves run by wildlife trusts.
 
+Local councils: Local Wildlife Sites (once "Sites of Importance for Nature Conservation"), places of local
+importance for wildlife chosen by the county's Local Wildlife Sites partnership, such as the Fairham Brook
+corridor between Clifton and Silverdale. Most are not nature reserves and have no legal protection, but are
+looked after through the planning system. Nottingham City Council publishes them for the whole county area.
+
 Writes work/<city>/nature.json: GeoJSON features with properties {t: type key, name, source}.
 Only areas whose centre lies inside the city's polygon are kept, so large sites just across the boundary
 stay out. OpenStreetMap reserves whose centre lies inside a Natural England area are left out as duplicates.
@@ -18,6 +23,11 @@ TYPES = [
     ("sssi", "SSSI_England", "Site of Special Scientific Interest"),
     ("ancient", "Ancient_Woodland_England", "Ancient woodland"),
 ]
+# per city: council map services with Local Wildlife Sites (key, ArcGIS layer, name field, publisher)
+LOCAL = {
+    "nottingham": [("lws", "https://maps164.nottinghamcity.gov.uk/server/rest/services/Core_services/Environment/MapServer/7/query",
+                    "SITE_NAME", "Nottingham City Council")],
+}
 OVERPASS = ["https://overpass-api.de/api/interpreter", "https://overpass.private.coffee/api/interpreter",
             "https://overpass.kumi.systems/api/interpreter"]
 
@@ -115,4 +125,28 @@ def main(city_id):
                       "properties": {"t": "reserve", "name": name or "Nature reserve", "source": "OpenStreetMap"}})
         n += 1
     log(f"s00 OpenStreetMap nature reserves: {n} more areas")
+
+    for key, url, field, publisher in LOCAL.get(city_id, []):
+        try:
+            gj = http(url, params={
+                "where": "1=1", "geometry": f"{b['w']},{b['s']},{b['e']},{b['n']}", "geometryType": "esriGeometryEnvelope",
+                "inSR": "4326", "spatialRel": "esriSpatialRelIntersects", "outFields": field, "outSR": "4326",
+                "returnGeometry": "true", "geometryPrecision": "5", "maxAllowableOffset": "0.00002", "f": "geojson"})
+        except Exception as e:  # noqa: BLE001 - optional
+            log(f"s00 {publisher} Local Wildlife Sites: failed, continuing without them ({e})")
+            continue
+        n = 0
+        for f in gj.get("features", []):
+            g = f.get("geometry")
+            if not g or not rings_of(g) or not reaches(g, poly):
+                continue
+            name = (f["properties"].get(field) or "").strip()
+            cx, cy = centre(g)
+            # already drawn as a reserve or a designated site (often the same place under its own name)
+            if any(point_in_ring(cx, cy, r) for e in feats for r in rings_of(e["geometry"])):
+                continue
+            feats.append({"type": "Feature", "geometry": rnd(g),
+                          "properties": {"t": key, "name": name or "Local Wildlife Site", "source": publisher}})
+            n += 1
+        log(f"s00 {publisher} Local Wildlife Sites: {n} more areas")
     save(city_id, "nature", feats)
