@@ -110,7 +110,7 @@ def main(city_id):
     hand = cur.get("names", {})
     stations = [(centroid(b["rings"][0]), hand.get(b["osm"]) or b["tags"]["name"]) for b in buildings
                 if b["tags"].get("building") == "train_station" and b["tags"].get("name")
-                and re.search(r"\bstation\b", hand.get(b["osm"]) or b["tags"]["name"], re.I)]
+                and re.search(r"\bstation$", hand.get(b["osm"]) or b["tags"]["name"], re.I)]   # the station, not a part
 
     def station_of(t, xy):
         if t.get("building") != "train_station" or t.get("name"):
