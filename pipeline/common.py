@@ -398,6 +398,7 @@ def building_name(tags, story=None, label=None, listing_name=None, place=None):
     num, street = tags.get("addr:housenumber"), tags.get("addr:street")
     address = f"{num.replace('-', '–')} {street}" if num and street else None
     # an unlisted shop, café or office with no name for the building itself: its address, the business 'Today'
+    # (a building with only an address stays unnamed: its card is titled by the address)
     trade = tags.get("building") in ("retail", "commercial", "office", "industrial", "warehouse", "supermarket", "kiosk")
     if story:
         name = story
@@ -409,7 +410,7 @@ def building_name(tags, story=None, label=None, listing_name=None, place=None):
     else:
         # a pub's name, or a name that says what the building is ("Kings Arms", "Albert Hall"), beats the address
         keep = osm and (tags.get("amenity") == "pub" or BUILDINGISH.search(osm))
-        name = he or label or old or (osm if keep else address) or osm or place
+        name = he or label or old or (osm if keep else address if osm else None) or osm or place
     m = re.match(r"^(?:Numbers?|Nos?\.?)\s+(\d.*)$", name or "")
     if m:                                 # "Numbers 119 and 121" -> "119 and 121 Derby Road"
         street = tags.get("addr:street")

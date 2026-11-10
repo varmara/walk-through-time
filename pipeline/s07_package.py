@@ -107,8 +107,10 @@ def main(city_id):
         return bool(re.search(r"\bformer\b", a, re.I))
 
     # an unnamed part of a station takes the station's name ("Nottingham station", not a booth inside it)
-    stations = [(centroid(b["rings"][0]), b["tags"]["name"]) for b in buildings
-                if b["tags"].get("building") == "train_station" and b["tags"].get("name")]
+    hand = cur.get("names", {})
+    stations = [(centroid(b["rings"][0]), hand.get(b["osm"]) or b["tags"]["name"]) for b in buildings
+                if b["tags"].get("building") == "train_station" and b["tags"].get("name")
+                and re.search(r"\bstation\b", hand.get(b["osm"]) or b["tags"]["name"], re.I)]
 
     def station_of(t, xy):
         if t.get("building") != "train_station" or t.get("name"):
