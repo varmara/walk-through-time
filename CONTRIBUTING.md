@@ -5,51 +5,81 @@ There are two kinds.
 
 ## 1. A story layer (hand-written)
 
-Add a layer to `CURATED` in `stories/<city>.py`:
+Stories live in Markdown files in `stories/<city>/`, one file per layer, named `NN-<id>.md` (`NN` sets the order
+in the Layers sheet). Edit them on GitHub or in any text editor; the next data build checks and publishes them.
 
-```python
-dict(
-    id="markets", title="Markets",
-    intro="Two or three plain sentences on the history behind the layer.",
-    entries=[
-        #  name shown on the card, Wikipedia article, the story, facts the article must contain
-        E("Old Market Square", "en:Old Market Square",
-          "The square has held markets since the Middle Ages.",
-          ("market",)),
-    ]),
+```markdown
+# Markets
+id: markets
+
+Two or three plain sentences on the history behind the layer.
+
+## Old Market Square
+- source: en:Old Market Square, Nottingham
+- at: pin:-1.1497,52.9529
+- check: market | 1928
+
+The square has held markets since the Middle Ages; Goose Fair was held here until 1928.
 ```
+
+An entry is a `##` heading (the name shown on the card), then its settings as `- key: value` lines, then the
+story as plain text. The settings:
+
+| Setting | Meaning |
+|---|---|
+| `source` | the Wikipedia article (`en:Title`) or Historic England list entry (`he:1254566`) the story rests on; for People, the person's article |
+| `place` | People only: the place's article, which decides the building |
+| `at` | where, when not where the article says: `name:…` (a building's name), `osm:way/123` (an outline), `nhle:1271444` (a list entry), `pin:lon,lat` (a pin) |
+| `year` | when the building standing today was built or opened (`1855`, `c. 1420`, `1841..1844`) |
+| `group` | People only, when Wikidata has no occupation: architects, writers, science, industry, sport, arts, public |
+| `names` | `no` when the entry's name is not the building's name (an event: "The castle burned, 1831") |
+| `check` | words the article must contain, separated by `\|` |
+| `quote` | for a Historic England source: a passage copied from the list entry (their site blocks automated reading), one per line |
+| `note` | for editors only: why, where from; not shown on the map |
+
+A layer file can say `kind: people` (pairs of a person and a place) or `kind: facts` ("Did you know" facts, each
+shown on its building's card).
 
 Rules, checked by step `s04_curated` every time the pipeline runs:
 
-- **Every story rests on a source:** a Wikipedia article (`"en:Title"`) or a Historic England list entry
-  (`"he:1254566"`), whose official description is checked the same way. Use a list entry for a listed building
-  with no Wikipedia article.
-  `facts` are short strings (a year, a name, a key word) that must
-  appear in the article. If one is missing, the story is dropped. If the article does not say it, the story
-  should not either.
-- **The story must be placed on a building.** The pipeline tries, in order: an explicit `at="osm:way/123"`, the
-  article's Wikidata item tagged on an OpenStreetMap outline, the item's Historic England list entry, the article's
-  coordinates, and finally the entry's name (or `at="name:..."`) matching a building or a named place inside one.
-- **A story can give the building's year:** `E(..., year="c. 1420")`. The year's digits must appear in the article,
-  and it becomes a date source next to OpenStreetMap and Wikidata. Give it only when the year is about the building
-  standing there today (built, rebuilt or opened), not about an earlier building on the site.
+- **Every story rests on a source.** The words under `check` (a year, a name, a key word) must appear in the
+  article. If one is missing, the story is dropped and the build log says which. If the article does not say it,
+  the story should not either. Bulleted lists in the article count too.
+- **The story must be placed on a building or a pin.** The pipeline tries, in order: `at`, the article's Wikidata
+  item tagged on an OpenStreetMap outline, the item's Historic England list entry, the article's coordinates, and
+  finally the entry's name matching a building or a named place inside one.
+- **A `year` is about the building standing there today** (built, rebuilt or opened), not an earlier building on
+  the site. Its digits must appear in the article, and it becomes a date source.
 - **Stories are short and plain:** one or two sentences, what happened and when. Name legends as legends.
 - **No personal details about private people.** Public figures are fine.
 
 ### People
 
-A people layer (`kind="people"`) pairs a person with a building:
+In a `kind: people` layer, the facts must appear in the person's and the place's articles taken together:
 
-```python
-P("Thomas Cecil Howitt", "en:Thomas Cecil Howitt", "en:Council House, Nottingham",
-  "The architect Thomas Cecil Howitt designed the Council House.",
-  ("Howitt", "Council House")),
+```markdown
+## Thomas Cecil Howitt
+- source: en:Thomas Cecil Howitt
+- place: en:Council House, Nottingham
+- check: Howitt | Council House
+
+The architect Thomas Cecil Howitt designed the Council House.
 ```
 
-The facts must appear in the person's and the place's articles taken together, and the place's article decides the
-building. The person's type (architects, writers, science, industry, sport, arts, public life) comes from their
-occupations on Wikidata; set `group="sport"` and so on only when Wikidata has none, for a duo or a team. Each type
-becomes its own tickbox on the page.
+The person's type comes from their occupations on Wikidata; each type becomes its own tickbox on the page.
+
+### Corrections and links
+
+Tables in the same folder, each with a Note column saying why:
+
+| File | What it holds |
+|---|---|
+| `names.md` | names chosen by hand, by OpenStreetMap outline |
+| `titles.md` | titles "what it was · what it is" chosen by hand |
+| `tags.md` | corrections to OpenStreetMap tags (`(remove)` drops one); fix them in OpenStreetMap too |
+| `wikipedia.md` | the Wikipedia article for a plaque's person, when the plaque's name is not the article's |
+| `plaques.md` | a label, group or type for a plaque, by the start of its inscription or its subject |
+| `collections.md` | collections of old pictures that are linked, not copied (not openly licensed) |
 
 ## 2. A rule layer (from an open dataset)
 

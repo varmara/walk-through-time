@@ -2,7 +2,7 @@
 
 Candidates:
   OpenStreetMap  start_date (or building:start_date, construction_date) tagged on the outline itself
-  Wikipedia      a `year` given in a story (stories/<city>.py); the year must appear in the article (step s04)
+  Wikipedia      a `year` given in a story (stories/<city>/); the year must appear in the article (step s04)
   Historic England  the date in the building's list entry, as Wikipedia's lists of listed buildings give it
                  (step s02_listing_dates): "Late 14th century", "c. 1720", "1736"
   Wikidata       inception (P571) of the item linked to the building

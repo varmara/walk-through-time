@@ -1,6 +1,6 @@
 """Check hand-written stories against Wikipedia and place each one on a building.
 
-Stories live in stories/<city>.py (see CONTRIBUTING.md). A source is a Wikipedia article ("en:Title") or a
+Stories live in Markdown files in stories/<city>/ (see CONTRIBUTING.md). A source is a Wikipedia article ("en:Title") or a
 Historic England list entry ("he:1254566"), whose official description is checked the same way. For every entry:
   1. The Wikipedia article is fetched. Every string in `facts` must appear in it (case-insensitive).
      If one is missing, the entry is dropped: if the article does not say it, the story should not either.
@@ -26,29 +26,28 @@ Historic England list entry ("he:1254566"), whose official description is checke
 
 Writes curated.json: {layers: [...], entries: [{layer, group, b, name, story, source, how, year?}], dropped: [...]}.
 """
-import importlib.util
 import re
 import time
 from pathlib import Path
 from urllib.parse import quote
 
+from . import stories_md
 from .common import marker, building_at, http, http_text, load, log, parse_year, save
 
 
 def stories(city_id):
-    path = Path(f"stories/{city_id}.py")
-    if not path.exists():
+    """The city's stories and corrections, from Markdown files in stories/<city>/ (see pipeline/stories_md.py)."""
+    folder = Path(f"stories/{city_id}")
+    if not folder.is_dir():
         return []
-    spec = importlib.util.spec_from_file_location(f"stories_{city_id}", path)
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    _wiki[city_id] = getattr(mod, "WIKIPEDIA", {})
-    _plaques[city_id] = getattr(mod, "PLAQUES", {})
-    _collections[city_id] = getattr(mod, "COLLECTIONS", [])
-    _names[city_id] = getattr(mod, "NAMES", {})
-    _tag_fixes[city_id] = getattr(mod, "TAG_FIXES", {})
-    _titles[city_id] = getattr(mod, "TITLES", {})
-    return mod.CURATED
+    mod = stories_md.load(folder)
+    _wiki[city_id] = mod["WIKIPEDIA"]
+    _plaques[city_id] = mod["PLAQUES"]
+    _collections[city_id] = mod["COLLECTIONS"]
+    _names[city_id] = mod["NAMES"]
+    _tag_fixes[city_id] = mod["TAG_FIXES"]
+    _titles[city_id] = mod["TITLES"]
+    return mod["CURATED"]
 
 
 _titles = {}        # per city: {OpenStreetMap outline: title chosen by hand}

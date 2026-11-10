@@ -26,7 +26,7 @@ open data ──► pipeline/ (Python, numbered steps) ──► data/<city>.jso
 | `s02_listing` | Listed-building points matched to outlines |
 | `s02_listing_dates` | Dates of listed buildings from Wikipedia's ward and parish lists (written from the Historic England entries) |
 | `s03_wikidata` | Names, dates, architects, photos and Wikipedia links from Wikidata |
-| `s04_curated` | Hand-written stories (`stories/<city>.py`) checked against Wikipedia and placed on buildings |
+| `s04_curated` | Hand-written stories (Markdown in `stories/<city>/`) checked against Wikipedia and placed on buildings |
 | `s05_dates` | One year per building with its precision (exact, approximate, century) and source; keeps every date that disagrees with it |
 | `s06_layers` | Every layer resolved to its buildings: story layers and rule layers (`pipeline/layers.py`) |
 | `s04_residents` | Well-known residents: people tied to the city in Wikidata whose Wikipedia article names a house number and street here, matched to the building by its OpenStreetMap address |

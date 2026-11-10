@@ -5,7 +5,7 @@ Each layer is a function decorated with @layer(...). It receives a Context and r
 Groups split a layer into parts the page can show apart (for example listing grades).
 
 These rules use only data the pipeline already downloads, so they work for any English city.
-Hand-written stories are a different kind of layer: see stories/<city>.py and CONTRIBUTING.md.
+Hand-written stories are a different kind of layer: see stories/<city>/ (Markdown) and CONTRIBUTING.md.
 """
 from dataclasses import dataclass
 

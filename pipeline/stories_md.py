@@ -1,0 +1,127 @@
+"""Read a city's stories from Markdown files (stories/<city>/), written to be edited by hand.
+
+A story layer is one file, `NN-<id>.md` (NN sets the order):
+
+    # Old inns                        <- the layer's title
+    id: inns                          <- settings, one per line (id; kind: people or facts for those layers)
+
+    The layer's introduction: one paragraph, as many lines as you like.
+
+    ## Ye Olde Trip to Jerusalem      <- an entry: the place, person or fact's name
+    - source: en:Ye Olde Trip to Jerusalem      (the Wikipedia article it rests on; a person's, for People)
+    - place: en:Nottingham Castle               (People: the place's article)
+    - at: name:Ye Olde Trip to Jerusalem        (where, if not where the article says: name:, osm:, nhle:, pin:lon,lat)
+    - year: c. 1650                             (when the building standing today was built)
+    - group: sport                              (People: the kind of person, if Wikidata has none)
+    - quote: …                                  (passages copied from a Historic England entry, one per line)
+    - names: no                                 (the entry's name is not the building's name)
+    - check: 1189 | caves                       (words the article must contain, separated by |)
+    - note: …                                   (for editors only: why, where from; not shown)
+
+    The story: one or two plain sentences, any number of lines.
+
+Corrections and links are tables, one file each (names.md, titles.md, wikipedia.md, plaques.md, tags.md,
+collections.md); each has a Note column for why. See stories/<city>/README.md.
+"""
+import re
+from pathlib import Path
+
+ENTRY_KEYS = {"source", "place", "at", "year", "group", "quote", "names", "check", "note"}
+
+
+def _cell(s):
+    return s.strip().replace("\\|", "|")
+
+
+def table(path):
+    """Rows of a Markdown table as dicts, keyed by the header's words in lower case."""
+    rows, head = [], None
+    for line in Path(path).read_text().splitlines():
+        line = line.strip()
+        if not line.startswith("|"):
+            continue
+        cells = [_cell(c) for c in re.split(r"(?<!\\)\|", line.strip("|"))]
+        if head is None:
+            head = [c.lower() for c in cells]
+        elif not all(re.fullmatch(r":?-{3,}:?", c) for c in cells):
+            rows.append(dict(zip(head, cells)))
+    return rows
+
+
+def layer(path):
+    lines = Path(path).read_text().splitlines()
+    L, entries, cur, intro, body = {}, [], None, [], []
+
+    def close():
+        if cur is not None:
+            cur["story"] = " ".join(body).strip()
+            entries.append(cur)
+
+    for raw in lines:
+        line = raw.rstrip()
+        if line.startswith("# ") and "title" not in L:
+            L["title"] = line[2:].strip()
+        elif line.startswith("## "):
+            close()
+            cur, body = {"name": line[3:].strip()}, []
+        elif cur is None:
+            m = re.match(r"^(id|kind):\s*(.+)$", line)
+            if m and not intro:
+                L[m[1]] = m[2].strip()
+            elif line.strip():
+                intro.append(line.strip())
+        else:
+            m = re.match(r"^- (\w+):\s*(.*)$", line)
+            if m and m[1] in ENTRY_KEYS and not body:
+                k, v = m[1], m[2].strip()
+                if k == "note":          # for whoever edits the file: why, where from
+                    pass
+                elif k == "check":
+                    cur["facts"] = tuple(x.strip() for x in v.split(" | ") if x.strip())
+                elif k == "quote":       # passages copied from a source that cannot be read automatically
+                    cur.setdefault("quote", []).append(v)
+                elif k == "names":
+                    if v.lower() in ("no", "false"):
+                        cur["names"] = False
+                else:
+                    cur[k] = v
+            elif line.strip():
+                body.append(line.strip())
+    close()
+    L["intro"] = " ".join(intro)
+    L["entries"] = entries
+    return L
+
+
+def load(folder):
+    """Everything a city's stories folder holds: CURATED and the correction tables."""
+    folder = Path(folder)
+    curated = [layer(p) for p in sorted(folder.glob("[0-9][0-9]-*.md"))]
+    out = {"CURATED": curated}
+    f = folder / "wikipedia.md"
+    out["WIKIPEDIA"] = {r["name on plaque"]: r["wikipedia article"] for r in table(f)} if f.exists() else {}
+    for name, key in (("names.md", "NAMES"), ("titles.md", "TITLES")):
+        f = folder / name
+        out[key] = {r["outline"]: r[key.lower()[:-1]] for r in table(f)} if f.exists() else {}
+    plaques = {}
+    f = folder / "plaques.md"
+    for r in (table(f) if f.exists() else []):
+        fix = {k: r[k] for k in ("label", "group", "type") if r.get(k)}
+        plaques[r["inscription starts, or subject"]] = fix
+    out["PLAQUES"] = plaques
+    tags = {}
+    f = folder / "tags.md"
+    for r in (table(f) if f.exists() else []):
+        tags.setdefault(r["outline"], {})[r["tag"]] = None if r["value"] == "(remove)" else r["value"]
+    out["TAG_FIXES"] = tags
+    colls = []
+    f = folder / "collections.md"
+    for r in (table(f) if f.exists() else []):
+        c = {"title": r["title"], "url": r["url"]}
+        for col, key in (("areas", "areas"), ("names", "names"), ("layers", "layers"), ("people", "who")):
+            vals = [v.strip() for v in r.get(col, "").split(";") if v.strip()]
+            if vals:
+                c[key] = vals
+        colls.append(c)
+    out["COLLECTIONS"] = colls
+    return out
