@@ -264,6 +264,24 @@ CURATED = [
               ("10 April 1829", "Sneinton", "pawnbroker", "now a museum"), at="name:William Booth Memorial Social Centre"),
         ]),
     dict(
+        id="caves", title="Caves",
+        intro="Nottingham stands on soft sandstone that can be dug with hand tools, and about a thousand man-made "
+              "caves are known beneath it: cellars, workshops, dwellings and shelters.",
+        entries=[
+            E("City of Caves", "en:City of Caves",
+              "Caves under the old town, used over the years as a tannery, pub cellars and an air raid shelter. "
+              "The tannery was in use from 1500 to 1640.",
+              ("tannery", "air raid shelter", "1500", "1640")),
+            E("Mortimer's Hole", "en:Nottingham Castle",
+              "A long passage to the bottom of the castle rock is known as Mortimer's Hole. In October 1330 Edward "
+              "III's men came in by a secret tunnel, and Roger Mortimer was led out bound and gagged.",
+              ("Mortimer's Hole", "1330", "secret tunnel", "bound and gagged"), at="pin:-1.1541,52.9496"),
+            E("Sneinton Hermitage", "en:Sneinton",
+              "Cave dwellings dug into the sandstone ridge extended out into Sneinton, where they were known as the "
+              "Hermitage. What little remains can still be seen along Sneinton Hermitage.",
+              ("Hermitage", "cave dwellings", "what little remains"), at="pin:-1.1310,52.9489"),
+        ]),
+    dict(
         id="facts", kind="facts", title="Did you know",
         intro="Short facts shown on building cards, each checked against its article.",
         entries=[
