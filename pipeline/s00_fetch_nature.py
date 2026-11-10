@@ -143,8 +143,9 @@ def main(city_id):
             name = (f["properties"].get(field) or "").strip()
             cx, cy = centre(g)
             # already drawn as a reserve or a designated site (often the same place under its own name)
-            if any(point_in_ring(cx, cy, r) for e in feats for r in rings_of(e["geometry"])):
-                continue
+            if (any(point_in_ring(cx, cy, r) for e in feats for r in rings_of(e["geometry"]))
+                    or (name and any(name.lower() in e["properties"]["name"].lower() for e in feats))):
+                continue    # "Holme Pit" is "Holme Pit SSSI", drawn with a slightly different outline
             feats.append({"type": "Feature", "geometry": rnd(g),
                           "properties": {"t": key, "name": name or "Local Wildlife Site", "source": publisher}})
             n += 1
