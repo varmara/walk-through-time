@@ -3,13 +3,162 @@
   "name": "Nottingham",
   "area": "City centre, Sneinton, the Meadows, and south of the Trent: Wilford, West Bridgford and Clifton",
   "polygon": [
-    [-1.1640, 52.9600], [-1.1300, 52.9600], [-1.1300, 52.9585], [-1.1160, 52.9585],
-    [-1.1160, 52.9455], [-1.1260, 52.9440],
-    [-1.1230, 52.9445], [-1.1000, 52.9480], [-1.0950, 52.9470], [-1.0950, 52.9100],
-    [-1.1500, 52.9050], [-1.1650, 52.9000], [-1.1750, 52.8870], [-1.2180, 52.8870],
-    [-1.2180, 52.9150], [-1.2000, 52.9255], [-1.1750, 52.9310], [-1.1600, 52.9335],
-    [-1.1650, 52.9380], [-1.1660, 52.9440], [-1.1640, 52.9440], [-1.1640, 52.9600]
+    [
+      -1.164,
+      52.96
+    ],
+    [
+      -1.13,
+      52.96
+    ],
+    [
+      -1.13,
+      52.9585
+    ],
+    [
+      -1.116,
+      52.9585
+    ],
+    [
+      -1.116,
+      52.9455
+    ],
+    [
+      -1.126,
+      52.944
+    ],
+    [
+      -1.123,
+      52.9445
+    ],
+    [
+      -1.1,
+      52.948
+    ],
+    [
+      -1.095,
+      52.947
+    ],
+    [
+      -1.095,
+      52.91
+    ],
+    [
+      -1.15,
+      52.905
+    ],
+    [
+      -1.165,
+      52.9
+    ],
+    [
+      -1.175,
+      52.887
+    ],
+    [
+      -1.218,
+      52.887
+    ],
+    [
+      -1.218,
+      52.915
+    ],
+    [
+      -1.2,
+      52.9255
+    ],
+    [
+      -1.175,
+      52.931
+    ],
+    [
+      -1.16,
+      52.9335
+    ],
+    [
+      -1.165,
+      52.938
+    ],
+    [
+      -1.166,
+      52.944
+    ],
+    [
+      -1.164,
+      52.944
+    ],
+    [
+      -1.164,
+      52.96
+    ]
   ],
-  "bbox": { "s": 52.8870, "w": -1.2180, "n": 52.9600, "e": -1.0950 },
-  "home": { "center": [-1.1450, 52.9440], "zoom": 14.6, "pitch": 55, "bearing": -18 }
+  "bbox": {
+    "s": 52.887,
+    "w": -1.218,
+    "n": 52.96,
+    "e": -1.095
+  },
+  "home": {
+    "center": [
+      -1.145,
+      52.944
+    ],
+    "zoom": 14.6,
+    "pitch": 55,
+    "bearing": -18
+  },
+  "periods": [
+    {
+      "from": 0,
+      "label": "Before 1750",
+      "note": "The old town: the castle on its sandstone rock (11th century), the English borough on the hill and the French borough by the castle, joined by the market place."
+    },
+    {
+      "from": 1750,
+      "label": "1750–1844",
+      "note": "Framework knitting and lace bring people in, but the town cannot spread: its common fields ring it on three sides, so it packs in and gets a name for the worst slums in England."
+    },
+    {
+      "from": 1845,
+      "label": "1845–1876",
+      "note": "The Inclosure Act of 1845 opens the common fields, and the town at last grows outwards onto them."
+    },
+    {
+      "from": 1877,
+      "label": "1877–1913",
+      "note": "The borough takes in Basford, Bulwell, Radford, Sneinton and more in 1877, and becomes a city in 1897. Nottingham is an international centre of lace."
+    },
+    {
+      "from": 1914,
+      "label": "1914–1945",
+      "note": "Between the wars: the new Council House (1927–1929) and the first council estates."
+    },
+    {
+      "from": 1946,
+      "label": "1946–1979",
+      "note": "After the war: the Clifton estate, planned from 1950 and once the largest council estate in Europe, slum clearance, and new shopping centres."
+    },
+    {
+      "from": 1980,
+      "label": "1980–1999"
+    },
+    {
+      "from": 2000,
+      "label": "2000 onwards"
+    }
+  ],
+  "periodSources": [
+    {
+      "title": "History of Nottingham – Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/History_of_Nottingham"
+    },
+    {
+      "title": "The expansion of Nottingham – University of Nottingham Manuscripts and Special Collections",
+      "url": "https://www.nottingham.ac.uk/manuscriptsandspecialcollections/learning/healthhousing/theme1/expansion.aspx"
+    },
+    {
+      "title": "Clifton, Nottingham – Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Clifton,_Nottingham"
+    }
+  ]
 }

@@ -4,8 +4,10 @@
 const CITY_ID = document.body.dataset.city;
 const MAX_YEAR = new Date().getFullYear();
 
-// Eras: [from, to, label, colour]. Warm = old, cool = new.
-const ERAS = [
+// Eras: [from, to, label, colour, note]. Warm = old, cool = new. A city can set its own periods in
+// cities/<city>.json ("periods": [{from, label, note}]), drawn from the city's history; these are the default.
+const PALETTE = ['#5b1f43', '#93283c', '#c4472d', '#e2802b', '#e9b934', '#9cbf4a', '#3d9c8a', '#3a76b6', '#6c5cc6'];
+let ERAS = [
   [0,    1699, 'before 1700', '#5b1f43'],
   [1700, 1799, '1700s',       '#93283c'],
   [1800, 1839, '1800–39',     '#c4472d'],
@@ -63,7 +65,13 @@ async function fetchData(url){
 function hexToRgb(h){ const n = parseInt(h.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; }
 function mix(a, b, t){ const A = hexToRgb(a), B = hexToRgb(b);
   return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * t).toString(16).padStart(2, '0')).join(''); }
-const eraOf = y => ERAS.find(e => y >= e[0] && y <= e[1]);
+const eraOf = y => ERAS.find(e => y >= e[0] && y <= e[1]) || ERAS[ERAS.length - 1];
+function setPeriods(periods){
+  if (!periods || periods.length < 2) return;
+  const n = periods.length;
+  ERAS = periods.map((p, i) => [p.from, i < n - 1 ? periods[i + 1].from - 1 : 9999, p.label,
+    PALETTE[Math.round(i * (PALETTE.length - 1) / (n - 1))], p.note || '']);
+}
 function colourFor(p){
   if (p.y == null) return tok('--unknown');
   return mix(eraOf(p.y)[3], tok('--bg'), FADE[p.f] || 0);
@@ -133,6 +141,8 @@ const isArea = key => groups.get(key)?.layer.kind === 'areas';
 async function main(){
   progress(5, 'loading map data…');
   city = await fetchJSON(`../cities/${CITY_ID}.json`);
+  setPeriods(city.periods);
+  drawLegend();
   data = await fetchData(`../data/${CITY_ID}.json`);
   progress(70, 'reading buildings…');
   features = data.index ? fromIndex(data.index) : data.buildings.features;
@@ -159,6 +169,9 @@ async function main(){
   progress(100);
   $('loader').classList.add('done');
   if (data.built) $('dataNote').textContent = 'Data updated ' + new Date(data.built).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' }) + '.';
+  // ?layer=inns (from a layer's page): tick that layer
+  const lq = new URLSearchParams(location.search).get('layer'), lyr = lq && layers.find(L => L.id === lq);
+  if (lyr) { lyr.groups.filter(g => g.count > 0).forEach(g => active.add(g.key)); saveActive(); renderLayers(); }
   applyLayers();
   updateYear();
   // ?focus=b12,p3&name=… (from the graph page): open those places, as a set when there are several
@@ -434,6 +447,8 @@ function infoHtml(L, g, withIntro = true){
     return `<button class="item" data-b="${bs.join(',')}" data-name="${esc(name)}">${esc(name)}${bs.length > 1 ? `<span class="cnt">${bs.length}</span>` : ''}</button>`;
   }).join('')}</div>`);
   if (L.kind === 'stories') parts.push('<p class="src">Each entry is checked against its Wikipedia article.</p>');
+  if (withIntro && (L.kind === 'stories' || L.kind === 'people'))
+    parts.push(`<p class="src"><a href="../data/share/${CITY_ID}/layer-${encodeURIComponent(L.id)}.html">Read “${esc(L.title)}” as a page →</a></p>`);
   else if (L.source) parts.push(`<p class="src">Source: <a href="${esc(L.source.url)}" target="_blank" rel="noopener">${esc(L.source.title)}</a></p>`);
   return parts.join('');
 }
@@ -480,9 +495,19 @@ $('mtSave').onclick = () => {
   const k = $('mtKey').value.trim(); if (!k) return;
   store.set('mtKey', k); addNls(k); setBase('nls');
 };
-$('legend').innerHTML = ERAS.map(e => `<div><i style="background:${e[3]}"></i>${e[2]}</div>`).join('')
-  + `<div><i style="background:var(--unknown)"></i>no date</div>`
-  + `<div><i style="background:var(--marked)"></i>in a ticked layer, no date</div>`;
+function drawLegend(){
+  $('legend').innerHTML = ERAS.map(e => `<div><i style="background:${e[3]}"></i>${e[2]}</div>`).join('')
+    + `<div><i style="background:var(--unknown)"></i>no date</div>`
+    + `<div><i style="background:var(--marked)"></i>in a ticked layer, no date</div>`;
+  $('legendNotes')?.remove();
+  const notes = ERAS.filter(e => e[4]);
+  const src = (city && city.periodSources) || [];
+  if (notes.length) $('legend').insertAdjacentHTML('afterend', `<details class="periods" id="legendNotes"><summary>What each period was in ${esc(city.name)}</summary>`
+    + notes.map(e => `<p><i style="background:${e[3]}"></i><b>${esc(e[2])}</b> ${esc(e[4])}</p>`).join('')
+    + (src.length ? `<p class="src">Sources: ${src.map(s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>`).join(' · ')}</p>` : '')
+    + '</details>');
+}
+drawLegend();
 $('legend').insertAdjacentHTML('afterend', '<p class="note">Palest of all: no date for the building itself, only the period when most homes in its small area were built (Council Tax records).</p>');
 
 // ================= Cards =================

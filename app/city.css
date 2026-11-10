@@ -93,6 +93,11 @@ input[type=range]{width:100%;accent-color:var(--ink);height:28px;margin:0}
 .legend div{display:flex;align-items:center;gap:5px;font:400 11px var(--mono);color:var(--muted);white-space:nowrap}
 .legend i{flex:0 0 12px;height:12px;border-radius:2px}
 .note{margin:0;font:400 12px var(--mono);color:var(--muted)}
+.periods{margin:2px 0 4px;font-size:13px}
+.periods summary{cursor:pointer;color:var(--accent);font-size:13px}
+.periods p{margin:6px 0;line-height:1.35}
+.periods p i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:baseline}
+.periods .src{font-size:12px;color:var(--muted)}
 .keyrow{display:flex;gap:6px}
 .keyrow input{flex:1;min-width:0;font:13px var(--mono);padding:8px;border:1px solid var(--line);border-radius:6px;background:transparent;color:var(--ink)}
 
