@@ -219,7 +219,8 @@ function drawMap(){
     const b = city.bbox;
     map = new maplibregl.Map({
       container:'map', ...city.home, maxPitch:75,
-      maxBounds:[[b.w - 0.03, b.s - 0.02], [b.e + 0.03, b.n + 0.02]],
+      // room around the city, so a phone can zoom out to the whole city and its surroundings (zoom 10)
+      maxBounds:[[b.w - 0.15, b.s - 0.12], [b.e + 0.15, b.n + 0.12]],
       minZoom:10,                  // the whole city; the tiles start at zoom 10
       attributionControl:false,
       style:{ version:8, sources:{}, layers:[{ id:'bg', type:'background', paint:{ 'background-color': tok('--bg') } }],
