@@ -12,6 +12,8 @@ Writes layers.json:
   pins    [{x, y, name, layer, group, text, source?, place?}]  places that are not buildings (bridges,
           grounds) and plaques not on a building; layer items refer to them as "p<index>"
 """
+import urllib.parse
+
 from .common import building_at, load, log, save, work
 from .layers import LAYERS, Context
 from .s04_curated import PEOPLE_GROUPS, people_group
@@ -37,36 +39,119 @@ def grouped(pairs):
     return [[n, bs] for n, bs in out.items()]
 
 
+def c_words(city_id):
+    """Words that tie an article to the city: its name and its districts (as for well-known residents)."""
+    from .s04_residents import PLACES
+    from .common import city
+    return [city(city_id)["name"].lower()] + PLACES.get(city_id, {}).get("words", [])
+
+
+def about_people(want, words):
+    """{name: {"text": the article's first sentences, "url", "title"}} for the People layer.
+    An article comes from the entry's own source, or the plaque's or architect's Wikidata item; for a plaque with
+    only a name, from Wikidata's search, used only when exactly one person of that name has an English article
+    that mentions the city (two Thomas Hines, one of them from Nottingham)."""
+    from .common import http
+    from .s06_summaries import extracts, trim
+    WD = "https://www.wikidata.org/w/api.php"
+    by_qid = {n: h["qid"] for n, h in want.items() if "title" not in h and h.get("qid")}
+    titles = {n: h["title"] for n, h in want.items() if "title" in h}
+    qids = sorted(set(by_qid.values()))
+    links = {}
+    for i in range(0, len(qids), 50):
+        try:
+            r = http(WD, params={"action": "wbgetentities", "ids": "|".join(qids[i:i + 50]), "props": "sitelinks",
+                                 "sitefilter": "enwiki", "format": "json"})
+        except Exception as e:  # noqa: BLE001
+            log(f"    Wikidata sitelinks failed: {e}")
+            continue
+        for q, ent in r.get("entities", {}).items():
+            t = ent.get("sitelinks", {}).get("enwiki", {}).get("title")
+            if t:
+                links[q] = t
+    for n, q in by_qid.items():
+        if q in links:
+            titles[n] = links[q]
+    # names alone: one person of that name with an English article that mentions the city
+    guess = {}
+    for n in [n for n, h in want.items() if not h and n not in titles and len(n.split()) >= 2][:400]:
+        try:
+            r = http(WD, params={"action": "wbsearchentities", "search": n, "language": "en", "type": "item",
+                                 "limit": "7", "format": "json"})
+            ids = [x["id"] for x in r.get("search", []) if x.get("label", "").lower() == n.lower()]
+            if not ids:
+                continue
+            r = http(WD, params={"action": "wbgetentities", "ids": "|".join(ids), "props": "claims|sitelinks",
+                                 "sitefilter": "enwiki", "format": "json"})
+            humans = [ent["sitelinks"]["enwiki"]["title"] for ent in r.get("entities", {}).values()
+                      if ent.get("sitelinks", {}).get("enwiki")
+                      and any(c["mainsnak"].get("datavalue", {}).get("value", {}).get("id") == "Q5"
+                              for c in ent.get("claims", {}).get("P31", []))]
+            if humans:
+                guess[n] = humans
+        except Exception as e:  # noqa: BLE001
+            log(f"    Wikidata search failed for {n}: {e}")
+    intro = extracts(list(titles.values()) + [t for ts in guess.values() for t in ts])
+    for n, ts in guess.items():
+        ok = [t for t in ts if any(w in (intro.get(t) or "").lower() for w in words)]
+        if len(ok) == 1:
+            titles[n] = ok[0]
+    out = {}
+    for n, t in titles.items():
+        text = trim(intro.get(t) or "")
+        if len(text) > 40:
+            out[n] = {"text": text, "title": t,
+                      "url": "https://en.wikipedia.org/wiki/" + urllib.parse.quote(t.replace(" ", "_"))}
+    return out
+
+
 def main(city_id):
     ctx = Context(load(city_id, "buildings"), load(city_id, "listing"), load(city_id, "places"),
                   load(city_id, "monuments"))
     cur = load(city_id, "curated")
     meta, member, stories, pins = [], {}, {}, []
 
-    def pin(x, y, name, layer_id, group, text, source=None, place=None):
+    def pin(x, y, name, layer_id, group, text, source=None, place=None, who=None):
         pins.append({"x": round(x, 6), "y": round(y, 6), "name": name, "layer": layer_id, "group": group, "text": text,
-                     **({"source": source} if source else {}), **({"place": place} if place else {})})
+                     **({"source": source} if source else {}), **({"place": place} if place else {}),
+                     **({"who": who} if who else {})})
         return f"p{len(pins) - 1}"
 
-    def add(i, group, layer_id, story=None, source=None, place=None):
+    def add(i, group, layer_id, story=None, source=None, place=None, who=None):
         member.setdefault(str(i), [])
         if group not in member[str(i)]:
             member[str(i)].append(group)
         if story:
             stories.setdefault(str(i), []).append({"layer": layer_id, "text": story,
                                                    **({"source": source} if source else {}),
-                                                   **({"place": place} if place else {})})
+                                                   **({"place": place} if place else {}),
+                                                   **({"who": who} if who else {})})
+
+    want = {}       # person's name -> what may find their Wikipedia article: {"title"} or {"qid"} or {} (by name)
+
+    def wiki_hint(name, source=None, qid=None):
+        if not name:
+            return
+        h = want.setdefault(name, {})
+        url = (source or {}).get("url") or ""
+        if "wikipedia.org/wiki/" in url and "title" not in h:
+            h["title"] = urllib.parse.unquote(url.rsplit("/wiki/", 1)[1]).replace("_", " ")
+        elif qid and "qid" not in h:
+            h["qid"] = qid
 
     for L in cur["layers"]:
         if L.get("kind") == "facts":    # 'Did you know' facts go on the cards (s07), not into a layer
             continue
         es = [e for e in cur["entries"] if e["layer"] == L["id"]]
-        for e in es:
-            if e["b"] is None:   # not a building: a pin
-                e["b"] = pin(*e["pin"], e["name"], L["id"], e["group"], e["story"], e["source"], e.get("place"))
-            else:
-                add(e["b"], e["group"], L["id"], e["story"], e["source"], e.get("place"))
         people = L.get("kind") == "people"
+        for e in es:
+            who = e["name"] if people else None
+            if who:
+                wiki_hint(who, e["source"])
+            if e["b"] is None:   # not a building: a pin
+                e["b"] = pin(*e["pin"], e["name"], L["id"], e["group"], e["story"], e["source"], e.get("place"), who)
+            else:
+                add(e["b"], e["group"], L["id"], e["story"], e["source"], e.get("place"), who)
         groups = L.get("groups") or [[L["id"], L["title"]]]
         meta.append({"id": L["id"], "title": L["title"], "intro": L.get("intro", ""),
                      "section": "People" if people else "Stories", "kind": "people" if people else "stories",
@@ -90,14 +175,17 @@ def main(city_id):
     titles = {k: t for k, t, _ in PEOPLE_GROUPS} | {"events": "Plaques to events and places"}
     pg = {g["key"]: g for g in people["groups"]}
 
-    def person(b, key, name, story, source, xy=None):
+    def person(b, key, name, story, source, xy=None, qid=None, who=True):
         k = "people-" + key
         if k not in pg:
             pg[k] = {"key": k, "title": titles.get(key, key), "count": 0, "items": []}
+        who = name if who else None
+        if who:
+            wiki_hint(name, source, qid)
         if b is None:   # a plaque on no building: a pin
-            b = pin(*xy, name, "people", k, story, source)
+            b = pin(*xy, name, "people", k, story, source, who=who)
         else:
-            add(b, k, "people", story, source)
+            add(b, k, "people", story, source, who=who)
         pg[k]["items"].append([b, name])
 
     plaques = load(city_id, "plaques") if work(city_id, "plaques").exists() else []
@@ -124,7 +212,8 @@ def main(city_id):
         if p.get("osm") and not p.get("id"):
             src = {"title": "OpenStreetMap", "url": f"https://www.openstreetmap.org/node/{p['osm']}", "kind": "Plaque mapped in"}
         label = p.get("subject") or (text[:40] + "…" if len(text) > 40 else text) or "Plaque"
-        person(b, key, label, story, src, xy=(p["x"], p["y"]))
+        person(b, key, label, story, src, xy=(p["x"], p["y"]), qid=p.get("qid"),
+               who=bool(p.get("subject")) and key != "events")
     log(f"s06 plaques: {placed}/{len(plaques)} placed on a building, the rest shown as pins")
 
     # well-known residents found in their Wikipedia articles (s04_residents)
@@ -148,7 +237,8 @@ def main(city_id):
             continue   # a hand-written entry already tells this
         url = info.get("architectArticle") or (f"https://www.wikidata.org/wiki/{info['architectQid']}" if info.get("architectQid") else None)
         person(i, "architects", name, f"Designed by {name}, according to Wikidata.",
-               {"title": name, "url": url, "kind": "Wikipedia" if info.get("architectArticle") else "Wikidata"} if url else None)
+               {"title": name, "url": url, "kind": "Wikipedia" if info.get("architectArticle") else "Wikidata"} if url else None,
+               qid=info.get("architectQid"))
         arch += 1
     log(f"s06 architects from Wikidata: {arch} buildings")
     order = [f"people-{k}" for k, _, _ in PEOPLE_GROUPS] + ["people-events"]
@@ -210,4 +300,7 @@ def main(city_id):
     log(f"s06 conservation areas: {len(cons)}")
 
 
-    save(city_id, "layers", {"meta": meta, "member": member, "stories": stories, "names": names, "pins": pins})
+    about = about_people(want, c_words(city_id))
+    log(f"s06 people: Wikipedia articles for {len(about)} of {len(want)} people")
+    save(city_id, "layers", {"meta": meta, "member": member, "stories": stories, "names": names, "pins": pins,
+                             "people": about})

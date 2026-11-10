@@ -160,7 +160,8 @@ function select(id){
   $('go').onclick = () => { location.href = `./?focus=${places.join(',')}&name=${encodeURIComponent(n.label)}`; };
   const groups = {};
   mine.forEach(l => { const o = G.byId.get(l.s === id ? l.t : l.s); (groups[o.type] = groups[o.type] || []).push([o, l]); });
-  $('links').innerHTML = `<h3>Linked to ${mine.length}</h3>` + Object.entries(groups)
+  $('links').innerHTML = (n.about ? `<div class="about"><p>${esc(n.about.text)}</p><div class="src">Wikipedia: <a href="${esc(n.about.url)}" target="_blank" rel="noopener">${esc(n.about.title)}</a></div></div>` : '')
+    + `<h3>Linked to ${mine.length}</h3>` + Object.entries(groups)
     .sort((a, b) => KINDS.findIndex(k => k[0] === a[0]) - KINDS.findIndex(k => k[0] === b[0]))
     .map(([k, xs]) => xs.map(([o, l]) => `<div class="link">
       <button data-id="${esc(o.id)}"><i style="background:${colour(o.type)}"></i>${esc(o.label)}</button>

@@ -94,6 +94,7 @@ def main(city_id):
     pins = [{"type": "Feature", "properties": {"i": k, **{kk: v for kk, v in pn.items() if kk not in ("x", "y")}},
              "geometry": {"type": "Point", "coordinates": [pn["x"], pn["y"]]}} for k, pn in enumerate(lay.get("pins", []))]
     out = {"city": city_id, "built": built, "stats": stats, "layers": lay["meta"], "nature": fc(nature), "pins": fc(pins),
+           "people": lay.get("people", {}),
            "buildings": fc(feats), "roads": fc(base["roads"]), "water": fc(base["water"]), "parks": fc(base["parks"])}
     Path("data").mkdir(exist_ok=True)
     save(city_id, "package", out)

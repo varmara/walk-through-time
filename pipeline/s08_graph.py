@@ -54,7 +54,8 @@ def main(city_id):
             for g in L["groups"]:
                 for name, refs in g["items"]:
                     eid = f"e:{name}"
-                    nodes.setdefault(eid, {"id": eid, "label": name, "type": g["key"].replace("people-", "")})
+                    nodes.setdefault(eid, {"id": eid, "label": name, "type": g["key"].replace("people-", ""),
+                                           **({"about": data["people"][name]} if name in data.get("people", {}) else {})})
                     people.append((eid, name))
                     last = name.split()[-1].lower()
                     for x in refs:

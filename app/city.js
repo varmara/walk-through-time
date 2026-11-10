@@ -553,7 +553,7 @@ function showCard(id){
   $('cSum').innerHTML = p.sum ? `<p>${esc(p.sum)}</p><p class="src">${esc(sumSrc?.kind || '')}${sumSrc?.url ? ': ' + link(sumSrc)
     : sumSrc?.title ? ' (' + esc(sumSrc.title) + ')' : ''}</p>` : '';
   $('cStories').innerHTML = (p.stories || []).map(s => `<div class="story"><div class="seclbl">${esc(layerTitle(s.layer))}</div>
-    <p>${esc(s.text)}</p>${s.source ? `<p class="src">${esc(s.source.kind || 'Wikipedia')}: ${link(s.source)}${s.place ? ` · ${esc(s.place.kind || 'Wikipedia')}: ` + link(s.place) : ''}</p>` : ''}</div>`).join('');
+    <p>${esc(s.text)}</p>${s.source ? `<p class="src">${esc(s.source.kind || 'Wikipedia')}: ${link(s.source)}${s.place ? ` · ${esc(s.place.kind || 'Wikipedia')}: ` + link(s.place) : ''}</p>` : ''}${aboutHtml(s.who, s.source)}</div>`).join('');
 
   const many = entitiesAt[id] || [];
   $('cStories').insertAdjacentHTML('beforeend', many.map(m =>
@@ -637,6 +637,14 @@ function openRef(r){
     { padding: innerWidth >= 760 ? { top: 60, bottom: 60, left: 60, right: 420 } : { top: 80, left: 30, right: 70, bottom: innerHeight * 0.45 }, maxZoom: 17, duration: 800 });
   showArea(f.properties);
 }
+// who a person in the People layer was: the opening sentences of their Wikipedia article
+function aboutHtml(who, source){
+  const a = who && data.people && data.people[who];
+  if (!a) return '';
+  const same = source && source.url === a.url;
+  return `<div class="about"><b>${esc(who)}</b> <span>${esc(a.text)}</span>
+    <p class="src">${same ? '' : 'Wikipedia: '}<a href="${esc(a.url)}" target="_blank" rel="noopener">${same ? 'Read more on Wikipedia' : esc(a.title)}</a></p></div>`;
+}
 function showPin(p){
   ['cCredit', 'cDyk', 'cArch'].forEach(id => $(id).hidden = true);
   $('cSum').hidden = true;
@@ -645,7 +653,7 @@ function showPin(p){
   $('cFacts').innerHTML = `<dt>Layer</dt><dd>${esc((groups.get(p.group) || {}).title || layerTitle(p.layer))}</dd>`;
   const src = typeof p.source === 'string' ? JSON.parse(p.source) : p.source;
   const place = typeof p.place === 'string' ? JSON.parse(p.place) : p.place;
-  $('cStories').innerHTML = `<div class="story"><p>${esc(p.text)}</p>${src ? `<p class="src">${esc(src.kind || 'Wikipedia')}: ${link(src)}${place ? ` · ${esc(place.kind || 'Wikipedia')}: ` + link(place) : ''}</p>` : ''}</div>`;
+  $('cStories').innerHTML = `<div class="story"><p>${esc(p.text)}</p>${src ? `<p class="src">${esc(src.kind || 'Wikipedia')}: ${link(src)}${place ? ` · ${esc(place.kind || 'Wikipedia')}: ` + link(place) : ''}</p>` : ''}${aboutHtml(p.who, src)}</div>`;
   $('cLinks').innerHTML = '';
   openSheet('card', p.name);
 }

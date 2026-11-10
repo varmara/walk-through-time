@@ -168,8 +168,11 @@ def layer_pages(data, city_id, city_name, site, out):
                 link = (f"{mapurl}?layer={urllib.parse.quote(L['id'])}&focus={','.join(ref_key(r) for r in refs)}"
                         f"&name={urllib.parse.quote(name)}")
                 meta = ([built] if built and L["kind"] == "stories" else []) + ([f"{where}{more}"] if L["kind"] == "people" and where else [])
+                who = data.get("people", {}).get(name) if L["kind"] == "people" else None
                 arts.append(f"<article><h3>{e(name)}</h3>"
                             + (f'<p class="meta">{e(" · ".join(meta))}</p>' if meta else "")
+                            + (f'<p><i>{e(who["text"])}</i></p><p class="src">Wikipedia: <a href="{html.escape(who["url"])}">'
+                               f'{e(who["title"])}</a></p>' if who else "")
                             + "".join(f"<p>{e(s['text'])}</p>{src_html(s.get('source'))}" for s in stories[:4])
                             + f'<p class="go"><a href="{html.escape(link)}">Show on the map →</a></p></article>')
                 n += 1

@@ -83,6 +83,6 @@ def osm_plaques(city_id, b, poly, have):
                       "address": None, "year": (t.get("start_date") or "")[:4] or None, "photo": None,
                       "colour": t.get("colour"), "org": t.get("operator"),
                       "subject": t.get("subject") or t.get("subject:name"), "type": "person" if (t.get("subject:wikidata") or t.get("subject")) else "thing",
-                      "roles": None, "primary": None, "osm": el["id"]})
+                      "roles": None, "primary": None, "osm": el["id"], "qid": t.get("subject:wikidata")})
     log(f"s00 plaques: {len(extra)} more from OpenStreetMap (of {len(data.get('elements', []))} plaque nodes)")
     return extra

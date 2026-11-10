@@ -177,3 +177,8 @@ a.fab{display:grid;place-items:center;text-decoration:none;color:inherit}
 .summary{flex-wrap:wrap}
 .key{display:inline-flex;align-items:center;gap:5px;margin-left:8px;font:400 11px var(--mono);color:var(--muted)}
 .key i{width:11px;height:11px;border-radius:2px;display:inline-block}
+
+/* who a person was (People layer): their Wikipedia article's opening sentences */
+.about{margin:8px 0 2px;padding:8px 10px;border-left:3px solid var(--accent);background:var(--bg);border-radius:0 8px 8px 0;font-size:14px}
+.about b{font-weight:600}
+.about .src{margin-top:4px}
