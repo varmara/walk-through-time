@@ -642,7 +642,8 @@ function aboutHtml(who, source){
   const a = who && data.people && data.people[who];
   if (!a) return '';
   const same = source && source.url === a.url;
-  return `<div class="about"><b>${esc(who)}</b> <span>${esc(a.text)}</span>
+  const named = a.text.toLowerCase().includes(who.split(' ').pop().toLowerCase());   // "William Booth was…"
+  return `<div class="about">${named ? '' : `<b>${esc(who)}:</b> `}<span>${esc(a.text)}</span>
     <p class="src">${same ? '' : 'Wikipedia: '}<a href="${esc(a.url)}" target="_blank" rel="noopener">${same ? 'Read more on Wikipedia' : esc(a.title)}</a></p></div>`;
 }
 function showPin(p){
