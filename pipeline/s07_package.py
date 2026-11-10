@@ -109,8 +109,8 @@ def main(city_id):
     # an unnamed part of a station takes the station's name ("Nottingham station", not a booth inside it)
     hand = cur.get("names", {})
     stations = [(centroid(b["rings"][0]), hand.get(b["osm"]) or b["tags"]["name"]) for b in buildings
-                if b["tags"].get("building") == "train_station" and b["tags"].get("name")
-                and re.search(r"\bstation$", hand.get(b["osm"]) or b["tags"]["name"], re.I)]   # the station, not a part
+                if b["tags"].get("name")      # the station, not a part (its main outline may be tagged as a roof)
+                and re.search(r"\bstation$", hand.get(b["osm"]) or b["tags"]["name"], re.I)]
 
     def station_of(t, xy):
         if t.get("building") != "train_station" or t.get("name"):
