@@ -174,8 +174,14 @@ CURATED = [
               ("Henry Kirke White", "churchyard", "favourite tree"), at="name:St Wilfrid's Church"),
             E("Ferry Inn", "en:Wilford",
               "Wilford stayed a village until the later 19th century. With woods around it and riverside amenities "
-              "such as the Ferry Inn, it attracted many visitors from Nottingham.",
-              ("later 19th century", "wilford ferry inn", "many visitors from nottingham"), at="name:Ferry Inn"),
+              "such as the Ferry Inn, it attracted many visitors from Nottingham. The Notts County goalkeeper "
+              "Albert Iremonger was its landlord until his death in 1958.",
+              ("later 19th century", "wilford ferry inn", "many visitors from nottingham", "iremonger", "1958"),
+              at="name:Ferry Inn"),
+            E("Wilford House", "en:Wilford",
+              "Thomas Forman, who founded the Nottingham Post, bought Wilford House from the Smith family after the "
+              "newspaper's successful launch.",
+              ("Forman", "Wilford House", "Smith family"), at="name:Wilford House"),
         ]),
     dict(
         id="bridgford", title="West Bridgford and Trent Bridge",
@@ -327,6 +333,12 @@ CURATED = [
             P("Henry Kirke White", "en:Henry Kirke White", "en:St Wilfrid's Church, Wilford",
               "The poet lived in Wilford in 1804–1805; the church holds two memorials to him.",
               ("Henry Kirke White", "Wilford", "1804"), at="name:St Wilfrid's Church"),
+            P("Bendigo", "en:William Thompson (boxer)", "en:William Thompson (boxer)",
+              "William \"Bendigo\" Thompson, born in Nottingham on 11 October 1811, won the heavyweight championship "
+              "of England in 1839. He died in 1880 and was buried in St Mary's burial ground, under a tomb with a "
+              "crouching lion. The city of Bendigo in Australia is indirectly named after him.",
+              ("11 October 1811", "heavyweight championship of England", "St Mary's burial ground", "crouching lion"),
+              at="nhle:1271444", group="sport"),
             P("Thomas Chambers Hine", "en:Thomas Chambers Hine", "en:Adams Building, Nottingham",
               "The Nottingham architect Thomas Chambers Hine designed this lace showroom and warehouse.",
               ("Thomas Chambers Hine", "Adams")),

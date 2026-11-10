@@ -33,7 +33,7 @@ NOT_PLACES = {"england", "nottinghamshire", "uk", "united kingdom", "and", "wher
 ADDRESS = re.compile(r"\b(\d{1,3})[a-z]?(?:\s*(?:-|–|and|&)\s*\d{1,3}[a-z]?)?,?\s+((?:St\.?\s|[A-Z][a-z'’]+\s){0,3}(?:" + TYPES + r"))\b")
 
 
-def strip_wikitext(t):
+def strip_wikitext(t, keep_lists=False):
     t = re.sub(r"<ref[^>/]*/>", " ", t)
     t = re.sub(r"<ref[^>]*>.*?</ref>", " ", t, flags=re.S)
     t = re.sub(r"<!--.*?-->", " ", t, flags=re.S)
@@ -45,6 +45,8 @@ def strip_wikitext(t):
     t = re.sub(r"\[https?://\S+\s([^\]]*)\]", r"\1", t)
     t = re.sub(r"'{2,}", "", t)
     t = re.sub(r"<[^>]+>", " ", t)
+    if keep_lists:          # "* Iremonger: ... landlord of the Ferry Inn until his death in 1958" -> its text
+        t = re.sub(r"^[*#:;]+\s*", "", t, flags=re.M)
     t = re.sub(r"^[=*#:;|!{].*$", " ", t, flags=re.M)     # headings, lists, tables
     return re.sub(r"\s+", " ", t)
 

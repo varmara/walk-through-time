@@ -6,6 +6,7 @@ Historic England list entry ("he:1254566"), whose official description is checke
      If one is missing, the entry is dropped: if the article does not say it, the story should not either.
   2. The entry is placed on a building, trying in order:
        at="osm:way/123"          an explicit OpenStreetMap outline
+       at="nhle:1271444"         a Historic England list entry: its building, or a pin at its point (a monument)
        the article's Wikidata item, tagged on a building outline in OpenStreetMap
        the item's Historic England list entry (P1216), matched in step s02
        the article's coordinates, inside (or within 15 m of) a building outline
@@ -68,8 +69,21 @@ def article(ref):
         _cache[ref] = None
         return None
     co = (page.get("coordinates") or [None])[0]
+    # the plain-text extract leaves out bulleted lists ("Notable families", "Notable residents"), so their text
+    # is added from the page's wikitext
+    lists = ""
+    try:
+        w = http(f"https://{lang}.wikipedia.org/w/api.php", params={
+            "action": "query", "prop": "revisions", "rvprop": "content", "rvslots": "main", "redirects": 1,
+            "format": "json", "formatversion": "2", "titles": page.get("title", title)})
+        wt = w["query"]["pages"][0]["revisions"][0]["slots"]["main"]["content"]
+        from .s04_residents import strip_wikitext      # (imported here: that step imports this one)
+        items = re.findall(r"^[*#]+.*$", wt, flags=re.M)
+        lists = strip_wikitext("\n".join(items), keep_lists=True)
+    except Exception:  # noqa: BLE001 - the extract alone still works
+        pass
     _cache[ref] = {
-        "text": (page.get("extract") or "").lower(),
+        "text": ((page.get("extract") or "") + "\n" + lists).lower(),
         "url": page.get("fullurl") or f"https://{lang}.wikipedia.org/wiki/{quote(title.replace(' ', '_'))}",
         "title": page.get("title", title),
         "qid": page.get("pageprops", {}).get("wikibase_item"),
@@ -140,6 +154,7 @@ def main(city_id):
     by_osm = {b["osm"]: i for i, b in enumerate(buildings)}
     by_qid = {b["tags"]["wikidata"]: i for i, b in enumerate(buildings) if b["tags"].get("wikidata")}
     by_nhle = {str(e["ListEntry"]): int(i) for i, es in listing.items() for e in es}
+    listed_xy = {str(p["ListEntry"]): (p["x"], p["y"]) for p in load(city_id, "listed")}
     names = {}
     for i, b in enumerate(buildings):
         if b["tags"].get("name"):
@@ -197,6 +212,12 @@ def main(city_id):
                 if at.startswith("pin:"):       # an explicit point "lon,lat", for places the article does not locate
                     a = {**a, "coords": tuple(float(v) for v in at[4:].split(","))}
                     at = "pinned"
+                if at.startswith("nhle:"):
+                    if at[5:] in by_nhle:
+                        b, how = by_nhle[at[5:]], "Historic England list entry"
+                    elif at[5:] in listed_xy:
+                        a, at, how = {**a, "coords": listed_xy[at[5:]]}, "pinned", None
+                        e = {**e, "_how": "pin at the Historic England list entry's point"}
                 if at.startswith("name:") and norm(at[5:]) in names:
                     b, how = names[norm(at[5:])], "name in OpenStreetMap"
                 if at == "pinned":
@@ -219,7 +240,7 @@ def main(city_id):
                     if key in names:
                         b, how = names[key], "name in OpenStreetMap"
                 if b is None and a["coords"]:
-                    how = "pin where the story file puts it" if at == "pinned" else "pin at the article's coordinates (no building there: a bridge, a ground, a square)"
+                    how = e.get("_how") or "pin where the story file puts it" if at == "pinned" else "pin at the article's coordinates (no building there: a bridge, a ground, a square)"
                 elif b is None:
                     why = "could not place it on a building, and the article has no coordinates"
             if why:
