@@ -322,7 +322,7 @@ def other_names(tags, name, today, label=None, listing_name=None):
 
 
 LANDMARK = re.compile(r"\b(museum|gallery|theatre|cinema|college|university|school|church|cathedral|chapel|"
-                      r"mosque|synagogue|temple|station|library|hospital|court|arts centre|concert hall|arena)\b", re.I)
+                      r"mosque|synagogue|station|library|hospital|arts centre|concert hall)\b", re.I)
 LANDMARK_USE = {"amenity": {"theatre", "cinema", "arts_centre", "library", "college", "university", "school",
                             "place_of_worship", "townhall", "courthouse", "hospital", "concert_hall"},
                 "tourism": {"museum", "gallery"}, "building": {"train_station", "church", "cathedral", "chapel",
@@ -330,10 +330,24 @@ LANDMARK_USE = {"amenity": {"theatre", "cinema", "arts_centre", "library", "coll
                 "railway": {"station"}, "public_transport": {"station"}}
 
 
+_TRADE = re.compile(r"\b(bar|caf[eé]|restaurant|gaming|pub|grill|lounge|hotel|former|academy|global|ltd|limited)\b", re.I)
+
+
 def landmark(tags_list, now):
     """A lasting public institution (a museum, theatre, college, church, station), whose current name belongs in
-    the title next to what the building was: 'Shire Hall and County Gaol · National Justice Museum'."""
-    return bool(now and (LANDMARK.search(now) or any(t.get(k) in v for t in tags_list for k, v in LANDMARK_USE.items())))
+    the title next to what the building was: 'Shire Hall and County Gaol · National Justice Museum'. Its name must
+    say so, and not be a business's ('Riverbank Bar and Gallery') or an old name ('Former Police Station')."""
+    return bool(now and LANDMARK.search(now) and not _TRADE.search(now))
+
+
+def same_place(a, b):
+    """Two ways of naming one thing: 'Church of St Mary' and 'St Mary's Church'; 'The Corner House' and
+    'The Cornerhouse'; 'Castle Gate Congregational Church' and '… Centre'."""
+    squash = lambda n: re.sub(r"[^a-z]", "", re.sub(r"\b(the|of|church|saint|st)\b", "", n.lower()))  # noqa: E731
+    if squash(a) and squash(b) and (squash(a) in squash(b) or squash(b) in squash(a)):
+        return True
+    mine = lambda n: _words(n) - {m.lower().rstrip("s") for m in BUILDINGISH.findall(n)}  # noqa: E731
+    return bool(mine(a) & mine(b))
 
 
 def marker(tags):

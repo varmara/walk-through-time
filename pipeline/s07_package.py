@@ -16,7 +16,7 @@ import re
 from collections import Counter
 import urllib.parse
 
-from .common import BUILDINGISH, LANDMARK, building_name, centroid, landmark, metres, other_names, load, log, marker, point_in_ring, save, work
+from .common import BUILDINGISH, LANDMARK, building_name, centroid, landmark, metres, other_names, same_place, load, log, marker, point_in_ring, save, work
 from .s00_fetch_nature import rings_of
 from .s05_dates import info_for, osm_article
 
@@ -93,15 +93,18 @@ def main(city_id):
     def full_title(name, today, aka, tags_list):
         """What it was, then what it is, for landmarks: 'Shire Hall · National Justice Museum'; a station known by
         its modern name shows its old one first: 'Midland Railway Station · Nottingham station'."""
-        if not name:
+        if not name or re.match(r"^\d", name):        # an address and its occupier: the Today row says it
             return None
-        if today and landmark(tags_list, today):
+        if today and landmark(tags_list, today) and not same_place(name, today):
             return f"{name} · {today}"
         if not today and aka and landmark(tags_list, name):
-            old = [a for a in aka if BUILDINGISH.search(a) or LANDMARK.search(a)]
-            if old and not (set(old[0].lower().split()) >= set(name.lower().split())):
+            old = [a for a in aka if (BUILDINGISH.search(a) or LANDMARK.search(a)) and not _former(a)]
+            if old and not same_place(old[0], name):
                 return f"{old[0]} · {name}"
         return None
+
+    def _former(a):
+        return bool(re.search(r"\bformer\b", a, re.I))
 
     feats = []
     for i, b in enumerate(buildings):
