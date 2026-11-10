@@ -6,11 +6,12 @@ nothing the article does not say. Name legends as legends. See CONTRIBUTING.md.
 """
 
 
-def E(name, source, story, facts, at=None, year=None):
-    """year: when the building standing today was built or opened ("1855", "c. 1420", "1841..1844").
+def E(name, source, story, facts, at=None, year=None, names=True):
+    """names=False: the story's title is not the building's name ("The castle burned, 1831").
+    year: when the building standing today was built or opened ("1855", "c. 1420", "1841..1844").
     Its digits must appear in the article; it becomes a date source next to OpenStreetMap and Wikidata."""
     return {"name": name, "source": source, "story": story, "facts": facts,
-            **({"at": at} if at else {}), **({"year": year} if year else {})}
+            **({"at": at} if at else {}), **({"year": year} if year else {}), **({"names": False} if not names else {})}
 
 
 def P(name, person, place, story, facts, at=None, group=None, quote=None):
@@ -180,7 +181,8 @@ CURATED = [
               "Nottingham and a crowd burned the castle, which belonged to the Duke of Newcastle, an opponent of "
               "reform. Three men were hanged; the Duke refused to restore the castle, and its burnt shell stood "
               "on the rock for years.",
-              ("8 October 1831", "Duke of Newcastle", "hanged", "burnt shell"), at="name:Nottingham Castle"),
+              ("8 October 1831", "Duke of Newcastle", "hanged", "burnt shell"), at="name:Nottingham Castle",
+              names=False),
         ]),
     dict(
         id="culture", title="Theatres and culture",
@@ -244,7 +246,7 @@ CURATED = [
             E("The poet in the churchyard", "en:Wilford",
               "Henry Kirke White is said to have spent much of his time writing poems in the churchyard, sitting "
               "under his favourite tree.",
-              ("Henry Kirke White", "churchyard", "favourite tree"), at="name:St Wilfrid's Church"),
+              ("Henry Kirke White", "churchyard", "favourite tree"), at="name:St Wilfrid's Church", names=False),
             E("Ferry Inn", "en:Wilford",
               "Wilford stayed a village until the later 19th century. With woods around it and riverside amenities "
               "such as the Ferry Inn, it attracted many visitors from Nottingham. The Notts County goalkeeper "
@@ -401,7 +403,7 @@ CURATED = [
             F("Malt Cross", "en:Malt Cross",
               "It takes its name from a monument that once stood in the market square; before it, the site was an "
               "inn called the Roebuck.",
-              ("monument", "Roebuck")),
+              ("monument", "Roebuck"), at="osm:way/291697300"),     # the article's point is on Long Row
         ]),
     dict(
         id="people", title="People", kind="people",

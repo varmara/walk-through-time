@@ -263,7 +263,8 @@ def main(city_id):
                             "story": e["story"], "how": how,
                             "source": {"title": src["title"], "url": src["url"], "kind": src["kind"]},
                             **({"place": {"title": a["title"], "url": a["url"], "kind": a["kind"]}} if e.get("place") else {}),
-                            **({"year": list(parse_year(e["year"]))} if e.get("year") and parse_year(e["year"]) else {})})
+                            **({"year": list(parse_year(e["year"]))} if e.get("year") and parse_year(e["year"]) else {}),
+                            **({"names": False} if e.get("names") is False else {})})
         log(f"s04 {L['id']}: {kept}/{len(L['entries'])} stories kept")
     for d in dropped:
         log(f"    dropped {d['layer']} / {d['name']}: {d['why']}")

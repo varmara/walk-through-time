@@ -38,7 +38,8 @@ def main(city_id):
     # names for outlines that have none in OpenStreetMap: a story's name, then a named place inside
     fallback, story_name = {}, {}
     for e in cur["entries"]:
-        if e.get("layer") != "people":      # a person's name is not the building's
+        if e.get("layer") not in ("people", "facts") and e.get("names", True):   # a person's or a fact's name,
+                                                                                # or an event's, is not the building's
             story_name.setdefault(str(e["b"]), e["name"])
     for k, v in lay.get("names", {}).items():   # plaque addresses
         fallback.setdefault(k, v)

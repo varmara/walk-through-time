@@ -305,8 +305,8 @@ def _words(s):
 
 def marker(tags):
     """A plaque, memorial or sign on a building names something else ("Near this site stood the Malt Cross")."""
-    return (tags.get("historic") in ("memorial", "marker", "wayside_cross") or tags.get("memorial")
-            or tags.get("tourism") == "information")
+    return ((tags.get("historic") and tags["historic"] not in ("building", "castle", "church", "manor", "house"))
+            or tags.get("memorial") or tags.get("tourism") == "information")
 
 
 def he_names_more(he, osm):
