@@ -59,7 +59,7 @@ def main(city_id):
                     buildings.append({"osm": f"way/{el['id']}", "rings": [rnd(c)], "tags": t})
             elif t.get("highway"):
                 k = "minor" if t["highway"] in ("service", "pedestrian", "residential", "living_street") else "major"
-                roads.append(feature("LineString", c, {"k": k}))
+                roads.append(feature("LineString", c, {"k": k, **({"n": t["name"]} if t.get("name") else {})}))
             elif t.get("waterway"):
                 water.append(feature("LineString", c))
             elif t.get("natural") == "water" and len(c) > 3:

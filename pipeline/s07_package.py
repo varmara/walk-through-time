@@ -16,7 +16,7 @@ import re
 from collections import Counter
 import urllib.parse
 
-from .common import building_name, centroid, other_names, load, log, marker, point_in_ring, save, work
+from .common import building_name, centroid, metres, other_names, load, log, marker, point_in_ring, save, work
 from .s00_fetch_nature import rings_of
 from .s05_dates import info_for, osm_article
 
@@ -65,6 +65,28 @@ def main(city_id):
                 out.append({"title": c["title"], "url": c["url"]})
         return out or None
 
+    # where a building with no name is: its address, or the named street nearest it
+    street_at = {}
+    for r in base["roads"]:
+        n = r["properties"].get("n")
+        if n:
+            for x, y in r["geometry"]["coordinates"]:
+                street_at.setdefault((round(x * 2000), round(y * 3000)), []).append((x, y, n))
+
+    def where(t, xy):
+        if t.get("addr:housenumber") and t.get("addr:street"):
+            return f"{t['addr:housenumber'].replace('-', '–')} {t['addr:street']}"
+        if t.get("addr:street"):
+            return t["addr:street"]
+        gx, gy, best = round(xy[0] * 2000), round(xy[1] * 3000), None
+        for dx in (-1, 0, 1):
+            for dy in (-1, 0, 1):
+                for x, y, n in street_at.get((gx + dx, gy + dy), []):
+                    d = metres(xy, [x, y])
+                    if d <= 60 and (best is None or d < best[0]):
+                        best = (d, n)
+        return best and best[1]
+
     feats = []
     for i, b in enumerate(buildings):
         t, k = b["tags"], str(i)
@@ -80,6 +102,7 @@ def main(city_id):
             "name": name or (None if re.match(r"^(railings|walls?|gates?|gate piers|steps|boundary)\b", best.get("Name") or "", re.I)
                              else best.get("Name")), "today": today,
             "aka": other_names(t, name, today, info.get("label"), best.get("Name")),
+            "where": None if name else where(t, centroid(b["rings"][0])),
             "y": d.get("y"), "f": d.get("f"), "src": d.get("src"), "alts": d.get("alts"),
             "per": d.get("period"), "sh": d.get("share"), "dt": d.get("text"),
             "h": b["h"], "base": b.get("base"), "levels": t.get("building:levels"), "osm": b["osm"],

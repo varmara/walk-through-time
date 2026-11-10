@@ -592,7 +592,7 @@ function showCard(id){
       <span><b>${esc(f.year)}</b>${credit(f) ? ' · ' + credit(f) : ''}</span></a>`;
   }).join('') + '</div>' : '';
   collHtml(J(p.coll));
-  openSheet('card', p.name || p.listName || 'Unnamed building');
+  openSheet('card', p.name || placeName(p));
 }
 // links to collections of old pictures that are not openly licensed (so not shown here)
 function collHtml(cs){
@@ -640,8 +640,14 @@ function refCentre(r){
   const pts = ringsOf(areaOf(r).geometry).flat();
   return [pts.reduce((a, c) => a + c[0], 0) / pts.length, pts.reduce((a, c) => a + c[1], 0) / pts.length];
 }
+// a building without a name: its address, or the street it stands on, or its listing's own words
+function placeName(p){
+  if (p.where) return /^\d/.test(p.where) ? p.where : `A building on ${p.where}`;
+  if (p.listName) return p.listName.replace(/\w\S*/g, w => w.length > 2 && w === w.toUpperCase() ? w[0] + w.slice(1).toLowerCase() : w);
+  return 'A building';
+}
 function refName(r){
-  if (isB(r)) { const p = features[r].properties; return p.name || p.listName || 'Unnamed building'; }
+  if (isB(r)) { const p = features[r].properties; return p.name || placeName(p); }
   return (r[0] === 'p' ? pinOf(r) : areaOf(r)).properties.name;
 }
 function openRef(r){
