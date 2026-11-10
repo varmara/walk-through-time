@@ -305,6 +305,21 @@ def _words(s):
     return {w.rstrip("s") for w in re.findall(r"[a-z]{3,}", s) if w not in _PLAIN}
 
 
+def other_names(tags, name, today, label=None, listing_name=None):
+    """The building's other names, oldest first where known: its old name, Historic England's, Wikidata's, another
+    name in OpenStreetMap ("Midland Railway Station" for Nottingham station; "Pearson's Department Store")."""
+    seen = {(name or "").lower(), (today or "").lower()}
+    out = []
+    for n in (tags.get("old_name"), tags.get("historic:name"), tidy_listing(listing_name), label, tags.get("building:name"),
+              tags.get("alt_name"), tags.get("name") if tags.get("name") != today else None):
+        for part in (n or "").split(";"):
+            part = part.strip()
+            if part and part.lower() not in seen and not any(part.lower() in s or s in part.lower() for s in seen if s):
+                seen.add(part.lower())
+                out.append(part)
+    return out or None
+
+
 def marker(tags):
     """A plaque, memorial or sign on a building names something else ("Near this site stood the Malt Cross")."""
     return ((tags.get("historic") and tags["historic"] not in ("building", "castle", "church", "manor", "house"))
@@ -339,18 +354,23 @@ def building_name(tags, story=None, label=None, listing_name=None, place=None):
         label = re.sub(r"\b(And|Of|The|At|To|On|In|For)\b", lambda m: m[1].lower(),
                        _HE_TAIL.sub("", label).strip(" ,")) or label
         label = label[0].upper() + label[1:]
+    num, street = tags.get("addr:housenumber"), tags.get("addr:street")
+    address = f"{num.replace('-', '–')} {street}" if num and street else None
+    # an unlisted shop, café or office with no name for the building itself: its address, the business 'Today'
+    trade = tags.get("building") in ("retail", "commercial", "office", "industrial", "warehouse", "supermarket", "kiosk")
     if story:
         name = story
     elif own:
         name = own
-    elif osm and not occupied(tags) and not he_names_more(he, osm):
+    elif osm and not occupied(tags) and not he_names_more(he, osm) and not (trade and address and not he and not label
+                                                                           and not BUILDINGISH.search(osm)):
         name = osm
     else:
-        name = he or label or old or osm or place
+        name = he or label or old or address or osm or place
     m = re.match(r"^(?:Numbers?|Nos?\.?)\s+(\d.*)$", name or "")
     if m:                                 # "Numbers 119 and 121" -> "119 and 121 Derby Road"
         street = tags.get("addr:street")
         name = m[1] + (f" {street}" if street and street.lower() not in m[1].lower() else "")
     today = (osm if osm and name and osm.strip().lower() not in name.strip().lower()
-             and (occupied(tags) or own or he_names_more(he, osm)) else None)   # not "Newton" for the Newton Building
+             and (occupied(tags) or own or he_names_more(he, osm) or name == address) else None)   # not "Newton" for the Newton Building
     return name, today

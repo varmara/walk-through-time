@@ -2,7 +2,7 @@
 
 Historic England's points are not always on their building: in a street of listed buildings a point can fall
 inside the next one (the Bell Inn carried the listing of Exchange House next door). So, in order:
-  1. an outline that names the list entry itself in OpenStreetMap (ref:GB:nhle);
+  1. an outline that names the list entry itself in OpenStreetMap (ref:GB:nhle, or HE_ref as many in Nottingham do);
   2. an outline within NEAR_NAME metres whose OpenStreetMap name, or a named place inside it, has the listing's
      own name ("THE BELL INN" -> the outline named "The Bell Inn");
   3. the outline the point falls in (or within 8 m of).
@@ -38,7 +38,8 @@ def main(city_id):
             names.setdefault(p["b"], set()).update(words(p["name"]))
     by_nhle = {}
     for i, b in enumerate(buildings):
-        for n in re.findall(r"\d{7}", b["tags"].get("ref:GB:nhle", "") + ";" + b["tags"].get("heritage:ref", "")):
+        t = b["tags"]
+        for n in re.findall(r"\d{7}", ";".join(t.get(k, "") for k in ("ref:GB:nhle", "HE_ref", "heritage:ref"))):
             by_nhle.setdefault(n, i)
     grid = {}
     for i in names:

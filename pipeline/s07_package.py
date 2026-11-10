@@ -15,7 +15,7 @@ import json
 from collections import Counter
 import urllib.parse
 
-from .common import building_name, centroid, load, log, marker, point_in_ring, save, work
+from .common import building_name, centroid, other_names, load, log, marker, point_in_ring, save, work
 from .s00_fetch_nature import rings_of
 from .s05_dates import info_for, osm_article
 
@@ -73,9 +73,11 @@ def main(city_id):
         article = info.get("article")
         if not article and osm_article(t):
             article = "https://en.wikipedia.org/wiki/" + osm_article(t).replace(" ", "_")
-        name, today = building_name(t, story_name.get(k), info.get("label"), best.get("Name"), fallback.get(k))
+        name, today = building_name(t, cur.get("names", {}).get(b["osm"]) or story_name.get(k), info.get("label"),
+                                    best.get("Name"), fallback.get(k))
         p = {
             "name": name or best.get("Name"), "today": today,
+            "aka": other_names(t, name, today, info.get("label"), best.get("Name")),
             "y": d.get("y"), "f": d.get("f"), "src": d.get("src"), "alts": d.get("alts"),
             "per": d.get("period"), "sh": d.get("share"), "dt": d.get("text"),
             "h": b["h"], "base": b.get("base"), "levels": t.get("building:levels"), "osm": b["osm"],

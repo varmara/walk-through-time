@@ -81,6 +81,14 @@ COLLECTIONS = [
     {"title": "Sport", "url": PN + "sport.html", "names": ["city ground", "meadow lane", "trent bridge cricket ground"]},
 ]
 
+# Names chosen by hand, by OpenStreetMap outline, where neither OpenStreetMap nor Historic England gives a good one.
+# (The other names still show on the card.)
+NAMES = {
+    "way/210965263": "52–57 Long Row",             # three merchants' houses, later Pearson's Department Store
+    "way/37080661": "Boots D6 building",           # Owen Williams's 'Wets' factory, 1930-1932; Medicity today
+    "way/215101442": "Boots D34 fire station",
+}
+
 CURATED = [
     dict(
         id="inns", title="Old inns",

@@ -531,6 +531,8 @@ function showCard(id){
 
   const rows = [];
   if (p.today) rows.push(['Today', esc(p.today)]);    // the current occupier; the title is what the building was
+  const aka = typeof p.aka === 'string' ? JSON.parse(p.aka) : p.aka;
+  if (aka && aka.length) rows.push(['Other names', aka.map(esc).join(' · ')]);   // old names, Historic England's, alternatives
   if (p.y != null) {
     const era = eraOf(p.y);
     rows.push(['Built', `${esc(dateText(p.y, p.f, p.per, p.dt))}<span class="pill" style="border-color:${era[3]}">${esc(era[2])}</span>`]);
