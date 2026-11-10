@@ -149,10 +149,14 @@ def main(city_id):
 
     want = {}       # person's name -> what may find their Wikipedia article: {"title"} or {"qid"} or {} (by name)
 
+    named = cur.get("wikipedia", {})       # the stories file names some people's articles itself
+
     def wiki_hint(name, source=None, qid=None, ctx=None):
         if not name:
             return
         h = want.setdefault(name, {})
+        if name in named:
+            h["title"] = named[name]
         if ctx:
             h["ctx"] = (h.get("ctx", "") + " " + ctx).strip()
         url = (source or {}).get("url") or ""

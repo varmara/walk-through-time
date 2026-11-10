@@ -42,7 +42,11 @@ def stories(city_id):
     spec = importlib.util.spec_from_file_location(f"stories_{city_id}", path)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
+    _wiki[city_id] = getattr(mod, "WIKIPEDIA", {})
     return mod.CURATED
+
+
+_wiki = {}      # per city: {person's name as a plaque or Wikidata gives it: their English Wikipedia article}
 
 
 _cache = {}
@@ -266,4 +270,5 @@ def main(city_id):
             used = {e["group"] for e in entries if e["layer"] == L["id"]}
             m["groups"] = [["people-" + k, t] for k, t, _ in PEOPLE_GROUPS if "people-" + k in used]
         meta.append(m)
-    save(city_id, "curated", {"layers": meta, "entries": entries, "dropped": dropped})
+    save(city_id, "curated", {"layers": meta, "entries": entries, "dropped": dropped,
+                              "wikipedia": _wiki.get(city_id, {})})
