@@ -106,6 +106,17 @@ def main(city_id):
     def _former(a):
         return bool(re.search(r"\bformer\b", a, re.I))
 
+    # an unnamed part of a station takes the station's name ("Nottingham station", not a booth inside it)
+    stations = [(centroid(b["rings"][0]), b["tags"]["name"]) for b in buildings
+                if b["tags"].get("building") == "train_station" and b["tags"].get("name")]
+
+    def station_of(t, xy):
+        if t.get("building") != "train_station" or t.get("name"):
+            return None
+        near = [(metres(xy, c), n) for c, n in stations]
+        near = [x for x in near if x[0] <= 250]
+        return min(near)[1] if near else None
+
     feats = []
     for i, b in enumerate(buildings):
         t, k = b["tags"], str(i)
@@ -116,7 +127,7 @@ def main(city_id):
         if not article and osm_article(t):
             article = "https://en.wikipedia.org/wiki/" + osm_article(t).replace(" ", "_")
         name, today = building_name(t, cur.get("names", {}).get(b["osm"]) or story_name.get(k), info.get("label"),
-                                    best.get("Name"), fallback.get(k))
+                                    best.get("Name"), station_of(t, centroid(b["rings"][0])) or fallback.get(k))
         p = {
             "name": name or (None if re.match(r"^(railings|walls?|gates?|gate piers|steps|boundary)\b", best.get("Name") or "", re.I)
                              else best.get("Name")), "today": today,

@@ -350,10 +350,19 @@ def same_place(a, b):
     return bool(mine(a) & mine(b))
 
 
+FIXTURES = {"vending_machine", "photo_booth", "atm", "telephone", "post_box", "bench", "waste_basket",
+            "bicycle_parking", "parking_entrance", "ticket_validator", "drinking_water", "recycling", "toilets",
+            "charging_station", "luggage_locker", "left_luggage", "clock", "fountain", "bureau_de_change",
+            "parcel_locker", "public_bookcase", "shelter", "kiosk"}
+
+
 def marker(tags):
-    """A plaque, memorial or sign on a building names something else ("Near this site stood the Malt Cross")."""
+    """A thing on or in a building that names something else: a plaque or memorial ("Near this site stood the
+    Malt Cross"), a sign, or a fixture (a Photo-Me booth in the station, a cash machine)."""
     return ((tags.get("historic") and tags["historic"] not in ("building", "castle", "church", "manor", "house"))
-            or tags.get("memorial") or tags.get("tourism") == "information")
+            or tags.get("memorial") or tags.get("tourism") == "information"
+            or tags.get("amenity") in FIXTURES or tags.get("shop") in ("kiosk", "vending")
+            or tags.get("vending"))
 
 
 def he_names_more(he, osm):
