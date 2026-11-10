@@ -36,13 +36,16 @@ def tiles(b):
 
 
 def fetch(area):
+    # ways and points: their tags and shape; relations (buildings and water drawn as multipolygons, e.g. the
+    # Arkwright Building around its courtyard) need "body" too, or Overpass sends them without their members
     q = f"""[out:json][timeout:180];(
-      way["building"]{area}; relation["building"]["type"="multipolygon"]{area};
+      way["building"]{area};
       way["highway"~"^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|pedestrian|service)$"]{area};
-      way["natural"="water"]{area}; way["waterway"~"^(canal|river)$"]{area}; relation["natural"="water"]{area};
+      way["natural"="water"]{area}; way["waterway"~"^(canal|river)$"]{area};
       way["leisure"~"^(park|garden)$"]{area}; way["landuse"="grass"]{area};
       node["name"]["amenity"]{area}; node["name"]["historic"]{area}; node["name"]["tourism"]{area};
-    ); out tags geom qt;"""
+    ); out tags geom qt;
+    (relation["building"]["type"="multipolygon"]{area}; relation["natural"="water"]{area};); out body geom qt;"""
     last = None
     for attempt in range(3):
         for url in OVERPASS:

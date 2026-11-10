@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       refresh:
-        description: "Download fresh OpenStreetMap data (slow, most of an hour)"
+        description: "Fetch everything afresh: OpenStreetMap and every web service (about 15 minutes)"
         type: boolean
         default: false
   schedule:
