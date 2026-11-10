@@ -209,10 +209,9 @@ CURATED = [
               "the Undertones playing the first gig, and holds 2,000 people.",
               ("1876", "Alexandra Skating Rink", "December 1980", "Undertones"), at="name:Rock City"),
             E("Broadway", "en:Broadway Cinema",
-              "The building began in 1839 as a grand Wesleyan chapel on Broad Street, designed by S. S. Rawlinson. "
-              "Broadway opened here in 1990, and one of its screens is the only cinema screen designed by Sir Paul "
-              "Smith.",
-              ("1839", "Wesleyan chapel", "Rawlinson", "1990", "Paul Smith")),
+              "The building began in 1839 as a grand Wesleyan chapel on Broad Street. Broadway opened here in 1990, "
+              "and one of its screens is the only cinema screen designed by Sir Paul Smith.",
+              ("1839", "Wesleyan chapel", "1990", "Paul Smith")),
         ]),
     dict(
         id="wilford", title="Wilford",
