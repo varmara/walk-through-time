@@ -11,7 +11,7 @@ Writes work/<city>/summaries.json: {building index: {"text", "src": {title, url,
 import re
 import urllib.parse
 
-from .common import building_name, http, tidy_listing, load, log, save
+from .common import building_name, marker, http, tidy_listing, load, log, save
 from .s05_dates import info_for, osm_article
 
 WIKI = "https://en.wikipedia.org/w/api.php"
@@ -213,7 +213,7 @@ def main(city_id):
         best = (listing.get(k) or [None])[0]
         tags_list = [t] + inside.get(i, [])
         info = info_for(b, i, wd, listing) or {}
-        place = next((p.get("name") for p in inside.get(i, []) if p.get("name")), None)
+        place = next((p.get("name") for p in inside.get(i, []) if p.get("name") and not marker(p)), None)
         name, today = building_name(t, cur.get(k), info.get("label"), (best or {}).get("Name"), place)
         if not name and not best:
             continue

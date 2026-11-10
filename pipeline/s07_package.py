@@ -15,7 +15,7 @@ import json
 from collections import Counter
 import urllib.parse
 
-from .common import building_name, load, log, save, work
+from .common import building_name, marker, load, log, save, work
 from .s05_dates import info_for, osm_article
 
 
@@ -42,7 +42,7 @@ def main(city_id):
     for k, v in lay.get("names", {}).items():   # plaque addresses
         fallback.setdefault(k, v)
     for pl in load(city_id, "places"):
-        if pl["b"] is not None and pl["name"]:
+        if pl["b"] is not None and pl["name"] and not marker(pl["tags"]):
             fallback.setdefault(str(pl["b"]), pl["name"])
 
     feats = []

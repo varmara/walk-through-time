@@ -277,7 +277,12 @@ def tidy_listing(name):
     'Newcastle House'. None when it is only an address ('3 AND 5, HOUNDS GATE')."""
     if not name:
         return None
-    n = _HE_TAIL.sub("", re.sub(r"\s*\([^)]*\)", "", name.strip())).strip(" ,")
+    n = name.strip()
+    was = re.search(r"\bformerly (?:the )?(.+)$", n, re.I)     # "11 Pelham Street…, formerly the Nottingham and…"
+    if was:
+        n = was[1]
+    n = _HE_TAIL.sub("", re.sub(r"\s*\([^)]*\)", "", n)).strip(" ,")
+    n = re.sub(r",\s*Nottingham$", "", n, flags=re.I)
     if not n or re.match(r"^\d", n) or re.match(r"^(?:NOS?\.?|NUMBERS?)\s*\d", n, re.I):
         return None
     if n.isupper():
@@ -288,7 +293,31 @@ def tidy_listing(name):
 
 BUILDINGISH = re.compile(r"\b(house|hall|chapel|church|school|mill|bank|inn|arms|hotel|theatre|cinema|picture|station|works|"
                          r"factory|warehouse|baths|library|exchange|buildings?|chambers|court|lodge|cottages?|almshouses?|"
-                         r"institute|club|tavern|brewery|market|offices|mission|tabernacle|hospital|asylum|gaol|barracks)\b", re.I)
+                         r"institute|club|tavern|brewery|market|offices|mission|tabernacle|hospital|asylum|gaol|barracks|home|"
+                         r"school|college|museum|gallery|cross|tower|lodge|works|depot|shop|stores|arcade|castle|centre|site)\b", re.I)
+_PLAIN = {"the", "and", "of", "at", "to", "on", "in", "for", "a", "st", "saint", "former", "old", "new", "nottingham"}
+
+
+def _words(s):
+    s = re.sub(r"['’]", "", (s or "").lower())            # Severn's, Severns'
+    return {w.rstrip("s") for w in re.findall(r"[a-z]{3,}", s) if w not in _PLAIN}
+
+
+def marker(tags):
+    """A plaque, memorial or sign on a building names something else ("Near this site stood the Malt Cross")."""
+    return (tags.get("historic") in ("memorial", "marker", "wayside_cross") or tags.get("memorial")
+            or tags.get("tourism") == "information")
+
+
+def he_names_more(he, osm):
+    """Historic England's name says what the building was, and the OpenStreetMap name is another thing entirely
+    (an occupier without shop or office tags: "Regus" in Stanford House, "Jem Leisure" in the Midland Bank)."""
+    if not he or not osm or not BUILDINGISH.search(he) or re.match(r"^(railings|walls?|gates?|steps|boundary)\b", he, re.I):
+        return False
+    mine = lambda n: _words(n) - {m.lower().rstrip("s") for m in BUILDINGISH.findall(n)}  # noqa: E731
+    # both must name something of their own ("Nottingham Castle" names only the town and the kind of building),
+    # and nothing in common ("Musters Road Methodist Church" is "West Bridgford Methodist Church")
+    return bool(mine(he)) and bool(mine(osm)) and not (mine(he) & mine(osm))
 
 
 def building_name(tags, story=None, label=None, listing_name=None, place=None):
@@ -312,10 +341,10 @@ def building_name(tags, story=None, label=None, listing_name=None, place=None):
         name = story
     elif own:
         name = own
-    elif osm and not occupied(tags):
+    elif osm and not occupied(tags) and not he_names_more(he, osm):
         name = osm
     else:
         name = he or label or old or osm or place
-    today = (osm if osm and name and osm.strip().lower() not in name.strip().lower() and (occupied(tags) or own)
-             else None)   # not "Newton" for the Newton Building
+    today = (osm if osm and name and osm.strip().lower() not in name.strip().lower()
+             and (occupied(tags) or own or he_names_more(he, osm)) else None)   # not "Newton" for the Newton Building
     return name, today
