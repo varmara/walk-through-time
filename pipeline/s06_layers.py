@@ -12,6 +12,7 @@ Writes layers.json:
   pins    [{x, y, name, layer, group, text, source?, place?}]  places that are not buildings (bridges,
           grounds) and plaques not on a building; layer items refer to them as "p<index>"
 """
+import re
 import urllib.parse
 
 from .common import building_at, load, log, save, work
@@ -46,6 +47,17 @@ def c_words(city_id):
     return [city(city_id)["name"].lower()] + PLACES.get(city_id, {}).get("words", [])
 
 
+def full_text(title):
+    """The whole plain text of a Wikipedia article (one per request, the API's limit for whole articles)."""
+    from .common import http
+    try:
+        r = http("https://en.wikipedia.org/w/api.php", params={"action": "query", "prop": "extracts", "explaintext": "1",
+                                                               "redirects": "1", "format": "json", "titles": title})
+        return next(iter(r["query"]["pages"].values())).get("extract") or ""
+    except Exception:  # noqa: BLE001
+        return ""
+
+
 def about_people(want, words):
     """{name: {"text": the article's first sentences, "url", "title"}} for the People layer.
     An article comes from the entry's own source, or the plaque's or architect's Wikidata item; for a plaque with
@@ -72,13 +84,16 @@ def about_people(want, words):
     for n, q in by_qid.items():
         if q in links:
             titles[n] = links[q]
-    # names alone: one person of that name with an English article that mentions the city
+    # names alone (a plaque's subject): the person of that name, or alias ("George Gordon Byron"), whose English
+    # article mentions the city, and the years on the plaque if it gives any
     guess = {}
-    for n in [n for n, h in want.items() if not h and n not in titles and len(n.split()) >= 2][:400]:
+    for n in [n for n, h in want.items() if "title" not in h and "qid" not in h and n not in titles
+              and len(n.split()) >= 2][:400]:
         try:
             r = http(WD, params={"action": "wbsearchentities", "search": n, "language": "en", "type": "item",
-                                 "limit": "7", "format": "json"})
-            ids = [x["id"] for x in r.get("search", []) if x.get("label", "").lower() == n.lower()]
+                                 "limit": "10", "format": "json"})
+            ids = [x["id"] for x in r.get("search", [])
+                   if n.lower() in (x.get("label", "").lower(), x.get("match", {}).get("text", "").lower())]
             if not ids:
                 continue
             r = http(WD, params={"action": "wbgetentities", "ids": "|".join(ids), "props": "claims|sitelinks",
@@ -93,7 +108,12 @@ def about_people(want, words):
             log(f"    Wikidata search failed for {n}: {e}")
     intro = extracts(list(titles.values()) + [t for ts in guess.values() for t in ts])
     for n, ts in guess.items():
-        ok = [t for t in ts if any(w in (intro.get(t) or "").lower() for w in words)]
+        years = set(re.findall(r"\b1[0-9]{3}\b", want[n].get("ctx", "")))
+        ok = []
+        for t in ts:
+            body = full_text(t).lower()
+            if any(w in body for w in words) and (not years or years & set(re.findall(r"\b1[0-9]{3}\b", body))):
+                ok.append(t)
         if len(ok) == 1:
             titles[n] = ok[0]
     out = {}
@@ -129,10 +149,12 @@ def main(city_id):
 
     want = {}       # person's name -> what may find their Wikipedia article: {"title"} or {"qid"} or {} (by name)
 
-    def wiki_hint(name, source=None, qid=None):
+    def wiki_hint(name, source=None, qid=None, ctx=None):
         if not name:
             return
         h = want.setdefault(name, {})
+        if ctx:
+            h["ctx"] = (h.get("ctx", "") + " " + ctx).strip()
         url = (source or {}).get("url") or ""
         if "wikipedia.org/wiki/" in url and "title" not in h:
             h["title"] = urllib.parse.unquote(url.rsplit("/wiki/", 1)[1]).replace("_", " ")
@@ -181,7 +203,7 @@ def main(city_id):
             pg[k] = {"key": k, "title": titles.get(key, key), "count": 0, "items": []}
         who = name if who else None
         if who:
-            wiki_hint(name, source, qid)
+            wiki_hint(name, source, qid, story)
         if b is None:   # a plaque on no building: a pin
             b = pin(*xy, name, "people", k, story, source, who=who)
         else:
