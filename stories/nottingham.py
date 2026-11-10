@@ -132,6 +132,11 @@ CURATED = [
               "A shopping centre opened in 1972 on the site of Nottingham Victoria railway station, "
               "whose clock tower still stands beside it.",
               ("1972", "clock tower"), year="1972"),
+            E("Adams Building", "en:Adams Building, Nottingham",
+              "Built from 1854 to designs by Thomas Chambers Hine for Thomas Adams, a Quaker lace manufacturer, "
+              "with a chapel for the workers in the basement. Inspectors thought it a model example of its kind; "
+              "since 1999 it has been part of Nottingham College.",
+              ("Thomas Chambers Hine", "Quaker", "chapel", "model example", "1999")),
         ]),
     dict(
         id="civic", title="Civic Nottingham",
@@ -155,6 +160,17 @@ CURATED = [
               "One of the largest paved squares in the United Kingdom. The two towns were once divided by a wall "
               "across it, whose line a stainless steel channel now marks; Goose Fair was held here until 1928.",
               ("largest paved squares", "divided by a wall", "stainless steel", "1928"), at="pin:-1.1497,52.9529"),
+            E("Broad Marsh", "en:Broad Marsh",
+              "After large-scale slum clearance, the Broad Marsh shopping centre was officially opened on 25 March "
+              "1975. It closed in 2020 and was left partially demolished; caves found beneath it, dug into the soft "
+              "sandstone, became part of the City of Caves.",
+              ("slum clearance", "25 March 1975", "partially demolished", "City of Caves")),
+            E("The castle burned, 1831", "en:1831 reform riots",
+              "When the House of Lords threw out the Second Reform Bill on 8 October 1831, rioting broke out in "
+              "Nottingham and a crowd burned the castle, which belonged to the Duke of Newcastle, an opponent of "
+              "reform. Three men were hanged; the Duke refused to restore the castle, and its burnt shell stood "
+              "on the rock for years.",
+              ("8 October 1831", "Duke of Newcastle", "hanged", "burnt shell"), at="name:Nottingham Castle"),
         ]),
     dict(
         id="culture", title="Theatres and culture",
@@ -192,6 +208,11 @@ CURATED = [
               "The building opened in 1876 as the Alexandra Skating Rink. Rock City opened in December 1980, with "
               "the Undertones playing the first gig, and holds 2,000 people.",
               ("1876", "Alexandra Skating Rink", "December 1980", "Undertones"), at="name:Rock City"),
+            E("Broadway", "en:Broadway Cinema",
+              "The building began in 1839 as a grand Wesleyan chapel on Broad Street, designed by S. S. Rawlinson. "
+              "Broadway opened here in 1990, and one of its screens is the only cinema screen designed by Sir Paul "
+              "Smith.",
+              ("1839", "Wesleyan chapel", "Rawlinson", "1990", "Paul Smith")),
         ]),
     dict(
         id="wilford", title="Wilford",
@@ -268,6 +289,15 @@ CURATED = [
               "Designed by the City Engineer Thomas Wallis Gordon, on land beside the Trent given by Sir Jesse Boot, "
               "and unveiled on 11 November 1927. It remembers the men of Nottingham who died in both World Wars.",
               ("Thomas Wallis Gordon", "Jesse Boot", "11 November 1927"), at="name:Memorial Arch", year="1927"),
+            E("Victoria Embankment", "en:The Meadows, Nottingham",
+              "A mile and a quarter of flood defences along the Trent, built between 1898 and 1901 under the borough "
+              "engineer Arthur Brown. Part of it was later laid out as Memorial Gardens to the dead of the First "
+              "World War.",
+              ("1898", "1901", "flood defence", "Arthur Brown", "Memorial Gardens"), at="pin:-1.1468,52.9338"),
+            E("The Meadows rebuilt", "en:The Meadows, Nottingham",
+              "Much of the Meadows' pre-1919 terraced housing was demolished to make way for a new development of "
+              "modern council housing, and the viaduct carrying the Great Central railway came down in 1975.",
+              ("pre-1919", "modern council housing", "Great Central", "1975"), at="pin:-1.1530,52.9390"),
         ]),
     dict(
         id="clifton", title="Clifton",
