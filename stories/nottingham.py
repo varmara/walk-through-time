@@ -88,6 +88,12 @@ NAMES = {
     "way/37080661": "Boots D6 building",           # Owen Williams's 'Wets' factory, 1930-1932; Medicity today
     "way/215101442": "Boots D34 fire station",
     "way/363152364": "Nottingham station porte-cochère",   # the covered carriage entrance, now part of the concourse
+    "way/168960005": "Nottingham General Hospital",        # the hospital's buildings, now flats called Standard Court
+}
+
+# Titles chosen by hand, "what it was · what it is", where the rule gets them the wrong way round.
+TITLES = {
+    "way/168960005": "Nottingham General Hospital · Standard Court",
 }
 
 # Corrections to OpenStreetMap's tags, by outline (None drops the tag). Better still, fix them in OpenStreetMap.

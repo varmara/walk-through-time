@@ -122,7 +122,7 @@ def main(city_id):
                              else best.get("Name")), "today": today,
             "aka": other_names(t, name, today, info.get("label"), best.get("Name")),
             "where": None if name else where(t, centroid(b["rings"][0])),
-            "full": full_title(name, today, other_names(t, name, today, info.get("label"), best.get("Name")),
+            "full": cur.get("titles", {}).get(b["osm"]) or full_title(name, today, other_names(t, name, today, info.get("label"), best.get("Name")),
                                [t] + inside.get(k, [])),
             "y": d.get("y"), "f": d.get("f"), "src": d.get("src"), "alts": d.get("alts"),
             "per": d.get("period"), "sh": d.get("share"), "dt": d.get("text"),

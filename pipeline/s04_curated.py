@@ -47,9 +47,11 @@ def stories(city_id):
     _collections[city_id] = getattr(mod, "COLLECTIONS", [])
     _names[city_id] = getattr(mod, "NAMES", {})
     _tag_fixes[city_id] = getattr(mod, "TAG_FIXES", {})
+    _titles[city_id] = getattr(mod, "TITLES", {})
     return mod.CURATED
 
 
+_titles = {}        # per city: {OpenStreetMap outline: title chosen by hand}
 _tag_fixes = {}     # per city: {OpenStreetMap outline: {tag: corrected value, or None to drop it}}
 _names = {}         # per city: {OpenStreetMap outline: name chosen by hand}
 _collections = {}   # per city: picture collections linked, not copied (their pictures are not openly licensed)
@@ -294,4 +296,5 @@ def main(city_id):
         meta.append(m)
     save(city_id, "curated", {"layers": meta, "entries": entries, "dropped": dropped,
                               "wikipedia": _wiki.get(city_id, {}), "plaques": _plaques.get(city_id, {}),
-                              "collections": _collections.get(city_id, []), "names": _names.get(city_id, {})})
+                              "collections": _collections.get(city_id, []), "names": _names.get(city_id, {}),
+                              "titles": _titles.get(city_id, {})})
