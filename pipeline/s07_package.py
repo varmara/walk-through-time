@@ -12,6 +12,7 @@ sum (one to three sentences) and sumSrc {title, url?, kind}.
 from datetime import datetime, timezone
 from pathlib import Path
 import json
+from collections import Counter
 import urllib.parse
 
 from .common import building_name, load, log, save, work
@@ -81,7 +82,7 @@ def main(city_id):
     stats = {
         "buildings": n, "dated": len(dated),
         "byPrecision": {f: sum(d["f"] == f for d in dated) for f in ("exact", "approx", "century")},
-        "bySource": {s: sum(d["src"] == s for d in dated) for s in ("OpenStreetMap", "Wikipedia", "Wikidata")},
+        "bySource": dict(Counter(d["src"] for d in dated).most_common()),
         "conflicts": sum("alts" in d for d in dated), "estimated": estimated,
         "listed": sum(1 for es in listing.values() if es),
         "stories": len(cur["entries"]), "storiesDropped": len(cur["dropped"]),
