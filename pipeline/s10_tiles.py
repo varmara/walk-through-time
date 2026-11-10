@@ -2,7 +2,7 @@
 
 The page used to load one file with every building's outline and every detail (18 MB, 2.4 MB compressed)
 and build the whole city before showing anything. Now:
-  data/<city>/tiles/{z}/{x}/{y}.pbf   Mapbox Vector Tiles (gzipped), made by tippecanoe, zoom 12 to 15
+  data/<city>/tiles/{z}/{x}/{y}.pbf   Mapbox Vector Tiles (gzipped), made by tippecanoe, zoom 10 to 15
                                       (the map draws closer zooms from the zoom 15 tiles). Layers:
                                       b (buildings: id = building index; y, f, h, base, L for colour, filters and
                                       height), roads (k), water, parks. The phone loads only the tiles on screen,
@@ -27,7 +27,7 @@ from pathlib import Path
 from .common import centroid, load, log
 
 CHUNK = 1000
-MIN_Z, MAX_Z = 12, 15
+MIN_Z, MAX_Z = 10, 15         # zoomed out (10-11) the smallest buildings are left out so tiles stay small
 TILE_PROPS = ("y", "f", "h", "base", "L")
 # what the index keeps; everything else goes to the card files
 INDEX_PROPS = ("name", "listName", "y", "f", "per", "sh", "dt", "L", "stories", "grade")

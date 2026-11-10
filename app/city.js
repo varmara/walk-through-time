@@ -220,6 +220,7 @@ function drawMap(){
     map = new maplibregl.Map({
       container:'map', ...city.home, maxPitch:75,
       maxBounds:[[b.w - 0.03, b.s - 0.02], [b.e + 0.03, b.n + 0.02]],
+      minZoom:10,                  // the whole city; the tiles start at zoom 10
       attributionControl:false,
       style:{ version:8, sources:{}, layers:[{ id:'bg', type:'background', paint:{ 'background-color': tok('--bg') } }],
         light:{ anchor:'map', position:[1.4, 210, 35], intensity: isDark() ? 0.35 : 0.45 } }
