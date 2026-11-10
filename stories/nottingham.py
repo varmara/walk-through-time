@@ -87,6 +87,14 @@ NAMES = {
     "way/210965263": "52–57 Long Row",             # three merchants' houses, later Pearson's Department Store
     "way/37080661": "Boots D6 building",           # Owen Williams's 'Wets' factory, 1930-1932; Medicity today
     "way/215101442": "Boots D34 fire station",
+    "way/363152364": "Nottingham station porte-cochère",   # the covered carriage entrance, now part of the concourse
+}
+
+# Corrections to OpenStreetMap's tags, by outline (None drops the tag). Better still, fix them in OpenStreetMap.
+TAG_FIXES = {
+    # the porte-cochère opened with the station's forebuildings in 1904 (Albert Edward Lambert, architect);
+    # 1839 is when the first station, on Carrington Street, opened
+    "way/363152364": {"start_date": "1904", "architect": "Albert Edward Lambert", "historic": None},
 }
 
 CURATED = [

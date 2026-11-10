@@ -46,9 +46,11 @@ def stories(city_id):
     _plaques[city_id] = getattr(mod, "PLAQUES", {})
     _collections[city_id] = getattr(mod, "COLLECTIONS", [])
     _names[city_id] = getattr(mod, "NAMES", {})
+    _tag_fixes[city_id] = getattr(mod, "TAG_FIXES", {})
     return mod.CURATED
 
 
+_tag_fixes = {}     # per city: {OpenStreetMap outline: {tag: corrected value, or None to drop it}}
 _names = {}         # per city: {OpenStreetMap outline: name chosen by hand}
 _collections = {}   # per city: picture collections linked, not copied (their pictures are not openly licensed)
 _plaques = {}   # per city: corrections to plaques, by the start of their inscription or their subject
@@ -159,6 +161,18 @@ def norm(s):
 def main(city_id):
     layers = stories(city_id)
     buildings = load(city_id, "buildings")
+    # corrections to OpenStreetMap's tags, by outline, from the stories file (TAG_FIXES); later steps read these
+    fixes, fixed = _tag_fixes.get(city_id, {}), 0
+    for b in buildings:
+        for k, v in fixes.get(b["osm"], {}).items():
+            fixed += 1
+            if v is None:
+                b["tags"].pop(k, None)
+            else:
+                b["tags"][k] = v
+    if fixes:
+        save(city_id, "buildings", buildings)
+        log(f"s04 tag fixes: {fixed} tags on {len(fixes)} outlines")
     listing = load(city_id, "listing")
     places = load(city_id, "places")
     by_osm = {b["osm"]: i for i, b in enumerate(buildings)}
