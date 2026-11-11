@@ -65,6 +65,8 @@ input[type=range]{width:100%;accent-color:var(--ink);height:28px;margin:0}
 .lrow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);cursor:pointer;font-size:16px}
 .lrow input{width:20px;height:20px;accent-color:var(--ink);margin:0;flex:0 0 auto}
 .lrow .sw{width:12px;height:12px;border-radius:3px;flex:0 0 auto}
+.lrow .sw.dot{border-radius:50%;width:11px;height:11px;box-shadow:0 0 0 1.5px var(--paper),0 0 0 2.5px var(--line)}
+.lrow .sw.line{height:3px;border-radius:2px;width:14px}
 .lrow .n{margin-left:auto;font:400 13px var(--sans);color:var(--muted);font-variant-numeric:tabular-nums}
 .lrow .more{border:0;background:transparent;color:var(--muted);cursor:pointer;width:32px;height:28px;flex:0 0 auto}
 .linfo{padding:6px 0 10px 30px;display:grid;gap:6px;font-size:14px}

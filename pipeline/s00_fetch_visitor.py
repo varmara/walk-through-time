@@ -36,9 +36,9 @@ def classify(t):
     """(category, group) for a point's tags, or None. Categories are the page's layers; groups its tickboxes."""
     tour, hist, am = t.get("tourism"), t.get("historic"), t.get("amenity")
     if tour in ("museum", "gallery"):
-        return "attractions", "museums"
+        return "attractions", "visit-museums"
     if tour in ("attraction", "zoo", "theme_park"):
-        return "attractions", "attractions"
+        return "attractions", "visit-places"
     if tour == "viewpoint":
         return "attractions", "viewpoints"
     if tour == "artwork" or hist == "statue":
@@ -70,7 +70,10 @@ def overpass(q):
     last = None
     for url in OVERPASS:
         try:
-            return http(url, {"data": q}, tries=2, timeout=240)["elements"]
+            r = http(url, {"data": q}, tries=2, timeout=240)
+            if r.get("remark") and not r.get("elements"):       # a timeout or a runtime error, with nothing in it
+                raise RuntimeError(r["remark"][:200])
+            return r["elements"]
         except Exception as e:  # noqa: BLE001 - try the next server
             last = e
             log(f"    {url.split('/')[2]}: {e}")
@@ -100,18 +103,27 @@ def points(c):
 
 
 def routes(c):
+    """The routes first (their tags), then each one's ways inside the box: one heavy query for every route's
+    geometry at once can time out on the public servers, which then answer with no elements."""
     b = c["bbox"]
     box = f"({b['s']},{b['w']},{b['n']},{b['e']})"
-    q = f"""[out:json][timeout:200];relation["route"~"^(hiking|foot|walking)$"]["name"]{box};out tags geom{box};"""
+    rels = overpass(f"""[out:json][timeout:120];relation["route"~"^(hiking|foot|walking)$"]{box};out tags;""")
     out = []
-    for el in overpass(q):
-        lines = [[[round(p["lon"], 5), round(p["lat"], 5)] for p in m["geometry"] if p]
-                 for m in el.get("members", []) if m.get("type") == "way" and m.get("geometry")]
+    for el in rels:
+        t = el.get("tags", {})
+        if not t.get("name"):
+            continue
+        try:
+            ways = overpass(f"""[out:json][timeout:120];rel({el['id']});way(r){box};out geom;""")
+        except Exception as e:  # noqa: BLE001 - leave that route out
+            log(f"    route {t['name']}: {e}")
+            continue
+        lines = [[[round(p["lon"], 5), round(p["lat"], 5)] for p in w.get("geometry", []) if p] for w in ways]
         lines = [ln for ln in lines if len(ln) > 1]
         if lines:
-            t = el.get("tags", {})
             out.append({"osm": f"relation/{el['id']}", "name": t["name"], "tags": {k: v for k, v in t.items() if k in KEEP},
                         "lines": lines})
+    log(f"s00 walking routes: {len(rels)} route relations in the box, {len(out)} with a name and ways on the map")
     return out
 
 

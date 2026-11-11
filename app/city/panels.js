@@ -1,7 +1,7 @@
 // Walk Through Time, city page: The Layers sheet and the Map sheet (base maps, the legend of eras).
-import { $, CITY_ID, ERAS, SECTIONS, esc, fmt, store } from './util.js';
+import { $, CITY_ID, ERAS, PIN_LAYERS, SECTIONS, esc, fmt, store } from './util.js';
 import { S } from './state.js';
-import { isArea, parseRef, saveActive } from './data.js';
+import { hasPins, isArea, kindOf, marksBuildings, parseRef, saveActive } from './data.js';
 import { addNls, buildingColour } from './map.js';
 import { updateYear } from './timebar.js';
 import { openRef } from './cards.js';
@@ -22,7 +22,10 @@ export function renderLayers(){
         <div class="linfo" id="info-${esc(L.id)}" hidden>${infoHtml(L, null)}</div>`);
       for (const g of gs) {
         const title = single ? L.title : g.title;
-        const sw = L.kind === 'areas' ? `<span class="sw" style="background:var(--n-${esc(g.key)})"></span>` : '';
+        const sw = L.kind === 'areas' ? `<span class="sw" style="background:var(--n-${esc(g.key)})"></span>`
+          : L.kind === 'points' ? `<span class="sw dot" style="background:var(--b-${esc(g.key)})"></span>`
+          : L.kind === 'routes' ? '<span class="sw line" style="background:var(--route)"></span>'
+          : PIN_LAYERS.includes(L.id) ? `<span class="sw dot" style="background:var(--p-${esc(L.id)})"></span>` : '';
         html.push(`<label class="lrow"${single ? '' : ' style="padding-left:14px"'}><input type="checkbox" data-g="${esc(g.key)}"${S.active.has(g.key) ? ' checked' : ''}>${sw}
           <span>${esc(title)}</span><span class="n">${fmt(g.count)}</span>
           ${single || g.items ? `<button class="more" data-info="g-${esc(g.key)}" aria-label="About ${esc(title)}" aria-expanded="false">ⓘ</button>` : ''}</label>
@@ -75,7 +78,7 @@ export function updateSummary(){
   const names = [...S.active].map(k => S.groups.get(k)).filter(Boolean)
     .map(g => g.layer.groups.filter(x => x.count > 0).length === 1 ? g.layer.title : g.title);
   $('lSummary').innerHTML = names.length
-    ? `<b>${names.length} on:</b> ${esc(names.join(', '))}<span class="key"><i style="background:var(--marked)"></i>in the layer, no date yet</span>`
+    ? `<b>${names.length} on:</b> ${esc(names.join(', '))}${[...S.active].some(marksBuildings) ? '<span class="key"><i style="background:var(--marked)"></i>in the layer, no date yet</span>' : ''}`
     : 'No layers on. Tick any to highlight them on the map.';
   $('lClear').hidden = !names.length;
   $('layerCount').hidden = !names.length;
@@ -87,7 +90,11 @@ export function applyLayers(){
   updateSummary();
   if (!S.map || !S.map.getLayer('b')) return;
   S.map.setPaintProperty('b', 'fill-extrusion-color', buildingColour());
-  const pinGroups = [...S.active].filter(k => !isArea(k));
+  const pinGroups = [...S.active].filter(hasPins);
+  S.map.setLayoutProperty('routes', 'visibility', S.active.has('routes') ? 'visible' : 'none');
+  const basics = [...S.active].filter(k => kindOf(k) === 'points');
+  S.map.setLayoutProperty('basics', 'visibility', basics.length ? 'visible' : 'none');
+  S.map.setFilter('basics', ['in', ['get', 't'], ['literal', basics.length ? basics : ['none']]]);
   S.map.setLayoutProperty('storypins', 'visibility', pinGroups.length ? 'visible' : 'none');
   S.map.setFilter('storypins', ['in', ['get', 'group'], ['literal', pinGroups.length ? pinGroups : ['none']]]);
   const types = [...S.active].filter(isArea);

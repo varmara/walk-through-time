@@ -1,13 +1,15 @@
 """Resolve every layer to what it contains, grouped into the sections of the page's Layers sheet.
 
 Story layers come from step s04, the People layer from s06_people, rule layers from pipeline/layers.py, nature
-areas from step s00_fetch_nature, and the other areas (conservation areas, parks and gardens, Article 4 areas, tree preservation
+areas from step s00_fetch_nature, the layers for visitors from
+visitorlayers.py, and the other areas (conservation areas, parks and gardens, Article 4 areas, tree preservation
 orders) from the s00 steps, in the order of layerdata.AREAS. Each layer has one or more groups; each group is one tickbox on the page.
 
-Writes layers.json:
+Writes layers.json, and routes.json and basics.json (GeoJSON features for s07):
   meta    [{id, title, section, kind, intro, source?, groups: [{key, title, count, items?}]}]
           items: [[name, [building indexes]]], one per person or story, in first-seen order
-          kind: stories | people | rule (buildings) or areas (drawn on the ground)
+          kind: stories | people | rule (buildings, and pins) | pins (pins only) | areas (drawn on the ground)
+                | routes (lines, items r<index>) | points (drawn close up from the tiles)
   member  {building index: [group keys]}
   stories {building index: [{layer, text, source, place?}]}
   pins    [{x, y, name, layer, group, text, source?, place?}]  places that are not buildings (bridges,
@@ -16,6 +18,7 @@ Writes layers.json:
 from .common import city, load, log, save, work
 from .layerdata import AREAS, Collector, grouped
 from .layers import LAYERS, Context
+from .visitorlayers import visitor
 
 NATURE = [
     ("nnr", "National Nature Reserves"),
@@ -58,6 +61,7 @@ def main(city_id):
     names = ppl["names"]
     out = Collector({"pins": ppl["pins"]})   # this step's pins follow the plaques'
     meta = []
+    visitor_meta, routes, basics = visitor(city_id, ctx, out)
 
     # ---- story layers (stories/<city>/NN-*.md); the People layer, from s06_people, where the stories put it
     for L in cur["layers"]:
@@ -154,4 +158,7 @@ def main(city_id):
                                  **({"items": items} if len(items) <= 400 else {})}]})
         log(f"s06 {L['title'].lower()}: {len(feats)}")
 
+    meta += visitor_meta
+    save(city_id, "routes", routes)
+    save(city_id, "basics", basics)
     save(city_id, "layers", {"meta": meta, **out.json(), "names": names, "people": ppl["about"]})

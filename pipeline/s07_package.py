@@ -152,6 +152,7 @@ def main(city_id):
     # areas drawn on the ground (nature, conservation areas, parks and gardens, Article 4, tree preservation orders)
     # travel together, in the order of layerdata.AREAS; "t" says which kind
     nature = [f for name in AREAS if work(city_id, name).exists() for f in load(city_id, name)]
+    extra = {k: fc(load(city_id, k) if work(city_id, k).exists() else []) for k in ("routes", "basics")}
     pins = [{"type": "Feature", "properties": {"i": k, **{kk: v for kk, v in pn.items() if kk not in ("x", "y")}},
              "geometry": {"type": "Point", "coordinates": [pn["x"], pn["y"]]}} for k, pn in enumerate(lay.get("pins", []))]
     for f in pins:          # pins: their layer's group, their person, where they stand
@@ -162,7 +163,7 @@ def main(city_id):
             pp["coll"] = c
     out = {"city": city_id, "built": built, "stats": stats, "layers": lay["meta"], "nature": fc(nature), "pins": fc(pins),
            "people": lay.get("people", {}), "templates": TEMPLATES, "credits": cur.get("credits", {}),
-           "buildings": fc(feats), "roads": fc(base["roads"]), "water": fc(base["water"]), "parks": fc(base["parks"])}
+           **extra, "buildings": fc(feats), "roads": fc(base["roads"]), "water": fc(base["water"]), "parks": fc(base["parks"])}
     Path("data").mkdir(exist_ok=True)
     save(city_id, "package", out)
 

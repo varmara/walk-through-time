@@ -7,7 +7,9 @@ and build the whole city before showing anything. Now:
                                       b (buildings: id = building index; y, f, h, base, L for colour, filters and
                                       height), roads (k), water, parks. The phone loads only the tiles on screen,
                                       with simpler outlines when zoomed out.
-                                      Also areas (nature and conservation areas…, t = which kind, i = its number).
+                                      Also areas (nature and conservation areas…, t = which kind, i = its number),
+                                      routes (walking routes: i, name) and basics (toilets, water, benches: t and
+                                      a few details, in the zoom 14 and 15 tiles only, drawn close up).
   data/<city>.json                    the index: only what the page needs before any card opens: the few buildings
                                       with a name, layers or a listing (see index()), how many buildings stand by
                                       each year (for the count under the slider), layers, pins, and the areas'
@@ -69,6 +71,12 @@ def bounds(g):
     return [round(min(xs), 5), round(min(ys), 5), round(max(xs), 5), round(max(ys), 5)]
 
 
+def bounds_lines(g):
+    pts = [c for ln in (g["coordinates"] if g["type"] == "MultiLineString" else [g["coordinates"]]) for c in ln]
+    xs, ys = [c[0] for c in pts], [c[1] for c in pts]
+    return [round(min(xs), 5), round(min(ys), 5), round(max(xs), 5), round(max(ys), 5)]
+
+
 def brief(stories):
     """A building's stories as the index keeps them: the layer, the person, the plaque, not the words."""
     return [{k: st[k] for k in ("layer", "who", "pin") if k in st} for st in stories]
@@ -109,12 +117,19 @@ def main(city_id):
                                    "properties": {**{k: a["properties"][k] for k in AREA_PROPS if k in a["properties"]}, "i": j}}
                                   for j, a in enumerate(areas)])
 
+    routes = pkg.get("routes", {}).get("features", [])
+    write_fc(tmp / "routes.json", [{"type": "Feature", "geometry": r["geometry"],
+                                    "properties": {k: r["properties"][k] for k in ("i", "name") if k in r["properties"]}}
+                                   for r in routes])
+    write_fc(tmp / "basics.json", [{**f, "tippecanoe": {"minzoom": 14}} for f in pkg.get("basics", {}).get("features", [])])
+
     t0 = time.time()
     tiles = root / "tiles"
     cmd = [exe, "-q", "--force", "-e", str(tiles), f"-Z{MIN_Z}", f"-z{MAX_Z}",
            "--drop-smallest-as-needed", "--extend-zooms-if-still-dropping", "--no-tile-stats",
            "-L", f"b:{tmp / 'b.json'}", "-L", f"roads:{tmp / 'roads.json'}",
-           "-L", f"water:{tmp / 'water.json'}", "-L", f"parks:{tmp / 'parks.json'}", "-L", f"areas:{tmp / 'areas.json'}"]
+           "-L", f"water:{tmp / 'water.json'}", "-L", f"parks:{tmp / 'parks.json'}", "-L", f"areas:{tmp / 'areas.json'}",
+           "-L", f"routes:{tmp / 'routes.json'}", "-L", f"basics:{tmp / 'basics.json'}"]
     subprocess.run(cmd, check=True)
     (tiles / "metadata.json").unlink(missing_ok=True)
     n_tiles = sum(1 for _ in tiles.rglob("*.pbf"))
@@ -123,7 +138,9 @@ def main(city_id):
 
     for n, chunk in cards.items():
         (root / "cards" / f"{n}.json").write_text(json.dumps(chunk, separators=(",", ":"), ensure_ascii=False))
-    slim = {k: v for k, v in pkg.items() if k not in ("buildings", "roads", "water", "parks", "nature")}
+    slim = {k: v for k, v in pkg.items() if k not in ("buildings", "roads", "water", "parks", "nature", "routes", "basics")}
+    # routes: drawn from the tiles; here what their card needs, and their bounds to fly to
+    slim["routes"] = [{**r["properties"], "bb": bounds_lines(r["geometry"])} for r in routes]
     # areas: drawn from the tiles; here what their card and the Layers sheet need, and their bounds to fly to
     slim["areas"] = [None if a["properties"].get("t") in TILE_ONLY else {**a["properties"], "bb": bounds(a["geometry"])}
                      for a in areas]

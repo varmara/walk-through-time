@@ -4,7 +4,7 @@
 //   image + credit · summary · facts (rows) · Did you know · old pictures · more old pictures · stories · links
 import { $, PRECISION, dateText, eraOf, esc } from './util.js';
 import { S } from './state.js';
-import { areaOf, centreOf, fstate, isB, loadCard, parseRef, pinOf, saveActive, storyOf, tiled } from './data.js';
+import { areaOf, centreOf, fstate, isB, loadCard, parseRef, pinOf, refOf, routeOf, saveActive, storyOf, tiled } from './data.js';
 import { openSheet } from './sheet.js';
 import { applyLayers, renderLayers } from './panels.js';
 import { showPlaces } from './places.js';
@@ -168,7 +168,6 @@ function areaCard(p){
   if (!p.source && L?.source) p = { ...p, source: L.source.title };   // an area only in the tiles: its layer says whose
   const type = AREA_TYPE[p.t] || ((S.groups.get(p.t) || {}).title || 'Nature area').replace(/s$/, '');
   const rows = [['Type', esc(type)]];
-
   if (p.designated) rows.push(['Designated', esc(p.designated)]);
   if (p.lpa) rows.push(['Council', esc(p.lpa)]);
   if (p.grade) rows.push(['Grade', `Grade ${esc(p.grade)}`]);
@@ -189,9 +188,54 @@ export function showPin(p){
   renderCard(pinCard(p));
   plaqueOn(p.on == null || p.on === '' ? null : +p.on);
 }
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const dayText = d => { const m = /^(\d{4})-(\d{2})(?:-(\d{2}))?$/.exec(d || '');     // 1921-09-08 -> 8 September 1921
+  return m ? `${m[3] ? +m[3] + ' ' : ''}${MONTHS[+m[2] - 1]} ${m[1]}` : d; };
+const WHEELCHAIR = { yes: 'Step-free access', limited: 'Limited step-free access', no: 'No step-free access' };
+const fee = v => v === 'no' ? 'Free' : v === 'yes' ? 'There is a charge' : v;
+const wikiUrl = wp => { const m = /^(\w+):(.+)$/.exec(wp || ''); return m && `https://${m[1]}.wikipedia.org/wiki/${encodeURIComponent(m[2].replace(/ /g, '_'))}`; };
+// links every visitor place can have: its website, Wikipedia, Wikidata, OpenStreetMap
+function placeLinks(p, withWeb = true){
+  const links = [];
+  if (withWeb && p.web) links.push(a(p.web, host(p.web)));
+  if (wikiUrl(p.wp)) links.push(a(wikiUrl(p.wp), 'Wikipedia'));
+  if (p.wd) links.push(a('https://www.wikidata.org/wiki/' + p.wd, 'Wikidata'));
+  if (p.osm) links.push(a('https://www.openstreetmap.org/' + p.osm, 'OpenStreetMap'));
+  return links;
+}
 function pinCard(p){
-  return { title: p.name, rows: [['Layer', esc((S.groups.get(p.group) || {}).title || layerTitle(p.layer))]],
-           stories: [{ text: p.text, source: J(p.source), place: J(p.place), who: p.who }], coll: J(p.coll) };
+  const rows = [['Layer', esc((S.groups.get(p.group) || {}).title || layerTitle(p.layer))]];
+  if (p.artist) rows.push(['Artist', esc(p.artist)]);
+  if (p.start) rows.push(['From', esc(dayText(p.start))]);
+  const open = openRows(p.oh || p.web ? [{ oh: p.oh, web: p.web }] : [], p.name);
+  if (open.length) { rows.push(...open); if (p.oh) open[0][1] += `<div class="hint">${esc(HOURS_NOTE)}</div>`; }
+  if (p.fee) rows.push(['Admission', esc(fee(p.fee))]);
+  if (WHEELCHAIR[p.wc]) rows.push(['Access', esc(WHEELCHAIR[p.wc])]);
+  if (p.op) rows.push(['Run by', esc(p.op)]);
+  return { title: p.name, rows, stories: [{ text: p.text, source: J(p.source), place: J(p.place), who: p.who }], coll: J(p.coll),
+           links: placeLinks(p, false) };
+}
+
+// ================= Walking routes, and toilets, water and benches =================
+const NETWORK = { iwn: 'International walking route', nwn: 'National walking route', rwn: 'Regional walking route', lwn: 'Local walking route' };
+export function showRoute(i){ const r = routeOf('r' + i); if (r) renderCard(routeCard(r.properties)); }
+function routeCard(p){
+  const rows = [];
+  if (NETWORK[p.network] || p.ref) rows.push(['Route', esc([NETWORK[p.network], p.ref].filter(Boolean).join(' · '))]);
+  if (p.km) rows.push(['On this map', `${esc(p.km)} km`]);
+  if (p.op) rows.push(['Looked after by', esc(p.op)]);
+  return { title: p.name, rows, stories: p.text ? [{ text: p.text }] : [], links: placeLinks(p) };
+}
+const BASIC = { toilets: 'Public toilets', water: 'Drinking water', benches: 'Bench' };
+export function showBasic(p){ renderCard(basicCard(p)); }
+function basicCard(p){
+  const rows = openRows(p.oh ? [{ oh: p.oh }] : [], '');
+  if (p.fee) rows.push(['Charge', esc(fee(p.fee))]);
+  if (p.t === 'toilets' && WHEELCHAIR[p.wc]) rows.push(['Access', esc(WHEELCHAIR[p.wc])]);
+  if (p.ch) rows.push(['Baby changing', p.ch === 'yes' ? 'Yes' : p.ch === 'no' ? 'No' : esc(p.ch)]);
+  if (p.acc === 'customers') rows.push(['Who can use them', 'Customers only']);
+  if (p.bk) rows.push(['Backrest', p.bk === 'yes' ? 'Yes' : 'No']);
+  return { title: p.name || BASIC[p.t] || 'Place', rows, links: placeLinks(p) };
 }
 // a plaque's building: lit up while the plaque is open, and shown inside the plaque's card
 export function unlight(){ if (S.litOn != null && S.map) fstate(S.litOn, { hl:false }); S.litOn = null; }
@@ -224,14 +268,14 @@ export function placeName(p){
 }
 export function refName(r){
   if (isB(r)) { const p = S.features[r].properties; return p.name || placeName(p); }
-  return (r[0] === 'p' ? pinOf(r) : areaOf(r)).properties.name;
+  return refOf(r).properties.name;
 }
 export function openRef(r){
   if (isB(r)) return selectBuilding(r);
   if (r[0] === 'p') return showPin(pinOf(r).properties);
-  const f = areaOf(r), bb = f.bb;
-  if (!S.active.has(f.properties.t)) { S.active.add(f.properties.t); saveActive(); renderLayers(); applyLayers(); }
+  const f = refOf(r), bb = f.bb, key = r[0] === 'r' ? 'routes' : f.properties.t;
+  if (!S.active.has(key)) { S.active.add(key); saveActive(); renderLayers(); applyLayers(); }
   S.map.fitBounds([[bb[0], bb[1]], [bb[2], bb[3]]],
     { padding: innerWidth >= 760 ? { top: 60, bottom: 60, left: 60, right: 420 } : { top: 80, left: 30, right: 70, bottom: innerHeight * 0.45 }, maxZoom: 17, duration: 800 });
-  showArea(f.properties);
+  r[0] === 'r' ? renderCard(routeCard(f.properties)) : showArea(f.properties);
 }

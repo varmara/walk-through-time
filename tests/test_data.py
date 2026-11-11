@@ -50,12 +50,13 @@ class Data(unittest.TestCase):
 
     def test_references(self):
         for city, index, cards, osm in self.each():
-            n, pins, areas = index["index"]["n"], index["pins"]["features"], index.get("areas", [])
+            n, pins, areas, routes = index["index"]["n"], index["pins"]["features"], index.get("areas", []), index.get("routes", [])
 
             def ok(r):
                 if isinstance(r, int):
                     return 0 <= r < n
-                return (r[0] == "p" and int(r[1:]) < len(pins)) or (r[0] == "a" and int(r[1:]) < len(areas) and areas[int(r[1:])] is not None)
+                return ((r[0] == "p" and int(r[1:]) < len(pins)) or (r[0] == "a" and int(r[1:]) < len(areas) and areas[int(r[1:])] is not None)
+                        or (r[0] == "r" and int(r[1:]) < len(routes)))
             bad = []
             for L in index["layers"]:
                 for g in L["groups"]:

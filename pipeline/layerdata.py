@@ -29,9 +29,10 @@ class Collector:
     def json(self):
         return {"member": self.member, "stories": self.stories, "pins": self.pins}
 
-    def pin(self, x, y, name, layer_id, group, text, source=None, place=None, who=None, on=None):
-        """A place that is not a building (a bridge, grounds, a plaque): layer items refer to it as "p<index>"."""
-        self.pins.append({"x": round(x, 6), "y": round(y, 6), "name": name, "layer": layer_id, "group": group,
+    def pin(self, x, y, name, layer_id, group, text, source=None, place=None, who=None, on=None, extra=None):
+        """A place that is not a building (a bridge, grounds, a plaque): layer items refer to it as "p<index>".
+        extra: more fields for its card (visitorlayers.py)."""
+        self.pins.append({**(extra or {}), "x": round(x, 6), "y": round(y, 6), "name": name, "layer": layer_id, "group": group,
                           "text": text, **({"source": source} if source else {}), **({"place": place} if place else {}),
                           **({"who": who} if who else {}), **({"on": on} if on is not None else {})})
         return f"p{len(self.pins) - 1}"

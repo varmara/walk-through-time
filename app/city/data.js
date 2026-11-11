@@ -58,10 +58,15 @@ if (window.DecompressionStream) maplibregl.addProtocol('gzt', async (params, abo
 try { S.active = new Set(JSON.parse(store.get('layers:' + CITY_ID) || '[]')); } catch {}
 export const saveActive = () => store.set('layers:' + CITY_ID, JSON.stringify([...S.active]));
 export const isArea = key => S.groups.get(key)?.layer.kind === 'areas';
+export const kindOf = key => S.groups.get(key)?.layer.kind;
+// a ticked group marks buildings (the rest stay pale) when its layer has buildings in it
+export const marksBuildings = key => ['stories', 'people', 'rule'].includes(kindOf(key));
+// its places are pins
+export const hasPins = key => ['stories', 'people', 'rule', 'pins'].includes(kindOf(key));
 
 // ================= Place references =================
 // Layer items point at buildings (a number), pins ("p<index>": places that are not buildings, plaques on no
-// building) or areas ("a<index>": conservation and nature areas).
+// building), areas ("a<index>": conservation and nature areas…) or walking routes ("r<index>").
 export const parseRef = x => typeof x === 'number' ? x : /^\d+$/.test(x) ? +x : x;
 export const isB = r => typeof r === 'number';
 export const pinOf = r => S.data.pins.features[+r.slice(1)];
@@ -74,11 +79,22 @@ export function areaOf(r){
   const pts = ringsOf(f.geometry).flat(), xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
   return { properties: f.properties, bb: [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)] };
 }
+// a walking route: its details and bounds, from the index (drawn from the tiles), or the older file's GeoJSON
+export function routeOf(r){
+  const i = +r.slice(1), R = S.data.routes;
+  if (Array.isArray(R)) return R[i] && { properties: R[i], bb: R[i].bb };
+  const f = R && R.features[i];
+  if (!f) return null;
+  const pts = f.geometry.coordinates.flat(), xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+  return { properties: f.properties, bb: [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)] };
+}
+// a pin, an area or a route: { properties, … }
+export const refOf = r => r[0] === 'p' ? pinOf(r) : r[0] === 'r' ? routeOf(r) : areaOf(r);
 export function ringsOf(g){ return g.type === 'Polygon' ? [g.coordinates[0]] : g.type === 'MultiPolygon' ? g.coordinates.map(p => p[0]) : []; }
 export function refCentre(r){
   if (isB(r)) return centreOf(r);
   if (r[0] === 'p') return pinOf(r).geometry.coordinates;
-  const b = areaOf(r).bb;
+  const b = refOf(r).bb;
   return [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2];
 }               // marker key -> maplibregl.Marker
 export const centreOf = b => {

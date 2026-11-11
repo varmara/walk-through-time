@@ -1,7 +1,7 @@
 // Walk Through Time, city page: Places: one person or story with several buildings, as numbered pins and a strip of cards that swipe sideways.
 import { $, dateText, eraOf, esc } from './util.js';
 import { S } from './state.js';
-import { areaOf, fstate, isB, loadCard, parseRef, pinOf, refCentre, storyFor } from './data.js';
+import { fstate, isB, loadCard, parseRef, refCentre, refOf, storyFor } from './data.js';
 import { buildingColour } from './map.js';
 import { closeSheet } from './sheet.js';
 import { openRef, refName } from './cards.js';
@@ -20,7 +20,7 @@ export function showPlaces(name, bs){
   $('pName').textContent = name;
   $('pCards').innerHTML = bs.map((b, i) => {
     if (!isB(b)) {
-      const pp = (b[0] === 'p' ? pinOf(b) : areaOf(b)).properties;
+      const pp = refOf(b).properties;
       return `<article class="pcard" data-i="${i}"><div class="pnum">${i + 1}</div><h3>${esc(refName(b))}</h3>
         ${pp.text ? `<p>${esc(pp.text)}</p>` : ''}<button class="textbtn" data-open="${b}">Details</button></article>`;
     }

@@ -9,7 +9,7 @@ import './cards.js';
 import './places.js';
 import { $, CITY_ID, fetchData, fetchJSON, progress, setPeriods } from './util.js';
 import { S } from './state.js';
-import { areaOf, byOsm, fromIndex, loadCard, pinOf, saveActive, tiled } from './data.js';
+import { areaOf, byOsm, fromIndex, loadCard, pinOf, refOf, saveActive, tiled } from './data.js';
 import { drawMap } from './map.js';
 import { updateYear } from './timebar.js';
 import { applyLayers, drawLegend, renderLayers } from './panels.js';
@@ -72,7 +72,7 @@ export async function main(){
   } else if (bq != null && +bq < S.features.length) selectBuilding(+bq);
   if (focus) {
     const refs = focus.split(',').map(x => x[0] === 'b' ? +x.slice(1) : x)
-      .filter(r => typeof r === 'number' ? r < S.features.length : r[0] === 'p' ? S.data.pins && pinOf(r) : areaOf(r));
+      .filter(r => typeof r === 'number' ? r < S.features.length : r[0] === 'p' ? S.data.pins && pinOf(r) : refOf(r));
     if (refs.length > 1) showPlaces(q.get('name') || 'Selected places', refs);
     else if (refs.length) openRef(refs[0]);
   }

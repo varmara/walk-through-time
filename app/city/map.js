@@ -1,9 +1,9 @@
 // Walk Through Time, city page: The map: MapLibre layers for buildings (coloured by era), roads, water, parks, areas and pins.
-import { AREA_TYPES, CITY_ID, ERAS, FADE, mix, store, tok } from './util.js';
+import { AREA_TYPES, BASICS, CITY_ID, ERAS, FADE, PIN_LAYERS, mix, store, tok } from './util.js';
 import { S } from './state.js';
-import { isArea } from './data.js';
+import { marksBuildings } from './data.js';
 import { turnNeedle } from './sheet.js';
-import { selectBuilding, showArea, showPin } from './cards.js';
+import { selectBuilding, showArea, showBasic, showPin, showRoute } from './cards.js';
 import { drawPins } from './places.js';
 
 export function isDark(){
@@ -23,7 +23,7 @@ export function buildingColour(){
     ['boolean', ['feature-state', 'hl'], false], tok('--hl'), eraColour()];
   if (S.places) return ['case', ['boolean', ['feature-state', 'sel'], false], tok('--sel'),
     ['boolean', ['feature-state', 'hl'], false], tok('--hl'), tok('--ghost')];   // only this person's places stand out
-  const keys = [...S.active].filter(k => !isArea(k));
+  const keys = [...S.active].filter(marksBuildings);
   if (!keys.length) return base;
   const inLayer = ['any', ...keys.map(k => ['in', ',' + k + ',', ['coalesce', ['get', 'L'], '']])];
   // in a ticked layer: era colour when dated, a strong neutral when not (plain grey would vanish into the faded rest)
@@ -31,6 +31,8 @@ export function buildingColour(){
     ['boolean', ['feature-state', 'hl'], false], tok('--hl'),
     inLayer, ['case', ['has', 'y'], eraColour(), tok('--marked')], tok('--ghost')];
 }
+export const pinColour = () => ['match', ['get', 'layer'], ...PIN_LAYERS.flatMap(L => [L, tok('--p-' + L)]), tok('--marked')];
+export const basicColour = () => ['match', ['get', 't'], ...BASICS.flatMap(k => [k, tok('--b-' + k)]), tok('--muted')];
 export const natureColour = () => ['match', ['get', 't'], ...AREA_TYPES.flatMap(t => [t, tok('--n-' + t)]), tok('--n-reserve')];
 
 export function drawMap(){
@@ -73,6 +75,12 @@ export function drawMap(){
       S.map.addLayer({ id:'nature-line', type:'line', ...areaSrc, layout:{ visibility:'none' },
         paint:{ 'line-color':natureColour(), 'line-width':2, 'line-dasharray':[2, 1] } });
 
+      // walking routes: from the tiles, or the older data file's GeoJSON
+      const routeSrc = T && Array.isArray(S.data.routes) ? src('routes') : { source:'routes' };
+      if (!(T && Array.isArray(S.data.routes))) S.map.addSource('routes', { type:'geojson', data: S.data.routes || { type:'FeatureCollection', features:[] } });
+      S.map.addLayer({ id:'routes', type:'line', ...routeSrc, layout:{ visibility:'none', 'line-cap':'round', 'line-join':'round' },
+        paint:{ 'line-color':tok('--route'), 'line-width':['interpolate', ['linear'], ['zoom'], 11, 2, 17, 5], 'line-dasharray':[1.6, 1.2] } });
+
       if (T) S.map.addSource('b', { type:'vector', tiles:[tileUrl], minzoom:T.minzoom, maxzoom:T.maxzoom });
       else S.map.addSource('b', { type:'geojson', data:{ type:'FeatureCollection', features: S.features } });
       S.map.addLayer({ id:'b', type:'fill-extrusion', source:'b', ...(T ? { 'source-layer':'b' } : {}), paint:{
@@ -82,8 +90,14 @@ export function drawMap(){
 
       S.map.addSource('storypins', { type:'geojson', data: S.data.pins || { type:'FeatureCollection', features:[] } });
       S.map.addLayer({ id:'storypins', type:'circle', source:'storypins', layout:{ visibility:'none' }, paint:{
-        'circle-radius':['interpolate', ['linear'], ['zoom'], 13, 4, 18, 9], 'circle-color':tok('--marked'),
+        'circle-radius':['interpolate', ['linear'], ['zoom'], 13, 4, 18, 9], 'circle-color':pinColour(),
         'circle-stroke-color':tok('--on-strong'), 'circle-stroke-width':2, 'circle-pitch-alignment':'map' } });
+      // toilets, drinking water and benches: close up only (the tiles have them from zoom 14)
+      const basicSrc = T ? src('basics') : { source:'basics' };
+      if (!T) S.map.addSource('basics', { type:'geojson', data: S.data.basics || { type:'FeatureCollection', features:[] } });
+      S.map.addLayer({ id:'basics', type:'circle', ...basicSrc, minzoom:15, layout:{ visibility:'none' }, paint:{
+        'circle-radius':['interpolate', ['linear'], ['zoom'], 15, 3.5, 19, 8], 'circle-color':basicColour(),
+        'circle-stroke-color':tok('--on-strong'), 'circle-stroke-width':1.5, 'circle-pitch-alignment':'map' } });
       S.map.addSource('places', { type:'geojson', data:{ type:'FeatureCollection', features:[] },
         cluster:true, clusterRadius:44, clusterMaxZoom:18 });
       // invisible layer: keeps the clustered source loaded so the HTML pins can read it
@@ -95,6 +109,12 @@ export function drawMap(){
         const pinHit = S.map.getLayoutProperty('storypins', 'visibility') === 'visible'
           && S.map.queryRenderedFeatures([[e.point.x - 8, e.point.y - 8], [e.point.x + 8, e.point.y + 8]], { layers:['storypins'] })[0];
         if (pinHit) return showPin(pinHit.properties);
+        const near = (id, r) => S.map.getLayoutProperty(id, 'visibility') === 'visible'
+          && S.map.queryRenderedFeatures([[e.point.x - r, e.point.y - r], [e.point.x + r, e.point.y + r]], { layers:[id] })[0];
+        const basic = near('basics', 8);
+        if (basic) return showBasic(basic.properties);
+        const route = near('routes', 6);
+        if (route) return showRoute(route.properties.i);
         const hit = S.map.queryRenderedFeatures(e.point, { layers:['b'] })[0];
         if (hit) return selectBuilding(hit.id, [e.lngLat.lng, e.lngLat.lat]);
         const area = S.map.getLayer('nature-fill') && S.map.getLayoutProperty('nature-fill', 'visibility') === 'visible'
