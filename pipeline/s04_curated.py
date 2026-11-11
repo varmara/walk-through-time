@@ -35,27 +35,29 @@ from . import stories_md
 from .common import marker, building_at, http, http_text, load, log, parse_year, save
 
 
+def main_outline(buildings, bs):
+    """Of the outlines one list entry covers (the station's building, its roof, its porte-cochère), the one a story
+    belongs on: a building rather than a roof or canopy, then the largest."""
+    def area(b):
+        r = b["rings"][0]
+        return abs(sum(x0 * y1 - x1 * y0 for (x0, y0), (x1, y1) in zip(r, r[1:])))
+    return min(bs, key=lambda i: (buildings[i]["tags"].get("building") in ("roof", "canopy", "construction"),
+                                  -area(buildings[i]), i))
+
+
 def stories(city_id):
     """The city's stories and corrections, from Markdown files in stories/<city>/ (see pipeline/stories_md.py)."""
     folder = Path(f"stories/{city_id}")
     if not folder.is_dir():
         return []
     mod = stories_md.load(folder)
-    _wiki[city_id] = mod["WIKIPEDIA"]
-    _plaques[city_id] = mod["PLAQUES"]
-    _collections[city_id] = mod["COLLECTIONS"]
-    _names[city_id] = mod["NAMES"]
-    _tag_fixes[city_id] = mod["TAG_FIXES"]
-    _titles[city_id] = mod["TITLES"]
+    _tables[city_id] = mod
     return mod["CURATED"]
 
 
-_titles = {}        # per city: {OpenStreetMap outline: title chosen by hand}
-_tag_fixes = {}     # per city: {OpenStreetMap outline: {tag: corrected value, or None to drop it}}
-_names = {}         # per city: {OpenStreetMap outline: name chosen by hand}
-_collections = {}   # per city: picture collections linked, not copied (their pictures are not openly licensed)
-_plaques = {}   # per city: corrections to plaques, by the start of their inscription or their subject
-_wiki = {}      # per city: {person's name as a plaque or Wikidata gives it: their English Wikipedia article}
+# per city, the stories folder's tables (stories_md.load): hand-chosen names and titles, tag fixes, plaque
+# corrections, people's Wikipedia articles, picture collections linked but not copied, and their credits
+_tables = {}
 
 
 _cache = {}
@@ -163,7 +165,7 @@ def main(city_id):
     layers = stories(city_id)
     buildings = load(city_id, "buildings")
     # corrections to OpenStreetMap's tags, by outline, from the stories file (TAG_FIXES); later steps read these
-    fixes, fixed = _tag_fixes.get(city_id, {}), 0
+    fixes, fixed = _tables.get(city_id, {}).get("TAG_FIXES", {}), 0
     for b in buildings:
         for k, v in fixes.get(b["osm"], {}).items():
             fixed += 1
@@ -178,7 +180,11 @@ def main(city_id):
     places = load(city_id, "places")
     by_osm = {b["osm"]: i for i, b in enumerate(buildings)}
     by_qid = {b["tags"]["wikidata"]: i for i, b in enumerate(buildings) if b["tags"].get("wikidata")}
-    by_nhle = {str(e["ListEntry"]): int(i) for i, es in listing.items() for e in es}
+    many = {}
+    for i, es in listing.items():
+        for e in es:
+            many.setdefault(str(e["ListEntry"]), []).append(int(i))
+    by_nhle = {n: main_outline(buildings, bs) for n, bs in many.items()}    # one list entry, several outlines
     listed_xy = {str(p["ListEntry"]): (p["x"], p["y"]) for p in load(city_id, "listed")}
     names = {}
     for i, b in enumerate(buildings):
@@ -293,7 +299,8 @@ def main(city_id):
             used = {e["group"] for e in entries if e["layer"] == L["id"]}
             m["groups"] = [["people-" + k, t] for k, t, _ in PEOPLE_GROUPS if "people-" + k in used]
         meta.append(m)
+    T = _tables.get(city_id, {})
     save(city_id, "curated", {"layers": meta, "entries": entries, "dropped": dropped,
-                              "wikipedia": _wiki.get(city_id, {}), "plaques": _plaques.get(city_id, {}),
-                              "collections": _collections.get(city_id, []), "names": _names.get(city_id, {}),
-                              "titles": _titles.get(city_id, {})})
+                              **{k.lower(): T.get(k) or default for k, default in (
+                                  ("WIKIPEDIA", {}), ("PLAQUES", {}), ("COLLECTIONS", []), ("NAMES", {}),
+                                  ("TITLES", {}), ("CREDITS", {}))}})
