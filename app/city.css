@@ -1,4 +1,4 @@
-/* Layout: full-bleed 3D map. Top left: title and count. Top right: round floating buttons (layers with a
+/* Layout: full-bleed 3D map. Top left: the city's name. Top right: round floating buttons (layers with a
    count badge, map options, home). Bottom: a slim time bar (year, play, slider). One sheet slides up over the
    time bar for layers, map options or the tapped building or area. On wide screens the sheet is a side panel. */
 /* colours, fonts and shadows: app/theme.css */
@@ -13,13 +13,14 @@ button{font:inherit;color:inherit}
 /* ---------- top: title and floating buttons ---------- */
 .top{position:fixed;top:0;left:0;right:0;z-index:5;pointer-events:none;
   padding:calc(env(safe-area-inset-top,0px) + 10px) 12px 0;display:flex;gap:8px;align-items:flex-start}
-.brand{pointer-events:auto;background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-1);padding:7px 11px;min-width:0;flex:1 1 auto;max-width:420px}
-.brand b{display:block;font:600 17px/1.25 var(--serif);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.brand span{font:400 12.5px/1.3 var(--sans);color:var(--muted);font-variant-numeric:tabular-nums}
-.brand .home{color:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
-.brand .home img{width:20px;height:20px;flex:0 0 auto}
+/* the city's name, small: the count of buildings is under the year */
+.brand{pointer-events:auto;display:inline-flex;align-items:center;gap:7px;min-width:0;flex:0 1 auto;
+  background:var(--paper);border:1px solid var(--line);border-radius:19px;box-shadow:var(--shadow-1);
+  padding:6px 13px 6px 9px;color:inherit;text-decoration:none}
+.brand img{width:20px;height:20px;flex:0 0 auto}
+.brand b{font:600 17px/1.4 var(--serif);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* the map's buttons, one column: layers, map options, north, the graph, home */
-.fabs{pointer-events:auto;display:grid;flex:0 0 auto;background:var(--paper);border:1px solid var(--line);border-radius:23px;box-shadow:var(--shadow-1)}
+.fabs{pointer-events:auto;display:grid;flex:0 0 auto;margin-left:auto;background:var(--paper);border:1px solid var(--line);border-radius:23px;box-shadow:var(--shadow-1)}
 .fab{position:relative;width:46px;height:46px;border:0;border-radius:0;background:transparent;cursor:pointer;display:grid;place-items:center}
 .fab:first-child{border-radius:23px 23px 0 0}
 .fab:last-child{border-radius:0 0 23px 23px}
@@ -37,6 +38,8 @@ button{font:inherit;color:inherit}
 /* the year: the one big thing on the page */
 .year{font:italic 500 34px/1 var(--serif);font-variant-numeric:lining-nums tabular-nums}
 .yearlbl{font:400 13px var(--sans);color:var(--muted)}
+.yearline{display:flex;align-items:baseline;gap:10px;min-width:0}
+.count{font:400 13px var(--sans);color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
 .play{margin-left:auto;width:40px;height:40px;border-radius:50%;border:0;background:var(--ink);color:var(--paper);font-size:15px;cursor:pointer;flex:0 0 auto}
 input[type=range]{width:100%;accent-color:var(--ink);height:28px;margin:0}
 .ticks{position:relative;height:1.3em;font:400 11px var(--sans);font-variant-numeric:tabular-nums;color:var(--muted);margin-top:-4px}

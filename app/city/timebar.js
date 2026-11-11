@@ -21,10 +21,12 @@ export function updateYear(){
   if (S.showUnknown) f.push(['!', ['has', 'y']]);
   S.map.setFilter('b', f);
   const shown = standingBy(Y);
-  // "49,097 buildings, 2% dated and 34% estimated"; while the slider is back in time, how many stand then
+  // under the year: "49,097 buildings standing"; back in time, "8,214 of 49,097 standing"
+  $('count').textContent = shown === S.stats.total ? `${fmt(shown)} buildings standing` : `${fmt(shown)} of ${fmt(S.stats.total)} standing`;
+  // and in the Map sheet, how many have a date: "2% have a date and 34% an estimate for their area"
   const pct = n => Math.round(n / S.stats.total * 100) + '%';
-  $('count').textContent = (shown === S.stats.total ? `${fmt(shown)} buildings` : `${fmt(shown)} of ${fmt(S.stats.total)} standing`)
-    + `, ${pct(S.stats.known)} dated` + (S.stats.estimated ? ` and ${pct(S.stats.estimated)} estimated` : '');
+  $('dated').textContent = `Of ${fmt(S.stats.total)} buildings, ${pct(S.stats.known)} have a date`
+    + (S.stats.estimated ? ` and ${pct(S.stats.estimated)} an estimate for their area.` : '.');
 }
 yearIn.addEventListener('input', updateYear);
 
