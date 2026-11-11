@@ -21,8 +21,10 @@ export function updateYear(){
   if (S.showUnknown) f.push(['!', ['has', 'y']]);
   S.map.setFilter('b', f);
   const shown = standingBy(Y);
-  $('count').textContent = `${fmt(shown)} of ${fmt(S.stats.total)} buildings · year known for ${Math.round(S.stats.known / S.stats.total * 100)}%`
-    + (S.stats.estimated ? `, estimated for ${Math.round(S.stats.estimated / S.stats.total * 100)}%` : '');
+  // "49,097 buildings, 2% dated and 34% estimated"; while the slider is back in time, how many stand then
+  const pct = n => Math.round(n / S.stats.total * 100) + '%';
+  $('count').textContent = (shown === S.stats.total ? `${fmt(shown)} buildings` : `${fmt(shown)} of ${fmt(S.stats.total)} standing`)
+    + `, ${pct(S.stats.known)} dated` + (S.stats.estimated ? ` and ${pct(S.stats.estimated)} estimated` : '');
 }
 yearIn.addEventListener('input', updateYear);
 

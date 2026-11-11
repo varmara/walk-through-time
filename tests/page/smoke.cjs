@@ -30,7 +30,7 @@ const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (
   };
 
   await open('');
-  check(/of [\d,]+ buildings/.test(await text('#count')), 'the map loads and counts the buildings');
+  check(/[\d,]+ buildings/.test(await text('#count')), 'the map loads and counts the buildings');
   const before = await text('#count');
   await page.evaluate(() => { const y = document.getElementById('year'); y.value = 250; y.dispatchEvent(new Event('input')); });
   check((await text('#count')) !== before && /^\d+$/.test(await text('#yearOut')), 'the year slider changes the count');

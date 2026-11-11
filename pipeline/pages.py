@@ -48,7 +48,7 @@ def main(out=ROOT):
         (out / c["id"] / "index.html").write_text(fill(city_t, values))
         (out / c["id"] / "graph.html").write_text(fill(graph_t, values))
         rows.append(f'    <a class="city" href="{c["id"]}/"><div><b>{e(c["name"])}</b><span>{e(page.get("tagline") or "3D")}</span></div>'
-                    f'<span class="go">→</span></a>')
+                    f'</a>')
     (out / "index.html").write_text(fill(index_t, {"cities": "\n".join(rows), "site": site}))
     print(f"pages: the landing page and the pages of {len(rows)} {'city' if len(rows) == 1 else 'cities'} in {out}", file=sys.stderr)
 

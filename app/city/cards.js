@@ -10,7 +10,7 @@ import { applyLayers, renderLayers } from './panels.js';
 import { showPlaces } from './places.js';
 
 const J = v => typeof v === 'string' ? JSON.parse(v) : v;      // properties from vector tiles arrive as strings
-const a = (href, text, arrow = false) => `<a href="${esc(href)}" target="_blank" rel="noopener">${esc(text)}${arrow ? ' →' : ''}</a>`;
+const a = (href, text) => `<a href="${esc(href)}" target="_blank" rel="noopener">${esc(text)}</a>`;
 const link = s => a(s.url, s.title);
 const filePage = f => 'https://commons.wikimedia.org/wiki/File:' + encodeURIComponent(f.replace(/ /g, '_'));
 const credit = f => [f.author, f.licence].filter(Boolean).map(esc).join(' · ');
@@ -44,7 +44,7 @@ function storyHtml(s){
     + (s.place ? ` · ${esc(s.place.kind || 'Wikipedia')}: ${link(s.place)}` : '') + '</p>' : '';
   return `<div class="story">${s.label ? `<div class="seclbl">${esc(s.label)}</div>` : ''}
     ${s.text ? `<p>${esc(s.text)}</p>` : ''}${src}${s.note ? `<p class="src">${esc(s.note)}</p>` : ''}${aboutHtml(s.who, s.source)}
-    ${s.pin ? `<p class="go"><a href="#" data-ref="${esc(s.pin)}">See the plaque on the map →</a></p>` : ''}</div>`;
+    ${s.pin ? `<p class="go"><a href="#" data-ref="${esc(s.pin)}">See the plaque on the map</a></p>` : ''}</div>`;
 }
 // old photographs, postcards and prints, oldest first, from Commons; each credited and linked to its page
 function archiveHtml(arch){
@@ -60,7 +60,7 @@ function archiveHtml(arch){
 function collHtml(cs){
   const host = u => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return ''; } };
   const credits = [...new Set(cs.map(c => (S.data.credits || {})[host(c.url)]).filter(Boolean))];
-  return '<h3>More old pictures</h3><p>' + cs.map(c => a(c.url, c.title, true)).join(' ') + '</p>'
+  return '<h3>More old pictures</h3><p>' + cs.map(c => a(c.url, c.title)).join(' ') + '</p>'
     + (credits.length ? credits.map(t => `<p class="src">${esc(t)}</p>`).join('')
       : '<p class="src">Linked, not shown, as the pictures are not openly licensed.</p>');
 }
@@ -118,11 +118,11 @@ function buildingCard(p, id){
     : sumSrc?.title ? ' (' + esc(sumSrc.title) + ')' : ''}</p>`;
   const stories = (p.stories || []).map(storyOf).map(s => ({ ...s, label: layerTitle(s.layer) }));
   const after = (S.entitiesAt[id] || []).map(m =>
-    `<button class="textbtn allplaces" data-name="${esc(m.name)}" data-b="${m.bs.join(',')}">All ${m.bs.length} places: ${esc(m.name)} →</button>`).join('');
+    `<button class="textbtn allplaces" data-name="${esc(m.name)}" data-b="${m.bs.join(',')}">All ${m.bs.length} places: ${esc(m.name)}</button>`).join('');
 
   const links = [];
-  if (p.listUrl || p.listEntry) links.push(a(p.listUrl || 'https://historicengland.org.uk/listing/the-list/list-entry/' + p.listEntry, 'Historic England list entry', true));
-  if (p.article) links.push(a(p.article, 'Wikipedia', true));
+  if (p.listUrl || p.listEntry) links.push(a(p.listUrl || 'https://historicengland.org.uk/listing/the-list/list-entry/' + p.listEntry, 'Historic England list entry'));
+  if (p.article) links.push(a(p.article, 'Wikipedia'));
   if (p.qid) links.push(a('https://www.wikidata.org/wiki/' + p.qid, 'Wikidata'));
   links.push(a('https://www.openstreetmap.org/' + p.osm, 'OpenStreetMap'));
 
@@ -148,9 +148,9 @@ function areaCard(p){
   rows.push(['Source', esc(p.source)]);
   const t = AREA_TEXT[p.t];
   const stories = t ? [{ ...t, note: t.note || p.credit }] : [];
-  const links = [p.source === 'Natural England' ? a('https://designatedsites.naturalengland.org.uk/', 'Natural England designated sites', true)
-    : p.source === 'Historic England' ? a('https://historicengland.org.uk/listing/what-is-designation/local/conservation-areas/', 'About conservation areas', true)
-    : p.url ? a(p.url, `${p.source}: the map data`, true)
+  const links = [p.source === 'Natural England' ? a('https://designatedsites.naturalengland.org.uk/', 'Natural England designated sites')
+    : p.source === 'Historic England' ? a('https://historicengland.org.uk/listing/what-is-designation/local/conservation-areas/', 'About conservation areas')
+    : p.url ? a(p.url, `${p.source}: the map data`)
     : a('https://www.openstreetmap.org/copyright', 'OpenStreetMap')];
   return { title: p.name, rows, stories, links };
 }
@@ -179,7 +179,7 @@ export function plaqueOn(b){
     box.innerHTML = `<div class="seclbl">On this building</div>
       <p><b>${esc(q.full || q.name || placeName(q))}</b>${when ? ` · ${esc(when)}` : ''}${q.grade ? ` · Grade ${esc(q.grade)} listed` : ''}</p>
       ${q.sum ? `<p>${esc(q.sum)}</p>` : ''}
-      <p class="go"><a href="#">Open the building →</a></p>`;
+      <p class="go"><a href="#">Open the building</a></p>`;
     box.querySelector('a').onclick = e => { e.preventDefault(); unlight(); selectBuilding(b); };
   };
   draw();

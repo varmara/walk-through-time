@@ -67,7 +67,7 @@ export function infoHtml(L, g, withIntro = true){
   }).join('')}</div>`);
   if (L.kind === 'stories') parts.push('<p class="src">Each entry is checked against its Wikipedia article.</p>');
   if (withIntro && (L.kind === 'stories' || L.kind === 'people'))
-    parts.push(`<p class="src"><a href="../data/share/${CITY_ID}/layer-${encodeURIComponent(L.id)}.html">Read “${esc(L.title)}” as a page →</a></p>`);
+    parts.push(`<p class="src"><a href="../data/share/${CITY_ID}/layer-${encodeURIComponent(L.id)}.html">Read “${esc(L.title)}” as a page</a></p>`);
   else if (L.source) parts.push(`<p class="src">Source: <a href="${esc(L.source.url)}" target="_blank" rel="noopener">${esc(L.source.title)}</a></p>`);
   return parts.join('');
 }

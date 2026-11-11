@@ -19,15 +19,15 @@ export function eraColour(){
     ['match', ['coalesce', ['get', 'f'], 'exact'], ...['approx', 'century', 'area'].flatMap(f => [f, step(FADE[f])]), step(0)]];
 }
 export function buildingColour(){
-  const base = ['case', ['boolean', ['feature-state', 'sel'], false], tok('--accent'),
+  const base = ['case', ['boolean', ['feature-state', 'sel'], false], tok('--sel'),
     ['boolean', ['feature-state', 'hl'], false], tok('--hl'), eraColour()];
-  if (S.places) return ['case', ['boolean', ['feature-state', 'sel'], false], tok('--accent'),
+  if (S.places) return ['case', ['boolean', ['feature-state', 'sel'], false], tok('--sel'),
     ['boolean', ['feature-state', 'hl'], false], tok('--hl'), tok('--ghost')];   // only this person's places stand out
   const keys = [...S.active].filter(k => !isArea(k));
   if (!keys.length) return base;
   const inLayer = ['any', ...keys.map(k => ['in', ',' + k + ',', ['coalesce', ['get', 'L'], '']])];
   // in a ticked layer: era colour when dated, a strong neutral when not (plain grey would vanish into the faded rest)
-  return ['case', ['boolean', ['feature-state', 'sel'], false], tok('--accent'),
+  return ['case', ['boolean', ['feature-state', 'sel'], false], tok('--sel'),
     ['boolean', ['feature-state', 'hl'], false], tok('--hl'),
     inLayer, ['case', ['has', 'y'], eraColour(), tok('--marked')], tok('--ghost')];
 }

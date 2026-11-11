@@ -22,7 +22,7 @@ export function showPlaces(name, bs){
     if (!isB(b)) {
       const pp = (b[0] === 'p' ? pinOf(b) : areaOf(b)).properties;
       return `<article class="pcard" data-i="${i}"><div class="pnum">${i + 1}</div><h3>${esc(refName(b))}</h3>
-        ${pp.text ? `<p>${esc(pp.text)}</p>` : ''}<button class="textbtn" data-open="${b}">Details →</button></article>`;
+        ${pp.text ? `<p>${esc(pp.text)}</p>` : ''}<button class="textbtn" data-open="${b}">Details</button></article>`;
     }
     const p = S.features[b].properties, st = storyFor(b, name), era = p.y != null ? eraOf(p.y) : null;
     return `<article class="pcard" data-i="${i}">
@@ -30,7 +30,7 @@ export function showPlaces(name, bs){
       <h3>${esc(refName(b))}</h3>
       ${p.y != null ? `<div class="pmeta">${esc(dateText(p.y, p.f, p.per, p.dt))}<span class="pill" style="border-color:${era[3]}">${esc(era[2])}</span></div>` : ''}
       ${st ? `<p>${esc(st.text)}</p>` : ''}
-      <button class="textbtn" data-open="${b}">Details →</button></article>`;
+      <button class="textbtn" data-open="${b}">Details</button></article>`;
   }).join('');
   $('pCards').querySelectorAll('[data-open]').forEach(btn => btn.onclick = () => openRef(parseRef(btn.dataset.open)));
   $('placesbar').hidden = false; $('timebar').hidden = true;

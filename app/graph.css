@@ -48,18 +48,18 @@ a{color:var(--accent)}
   padding:12px 16px calc(env(safe-area-inset-bottom,0px) + 14px)}
 @media (min-width:760px){ .sheet{left:auto;top:12px;right:12px;bottom:12px;width:380px;max-height:none;border-radius:16px;border:1px solid var(--line)} }
 .shead{display:flex;align-items:flex-start;gap:10px}
-.shead h2{margin:0;font-size:20px;line-height:1.2;flex:1}
-.stype{font:12px var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+.shead h2{margin:0;font:600 22px/1.15 var(--serif);flex:1}
+.stype{font:500 13px var(--sans);color:var(--muted);margin-top:2px}
 .close{flex:none;width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--bg);cursor:pointer}
 .go{margin:10px 0 4px;padding:9px 12px;border-radius:10px;border:0;background:var(--accent);color:var(--on-strong);font-weight:600;cursor:pointer;width:100%}
 .links{overflow-y:auto;margin-top:6px;-webkit-overflow-scrolling:touch}
-.links h3{font:12px var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:10px 0 4px}
+.links h3{font:500 13px var(--sans);color:var(--muted);margin:10px 0 4px}
 .link{border-top:1px solid var(--line);padding:8px 0}
 .link button{background:none;border:0;padding:0;font-weight:600;cursor:pointer;text-align:left;display:flex;gap:6px;align-items:center}
 .link button i{width:9px;height:9px;border-radius:50%;flex:none}
-.link p{margin:3px 0 0;font-size:14px}
+.link p{margin:3px 0 0;font:15px/1.45 var(--serif)}
 .link .src{font-size:12px;color:var(--muted)}
 .loading{position:fixed;inset:0;display:grid;place-items:center;color:var(--muted)}
-.about{margin:8px 0 4px;font-size:14px}
+.about{margin:8px 0 4px;font:15px/1.45 var(--serif)}
 .about p{margin:0 0 4px}
 .about .src{font-size:12px;color:var(--muted)}
