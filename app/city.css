@@ -36,10 +36,8 @@ button{font:inherit;color:inherit}
   box-shadow:var(--shadow-2);display:grid;gap:2px}
 .yearrow{display:flex;align-items:center;gap:10px}
 /* the year: the one big thing on the page */
-.year{font:italic 500 34px/1 var(--serif);font-variant-numeric:lining-nums tabular-nums}
+.year{display:block;font:italic 500 34px/1 var(--serif);font-variant-numeric:lining-nums tabular-nums}
 .yearlbl{font:400 13px var(--sans);color:var(--muted)}
-.yearline{display:flex;align-items:baseline;gap:10px;min-width:0}
-.count{font:400 13px var(--sans);color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
 .play{margin-left:auto;width:40px;height:40px;border-radius:50%;border:0;background:var(--ink);color:var(--paper);font-size:15px;cursor:pointer;flex:0 0 auto}
 input[type=range]{width:100%;accent-color:var(--ink);height:28px;margin:0}
 .ticks{position:relative;height:1.3em;font:400 11px var(--sans);font-variant-numeric:tabular-nums;color:var(--muted);margin-top:-4px}

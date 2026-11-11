@@ -30,10 +30,9 @@ const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (
   };
 
   await open('');
-  check(/[\d,]+ buildings/.test(await text('#count')), 'the map loads and counts the buildings');
-  const before = await text('#count');
+  check(/Of [\d,]+ buildings/.test(await page.evaluate(() => document.getElementById('dated').textContent)), 'the map loads and counts the buildings');
   await page.evaluate(() => { const y = document.getElementById('year'); y.value = 250; y.dispatchEvent(new Event('input')); });
-  check((await text('#count')) !== before && /^\d+$/.test(await text('#yearOut')), 'the year slider changes the count');
+  check(/^\d+$/.test(await text('#yearOut')) && (await text('#yearOut')) !== '2026', 'the year slider changes the year');
 
   await page.click('#bLayers');
   const boxes = await page.$$('input[data-g]');

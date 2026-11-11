@@ -1,7 +1,6 @@
 // Walk Through Time, city page: The year slider and Play.
 import { $, MAX_YEAR, fmt } from './util.js';
 import { S } from './state.js';
-import { standingBy } from './data.js';
 
 // ================= Year slider =================
 // Piecewise scale: little was built before 1700, so the early centuries get a short stretch of the track.
@@ -20,10 +19,7 @@ export function updateYear(){
   const f = ['any', ['all', ['has', 'y'], ['<=', ['get', 'y'], Y]]];
   if (S.showUnknown) f.push(['!', ['has', 'y']]);
   S.map.setFilter('b', f);
-  const shown = standingBy(Y);
-  // under the year: "49,097 buildings standing"; back in time, "8,214 of 49,097 standing"
-  $('count').textContent = shown === S.stats.total ? `${fmt(shown)} buildings standing` : `${fmt(shown)} of ${fmt(S.stats.total)} standing`;
-  // and in the Map sheet, how many have a date: "2% have a date and 34% an estimate for their area"
+  // in the Map sheet, how many have a date: "2% have a date and 34% an estimate for their area"
   const pct = n => Math.round(n / S.stats.total * 100) + '%';
   $('dated').textContent = `Of ${fmt(S.stats.total)} buildings, ${pct(S.stats.known)} have a date`
     + (S.stats.estimated ? ` and ${pct(S.stats.estimated)} an estimate for their area.` : '.');

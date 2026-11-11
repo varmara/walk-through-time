@@ -148,7 +148,8 @@ async function morePhotos(cat, skip, id){
   if (shots.length) fill('cPhotos', `<h3>More photos</h3><div class="strip">${shots.join('')}</div>`
     + `<p class="src">From Wikimedia Commons: ${a('https://commons.wikimedia.org/wiki/Category:' + encodeURIComponent(cat.replace(/ /g, '_')), 'Category:' + cat)}</p>`);
 }
-function fill(id, html){ $(id).hidden = !html; $(id).innerHTML = html || ''; }
+// a page cached from before a section was added has no place for it: leave it out rather than stop the card
+function fill(id, html){ const el = $(id); if (!el) return; el.hidden = !html; el.innerHTML = html || ''; }
 
 const kinded = s => s && { ...s, kind: s.kind || 'Wikipedia' };
 function storyHtml(s, N){
