@@ -1,7 +1,8 @@
 # Credits for linked collections
 
-What the page says under "More old pictures" for each website the collections (collections.md) link to.
+The name the page gives each website the collections (collections.md) link to, in the card's "More photos from …"
+line. The pictures are linked, not shown, as they are not openly licensed.
 
 | Site | Credit |
 |---|---|
-| picturenottingham.co.uk | Picture Nottingham: photographs from Nottingham Local Studies Library, © picturenottingham.co.uk. Linked, not shown, as they are not openly licensed. |
+| picturenottingham.co.uk | Picture Nottingham |

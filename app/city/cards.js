@@ -166,14 +166,17 @@ function archiveHtml(arch){
       <span><b>${esc(f.year)}</b>${credit(f) ? ' · ' + credit(f) : ''}</span></a>`;
   }).join('') + '</div>';
 }
-// links to collections of old pictures that are not openly licensed (so not shown here), with each site's credit
-// once (stories/<city>/credits.md)
+// links to collections of old pictures that are not openly licensed (so not shown here): "More photos from
+// <site>", the site named as stories/<city>/credits.md names it; several collections on one site are listed after it
 function collHtml(cs){
   const host = u => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return ''; } };
-  const credits = [...new Set(cs.map(c => (S.data.credits || {})[host(c.url)]).filter(Boolean))];
-  return '<h3>More old pictures</h3><p>' + cs.map(c => a(c.url, c.title)).join(' ') + '</p>'
-    + (credits.length ? credits.map(t => `<p class="src">${esc(t)}</p>`).join('')
-      : '<p class="src">Linked, not shown, as the pictures are not openly licensed.</p>');
+  const sites = new Map();
+  for (const c of cs){ const h = host(c.url); if (!sites.has(h)) sites.set(h, []); sites.get(h).push(c); }
+  return [...sites].map(([h, list]) => {
+    const name = (S.data.credits || {})[h] || h;
+    return '<p>More photos from ' + (list.length === 1 ? a(list[0].url, name)
+      : esc(name) + ': ' + list.map(c => a(c.url, c.title)).join(', ')) + '</p>';
+  }).join('');
 }
 // who a person in the People layer was: the opening sentences of their Wikipedia article
 function aboutHtml(who, source, N){

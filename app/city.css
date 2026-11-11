@@ -179,9 +179,7 @@ a.fab{display:grid;place-items:center;text-decoration:none;color:inherit}
 .about{margin:8px 0 2px;padding:8px 10px;border-left:3px solid var(--line);background:color-mix(in srgb,var(--bg) 55%,var(--paper));border-radius:0 8px 8px 0;font:15px/1.45 var(--serif)}
 .about b{font-weight:600}
 .about .src{margin-top:4px}
-.coll h3{margin:12px 0 4px;font:500 13px var(--sans);color:var(--muted)}
-.coll p{margin:4px 0}
-.coll a{margin-right:12px;white-space:nowrap}
+.coll p{margin:12px 0 4px}
 /* a plaque's card: the building it is on */
 .onbuilding{margin-top:10px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;font-size:14px}
 .onbuilding p{margin:4px 0}
