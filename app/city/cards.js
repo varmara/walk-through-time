@@ -194,10 +194,13 @@ const dayText = d => { const m = /^(\d{4})-(\d{2})(?:-(\d{2}))?$/.exec(d || '');
 const WHEELCHAIR = { yes: 'Step-free access', limited: 'Limited step-free access', no: 'No step-free access' };
 const fee = v => v === 'no' ? 'Free' : v === 'yes' ? 'There is a charge' : v;
 const wikiUrl = wp => { const m = /^(\w+):(.+)$/.exec(wp || ''); return m && `https://${m[1]}.wikipedia.org/wiki/${encodeURIComponent(m[2].replace(/ /g, '_'))}`; };
-// links every visitor place can have: its website, Wikipedia, Wikidata, OpenStreetMap
+// links every visitor place can have: its website, Art UK, Wikipedia, Wikidata, OpenStreetMap
 function placeLinks(p, withWeb = true){
   const links = [];
   if (withWeb && p.web) links.push(a(p.web, host(p.web)));
+  if (p.artuk) links.push(a('https://artuk.org/discover/artworks/' + p.artuk, 'Art UK'));
+  else if (p.layer === 'art' && p.name && p.name.toLowerCase() !== (p.kind || '').toLowerCase())   // Art UK records public sculpture
+    links.push(a('https://artuk.org/discover/artworks/search/keyword:' + encodeURIComponent(p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')), 'Find on Art UK'));
   if (wikiUrl(p.wp)) links.push(a(wikiUrl(p.wp), 'Wikipedia'));
   if (p.wd) links.push(a('https://www.wikidata.org/wiki/' + p.wd, 'Wikidata'));
   if (p.osm) links.push(a('https://www.openstreetmap.org/' + p.osm, 'OpenStreetMap'));
