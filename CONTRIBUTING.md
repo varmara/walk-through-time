@@ -35,6 +35,7 @@ story as plain text. The settings:
 | `names` | `no` when the entry's name is not the building's name (an event: "The castle burned, 1831") |
 | `check` | words the article must contain, separated by `\|` |
 | `quote` | for a Historic England source: a passage copied from the list entry (their site blocks automated reading), one per line |
+| `architect` | who designed the building, when Wikidata does not say: their Wikipedia article (`en:Thomas Rickman`), or the name as the story writes it and the article (`Vincent Harris = en:E. Vincent Harris`), separated by `\|`; fills the card's Architect row and links their names |
 | `note` | for editors only: why, where from; not shown on the map |
 
 A layer file can say `kind: people` (pairs of a person and a place) or `kind: facts` ("Did you know" facts, each
@@ -80,7 +81,8 @@ Tables in the same folder, each with a Note column saying why:
 | `wikipedia.md` | the Wikipedia article for a plaque's person, when the plaque's name is not the article's |
 | `plaques.md` | a label, group or type for a plaque, by the start of its inscription or its subject |
 | `collections.md` | collections of old pictures that are linked, not copied (not openly licensed) |
-| `credits.md` | the credit line shown under each linked collection's website |
+| `credits.md` | the name each linked collection's website goes by, in the card's "More photos from …" |
+| `architects.md` | architects as OpenStreetMap names them (`T. Cecil Howitt`), made plain, with their article when the name alone does not find it |
 
 ## 2. A rule layer (from an open dataset)
 

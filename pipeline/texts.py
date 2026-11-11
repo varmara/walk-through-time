@@ -6,6 +6,7 @@
 #   {"layer", "tpl": "architect", "who": ...}   words that are the same but for a name: a template in the package's
 #                                               "templates", filled in by the page (app/city/data.js: storyOf) and here
 TEMPLATES = {"architect": "Designed by {who}, according to Wikidata.",
+             "architect-osm": "Designed by {who}, according to OpenStreetMap.",
              "scheduled": "Part of the scheduled monument “{of}”.",
              "locallist": "On the council's local heritage list as “{of}”."}
 

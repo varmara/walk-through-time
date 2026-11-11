@@ -68,7 +68,9 @@ const ROLE = { 'people-architects': 'architect', 'people-writers': 'writer', 'pe
 const whoLink = name => `<a href="#" class="who" data-who="${esc(name)}">${esc(name)}</a>`;
 // the names of People-layer people in an escaped text become links to their places
 function linkPeople(html){
-  const names = [...people().keys()].filter(n => n.includes(' ')).sort((x, y) => y.length - x.length);
+  // and people with an article but no place on the map (an architect a story names on a bridge): to the article
+  const names = [...new Set([...people().keys(), ...Object.keys(S.data.people || {})])]
+    .filter(n => n.includes(' ')).sort((x, y) => y.length - x.length);
   const done = new Set();
   for (const n of names) {
     const e = esc(n);
@@ -264,12 +266,16 @@ function buildingCard(p, id){
       + alts.map(x => `<div>${esc(dateText(x.y, x.f, null, x.text))}${N.cite(dateSource(x.src, p))} <span class="muted">${esc(shortSrc(x.src))}</span></div>`).join('')
       + (alts.length ? `<div class="hint">The first is from ${esc(shortSrc(p.src))}. Sources disagree; they may describe different moments, such as a founding and a rebuilding.</div>` : '')]);
   } else rows.push(['Built', '<span class="muted">not in open data yet</span>']);
-  if (p.architect) {     // their article; their other buildings, when the People layer has them
-    const n = people().get(p.architect)?.refs.length || 0;
-    rows.push(['Architect', (p.archUrl ? a(p.archUrl, p.architect) : esc(p.architect))
-      + (n > 1 ? ` <span class="muted">·</span> <a href="#" class="who" data-who="${esc(p.architect)}">${n} buildings</a>` : '')]);
-  }
-  const who = connected(id).filter(w => w.name !== p.architect);   // the architect has a row of their own
+  // the architects: each linked to their article, and to their other buildings when the People layer has them
+  // (an older index has one architect, with archUrl)
+  const archs = p.architects || (p.architect ? [[p.architect, p.archUrl]] : []);
+  if (archs.length) rows.push([archs.length > 1 ? 'Architects' : 'Architect', archs.map(([name, url]) => {
+    const n = people().get(name)?.refs.length || 0;
+    return (url ? a(url, name) : esc(name))
+      + (n > 1 ? ` <span class="muted">·</span> <a href="#" class="who" data-who="${esc(name)}">${n} buildings</a>` : '');
+  }).join('<br>')]);
+  const archNames = new Set(archs.map(x => x[0]));
+  const who = connected(id).filter(w => !archNames.has(w.name));   // the architects have a row of their own
   if (who.length) rows.push(['People', who.map(w => w.html).join('<br>')]);
   if (p.grade) rows.push(['Listing', `Grade ${esc(p.grade)} listed`]);
   if (p.council) rows.push(['Council', esc(p.council)]);      // whose planning rules apply, near the city's edges

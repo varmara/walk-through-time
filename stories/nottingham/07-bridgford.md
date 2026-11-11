@@ -13,6 +13,7 @@ the ground in 1841. It hosted its first Test match, England against Australia, i
 ## County Hall
 - source: en:County Hall, Nottinghamshire
 - check: Vincent Harris | Second World War | 1954
+- architect: Vincent Harris = en:E. Vincent Harris
 
 Nottinghamshire County Council's headquarters, designed by Vincent Harris. Building paused during the Second
 World War, and it was only completed in 1954.

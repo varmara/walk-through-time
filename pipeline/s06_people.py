@@ -34,6 +34,16 @@ def plaque_label(text):
     return t[:40].rsplit(" ", 1)[0] + "…" if len(t) > 40 else t
 
 
+def person_like(name):
+    """A name that may be one person's: not "Mr Hallam", "W. Smith" or a firm ("CBP Architects", "Royston & Lund")."""
+    if re.search(r"\b(?:Ltd|Limited|Architects?|Partners(?:hip)?|Associates|Group|Council|Practice)\b|&|\band\b", name):
+        return False
+    words = name.replace(".", ". ").split()
+    full = [w for w in words if len(w.strip(".")) > 1 and w not in ("Mr.", "Mr", "Mrs", "Mrs.", "Sir", "JP")]
+    return len(full) >= 2 or (len(full) == 1 and len(words) >= 2 and not re.match(r"Mrs?\.?$", words[0]) and
+                                 sum(1 for w in words if len(w.strip(".")) == 1) >= 2)
+
+
 def c_words(city_id):
     """Words that tie an article to the city: its name and its districts (as for well-known residents)."""
     c = city(city_id)
@@ -223,25 +233,65 @@ def main(city_id):
                {"title": r["title"], "url": r["url"], "kind": "Wikipedia"})
     log(f"s06 residents: {len(residents)} addresses of well-known people")
 
+    # ---- architects: from Wikidata (P84), from a story's `architect:` line, or from OpenStreetMap's architect tag,
+    # in that order; each building's are saved for its card (s07), and they join the People layer, so their names
+    # link to their other buildings
     wd = load(city_id, "wikidata")
     # a hand-written entry, a resident's article or another story already telling who designed it
     told = {(int(i), s2["source"]["title"]) for i, ss in out.stories.items() for s2 in ss if s2.get("source")}
     told |= {(e["b"], e["source"]["title"]) for e in cur["entries"]
              if isinstance(e.get("b"), int) and e.get("source") and e["layer"] != "facts"}
-    arch = 0
+    fixes = cur.get("architects", {})            # stories/<city>/architects.md: OpenStreetMap's names, made plain
+    by_story = {}
+    for e in cur["entries"]:
+        for name, title in e.get("architect", []):
+            src = {"title": title, "url": "https://en.wikipedia.org/wiki/" + urllib.parse.quote(title.replace(" ", "_")),
+                   "kind": "Wikipedia"} if title else None
+            wiki_hint(name, src)               # on a pin too: the story's words then link to the article
+            if isinstance(e.get("b"), int) and name not in by_story.get(e["b"], []):
+                by_story.setdefault(e["b"], []).append(name)
+    arch, counts = {}, {"wikidata": 0, "story": 0, "osm": 0}
     for i, b in enumerate(buildings):
-        info = info_for(b, i, wd, listing)
-        if not info or not info.get("architect"):
-            continue
-        name = info["architect"]
-        if any(t == name or name in t for (j, t) in told if j == i):
-            continue   # a hand-written entry already tells this
-        url = info.get("architectArticle") or (f"https://www.wikidata.org/wiki/{info['architectQid']}" if info.get("architectQid") else None)
-        person(i, "architects", name, TEMPLATES["architect"].format(who=name), tpl="architect", source=
-               {"title": name, "url": url, "kind": "Wikipedia" if info.get("architectArticle") else "Wikidata"} if url else None,
-               qid=info.get("architectQid"))
-        arch += 1
-    log(f"s06 architects from Wikidata: {arch} buildings")
+        info = info_for(b, i, wd, listing) or {}
+        if info.get("architect"):
+            name = info["architect"]
+            arch[str(i)] = [name]
+            counts["wikidata"] += 1
+            if any(t == name or name in t for (j, t) in told if j == i):
+                continue   # a hand-written entry already tells this
+            url = info.get("architectArticle") or (f"https://www.wikidata.org/wiki/{info['architectQid']}" if info.get("architectQid") else None)
+            person(i, "architects", name, TEMPLATES["architect"].format(who=name), tpl="architect", source=
+                   {"title": name, "url": url, "kind": "Wikipedia" if info.get("architectArticle") else "Wikidata"} if url else None,
+                   qid=info.get("architectQid"))
+        elif i in by_story:
+            arch[str(i)] = by_story[i]
+            counts["story"] += 1
+            for name in by_story[i]:             # the story tells it: in the layer, with no words of its own
+                out.add(i, "people-architects", "people")
+                pg.setdefault("people-architects", {"key": "people-architects", "title": titles["architects"],
+                                                    "count": 0, "items": []})["items"].append([i, name])
+        elif b["tags"].get("architect"):
+            t = b["tags"]
+            qids = [q.strip() for q in (t.get("architect:wikidata") or "").split(";")]
+            found = []
+            for k, raw in enumerate(x.strip() for x in t["architect"].split(";")):
+                fix = fixes.get(raw, {})
+                name = fix.get("name") or raw
+                if not name:
+                    continue
+                found.append(name)
+                if not person_like(name) and not fix:
+                    continue                     # "Mr Hallam", "CBP Architects": on the card, not in the layer
+                if fix.get("article"):
+                    named.setdefault(name, fix["article"])
+                qid = qids[k] if k < len(qids) and re.fullmatch(r"Q\d+", qids[k]) else None
+                person(i, "architects", name, TEMPLATES["architect-osm"].format(who=name), tpl="architect-osm", qid=qid,
+                       source={"title": "OpenStreetMap", "url": f"https://www.openstreetmap.org/{b['osm']}", "kind": "OpenStreetMap"})
+            if found:
+                arch[str(i)] = found
+                counts["osm"] += 1
+    log(f"s06 architects: {counts['wikidata']} buildings from Wikidata, {counts['story']} from the stories, "
+        f"{counts['osm']} from OpenStreetMap")
     order = [f"people-{k}" for k, _, _ in PEOPLE_GROUPS] + ["people-events"]
     for g in pg.values():
         g["count"] = len({b for b, _ in g["items"]})
@@ -250,4 +300,7 @@ def main(city_id):
 
     about = about_people(want, c_words(city_id))
     log(f"s06 people: Wikipedia articles for {len(about)} of {len(want)} people")
-    save(city_id, "people", {**out.json(), "meta": people, "names": names, "about": about})
+    missing = sorted({n for ns in arch.values() for n in ns if n not in about and person_like(n)})
+    if missing:
+        log(f"    architects with no Wikipedia article found: {', '.join(missing)}")
+    save(city_id, "people", {**out.json(), "meta": people, "names": names, "about": about, "architects": arch})

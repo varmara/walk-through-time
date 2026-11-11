@@ -6,7 +6,7 @@
 
 Building properties: council (the council it is in), name, y (year), f (exact | approx | century), src, alts [{y, f, src}],
 h (height, m), base (bridges: deck height above the ground), levels, kind, osm, grade, listEntry, listName, listUrl, qid, image, article,
-architect, archUrl (the architect's Wikipedia article or Wikidata item), cat (its Commons category, for the card's
+architects ([[name, the architect's Wikipedia article or Wikidata item]]), cat (its Commons category, for the card's
 photos), L (",group,group," for map filters), stories [{layer, text, source}],
 sum (one to three sentences) and sumSrc {title, url?, kind},
 open [{name?, what?, oh?, web?}]: opening hours and websites from OpenStreetMap, of the building itself (no name)
@@ -120,6 +120,19 @@ def main(city_id):
             if len(mine) < 6 and o not in mine:
                 mine.append(o)
 
+    about, by_b = lay.get("people", {}), lay.get("architects", {})
+
+    def architects(k, info):
+        """[[name, link or null], ...]: Wikidata's architect, else those a story or OpenStreetMap names (s06_people),
+        each linked to their Wikipedia article where one was found, else to Wikidata's item."""
+        out = []
+        for n in by_b.get(k, []):
+            url = (about.get(n) or {}).get("url")
+            if not url and n == info.get("architect"):
+                url = info.get("architectArticle") or (info.get("architectQid") and f"https://www.wikidata.org/wiki/{info['architectQid']}")
+            out.append([n, url or None])
+        return out
+
     council_of = councils(city_id)
     feats = []
     for i, b in enumerate(buildings):
@@ -142,8 +155,7 @@ def main(city_id):
             "listUrl": best.get("hyperlink"), "qid": info.get("qid") or t.get("wikidata"),
             "image": info.get("image") or ((photos.get(k) or {}).get("photo") and commons(photos[k]["photo"]["file"])),
             "credit": None if info.get("image") else (photos.get(k) or {}).get("photo"),
-            "archive": (photos.get(k) or {}).get("archive"), "dyk": dyk.get(k), "article": article, "architect": info.get("architect") or t.get("architect"),
-            "archUrl": info.get("architectArticle") or (info.get("architectQid") and f"https://www.wikidata.org/wiki/{info['architectQid']}"),
+            "archive": (photos.get(k) or {}).get("archive"), "dyk": dyk.get(k), "article": article, "architects": architects(k, info),
             "cat": info.get("commonscat"),
             "L": ("," + ",".join(lay["member"][k]) + ",") if k in lay["member"] else None,
             "stories": lay["stories"].get(k),

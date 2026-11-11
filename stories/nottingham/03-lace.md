@@ -8,6 +8,7 @@ Lace Market, east of the Old Market Square.
 - source: en:Adams Building, Nottingham
 - year: 1855
 - check: Thomas Adams | Thomas Chambers Hine | 1855
+- architect: en:Thomas Chambers Hine
 
 A lace showroom and warehouse built for Thomas Adams to a design by Thomas Chambers Hine, opened in 1855.
 

@@ -237,7 +237,9 @@ def main(city_id):
                 why = "Wikipedia article not found"
             else:
                 text = src["text"] + "\n" + (a["text"] if e.get("place") else "")
-                facts = list(e.get("facts", ())) + re.findall(r"\d{4}", e.get("year", ""))
+                # the architects it names: their surnames at least must be in the article
+                facts = list(e.get("facts", ())) + re.findall(r"\d{4}", e.get("year", "")) \
+                    + [n.split()[-1] for n, _ in e.get("architect", [])]
                 missing = [f for f in dict.fromkeys(facts) if f.lower() not in text]
                 if missing:
                     why = "articles do not mention: " + ", ".join(missing)
@@ -291,6 +293,7 @@ def main(city_id):
                             "source": {"title": src["title"], "url": src["url"], "kind": src["kind"]},
                             **({"place": {"title": a["title"], "url": a["url"], "kind": a["kind"]}} if e.get("place") else {}),
                             **({"year": list(parse_year(e["year"]))} if e.get("year") and parse_year(e["year"]) else {}),
+                            **({"architect": e["architect"]} if e.get("architect") else {}),
                             **({"names": False} if e.get("names") is False else {})})
         log(f"s04 {L['id']}: {kept}/{len(L['entries'])} stories kept")
     for d in dropped:
@@ -306,4 +309,4 @@ def main(city_id):
     save(city_id, "curated", {"layers": meta, "entries": entries, "dropped": dropped,
                               **{k.lower(): T.get(k) or default for k, default in (
                                   ("WIKIPEDIA", {}), ("PLAQUES", {}), ("COLLECTIONS", []), ("NAMES", {}),
-                                  ("TITLES", {}), ("CREDITS", {}))}})
+                                  ("TITLES", {}), ("CREDITS", {}), ("ARCHITECTS", {}))}})

@@ -7,6 +7,7 @@ The low ground between the city and the Trent, with two football grounds facing 
 - source: en:Trent Bridge (bridge)
 - year: 1868..1871
 - check: Tarbotton | 1156 | stone arches
+- architect: en:Marriott Ogle Tarbotton
 
 The iron bridge was designed by Marriott Ogle Tarbotton and built between 1868 and 1871. A medieval bridge of
 more than 20 stone arches, begun in 1156, crossed the river nearby.

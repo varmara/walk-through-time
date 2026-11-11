@@ -26,7 +26,21 @@ collections.md, credits.md); each has a Note column for why. See stories/<city>/
 import re
 from pathlib import Path
 
-ENTRY_KEYS = {"source", "place", "at", "year", "group", "quote", "names", "check", "note"}
+ENTRY_KEYS = {"source", "place", "at", "year", "group", "quote", "names", "check", "note", "architect"}
+
+
+def architects(v):
+    """`en:Thomas Rickman | Vincent Harris = en:E. Vincent Harris` -> [[name, article], ...]: the name as the story
+    writes it, and the architect's Wikipedia article (a bare name: found by name, like a plaque's person)."""
+    out = []
+    for part in (x.strip() for x in v.split(" | ")):
+        name, _, art = part.partition("=") if "=" in part else ("", "", part)
+        art = art.strip()
+        title = art[3:].strip() if art.startswith("en:") else None
+        name = name.strip() or re.sub(r"\s*\(.*\)$", "", title or art)
+        if name:
+            out.append([name, title])
+    return out
 
 
 def _cell(s):
@@ -80,6 +94,8 @@ def layer(path):
                     cur["facts"] = tuple(x.strip() for x in v.split(" | ") if x.strip())
                 elif k == "quote":       # passages copied from a source that cannot be read automatically
                     cur.setdefault("quote", []).append(v)
+                elif k == "architect":
+                    cur["architect"] = architects(v)
                 elif k == "names":
                     if v.lower() in ("no", "false"):
                         cur["names"] = False
@@ -126,4 +142,7 @@ def load(folder):
     out["COLLECTIONS"] = colls
     f = folder / "credits.md"
     out["CREDITS"] = {r["site"]: r["credit"] for r in table(f)} if f.exists() else {}
+    f = folder / "architects.md"
+    out["ARCHITECTS"] = {r["name in openstreetmap"]: {k: r[k2] for k, k2 in (("name", "architect"), ("article", "wikipedia article"))
+                                                      if r.get(k2)} for r in table(f)} if f.exists() else {}
     return out

@@ -161,4 +161,5 @@ def main(city_id):
     meta += visitor_meta + museums(city_id, ctx, out) + pub_heritage(city_id, ctx, out)
     save(city_id, "routes", routes)
     save(city_id, "basics", basics)
-    save(city_id, "layers", {"meta": meta, **out.json(), "names": names, "people": ppl["about"]})
+    save(city_id, "layers", {"meta": meta, **out.json(), "names": names, "people": ppl["about"],
+                             "architects": ppl.get("architects", {})})
