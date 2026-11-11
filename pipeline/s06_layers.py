@@ -15,7 +15,7 @@ Writes layers.json:
 import re
 import urllib.parse
 
-from .common import building_at, load, log, save, work
+from .common import TEMPLATES, building_at, load, log, save, work
 from .layers import LAYERS, Context
 from .s04_curated import PEOPLE_GROUPS, people_group
 from .s05_dates import info_for
@@ -150,12 +150,15 @@ def main(city_id):
                      **({"who": who} if who else {}), **({"on": on} if on is not None else {})})
         return f"p{len(pins) - 1}"
 
-    def add(i, group, layer_id, story=None, source=None, place=None, who=None, pin_ref=None):
+    def add(i, group, layer_id, story=None, source=None, place=None, who=None, pin_ref=None, tpl=None, of=None):
         member.setdefault(str(i), [])
         if group not in member[str(i)]:
             member[str(i)].append(group)
         if pin_ref:          # a plaque on this building: its words are stored once, on the plaque's pin
             stories.setdefault(str(i), []).append({"layer": layer_id, "pin": pin_ref, **({"who": who} if who else {})})
+        elif tpl:            # the same words but for a name: a template (common.TEMPLATES)
+            stories.setdefault(str(i), []).append({"layer": layer_id, "tpl": tpl, **({"who": who} if who else {}),
+                                                   **({"of": of} if of else {}), **({"source": source} if source else {})})
         elif story:
             stories.setdefault(str(i), []).append({"layer": layer_id, "text": story,
                                                    **({"source": source} if source else {}),
@@ -217,7 +220,7 @@ def main(city_id):
     titles = {k: t for k, t, _ in PEOPLE_GROUPS} | {"events": "Plaques to events and places"}
     pg = {g["key"]: g for g in people["groups"]}
 
-    def person(b, key, name, story, source, xy=None, qid=None, who=True, on=None):
+    def person(b, key, name, story, source, xy=None, qid=None, who=True, on=None, tpl=None):
         k = "people-" + key
         if k not in pg:
             pg[k] = {"key": k, "title": titles.get(key, key), "count": 0, "items": []}
@@ -229,7 +232,7 @@ def main(city_id):
             if on is not None:
                 add(on, k, "people", story, source, who=who, pin_ref=b)
         else:
-            add(b, k, "people", story, source, who=who)
+            add(b, k, "people", story, source, who=who or (name if tpl else None), tpl=tpl)
         pg[k]["items"].append([b, name])
 
     plaques = load(city_id, "plaques") if work(city_id, "plaques").exists() else []
@@ -290,7 +293,7 @@ def main(city_id):
         if any(t == name or name in t for (j, t) in told if j == i):
             continue   # a hand-written entry already tells this
         url = info.get("architectArticle") or (f"https://www.wikidata.org/wiki/{info['architectQid']}" if info.get("architectQid") else None)
-        person(i, "architects", name, f"Designed by {name}, according to Wikidata.",
+        person(i, "architects", name, TEMPLATES["architect"].format(who=name), tpl="architect", source=
                {"title": name, "url": url, "kind": "Wikipedia" if info.get("architectArticle") else "Wikidata"} if url else None,
                qid=info.get("architectQid"))
         arch += 1
@@ -315,7 +318,7 @@ def main(city_id):
         res = L["fn"](ctx)
         for i, v in res.items():
             group, extra = v if isinstance(v, tuple) else (v, {})
-            add(i, group, L["id"], extra.get("story"))
+            add(i, group, L["id"], extra.get("story"), tpl=extra.get("tpl"), of=extra.get("of"))
         groups = []
         for k, t in L["groups"]:
             members = [i for i, v in res.items() if (v[0] if isinstance(v, tuple) else v) == k]

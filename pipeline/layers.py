@@ -81,7 +81,7 @@ def listed(ctx):
        groups=[("scheduled", "Scheduled monument")],
        source=("Historic England, National Heritage List for England", "https://historicengland.org.uk/listing/the-list/"))
 def scheduled(ctx):
-    return {i: ("scheduled", {"story": f"Part of the scheduled monument “{f['properties'].get('Name', '').strip()}”."})
+    return {i: ("scheduled", {"tpl": "scheduled", "of": f["properties"].get("Name", "").strip()})
             for f in ctx.monuments for i in within(ctx, [f], "scheduled")}
 
 

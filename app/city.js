@@ -96,7 +96,11 @@ const entitiesAt = {};           // building index -> [{name, bs}] for people an
 const FLAGS = { e:'exact', a:'approx', c:'century', r:'area' };
 function fromIndex(ix){
   const out = new Array(ix.n);
-  let x = 0, y = 0;
+  if (!ix.dxy) {             // the index has only the few named, listed or layered buildings; the rest is in the card files
+    for (let i = 0; i < ix.n; i++) out[i] = { properties: { ...(ix.props[i] || {}) } };
+    return out;
+  }
+  let x = 0, y = 0;          // older index: every building's centre and year
   for (let i = 0; i < ix.n; i++) {
     x += ix.dxy[2 * i]; y += ix.dxy[2 * i + 1];
     const p = { ...(ix.props[i] || {}) };
@@ -105,6 +109,14 @@ function fromIndex(ix){
     out[i] = { properties: p, xy: [ix.origin[0] + x / ix.scale, ix.origin[1] + y / ix.scale] };
   }
   return out;
+}
+// how many buildings stand by a year: from the index's count of buildings per year (or from every building)
+let hist = null;
+function standingBy(Y){
+  if (!hist) return features.filter(x => x.properties.y != null ? x.properties.y <= Y : showUnknown).length;
+  let n = showUnknown ? hist.undated : 0;
+  for (const [y, c] of hist.years) { if (y > Y) break; n += c; }
+  return n;
 }
 const tiled = () => !!data.index;
 const fstate = (id, st) => map.setFeatureState(tiled() ? { source:'b', sourceLayer:'b', id } : { source:'b', id }, st);
@@ -153,6 +165,11 @@ async function main(){
     f.id = i;
     if (f.properties.y != null) f.properties.f === 'area' ? estimated++ : known++;
   });
+  if (data.index && data.index.hist) {
+    hist = { years: data.index.hist, undated: data.index.undated };
+    estimated = data.index.estimated;
+    known = features.length - data.index.undated - estimated;
+  }
   stats = { total: features.length, known, estimated };
 
   layers = (data.layers || []).map(L => ({ ...L, groups: (L.groups || []).map(g => Array.isArray(g) ? { key: g[0], title: g[1] } : g) }));
@@ -253,10 +270,12 @@ function drawMap(){
       map.addLayer({ id:'roads', type:'line', ...src('roads'), layout:{ 'line-cap':'round', 'line-join':'round' },
         paint:{ 'line-color':tok('--road'), 'line-width':['interpolate', ['linear'], ['zoom'], 13, ['match', ['get','k'], 'major', 1.5, 0.4], 18, ['match', ['get','k'], 'major', 14, 3]] } });
 
-      map.addSource('nature', { type:'geojson', data: data.nature || { type:'FeatureCollection', features:[] } });
-      map.addLayer({ id:'nature-fill', type:'fill', source:'nature', layout:{ visibility:'none' },
+      // areas (nature, conservation): from the tiles, or the older data file's GeoJSON
+      const areaSrc = T && data.areas ? src('areas') : { source:'nature' };
+      if (!(T && data.areas)) map.addSource('nature', { type:'geojson', data: data.nature || { type:'FeatureCollection', features:[] } });
+      map.addLayer({ id:'nature-fill', type:'fill', ...areaSrc, layout:{ visibility:'none' },
         paint:{ 'fill-color':natureColour(), 'fill-opacity':0.32 } });
-      map.addLayer({ id:'nature-line', type:'line', source:'nature', layout:{ visibility:'none' },
+      map.addLayer({ id:'nature-line', type:'line', ...areaSrc, layout:{ visibility:'none' },
         paint:{ 'line-color':natureColour(), 'line-width':2, 'line-dasharray':[2, 1] } });
 
       if (T) map.addSource('b', { type:'vector', tiles:[tileUrl], minzoom:T.minzoom, maxzoom:T.maxzoom });
@@ -282,10 +301,10 @@ function drawMap(){
           && map.queryRenderedFeatures([[e.point.x - 8, e.point.y - 8], [e.point.x + 8, e.point.y + 8]], { layers:['storypins'] })[0];
         if (pinHit) return showPin(pinHit.properties);
         const hit = map.queryRenderedFeatures(e.point, { layers:['b'] })[0];
-        if (hit) return selectBuilding(hit.id);
+        if (hit) return selectBuilding(hit.id, [e.lngLat.lng, e.lngLat.lat]);
         const area = map.getLayer('nature-fill') && map.getLayoutProperty('nature-fill', 'visibility') === 'visible'
           && map.queryRenderedFeatures(e.point, { layers:['nature-fill'] })[0];
-        if (area) showArea(area.properties);
+        if (area) showArea(data.areas ? data.areas[area.properties.i] : area.properties);
       });
       // start the credits folded behind their (i) button: on a phone they would cover the map
       document.querySelector('.maplibregl-ctrl-attrib')?.classList.remove('maplibregl-compact-show');
@@ -323,7 +342,7 @@ function updateYear(){
   const f = ['any', ['all', ['has', 'y'], ['<=', ['get', 'y'], Y]]];
   if (showUnknown) f.push(['!', ['has', 'y']]);
   map.setFilter('b', f);
-  const shown = features.filter(x => x.properties.y != null ? x.properties.y <= Y : showUnknown).length;
+  const shown = standingBy(Y);
   $('count').textContent = `${fmt(shown)} of ${fmt(stats.total)} buildings · year known for ${Math.round(stats.known / stats.total * 100)}%`
     + (stats.estimated ? `, estimated for ${Math.round(stats.estimated / stats.total * 100)}%` : '');
 }
@@ -522,13 +541,16 @@ $('legend').insertAdjacentHTML('afterend', '<p class="note">Palest of all: no da
 
 // ================= Cards =================
 const layerTitle = id => layers.find(L => L.id === id)?.title || id;
-function selectBuilding(id){
+// at: where the building was tapped, to move there at once; otherwise its centre, which is in its card file
+function selectBuilding(id, at){
   unlight();
   if (selectedId != null) fstate(selectedId, { sel:false });
   selectedId = id;
   fstate(id, { sel:true });
-  map.easeTo({ center:centreOf(id), zoom:Math.max(map.getZoom(), 16.5), duration:700,
+  const go = c => c && map.easeTo({ center:c, zoom:Math.max(map.getZoom(), 16.5), duration:700,
     padding: innerWidth >= 760 ? { right: 400 } : { bottom: innerHeight * 0.45 } });
+  if (at || centreOf(id)) go(at || centreOf(id));
+  else loadCard(id).then(() => selectedId === id && go(centreOf(id))).catch(() => {});
   if (features[id].full || !tiled()) return showCard(id);
   openSheet('card', refName(id));                  // the title at once, the details when their file arrives
   $('cFacts').innerHTML = '<dt>Loading…</dt><dd></dd>';
@@ -644,13 +666,21 @@ function showArea(p){
 const parseRef = x => typeof x === 'number' ? x : /^\d+$/.test(x) ? +x : x;
 const isB = r => typeof r === 'number';
 const pinOf = r => data.pins.features[+r.slice(1)];
-const areaOf = r => data.nature.features[+r.slice(1)];
+// an area: { properties, bb: [west, south, east, north] } from the index, or from the older file's GeoJSON
+function areaOf(r){
+  const i = +r.slice(1);
+  if (data.areas) return data.areas[i] && { properties: data.areas[i], bb: data.areas[i].bb };
+  const f = data.nature.features[i];
+  if (!f) return null;
+  const pts = ringsOf(f.geometry).flat(), xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+  return { properties: f.properties, bb: [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)] };
+}
 function ringsOf(g){ return g.type === 'Polygon' ? [g.coordinates[0]] : g.type === 'MultiPolygon' ? g.coordinates.map(p => p[0]) : []; }
 function refCentre(r){
   if (isB(r)) return centreOf(r);
   if (r[0] === 'p') return pinOf(r).geometry.coordinates;
-  const pts = ringsOf(areaOf(r).geometry).flat();
-  return [pts.reduce((a, c) => a + c[0], 0) / pts.length, pts.reduce((a, c) => a + c[1], 0) / pts.length];
+  const b = areaOf(r).bb;
+  return [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2];
 }
 // a building without a name: its address, or the street it stands on, or its listing's own words
 function placeName(p){
@@ -665,9 +695,9 @@ function refName(r){
 function openRef(r){
   if (isB(r)) return selectBuilding(r);
   if (r[0] === 'p') return showPin(pinOf(r).properties);
-  const f = areaOf(r), pts = ringsOf(f.geometry).flat();
+  const f = areaOf(r), bb = f.bb;
   if (!active.has(f.properties.t)) { active.add(f.properties.t); saveActive(); renderLayers(); applyLayers(); }
-  map.fitBounds([[Math.min(...pts.map(p => p[0])), Math.min(...pts.map(p => p[1]))], [Math.max(...pts.map(p => p[0])), Math.max(...pts.map(p => p[1]))]],
+  map.fitBounds([[bb[0], bb[1]], [bb[2], bb[3]]],
     { padding: innerWidth >= 760 ? { top: 60, bottom: 60, left: 60, right: 420 } : { top: 80, left: 30, right: 70, bottom: innerHeight * 0.45 }, maxZoom: 17, duration: 800 });
   showArea(f.properties);
 }
@@ -724,12 +754,18 @@ let places = null;             // { name, bs, i }
 const pins = {};               // marker key -> maplibregl.Marker
 const centreOf = b => {
   if (features[b].xy) return features[b].xy;
-  const g = features[b].geometry, ring = g.type === 'Polygon' ? g.coordinates[0] : g.coordinates[0][0];
+  if (features[b].properties.xy) return features[b].properties.xy;     // from the card file
+  const g = features[b].geometry;
+  if (!g) return null;                                                  // not loaded yet
+  const ring = g.type === 'Polygon' ? g.coordinates[0] : g.coordinates[0][0];
   return [ring.reduce((a, c) => a + c[0], 0) / ring.length, ring.reduce((a, c) => a + c[1], 0) / ring.length];
 };
 // a story as shown: a plaque's words are stored once, on its pin, and shown on its building's card too
+// and words the same but for a name are a template (pipeline/common.py: TEMPLATES): "Designed by {who}…"
 function storyOf(s){
-  if (!s.pin || s.text) return s;
+  if (s.text) return s;
+  if (s.tpl) return { ...s, text: (data.templates?.[s.tpl] || '').replace('{who}', s.who || '').replace('{of}', s.of || '') };
+  if (!s.pin) return s;
   const pp = pinOf(s.pin)?.properties || {};
   const J = v => typeof v === 'string' ? JSON.parse(v) : v;
   return { ...s, text: pp.text || '', source: J(pp.source), who: s.who || pp.who };

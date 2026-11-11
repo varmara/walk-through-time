@@ -15,7 +15,7 @@ import json
 from collections import Counter
 import urllib.parse
 
-from .common import centroid, load, log, point_in_ring, save, work
+from .common import TEMPLATES, centroid, load, log, point_in_ring, save, work
 from .s00_fetch_nature import rings_of
 from .s05_dates import info_for, osm_article
 
@@ -113,7 +113,7 @@ def main(city_id):
         if c:
             pp["coll"] = c
     out = {"city": city_id, "built": built, "stats": stats, "layers": lay["meta"], "nature": fc(nature), "pins": fc(pins),
-           "people": lay.get("people", {}),
+           "people": lay.get("people", {}), "templates": TEMPLATES,
            "buildings": fc(feats), "roads": fc(base["roads"]), "water": fc(base["water"]), "parks": fc(base["parks"])}
     Path("data").mkdir(exist_ok=True)
     save(city_id, "package", out)

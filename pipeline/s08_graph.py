@@ -8,7 +8,7 @@ the Lace Market story of a warehouse Hine designed) is linked there too, as in a
 import json
 from pathlib import Path
 
-from .common import load, log
+from .common import load, log, story_text
 
 
 def main(city_id):
@@ -21,7 +21,8 @@ def main(city_id):
     def place_info(r):
         if r[0] == "b":
             p = feats[int(r[1:])]["properties"]
-            return {"label": p.get("name") or p.get("listName") or "Unnamed building", "year": p.get("y"), "f": p.get("f")}, p.get("stories") or []
+            return {"label": p.get("name") or p.get("listName") or "Unnamed building", "year": p.get("y"), "f": p.get("f")}, \
+                [story_text(st, pins, data.get("templates")) for st in p.get("stories") or []]
         if r[0] == "p":
             p = pins[int(r[1:])]["properties"]
             return {"label": p["name"]}, [{"layer": p.get("layer"), "text": p.get("text"), "source": p.get("source")}]

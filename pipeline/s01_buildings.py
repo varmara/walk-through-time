@@ -5,7 +5,7 @@ Reads work/<city>/osm.json. Writes:
   base.json       {roads, water, parks}         GeoJSON for the plain base map
   places.json     [{x, y, name, tags, b}]        named points (pubs, museums...), b = building index or null
 """
-from .common import bbox, building_at, load, log, rnd, save, stitch_rings
+from .common import bbox, building_at, centroid, load, log, rnd, save, stitch_rings
 
 
 def height_of(t):
@@ -43,6 +43,24 @@ def feature(kind, coords, props=None):
     c = [[round(x, 5), round(y, 5)] for x, y in coords]
     geom = {"type": kind, "coordinates": c if kind == "LineString" else [c]}
     return {"type": "Feature", "properties": props or {}, "geometry": geom}
+
+
+def hilbert(x, y, x0, y0, x1, y1, order=16):
+    """Position of (x, y) along a Hilbert curve over the box (x0, y0)-(x1, y1): points close on the map are
+    mostly close along the curve."""
+    n = 1 << order
+    xi = min(n - 1, max(0, int((x - x0) / (x1 - x0 or 1) * n)))
+    yi = min(n - 1, max(0, int((y - y0) / (y1 - y0 or 1) * n)))
+    d, s = 0, n >> 1
+    while s:
+        rx, ry = (xi & s) > 0, (yi & s) > 0
+        d += s * s * ((3 * rx) ^ ry)
+        if not ry:
+            if rx:
+                xi, yi = n - 1 - xi, n - 1 - yi
+            xi, yi = yi, xi
+        s >>= 1
+    return d
 
 
 def main(city_id):
@@ -89,6 +107,12 @@ def main(city_id):
         tags = {**br["tags"], "building": "bridge"}
         buildings.append({"osm": br["osm"], "rings": br["rings"], "tags": tags, "bb": bbox(br["rings"][0]),
                           "h": br["base"] + 1.5, "base": br["base"]})
+    # numbered in map order (along a Hilbert curve), so neighbours have nearby numbers: a card file then holds one
+    # part of town, and tapping round a street loads one file rather than one per building
+    cx = [centroid(b["rings"][0]) for b in buildings]
+    frame = (min(c[0] for c in cx), min(c[1] for c in cx), max(c[0] for c in cx), max(c[1] for c in cx))
+    order = sorted(range(len(buildings)), key=lambda i: hilbert(*cx[i], *frame))
+    buildings[:] = [buildings[i] for i in order]
     for n in nodes:
         n["b"] = building_at(buildings, n["x"], n["y"], near=10)   # points are often drawn just outside the outline
 

@@ -19,7 +19,7 @@ import shutil
 import urllib.parse
 from pathlib import Path
 
-from .common import load, city, log
+from .common import load, city, log, story_text
 
 
 def site_url():
@@ -126,7 +126,8 @@ def layer_pages(data, city_id, city_name, site, out):
             built = None
             if p.get("y") is not None and p.get("f") != "area":
                 built = p.get("dt") or (f"built {'in ' if p.get('f') == 'exact' else 'about '}{p['y']}")
-            return p.get("name") or p.get("listName") or "A building", built, p.get("image"), p.get("stories", [])
+            return (p.get("name") or p.get("listName") or "A building", built, p.get("image"),
+                    [story_text(st, pins, data.get("templates")) for st in p.get("stories", [])])
         pp = pin_by.get(r)
         if pp:
             return pp.get("name"), None, None, [{"layer": pp.get("layer"), "text": pp.get("text"), "source": pp.get("source")}]
