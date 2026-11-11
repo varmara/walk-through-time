@@ -166,6 +166,28 @@ jobs:
           path: work
           key: work-${{ github.run_id }}
 
+      # The build's intermediate files, for working on the pipeline on a computer without fetching everything
+      # (tools/fetch-built.sh). Replaced every build; not part of the site. Saved before the checks, so a
+      # build that fails them can be looked into.
+      - name: Save the work files for development
+        if: steps.plan.outputs.start != 'none'
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          out=$(mktemp -d)
+          tar -C work --exclude='*/osm.json' -czf "$out/work.tar.gz" .
+          cd "$out"
+          split -b 90m -d work.tar.gz work.tar.gz. && rm work.tar.gz      # GitHub refuses files over 100 MB
+          git init -q -b work
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          printf '# Work files\n\nThe last build'"'"'s intermediate files (pipeline/), for development: tools/fetch-built.sh.\n' > README.md
+          git add . && git commit -q -m "Work files from ${GITHUB_SHA::7}"
+          for t in 1 2 3; do
+            git push -q -f "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" work && break
+            sleep 20
+          done
+
       # Checks before anything is published: names of known buildings, and the parsers (tests/)
       - name: Check
         if: steps.plan.outputs.start != 'none'
@@ -201,27 +223,6 @@ jobs:
           git add data
           if git diff --cached --quiet; then echo "No changes to data."; else
             git commit -q -m "Update city data" && git push origin HEAD:main; fi
-
-      # The build's intermediate files, for working on the pipeline on a computer without fetching everything
-      # (tools/fetch-built.sh). Replaced every build; not part of the site.
-      - name: Save the work files for development
-        if: steps.plan.outputs.start != 'none'
-        env:
-          TOKEN: ${{ github.token }}
-        run: |
-          out=$(mktemp -d)
-          tar -C work --exclude='*/osm.json' -czf "$out/work.tar.gz" .
-          cd "$out"
-          split -b 90m -d work.tar.gz work.tar.gz. && rm work.tar.gz      # GitHub refuses files over 100 MB
-          git init -q -b work
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          printf '# Work files\n\nThe last build'"'"'s intermediate files (pipeline/), for development: tools/fetch-built.sh.\n' > README.md
-          git add . && git commit -q -m "Work files from ${GITHUB_SHA::7}"
-          for t in 1 2 3; do
-            git push -q -f "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" work && break
-            sleep 20
-          done
 
       - name: Save new OpenStreetMap downloads
         if: steps.plan.outputs.start != 'none' && hashFiles('work/*/osm.fresh') != ''
