@@ -1,4 +1,8 @@
-name: Build city data
+name: Build and publish
+
+# Builds the city data (pipeline/) and publishes the site to the "site" branch, which GitHub Pages serves:
+# the page's files from main plus the built data, as one commit replaced every time, so main holds only code and
+# stories and does not grow with every build. A push that changes only the page publishes without rebuilding.
 
 on:
   workflow_dispatch:
@@ -15,6 +19,11 @@ on:
       - "pipeline/**"
       - "stories/**"
       - "cities/**"
+      - "tests/**"
+      - "app/**"
+      - "lib/**"
+      - "index.html"
+      - "nottingham/**"
       - ".github/workflows/build-data.yml"
 
 permissions:
@@ -40,6 +49,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      # The last published data: a build that starts part-way through keeps the files earlier steps wrote, and a
+      # page-only change publishes it as it is. (Before the first publish, main's own data/ is used.)
+      - name: Restore the published data
+        run: |
+          if git fetch -q --depth 1 origin site 2>/dev/null; then
+            rm -rf data && git archive FETCH_HEAD data | tar -x && echo "Restored data from the site branch"
+          fi
 
       - name: Restore the saved OpenStreetMap download
         if: env.REFRESH != 'true'
@@ -93,11 +110,16 @@ jobs:
              && git cat-file -e "$last^{commit}" 2>/dev/null; then
             start=$(git diff --name-only "$last" "${{ github.sha }}" | python -m pipeline.plan)
           fi
+          if [ "${{ github.event_name }}" = push ] && [ "$start" = all ] && git cat-file -e "$last^{commit}" 2>/dev/null \
+             && [ -z "$(git diff --name-only "$last" "${{ github.sha }}" | python -m pipeline.plan --needs-build)" ]; then
+            start=none        # only the page changed
+          fi
           echo "Starting at: $start"
           echo "start=$start" >> "$GITHUB_OUTPUT"
 
       # tippecanoe turns the buildings into vector tiles (step s10_tiles); built once, then kept in the cache
       - name: Restore tippecanoe
+        if: steps.plan.outputs.start != 'none'
         id: tippecanoe
         uses: actions/cache@v4
         with:
@@ -105,7 +127,7 @@ jobs:
           key: tippecanoe-2.79.0-${{ runner.os }}
 
       - name: Build tippecanoe
-        if: steps.tippecanoe.outputs.cache-hit != 'true'
+        if: steps.plan.outputs.start != 'none' && steps.tippecanoe.outputs.cache-hit != 'true'
         run: |
           sudo apt-get install -y -q libsqlite3-dev zlib1g-dev
           git clone -q --depth 1 -b 2.79.0 https://github.com/felt/tippecanoe.git /tmp/tippecanoe
@@ -113,6 +135,7 @@ jobs:
           mkdir -p ~/tippecanoe && cp /tmp/tippecanoe/tippecanoe ~/tippecanoe/
 
       - name: Run the pipeline for every city
+        if: steps.plan.outputs.start != 'none'
         env:
           TIPPECANOE: /home/runner/tippecanoe/tippecanoe
         run: |
@@ -127,37 +150,81 @@ jobs:
           fi
 
       - name: Save web answers for the next build
+        if: steps.plan.outputs.start != 'none'
         uses: actions/cache/save@v4
         with:
           path: cache
           key: web-${{ github.run_id }}
 
       - name: Save work files for the next build
+        if: steps.plan.outputs.start != 'none'
         run: echo "${{ github.sha }}" > work/.source_sha
 
-      - uses: actions/cache/save@v4
+      - if: steps.plan.outputs.start != 'none'
+        uses: actions/cache/save@v4
         with:
           path: work
           key: work-${{ github.run_id }}
 
-      - name: Commit updated data
+      # Checks before anything is published: names of known buildings, and the parsers (tests/)
+      - name: Check
+        if: steps.plan.outputs.start != 'none'
+        run: python -m unittest discover -s tests -t . -q
+
+      - name: Publish the site
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          out=$(mktemp -d)
+          cp -r index.html app lib cities data "$out"/
+          for c in $(ls cities/*.json | xargs -n1 basename | sed 's/\.json$//'); do cp -r "$c" "$out"/; done
+          touch "$out/.nojekyll"          # serve the files as they are
+          cd "$out"
+          git init -q -b site
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add . && git commit -q -m "Site built from ${GITHUB_SHA::7}"
+          for t in 1 2 3; do
+            git push -q -f "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" site && break
+            sleep 20
+          done
+
+      # Until GitHub Pages serves the site branch, main's data/ is still what visitors get: keep it up to date.
+      # (Removed once Pages is switched over.)
+      - name: Commit updated data to main (until Pages serves the site branch)
+        if: steps.plan.outputs.start != 'none'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # The data files are rebuilt in full, so this run's files replace whatever is on main now
-          # (another run may have pushed while this one was working).
           git fetch -q origin main
           git reset -q FETCH_HEAD
           git add data
-          if git diff --cached --quiet; then
-            echo "No changes to data."
-          else
-            git commit -m "Update city data"
-            git push origin HEAD:main
-          fi
+          if git diff --cached --quiet; then echo "No changes to data."; else
+            git commit -q -m "Update city data" && git push origin HEAD:main; fi
+
+      # The build's intermediate files, for working on the pipeline on a computer without fetching everything
+      # (tools/fetch-built.sh). Replaced every build; not part of the site.
+      - name: Save the work files for development
+        if: steps.plan.outputs.start != 'none'
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          out=$(mktemp -d)
+          tar -C work --exclude='*/osm.json' -czf "$out/work.tar.gz" .
+          cd "$out"
+          split -b 90m -d work.tar.gz work.tar.gz. && rm work.tar.gz      # GitHub refuses files over 100 MB
+          git init -q -b work
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          printf '# Work files\n\nThe last build'"'"'s intermediate files (pipeline/), for development: tools/fetch-built.sh.\n' > README.md
+          git add . && git commit -q -m "Work files from ${GITHUB_SHA::7}"
+          for t in 1 2 3; do
+            git push -q -f "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" work && break
+            sleep 20
+          done
 
       - name: Save new OpenStreetMap downloads
-        if: hashFiles('work/*/osm.fresh') != ''
+        if: steps.plan.outputs.start != 'none' && hashFiles('work/*/osm.fresh') != ''
         env:
           TOKEN: ${{ github.token }}
         run: |

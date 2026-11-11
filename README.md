@@ -38,7 +38,12 @@ open data ──► pipeline/ (Python, numbered steps) ──► data/<city>.jso
 
 A GitHub Actions workflow (`.github/workflows/build-data.yml`) runs the pipeline twice a year
 (1 January and 1 July), whenever the pipeline, stories or city settings change, and on demand from the
-**Actions** tab, then commits the results.
+**Actions** tab. After the checks in `tests/` pass, it publishes the site to the `site` branch, which GitHub
+Pages serves: the page's files from `main` plus the built data, as a single commit replaced each time. So `main`
+holds only code and stories and does not grow with every build, and a change to the page alone (`app/`,
+`index.html`, `<city>/`) is published in about a minute without rebuilding. The last build's intermediate files are
+kept on the `work` branch, so a step can be run again on a computer without downloading everything:
+`tools/fetch-built.sh` fetches both the data and the work files.
 
 Downloading OpenStreetMap takes most of an hour, so the last download is kept, compressed, on the `downloads` branch.
 Runs triggered by a change reuse it, as long as the city's area and the download query are unchanged, and finish in a
@@ -51,7 +56,9 @@ run every step. The twice-yearly and **refresh** runs start from nothing.
 
 ```
 cities/<id>.json          city settings: area (polygon and bounding box) and starting view
-stories/<id>.py           hand-written story layers for the city
+stories/<id>/             hand-written story layers and corrections for the city (Markdown; see CONTRIBUTING.md)
+tests/                    checks run before every publish
+tools/fetch-built.sh      fetch the last build's data and work files, to work on a computer
 app/city.js, app/city.css the shared city page
 <id>/index.html           one page per city
 lib/                      MapLibre GL JS (BSD-3-Clause)

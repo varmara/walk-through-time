@@ -93,8 +93,10 @@ Heritage, Today, ...). A dataset the pipeline does not download yet needs a fetc
 ## Checking your layer
 
 ```bash
-python -m pipeline.run nottingham            # everything (downloads take a few minutes)
-python -m pipeline.run nottingham --from s04  # only stories, layers and packaging, reusing downloads in work/
+tools/fetch-built.sh                          # the last build's data and work files, from GitHub
+python -m pipeline.run nottingham --from s04  # then any step onwards, without downloading anything
+python -m pipeline.run nottingham            # or everything (downloads take a few minutes)
+python -m unittest discover -s tests -t .     # the checks the build runs before publishing
 python3 -m http.server 8642                   # then open http://localhost:8642/nottingham/
 ```
 

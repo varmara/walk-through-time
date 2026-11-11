@@ -5,20 +5,28 @@ whose code changed and reuse the rest from the last build (restored from the Act
 or "all" when the whole pipeline must run: the area or the workflow changed, or shared code (common.py, run.py).
 
   git diff --name-only BEFORE AFTER | python -m pipeline.plan
+  git diff --name-only BEFORE AFTER | python -m pipeline.plan --needs-build    the changed files a build needs
+                                                                              (none: only the page changed)
 """
 import sys
 
 from .run import STEPS
 
-START = {"stories/": "s04_curated", "pipeline/layers.py": "s06_layers", "pipeline/plan.py": None}
+START = {"stories/": "s04_curated", "pipeline/layers.py": "s06_layers", "pipeline/plan.py": None,
+         "tests/": "s10_tiles"}          # the checks run after the last step: run that one again
 EVERYTHING = ("cities/", "pipeline/common.py", "pipeline/run.py", "pipeline/__init__.py", ".github/workflows/build-data.yml")
+
+
+def needs_build(p):
+    p = p.strip()
+    return bool(p) and p.startswith(("pipeline/", "stories/", "cities/", "tests/", ".github/"))
 
 
 def start_for(paths):
     first = None
     for p in paths:
         p = p.strip()
-        if not p or not p.startswith(("pipeline/", "stories/", "cities/", ".github/")):
+        if not needs_build(p):
             continue            # the page, the README, the data itself: nothing to rebuild for
         if p.startswith(EVERYTHING):
             return "all"
@@ -34,4 +42,8 @@ def start_for(paths):
 
 
 if __name__ == "__main__":
-    print(start_for(sys.stdin.read().splitlines()))
+    lines = sys.stdin.read().splitlines()
+    if "--needs-build" in sys.argv:
+        print("\n".join(p for p in lines if needs_build(p)))
+    else:
+        print(start_for(lines))
