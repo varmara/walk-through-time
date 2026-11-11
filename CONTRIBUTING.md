@@ -101,4 +101,6 @@ python3 -m http.server 8642                   # then open http://localhost:8642/
 ```
 
 `data/<city>-report.md` lists every story that was dropped and why, and how each kept story was placed.
+`data/<city>-changes.md` lists every building whose title, year or listing changed since the last build.
+When you fix a name, add the building to `tests/expected/<city>-names.md` so the fix cannot quietly break again.
 On GitHub the pipeline runs automatically when `stories/`, `pipeline/` or `cities/` change.

@@ -11,7 +11,7 @@ Writes work/<city>/summaries.json: {building index: {"text", "src": {title, url,
 import re
 import urllib.parse
 
-from .common import building_name, marker, http, tidy_listing, load, log, save
+from .common import marker, http, tidy_listing, load, log, save
 from .s05_dates import info_for, osm_article
 
 WIKI = "https://en.wikipedia.org/w/api.php"
@@ -186,10 +186,7 @@ def main(city_id):
     for pl in load(city_id, "places"):
         if pl["b"] is not None:
             inside.setdefault(pl["b"], []).append(pl["tags"])
-    curated = load(city_id, "curated")
-    hand = curated.get("names", {})          # names chosen by hand in the stories file
-    cur = {str(e["b"]): e["name"] for e in curated["entries"]
-           if e["b"] is not None and e.get("layer") not in ("people", "facts") and e.get("names", True)}
+    names = load(city_id, "names")          # s06_names
 
     titles = {}
     for i, b in enumerate(buildings):
@@ -215,8 +212,10 @@ def main(city_id):
         best = (listing.get(k) or [None])[0]
         tags_list = [t] + [pt for pt in inside.get(i, []) if not marker(pt)]   # a war memorial inside is not its use
         info = info_for(b, i, wd, listing) or {}
-        place = next((p.get("name") for p in inside.get(i, []) if p.get("name") and not marker(p)), None)
-        name, today = building_name(t, hand.get(b["osm"]) or cur.get(k), info.get("label"), (best or {}).get("Name"), place)
+        nm = names.get(k, {})
+        name, today = nm.get("name"), nm.get("today")
+        if best and name == best.get("Name"):       # only Historic England's own words: written as an address
+            name = None
         if not name and not best:
             continue
         address = not name

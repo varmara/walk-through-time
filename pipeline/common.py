@@ -376,6 +376,12 @@ def he_names_more(he, osm):
     return bool(mine(he)) and bool(mine(osm)) and not (mine(he) & mine(osm))
 
 
+def house_numbers(n):
+    """An address's numbers as written: '15;16' -> '15 and 16', '3;5;7' -> '3, 5 and 7', '2-4' -> '2–4'."""
+    parts = [x.strip().replace("-", "–") for x in re.split(r"[;,]", n or "") if x.strip()]
+    return parts[0] if len(parts) == 1 else ", ".join(parts[:-1]) + " and " + parts[-1] if parts else ""
+
+
 def building_name(tags, story=None, label=None, listing_name=None, place=None):
     """(name, today): the name to show and, if different, who or what uses the building today.
 
@@ -396,7 +402,7 @@ def building_name(tags, story=None, label=None, listing_name=None, place=None):
                        _HE_TAIL.sub("", label).strip(" ,")) or label
         label = label[0].upper() + label[1:]
     num, street = tags.get("addr:housenumber"), tags.get("addr:street")
-    address = f"{num.replace('-', '–')} {street}" if num and street else None
+    address = f"{house_numbers(num)} {street}" if num and street else None
     # an unlisted shop, café or office with no name for the building itself: its address, the business 'Today'
     # (a building with only an address stays unnamed: its card is titled by the address)
     trade = tags.get("building") in ("retail", "commercial", "office", "industrial", "warehouse", "supermarket", "kiosk")
