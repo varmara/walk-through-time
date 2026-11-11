@@ -35,7 +35,7 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04      # pinned: the test browser (Playwright) and the cached tippecanoe are built for it
     timeout-minutes: 90
     env:
       # Scheduled runs and "refresh" runs download everything again; others reuse the saved download.
@@ -124,7 +124,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/tippecanoe
-          key: tippecanoe-2.79.0-${{ runner.os }}
+          key: tippecanoe-2.79.0-ubuntu-24.04
 
       - name: Build tippecanoe
         if: steps.plan.outputs.start != 'none' && steps.tippecanoe.outputs.cache-hit != 'true'
@@ -206,7 +206,7 @@ jobs:
           path: |
             ~/pw
             ~/.cache/ms-playwright
-          key: playwright-1.56.0-${{ runner.os }}
+          key: playwright-1.56.0-ubuntu-24.04
 
       - name: Check the page in a browser
         run: |
