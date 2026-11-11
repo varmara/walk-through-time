@@ -12,18 +12,11 @@ Writes work/<city>/residents.json: [{name, qid, title, url, sentence, address, b
 import re
 import urllib.parse
 
-from .common import http, load, log, save
+from .common import city, http, load, log, save
 from .s04_curated import occupations, people_group
 
 WIKI = "https://en.wikipedia.org/w/api.php"
 WDQS = "https://query.wikidata.org/sparql"
-# per city: Wikidata items of the city (places inside them count too, through 'located in'), other place names,
-# and words that place a sentence in the city
-PLACES = {
-    "nottingham": {"items": ["Q41262"], "labels": ["West Bridgford", "Wilford", "Clifton"],
-                   "words": ["nottingham", "west bridgford", "wilford", "clifton", "sneinton", "the meadows",
-                             "lace market", "the park estate", "the park, nottingham", "lenton", "radford", "hockley"]},
-}
 VERBS = re.compile(r"\b(lived|lives|living|born|died|home|house|resided|residence|moved|grew up|lodged|lodgings|"
                    r"rented|bought|stayed|settled|workshop|studio|practice|shop|premises|address)\b", re.I)
 TYPES = (r"Street|Road|Gate|Lane|Place|Terrace|Square|Row|Avenue|Drive|Crescent|Walk|Hill|Grove|Park|Close|Way|"
@@ -95,7 +88,7 @@ def wikitexts(titles):
 
 
 def main(city_id):
-    cfg = PLACES.get(city_id)
+    cfg = city(city_id).get("residents")
     if not cfg:
         save(city_id, "residents", [])
         return

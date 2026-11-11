@@ -578,6 +578,7 @@ function showCard(id){
   } else rows.push(['Built', '<span class="muted">not in open data yet</span>']);
   if (p.architect) rows.push(['Architect', esc(p.architect)]);
   if (p.grade) rows.push(['Listing', `Grade ${esc(p.grade)} listed`]);
+  if (p.council) rows.push(['Council', esc(p.council)]);      // whose planning rules apply, near the city's edges
   if (p.kind !== 'bridge') rows.push(['Height', `≈ ${Math.round(p.h)} m${p.levels ? ' · ' + esc(p.levels) + (p.levels === '1' ? ' storey' : ' storeys') : ''}`]);
   if (p.kind && p.kind !== 'yes') rows.push(['Type (OSM)', esc(p.kind.replace(/_/g, ' '))]);
   $('cFacts').innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
@@ -632,9 +633,13 @@ function showCard(id){
 function collHtml(cs){
   cs = cs || [];
   $('cColl').hidden = !cs.length;
+  // each site's credit, once (stories/<city>/credits.md)
+  const host = u => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return ''; } };
+  const credits = [...new Set(cs.map(c => (data.credits || {})[host(c.url)]).filter(Boolean))];
   $('cColl').innerHTML = cs.length ? '<h3>More old pictures</h3><p>' + cs.map(c =>
     `<a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.title)} →</a>`).join(' ')
-    + '</p><p class="src">Picture Nottingham: photographs from Nottingham Local Studies Library, © picturenottingham.co.uk. Linked, not shown, as they are not openly licensed.</p>' : '';
+    + '</p>' + credits.map(t => `<p class="src">${esc(t)}</p>`).join('')
+    + (credits.length ? '' : '<p class="src">Linked, not shown, as the pictures are not openly licensed.</p>') : '';
 }
 function showArea(p){
   ['cCredit', 'cDyk', 'cArch', 'cColl'].forEach(id => $(id).hidden = true);

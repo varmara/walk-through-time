@@ -20,8 +20,9 @@ open data ──► pipeline/ (Python, numbered steps) ──► data/<city>.jso
 |---|---|
 | `s00_fetch_osm` | Buildings, roads, water, parks and named places from OpenStreetMap |
 | `s00_fetch_heritage` | Listed buildings and scheduled monuments from Historic England |
-| `s00_fetch_plaques` | Commemorative plaques (Open Plaques, public domain), as published with locations by Nottingham City Council |
-| `s00_fetch_nature` | Nature Reserves, SSSIs and ancient woodland from Natural England; other nature reserves from OpenStreetMap |
+| `s00_fetch_plaques` | Commemorative plaques (Open Plaques, public domain), as published with locations by the councils that do (Nottingham City Council), and plaques mapped in OpenStreetMap |
+| `s00_fetch_nature` | Nature Reserves, SSSIs and ancient woodland from Natural England; other nature reserves from OpenStreetMap; Local Wildlife Sites from the council that publishes them |
+| `s00_fetch_councils` | The boundaries of the councils the map covers (ONS), and the local heritage lists of those that publish one |
 | `s01_buildings` | Building outlines and heights, the base map, named places matched to buildings |
 | `s02_listing` | Listed-building points matched to outlines |
 | `s02_listing_dates` | Dates of listed buildings from Wikipedia's ward and parish lists (written from the Historic England entries) |
@@ -90,8 +91,12 @@ to add one.
 
 ## Adding a city
 
-1. Add `cities/<id>.json` with the city's bounding box and starting view.
-2. Optionally add `stories/<id>.py` with story layers.
+1. Add `cities/<id>.json` with the city's bounding box and starting view, and the councils whose land it covers
+   (`councils`, by ONS code: the build reports any council in the area that is missing). Council map services
+   go under `sources`, by kind (`wildlife`, `plaques`, `localList`), each naming its publisher and credit; a
+   council with none of a kind is covered by the national sources (Historic England, Natural England, Open
+   Plaques and OpenStreetMap). `cities/nottingham.json` is an example with four councils.
+2. Optionally add `stories/<id>/` with story layers (Markdown; see CONTRIBUTING.md).
 3. Copy `nottingham/index.html` to `<id>/index.html` and change `data-city` and the titles.
 4. Add the city to the list on the landing page `index.html`.
 
@@ -110,5 +115,7 @@ itself inspired by Sasha Bogachev's [Paris, building by building](https://paris.
 - Historic England data, [Open Government Licence](https://historicengland.org.uk/terms/website-terms-conditions/open-data-hub/)
 - Wikidata, CC0
 - Open Plaques, public domain; plaque locations via Nottingham City Council
+- Council boundaries: Office for National Statistics, Open Government Licence (contains OS data © Crown copyright and database right)
+- Local Wildlife Sites and the Local Heritage List: © Nottingham City Council, contains Ordnance Survey data © Crown copyright and database rights
 - Wikipedia text, CC BY-SA; stories link to the articles they rest on
 - Historic maps reproduced with the permission of the [National Library of Scotland](https://maps.nls.uk/)

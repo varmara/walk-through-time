@@ -160,5 +160,66 @@
       "title": "Clifton, Nottingham – Wikipedia",
       "url": "https://en.wikipedia.org/wiki/Clifton,_Nottingham"
     }
-  ]
+  ],
+  "councils": {
+    "_about": "The councils whose land the map covers, by ONS code. pipeline/s00_fetch_councils.py fetches their boundaries (ONS, Open Government Licence) and warns about any council in the area that is not listed here. Each source below names the council that publishes it.",
+    "E06000018": "Nottingham City Council",
+    "E07000176": "Rushcliffe Borough Council",
+    "E07000172": "Broxtowe Borough Council",
+    "E07000173": "Gedling Borough Council"
+  },
+  "sources": {
+    "_about": "Council map services the pipeline reads, by kind. A council with no entry for a kind simply has none: plaques there come from OpenStreetMap and Open Plaques, conservation areas from Historic England.",
+    "wildlife": [
+      {
+        "publisher": "Nottingham City Council",
+        "covers": "all of Nottinghamshire",
+        "url": "https://maps164.nottinghamcity.gov.uk/server/rest/services/Core_services/Environment/MapServer/7",
+        "nameField": "SITE_NAME",
+        "credit": "© Nottingham City Council. Contains Ordnance Survey data © Crown copyright and database rights."
+      }
+    ],
+    "plaques": [
+      {
+        "publisher": "Nottingham City Council",
+        "council": "E06000018",
+        "url": "https://maps164.nottinghamcity.gov.uk/server/rest/services/Core_services/Housing_and_Property/MapServer/34"
+      }
+    ],
+    "localList": [
+      {
+        "publisher": "Nottingham City Council",
+        "council": "E06000018",
+        "title": "Nottingham Local Heritage List",
+        "url": "https://maps164.nottinghamcity.gov.uk/server/rest/services/Core_services/Planning/MapServer/19",
+        "page": "https://www.nottinghamcity.gov.uk/locallist",
+        "credit": "© Nottingham City Council. Contains Ordnance Survey data © Crown copyright and database rights."
+      }
+    ]
+  },
+  "residents": {
+    "_about": "For finding well-known residents in Wikipedia (s04_residents): the Wikidata items of the city (places in them count too), other places' names, and words that place a sentence here.",
+    "items": [
+      "Q41262"
+    ],
+    "labels": [
+      "West Bridgford",
+      "Wilford",
+      "Clifton"
+    ],
+    "words": [
+      "nottingham",
+      "west bridgford",
+      "wilford",
+      "clifton",
+      "sneinton",
+      "the meadows",
+      "lace market",
+      "the park estate",
+      "the park, nottingham",
+      "lenton",
+      "radford",
+      "hockley"
+    ]
+  }
 }

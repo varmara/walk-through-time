@@ -7,7 +7,8 @@ tagged leisure=nature_reserve, such as reserves run by wildlife trusts.
 Local councils: Local Wildlife Sites (once "Sites of Importance for Nature Conservation"), places of local
 importance for wildlife chosen by the county's Local Wildlife Sites partnership, such as the Fairham Brook
 corridor between Clifton and Silverdale. Most are not nature reserves and have no legal protection, but are
-looked after through the planning system. Nottingham City Council publishes them for the whole county area.
+looked after through the planning system. Which council publishes them is in the city's settings
+(cities/<city>.json, sources.wildlife): for Nottingham, the City Council publishes them for the whole county.
 
 Writes work/<city>/nature.json: GeoJSON features with properties {t: type key, name, source}.
 Only areas whose centre lies inside the city's polygon are kept, so large sites just across the boundary
@@ -23,11 +24,6 @@ TYPES = [
     ("sssi", "SSSI_England", "Site of Special Scientific Interest"),
     ("ancient", "Ancient_Woodland_England", "Ancient woodland"),
 ]
-# per city: council map services with Local Wildlife Sites (key, ArcGIS layer, name field, publisher)
-LOCAL = {
-    "nottingham": [("lws", "https://maps164.nottinghamcity.gov.uk/server/rest/services/Core_services/Environment/MapServer/7/query",
-                    "SITE_NAME", "Nottingham City Council")],
-}
 OVERPASS = ["https://overpass-api.de/api/interpreter", "https://overpass.private.coffee/api/interpreter",
             "https://overpass.kumi.systems/api/interpreter"]
 
@@ -126,7 +122,8 @@ def main(city_id):
         n += 1
     log(f"s00 OpenStreetMap nature reserves: {n} more areas")
 
-    for key, url, field, publisher in LOCAL.get(city_id, []):
+    for src in c.get("sources", {}).get("wildlife", []):
+        key, url, field, publisher = "lws", src["url"] + "/query", src.get("nameField", "NAME"), src["publisher"]
         try:
             gj = http(url, params={
                 "where": "1=1", "geometry": f"{b['w']},{b['s']},{b['e']},{b['n']}", "geometryType": "esriGeometryEnvelope",
@@ -149,8 +146,7 @@ def main(city_id):
             feats.append({"type": "Feature", "geometry": rnd(g),
                           "properties": {"t": key, "name": name or "Local Wildlife Site", "source": publisher,
                                          "url": url.rsplit("/query", 1)[0],
-                                         "credit": f"© {publisher}. Contains Ordnance Survey data © Crown copyright "
-                                                   "and database rights."}})
+                                         "credit": src.get("credit") or f"© {publisher}."}})
             n += 1
         log(f"s00 {publisher} Local Wildlife Sites: {n} more areas")
     save(city_id, "nature", feats)

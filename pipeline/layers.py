@@ -7,7 +7,7 @@ Groups split a layer into parts the page can show apart (for example listing gra
 These rules use only data the pipeline already downloads, so they work for any English city.
 Hand-written stories are a different kind of layer: see stories/<city>/ (Markdown) and CONTRIBUTING.md.
 """
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from .common import building_at, point_in_ring
 
@@ -16,6 +16,7 @@ LAYERS = []
 
 def layer(**meta):
     """meta: id, title, intro, section (heading in the Layers sheet), groups=[(key, title)], source=(title, url),
+    or settings="<kind>" to take the source from the city's settings (sources.<kind>: title and page),
     list=True to show the buildings' names in the Layers sheet (for layers with up to a few hundred buildings)."""
     def wrap(fn):
         LAYERS.append(dict(meta, fn=fn))
@@ -29,6 +30,7 @@ class Context:
     listing: dict      # {building index (str): [list entries, highest grade first]}
     places: list       # named OpenStreetMap points, with b = building index or None
     monuments: list    # Historic England scheduled monument features (GeoJSON)
+    locallist: list = field(default_factory=list)   # councils' local heritage lists (GeoJSON, s00_fetch_councils)
 
 
 # ---------- helpers for common joins ----------
@@ -83,6 +85,16 @@ def listed(ctx):
 def scheduled(ctx):
     return {i: ("scheduled", {"tpl": "scheduled", "of": f["properties"].get("Name", "").strip()})
             for f in ctx.monuments for i in within(ctx, [f], "scheduled")}
+
+
+@layer(id="locallist", title="Local heritage list", section="Heritage", list=True, settings="localList",
+       intro="Buildings and places a council protects locally: not nationally listed, but of local architectural "
+             "or historic interest, so planning decisions take them into account. Only some councils publish "
+             "their list as map data.",
+       groups=[("locallist", "On a local heritage list")])
+def locallist(ctx):
+    return {i: ("locallist", {"tpl": "locallist", "of": (f["properties"].get("name") or "").strip()})
+            for f in ctx.locallist for i in within(ctx, [f], "locallist")}
 
 
 @layer(id="pubs", title="Pubs and bars today", section="Today", list=True,

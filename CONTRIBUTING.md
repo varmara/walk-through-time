@@ -80,6 +80,7 @@ Tables in the same folder, each with a Note column saying why:
 | `wikipedia.md` | the Wikipedia article for a plaque's person, when the plaque's name is not the article's |
 | `plaques.md` | a label, group or type for a plaque, by the start of its inscription or its subject |
 | `collections.md` | collections of old pictures that are linked, not copied (not openly licensed) |
+| `credits.md` | the credit line shown under each linked collection's website |
 
 ## 2. A rule layer (from an open dataset)
 

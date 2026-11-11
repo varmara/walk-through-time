@@ -15,7 +15,7 @@ Writes layers.json:
 import re
 import urllib.parse
 
-from .common import TEMPLATES, building_at, load, log, save, work
+from .common import TEMPLATES, building_at, city, load, log, save, work
 from .layers import LAYERS, Context
 from .s04_curated import PEOPLE_GROUPS, people_group
 from .s05_dates import info_for
@@ -55,9 +55,8 @@ def plaque_label(text):
 
 def c_words(city_id):
     """Words that tie an article to the city: its name and its districts (as for well-known residents)."""
-    from .s04_residents import PLACES
-    from .common import city
-    return [city(city_id)["name"].lower()] + PLACES.get(city_id, {}).get("words", [])
+    c = city(city_id)
+    return [c["name"].lower()] + c.get("residents", {}).get("words", [])
 
 
 def full_text(title):
@@ -140,7 +139,9 @@ def about_people(want, words):
 
 def main(city_id):
     ctx = Context(load(city_id, "buildings"), load(city_id, "listing"), load(city_id, "places"),
-                  load(city_id, "monuments"))
+                  load(city_id, "monuments"),
+                  load(city_id, "locallist") if work(city_id, "locallist").exists() else [])
+    settings = city(city_id)
     cur = load(city_id, "curated")
     meta, member, stories, pins = [], {}, {}, []
 
@@ -327,19 +328,24 @@ def main(city_id):
                 g["items"] = sorted(grouped([[i, bname(i)] for i in members]), key=lambda it: it[0].lower())
             groups.append(g)
         src = L.get("source")
+        if L.get("settings"):       # the source named in the city's settings (several councils: the first one's)
+            ss = settings.get("sources", {}).get(L["settings"]) or []
+            src = (ss[0].get("title") or ss[0]["publisher"], ss[0].get("page") or ss[0]["url"]) if ss else None
         meta.append({"id": L["id"], "title": L["title"], "intro": L["intro"], "section": L.get("section", "Heritage"),
                      "kind": "rule", "groups": groups,
                      **({"source": {"title": src[0], "url": src[1]}} if src else {})})
         log(f"s06 {L['id']}: {len(res)} buildings")
 
     nature = load(city_id, "nature") if work(city_id, "nature").exists() else []
+    wild = [w for w in settings.get("sources", {}).get("wildlife", []) if w.get("credit")]
     groups = [{"key": k, "title": t, "count": sum(1 for f in nature if f["properties"]["t"] == k)} for k, t in NATURE]
     meta.append({"id": "nature", "title": "Nature", "section": "Nature", "kind": "areas",
                  "intro": "Protected and managed nature areas. National and Local Nature Reserves, Sites of Special "
                           "Scientific Interest and ancient woodland come from Natural England; other reserves from "
                           "OpenStreetMap. Local Wildlife Sites, places of local importance for wildlife such as stream "
-                          "corridors and old railway lines, come from Nottingham City Council's map data "
-                          "(© Nottingham City Council; contains Ordnance Survey data © Crown copyright).",
+                          "corridors and old railway lines, come from "
+                          + (" and ".join(f"{w['publisher']}'s map data ({w['credit']})" for w in wild) or "councils' map data")
+                          + ".",
                  "source": {"title": "Natural England open data", "url": "https://naturalengland-defra.opendata.arcgis.com/"},
                  "groups": [g for g in groups if g["count"]]})
     log(f"s06 nature: {len(nature)} areas")

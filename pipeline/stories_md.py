@@ -21,7 +21,7 @@ A story layer is one file, `NN-<id>.md` (NN sets the order):
     The story: one or two plain sentences, any number of lines.
 
 Corrections and links are tables, one file each (names.md, titles.md, wikipedia.md, plaques.md, tags.md,
-collections.md); each has a Note column for why. See stories/<city>/README.md.
+collections.md, credits.md); each has a Note column for why. See stories/<city>/README.md.
 """
 import re
 from pathlib import Path
@@ -124,4 +124,6 @@ def load(folder):
                 c[key] = vals
         colls.append(c)
     out["COLLECTIONS"] = colls
+    f = folder / "credits.md"
+    out["CREDITS"] = {r["site"]: r["credit"] for r in table(f)} if f.exists() else {}
     return out

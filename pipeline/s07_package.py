@@ -4,7 +4,7 @@
                             stats. Step s10_tiles turns it into what the page loads (tiles, a small index, card files).
   data/<city>-report.md   coverage of dates by precision and source, conflicts, layers, dropped stories
 
-Building properties: name, y (year), f (exact | approx | century), src, alts [{y, f, src}],
+Building properties: council (the council it is in), name, y (year), f (exact | approx | century), src, alts [{y, f, src}],
 h (height, m), base (bridges: deck height above the ground), levels, kind, osm, grade, listEntry, listName, listUrl, qid, image, article,
 architect, L (",group,group," for map filters), stories [{layer, text, source}],
 sum (one to three sentences) and sumSrc {title, url?, kind}.
@@ -18,6 +18,27 @@ import urllib.parse
 from .common import TEMPLATES, centroid, load, log, point_in_ring, save, work
 from .s00_fetch_nature import rings_of
 from .s05_dates import info_for, osm_article
+
+
+def councils(city_id):
+    """fn(x, y) -> the name of the council a point is in (s00_fetch_councils), or None. Looked up by small grid
+    cell, testing the outlines exactly only in cells a boundary crosses."""
+    cs = [(c["name"], rings_of(c["geometry"])) for c in (load(city_id, "councils") if work(city_id, "councils").exists() else [])]
+    if not cs:
+        return lambda x, y: None
+
+    def exact(x, y):
+        return next((n for n, rs in cs if any(point_in_ring(x, y, r) for r in rs)), None)
+    cells = {}
+
+    def at(x, y):
+        k = (int(x // 0.002), int(y // 0.002))
+        if k not in cells:
+            x0, y0 = k[0] * 0.002, k[1] * 0.002
+            corners = {exact(x0 + dx, y0 + dy) for dx in (0, 0.002) for dy in (0, 0.002)}
+            cells[k] = corners.pop() if len(corners) == 1 else ...
+        return exact(x, y) if cells[k] is ... else cells[k]
+    return at
 
 
 def main(city_id):
@@ -54,6 +75,7 @@ def main(city_id):
                 out.append({"title": c["title"], "url": c["url"]})
         return out or None
 
+    council_of = councils(city_id)
     feats = []
     for i, b in enumerate(buildings):
         t, k = b["tags"], str(i)
@@ -80,6 +102,7 @@ def main(city_id):
             "stories": lay["stories"].get(k),
             "sum": (sums.get(k) or {}).get("text"), "sumSrc": (sums.get(k) or {}).get("src"),
         }
+        p["council"] = council_of(*centroid(b["rings"][0]))
         p["coll"] = collections_for(name, p["L"], [s2.get("who") for s2 in p["stories"] or [] if s2.get("who")],
                                     centroid(b["rings"][0]))
         p = {kk: v for kk, v in p.items() if v not in (None, "", [])}
@@ -113,7 +136,7 @@ def main(city_id):
         if c:
             pp["coll"] = c
     out = {"city": city_id, "built": built, "stats": stats, "layers": lay["meta"], "nature": fc(nature), "pins": fc(pins),
-           "people": lay.get("people", {}), "templates": TEMPLATES,
+           "people": lay.get("people", {}), "templates": TEMPLATES, "credits": cur.get("credits", {}),
            "buildings": fc(feats), "roads": fc(base["roads"]), "water": fc(base["water"]), "parks": fc(base["parks"])}
     Path("data").mkdir(exist_ok=True)
     save(city_id, "package", out)
