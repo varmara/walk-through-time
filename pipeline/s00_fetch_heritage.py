@@ -88,3 +88,28 @@ def main(city_id):
         log(f"    failed, continuing without: {e}")
     save(city_id, "conservation", areas)
     log(f"    {len(areas)} conservation areas")
+
+    # registered parks and gardens: designed landscapes of special historic interest (the Arboretum, the cemeteries).
+    # The service's layer numbers are not fixed, so the layer is found by its name.
+    log("s00 Historic England: registered parks and gardens")
+    parks = []
+    try:
+        layer = next((L["id"] for L in http(NHLE, params={"f": "json"}).get("layers", [])
+                      if re.search(r"park", L.get("name", ""), re.I) and re.search(r"garden", L.get("name", ""), re.I)), None)
+        if layer is None:
+            raise RuntimeError("no parks and gardens layer in the service")
+        for f in query(layer, b, "*").get("features", []):
+            g, pr = f.get("geometry") or {}, f.get("properties") or {}
+            rings = [g["coordinates"][0]] if g.get("type") == "Polygon" else [q[0] for q in g.get("coordinates", [])] if g.get("type") == "MultiPolygon" else []
+            pts = [pt for ring in rings for pt in ring]
+            if not pts or (poly and not any(inside(*q) for q in pts[::3])):
+                continue
+            get = lambda *ks: next((pr[k] for k in ks if pr.get(k) not in (None, "")), None)  # noqa: E731
+            parks.append({"type": "Feature", "geometry": g, "properties": {
+                "t": "parkgarden", "name": (get("Name", "NAME") or "Registered park or garden").strip(),
+                "grade": get("Grade", "GRADE"), "listEntry": get("ListEntry", "LISTENTRY", "List_Entry"),
+                "url": get("hyperlink", "Hyperlink", "URL"), "source": "Historic England"}})
+    except Exception as e:  # noqa: BLE001 - optional layer
+        log(f"    failed, continuing without: {e}")
+    save(city_id, "parks", parks)
+    log(f"    {len(parks)} registered parks and gardens: {', '.join(p['properties']['name'] for p in parks)}")
