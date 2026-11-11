@@ -211,7 +211,8 @@ function pinCard(p){
   if (open.length) { rows.push(...open); if (p.oh) open[0][1] += `<div class="hint">${esc(HOURS_NOTE)}</div>`; }
   if (p.fee) rows.push(['Admission', esc(fee(p.fee))]);
   if (WHEELCHAIR[p.wc]) rows.push(['Access', esc(WHEELCHAIR[p.wc])]);
-  if (p.op) rows.push(['Run by', esc(p.op)]);
+  if (p.op || p.gov) rows.push(['Run by', esc(p.op || p.gov)]);
+  if (p.acc) rows.push(['Accreditation', esc(p.acc)]);
   return { title: p.name, rows, stories: [{ text: p.text, source: J(p.source), place: J(p.place), who: p.who }], coll: J(p.coll),
            links: placeLinks(p, false) };
 }

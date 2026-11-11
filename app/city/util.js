@@ -15,7 +15,7 @@ export let ERAS = [[0, 1699, 'before 1700'], [1700, 1799, '1700s'], [1800, 1839,
 export const FADE = { exact: 0, approx: 0.2, century: 0.35, area: 0.45 };   // how far each precision fades towards the background
 export const SECTIONS = ['Stories', 'Visit', 'People', 'Heritage', 'Nature', 'Today'];
 export const AREA_TYPES = ['nnr', 'lnr', 'sssi', 'ancient', 'reserve', 'lws', 'conservation', 'parkgarden', 'article4', 'tpo'];   // areas drawn on the ground
-export const PIN_LAYERS = ['attractions', 'art', 'boards'];   // pins with a colour of their own (--p-<layer>); other pins --marked
+export const PIN_LAYERS = ['attractions', 'art', 'boards', 'museums'];   // pins with a colour of their own (--p-<layer>); other pins --marked
 export const BASICS = ['toilets', 'water', 'benches'];                   // points drawn close up (--b-<key>)
 
 export const $ = id => document.getElementById(id);

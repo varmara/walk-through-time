@@ -1,7 +1,7 @@
 """Resolve every layer to what it contains, grouped into the sections of the page's Layers sheet.
 
 Story layers come from step s04, the People layer from s06_people, rule layers from pipeline/layers.py, nature
-areas from step s00_fetch_nature, the layers for visitors from
+areas from step s00_fetch_nature, the layers for visitors and the lists (Mapping Museums) from
 visitorlayers.py, and the other areas (conservation areas, parks and gardens, Article 4 areas, tree preservation
 orders) from the s00 steps, in the order of layerdata.AREAS. Each layer has one or more groups; each group is one tickbox on the page.
 
@@ -18,7 +18,7 @@ Writes layers.json, and routes.json and basics.json (GeoJSON features for s07):
 from .common import city, load, log, save, work
 from .layerdata import AREAS, Collector, grouped
 from .layers import LAYERS, Context
-from .visitorlayers import visitor
+from .visitorlayers import museums, visitor
 
 NATURE = [
     ("nnr", "National Nature Reserves"),
@@ -158,7 +158,7 @@ def main(city_id):
                                  **({"items": items} if len(items) <= 400 else {})}]})
         log(f"s06 {L['title'].lower()}: {len(feats)}")
 
-    meta += visitor_meta
+    meta += visitor_meta + museums(city_id, ctx, out)
     save(city_id, "routes", routes)
     save(city_id, "basics", basics)
     save(city_id, "layers", {"meta": meta, **out.json(), "names": names, "people": ppl["about"]})

@@ -1,10 +1,11 @@
-"""Layers for visitors: called by s06_layers.
+"""Layers for visitors, and the layers that come from lists rather than rules: called by s06_layers.
 
   attractions   museums, galleries, attractions and viewpoints (OpenStreetMap): the building they are in, or a pin
   art           statues, sculpture, murals and memorials: pins, with Art UK's page where there is one
   boards        information boards about history and nature: pins
   routes        waymarked walking routes: lines, items r<index>
   basics        toilets, drinking water and benches: points drawn only close up, from the tiles
+  museums       Mapping Museums: museums open now and closed since, on their building or as a pin
 
 Each returns the layer's meta (as s06_layers.py describes) and fills the Collector with members, stories and pins.
 A pin's extra fields (osm, kind, artist, start, oh, web, wd, wp, artuk, fee, wc) are what its card shows.
@@ -14,8 +15,10 @@ import re
 from .common import load, log, work
 from .geo import building_at, metres
 from .layerdata import grouped
+from .s00_fetch_museums import DATASET
 
 OSM = ("OpenStreetMap", "https://www.openstreetmap.org/copyright")
+MMSOURCE = {"kind": "Mapping Museums", "title": "Mapping Museums Data, Birkbeck, University of London (CC BY 4.0)", "url": DATASET}
 
 
 def an(word):
@@ -158,5 +161,36 @@ def visitor(city_id, ctx, out):
                                 for k, t in GROUPS["basics"] if any(f["properties"]["t"] == k for f in basics)]})
     log(f"s06 basics: {len(basics)} points")
     return meta, routes, basics
+
+
+def museums(city_id, ctx, out):
+    """Mapping Museums: each museum's building, or a pin where its address stands on none."""
+    if not work(city_id, "museums").exists() or not load(city_id, "museums"):
+        return []
+    items = {"mm-open": [], "mm-closed": []}
+    for m in load(city_id, "museums"):
+        g = "mm-closed" if m["closed"] else "mm-open"
+        when = lambda y: f"in {y}" if y and not y.startswith("between") else (y or "")  # noqa: E731
+        text = (f"{m['name']} opened {when(m['opened'])}".rstrip() + (f" and closed {when(m['closed'])}" if m["closed"] else "")
+                + "." + (f" Subject: {m['subject'].lower()}." if m.get("subject") else ""))
+        b = building_at(ctx.buildings, m["x"], m["y"], near=15)
+        if b is not None:
+            out.add(b, g, "museums", text, MMSOURCE)
+            items[g].append([b, m["name"]])
+        else:
+            ref = out.pin(m["x"], m["y"], m["name"], "museums", g, text, MMSOURCE,
+                          extra={k: x for k, x in {"kind": "museum", "gov": m.get("governance"),
+                                                   "acc": m.get("accreditation")}.items() if x})
+            items[g].append([ref, m["name"]])
+    log(f"s06 museums (Mapping Museums): {len(items['mm-open'])} open, {len(items['mm-closed'])} closed")
+    return [{"id": "museums", "title": "Museums, past and present", "section": "Visit", "kind": "rule",
+             "intro": "Every museum open in the city at some time since 1960, with the years it opened and closed: the "
+                      "big ones and the small ones, and those that have gone. From Mapping Museums, a research project at "
+                      "Birkbeck, University of London; its data runs to 2021. A museum stands on its building, or is a pin "
+                      "at its address.",
+             "source": {"title": "Mapping Museums (Birkbeck, CC BY 4.0)", "url": DATASET},
+             "groups": [{"key": k, "title": t, "count": len(items[k]),
+                         "items": sorted(grouped(items[k]), key=lambda it: it[0].lower())}
+                        for k, t in (("mm-open", "Open"), ("mm-closed", "Closed since")) if items[k]]}]
 
 
