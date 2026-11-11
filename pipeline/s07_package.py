@@ -11,6 +11,7 @@ sum (one to three sentences) and sumSrc {title, url?, kind},
 open [{name?, what?, oh?, web?}]: opening hours and websites from OpenStreetMap, of the building itself (no name)
 and of the places inside it (a pub, a museum, a shop), for the card's "Open" rows.
 """
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 import json
@@ -44,6 +45,23 @@ def councils(city_id):
             cells[k] = corners.pop() if len(corners) == 1 else ...
         return exact(x, y) if cells[k] is ... else cells[k]
     return at
+
+
+# whose opening hours a card shows: pubs and old inns, museums and other public places
+PUBLIC = {"amenity": {"pub", "place_of_worship", "library", "townhall", "theatre", "arts_centre", "community_centre",
+                      "cinema", "courthouse"},
+          "tourism": {"museum", "gallery", "attraction", "viewpoint", "zoo", "theme_park"},
+          "leisure": {"park", "garden", "nature_reserve"}}
+
+
+def visitor_place(t, name=None):
+    if any(t.get(k) in v for k, v in PUBLIC.items()) or (t.get("tourism") == "information" and t.get("information") == "office"):
+        return True
+    if t.get("historic") and not t.get("shop") and t.get("amenity") not in ("bar", "restaurant", "cafe", "fast_food"):
+        return True
+    # an old inn that is now a hotel or a restaurant still is one
+    return bool(re.search(r"\binn\b", name or t.get("name") or "", re.I)) and \
+        (t.get("tourism") in ("hotel", "guest_house") or t.get("amenity") in ("bar", "restaurant"))
 
 
 def main(city_id):
@@ -81,9 +99,11 @@ def main(city_id):
         return out or None
 
     # opening hours and websites: the building's own, then the places inside it
-    WHAT = ("tourism", "amenity", "shop", "leisure", "office", "craft")
+    WHAT = ("tourism", "amenity", "leisure", "historic")
 
     def open_info(t, name=None):
+        if not visitor_place(t, name):     # no bars, cafés, restaurants, shops or offices: pubs, inns, public places
+            return None
         oh = (t.get("opening_hours") or "").strip()
         web = (t.get("website") or t.get("contact:website") or t.get("url") or "").strip()
         if not web.startswith("http"):

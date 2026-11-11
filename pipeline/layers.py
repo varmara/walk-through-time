@@ -97,11 +97,10 @@ def locallist(ctx):
             for f in ctx.locallist for i in within(ctx, [f], "locallist")}
 
 
-@layer(id="pubs", title="Pubs and bars today", section="Today", list=True,
-       intro="Buildings with a pub or a bar in them today, according to OpenStreetMap. A place missing here is "
-             "missing or tagged differently in OpenStreetMap, where anyone can add it.",
-       groups=[("pubs", "Pubs"), ("bars", "Bars")],
+@layer(id="pubs", title="Pubs today", section="Today", list=True,
+       intro="Buildings with a pub in them today, according to OpenStreetMap. A pub missing here is missing or "
+             "tagged differently in OpenStreetMap, where anyone can add it.",
+       groups=[("pubs", "Pubs")],
        source=("OpenStreetMap", "https://www.openstreetmap.org/copyright"))
 def pubs(ctx):
-    return containing_places(ctx, lambda t: t.get("amenity") in ("pub", "bar"),
-                             lambda t: "pubs" if t.get("amenity") == "pub" else "bars")
+    return containing_places(ctx, lambda t: t.get("amenity") == "pub", "pubs")
