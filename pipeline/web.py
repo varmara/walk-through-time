@@ -78,6 +78,25 @@ def http(url, data=None, params=None, accept="application/json", tries=4, timeou
     raise RuntimeError(f"{url.split('?')[0]}: {last}")
 
 
+def http_bytes(url, tries=3, timeout=180):
+    """A file as it is (a CSV, say), saved like the other answers."""
+    hit = cached("bytes", url)
+    if hit is not None:
+        return hit
+    last = None
+    for attempt in range(tries):
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": UA})
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                raw = r.read()
+            keep("bytes", url, None, raw)
+            return raw
+        except Exception as e:  # noqa: BLE001
+            last = e
+            time.sleep(10 * (attempt + 1))
+    raise RuntimeError(f"{url}: {last}")
+
+
 def http_text(url, tries=3, timeout=60):
     """A web page as plain text (tags removed), for checking facts against it."""
     import html as _html
