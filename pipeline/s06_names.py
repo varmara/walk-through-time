@@ -1,7 +1,7 @@
 """What each building is called: one place for every naming rule, so the card, the summary, the share page and the
 checks in tests/ all see the same names.
 
-For each building (rules in common.py: building_name, other_names, landmark, same_place, marker):
+For each building (rules in names.py: building_name, other_names, landmark, same_place, marker):
   name    what the building was: a hand-chosen name (stories/<city>/names.md), a story's place name, its own name
           in OpenStreetMap, Historic England's, Wikidata's, an old name, a named place inside it
   today   who or what uses it now, when that is not its name (the card's Today row)
@@ -14,7 +14,9 @@ Reads buildings, listing, wikidata, curated, layers, places and base. Writes nam
 """
 import re
 
-from .common import BUILDINGISH, LANDMARK, building_name, centroid, house_numbers, landmark, load, log, marker, metres, other_names, same_place, save
+from .common import load, log, save
+from .geo import centroid, metres
+from .names import BUILDINGISH, LANDMARK, building_name, house_numbers, landmark, marker, other_names, same_place
 from .s05_dates import info_for
 
 NOT_A_BUILDING = re.compile(r"^(railings|walls?|gates?|gate piers|steps|boundary)\b", re.I)

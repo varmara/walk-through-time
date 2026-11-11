@@ -20,7 +20,10 @@ import html
 import re
 import time
 
-from .common import building_name, centroid, city, http, load, log, metres, point_in_ring, save, tidy_listing
+from .common import city, load, log, save
+from .web import http
+from .geo import centroid, metres, point_in_ring
+from .names import building_name, tidy_listing
 
 API = "https://commons.wikimedia.org/w/api.php"
 CELL_LAT, CELL_LON, RADIUS = 0.0040, 0.0065, 320

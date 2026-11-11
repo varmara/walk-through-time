@@ -19,7 +19,8 @@ import shutil
 import urllib.parse
 from pathlib import Path
 
-from .common import load, city, log, story_text
+from .common import city, load, log
+from .texts import story_text
 
 
 def site_url():

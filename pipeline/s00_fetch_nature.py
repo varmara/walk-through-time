@@ -14,7 +14,9 @@ Writes work/<city>/nature.json: GeoJSON features with properties {t: type key, n
 Only areas whose centre lies inside the city's polygon are kept, so large sites just across the boundary
 stay out. OpenStreetMap reserves whose centre lies inside a Natural England area are left out as duplicates.
 """
-from .common import city, http, log, point_in_ring, save
+from .common import city, log, save
+from .web import http
+from .geo import point_in_ring
 
 NE = "https://services.arcgis.com/JJzESW51TqeY9uat/ArcGIS/rest/services/{}/FeatureServer/0/query"
 TYPES = [

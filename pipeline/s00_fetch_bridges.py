@@ -10,7 +10,9 @@ Writes work/<city>/bridges.json: [{osm, rings, tags, base}]  base = height of th
 """
 import math
 
-from .common import city, http, log, metres, point_in_ring, rnd, save, stitch_rings
+from .common import city, log, save
+from .web import http
+from .geo import metres, point_in_ring, rnd, stitch_rings
 from .s00_fetch_osm import OVERPASS
 
 MIN_LEN = 25

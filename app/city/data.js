@@ -90,7 +90,7 @@ export const centreOf = b => {
   return [ring.reduce((a, c) => a + c[0], 0) / ring.length, ring.reduce((a, c) => a + c[1], 0) / ring.length];
 };
 // a story as shown: a plaque's words are stored once, on its pin, and shown on its building's card too
-// and words the same but for a name are a template (pipeline/common.py: TEMPLATES): "Designed by {who}…"
+// and words the same but for a name are a template (pipeline/texts.py: TEMPLATES): "Designed by {who}…"
 export function storyOf(s){
   if (s.text) return s;
   if (s.tpl) return { ...s, text: (S.data.templates?.[s.tpl] || '').replace('{who}', s.who || '').replace('{of}', s.of || '') };

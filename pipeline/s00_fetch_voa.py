@@ -16,7 +16,9 @@ import time
 import urllib.request
 import zipfile
 
-from .common import UA, cached, city, http, keep, log, point_in_ring, save
+from .common import city, log, save
+from .web import UA, cached, http, keep
+from .geo import point_in_ring
 
 CTSOP = "https://assets.publishing.service.gov.uk/media/648affc9b32b9e0012a96867/CTSOP4_1_2020-2023_03_31.zip"
 LSOA = ("https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/"

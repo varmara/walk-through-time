@@ -16,7 +16,8 @@ import json
 import time
 from pathlib import Path
 
-from .common import city, http, log, save, work
+from .common import city, log, save, work
+from .web import http
 
 OVERPASS = [
     "https://overpass-api.de/api/interpreter",

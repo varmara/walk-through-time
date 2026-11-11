@@ -11,7 +11,9 @@ subject, type, roles, primary}].
 """
 import re
 
-from .common import city, http, log, point_in_ring, save
+from .common import city, log, save
+from .web import http
+from .geo import point_in_ring
 
 FIELDS = {"PLAQUE_ID": "id", "TITLE": "title", "INSCRIPTION": "inscription", "ADDRESS": "address", "YEAR_ERECTED": "year",
           "PHOTOGRAPH": "photo", "COLOUR": "colour", "ORGANISATION": "org", "LEAD_SUBJECT_NAME": "subject",
@@ -60,7 +62,7 @@ def same_words(a, b):
 def osm_plaques(city_id, b, poly, have):
     """Plaques mapped in OpenStreetMap (memorial=plaque / blue_plaque), skipping any within 15 m of one we have.
     One small query for plaque nodes only; it does not touch the saved building download."""
-    from .common import metres
+    from .geo import metres
     from .s00_fetch_osm import OVERPASS
     q = (f'[out:json][timeout:120];(node["memorial"~"^(plaque|blue_plaque)$"]({b["s"]},{b["w"]},{b["n"]},{b["e"]});'
          f'node["openplaques:id"]({b["s"]},{b["w"]},{b["n"]},{b["e"]}););out;')

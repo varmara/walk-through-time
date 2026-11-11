@@ -11,7 +11,9 @@ Writes work/<city>/summaries.json: {building index: {"text", "src": {title, url,
 import re
 import urllib.parse
 
-from .common import marker, http, tidy_listing, load, log, save
+from .common import load, log, save
+from .web import http
+from .names import marker, tidy_listing
 from .s05_dates import info_for, osm_article
 
 WIKI = "https://en.wikipedia.org/w/api.php"

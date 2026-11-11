@@ -15,7 +15,9 @@ import json
 from collections import Counter
 import urllib.parse
 
-from .common import TEMPLATES, centroid, load, log, point_in_ring, save, work
+from .common import load, log, save, work
+from .geo import centroid, point_in_ring
+from .texts import TEMPLATES
 from .s00_fetch_nature import rings_of
 from .s05_dates import info_for, osm_article
 

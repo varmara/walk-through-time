@@ -7,7 +7,9 @@ Licence: Open Government Licence, © Historic England.
 """
 import re
 
-from .common import city, http, log, point_in_ring, save
+from .common import city, log, save
+from .web import http
+from .geo import point_in_ring
 
 NHLE = ("https://services-eu1.arcgis.com/ZOdPfBS3aqqDYPUQ/arcgis/rest/services/"
         "National_Heritage_List_for_England_NHLE_v02_VIEW/FeatureServer")

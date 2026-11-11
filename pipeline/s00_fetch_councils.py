@@ -12,7 +12,8 @@ listed (sources.localList). Only the councils that publish one as map data are f
 Writes work/<city>/councils.json: [{code, name, geometry}] and work/<city>/locallist.json: GeoJSON features with
 {name, council, status}.
 """
-from .common import city, http, log, save
+from .common import city, log, save
+from .web import http
 from .s00_fetch_nature import reaches, rings_of, rnd
 
 # tried in order: ONS republishes the boundaries every year, under a new name

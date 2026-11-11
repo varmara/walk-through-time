@@ -11,7 +11,9 @@ Writes work/<city>/listdates.json: {list entry number: {"text": date as written,
 """
 import re
 
-from .common import http, load, log, metres, save
+from .common import load, log, save
+from .web import http
+from .geo import metres
 
 WIKI = "https://en.wikipedia.org/w/api.php"
 # per city: Wikipedia categories holding the lists, and searches that find lists outside them

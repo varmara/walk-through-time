@@ -15,7 +15,9 @@ Writes layers.json:
 import re
 import urllib.parse
 
-from .common import TEMPLATES, building_at, city, load, log, save, work
+from .common import city, load, log, save, work
+from .geo import building_at
+from .texts import TEMPLATES
 from .layers import LAYERS, Context
 from .s04_curated import PEOPLE_GROUPS, people_group
 from .s05_dates import info_for
@@ -61,7 +63,7 @@ def c_words(city_id):
 
 def full_text(title):
     """The whole plain text of a Wikipedia article (one per request, the API's limit for whole articles)."""
-    from .common import http
+    from .web import http
     try:
         r = http("https://en.wikipedia.org/w/api.php", params={"action": "query", "prop": "extracts", "explaintext": "1",
                                                                "redirects": "1", "format": "json", "titles": title})
@@ -75,7 +77,7 @@ def about_people(want, words):
     An article comes from the entry's own source, or the plaque's or architect's Wikidata item; for a plaque with
     only a name, from Wikidata's search, used only when exactly one person of that name has an English article
     that mentions the city (two Thomas Hines, one of them from Nottingham)."""
-    from .common import http
+    from .web import http
     from .s06_summaries import extracts, trim
     WD = "https://www.wikidata.org/w/api.php"
     by_qid = {n: h["qid"] for n, h in want.items() if "title" not in h and h.get("qid")}
@@ -157,7 +159,7 @@ def main(city_id):
             member[str(i)].append(group)
         if pin_ref:          # a plaque on this building: its words are stored once, on the plaque's pin
             stories.setdefault(str(i), []).append({"layer": layer_id, "pin": pin_ref, **({"who": who} if who else {})})
-        elif tpl:            # the same words but for a name: a template (common.TEMPLATES)
+        elif tpl:            # the same words but for a name: a template (texts.TEMPLATES)
             stories.setdefault(str(i), []).append({"layer": layer_id, "tpl": tpl, **({"who": who} if who else {}),
                                                    **({"of": of} if of else {}), **({"source": source} if source else {})})
         elif story:

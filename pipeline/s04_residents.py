@@ -12,7 +12,8 @@ Writes work/<city>/residents.json: [{name, qid, title, url, sentence, address, b
 import re
 import urllib.parse
 
-from .common import city, http, load, log, save
+from .common import city, load, log, save
+from .web import http
 from .s04_curated import occupations, people_group
 
 WIKI = "https://en.wikipedia.org/w/api.php"

@@ -32,7 +32,10 @@ from pathlib import Path
 from urllib.parse import quote
 
 from . import stories_md
-from .common import marker, building_at, http, http_text, load, log, parse_year, save
+from .common import load, log, parse_year, save
+from .web import http, http_text
+from .geo import building_at
+from .names import marker
 
 
 def main_outline(buildings, bs):

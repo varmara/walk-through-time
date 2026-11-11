@@ -28,7 +28,8 @@ import time
 from collections import Counter
 from pathlib import Path
 
-from .common import centroid, load, log
+from .common import load, log
+from .geo import centroid
 
 CHUNK = 1000
 MIN_Z, MAX_Z = 10, 15         # zoomed out (10-11) the smallest buildings are left out so tiles stay small

@@ -54,7 +54,7 @@ few minutes. The twice-yearly runs, and manual runs with **refresh** ticked, dow
 Answers from the other web services (Wikipedia, Wikidata, Commons, Historic England, Natural England, Council Tax)
 are saved too, in the Actions cache, and a build triggered by a change reuses them, asking only for what is new.
 It also starts at the earliest step whose code changed (a story change starts at `s04_curated`), reusing the last
-build's intermediate files (`pipeline/plan.py`). Changes to `common.py`, `run.py`, the workflow or a city's settings
+build's intermediate files (`pipeline/plan.py`). Changes to shared modules (`common.py`, `web.py`, `geo.py`, `names.py`, `texts.py`), `run.py`, the workflow or a city's settings
 run every step. The twice-yearly and **refresh** runs start from nothing.
 
 ```

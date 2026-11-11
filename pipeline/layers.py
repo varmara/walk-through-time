@@ -9,7 +9,7 @@ Hand-written stories are a different kind of layer: see stories/<city>/ (Markdow
 """
 from dataclasses import dataclass, field
 
-from .common import building_at, point_in_ring
+from .geo import building_at, point_in_ring
 
 LAYERS = []
 

@@ -8,7 +8,8 @@ the Lace Market story of a warehouse Hine designed) is linked there too, as in a
 import json
 from pathlib import Path
 
-from .common import load, log, story_text
+from .common import load, log
+from .texts import story_text
 
 
 def main(city_id):

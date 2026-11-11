@@ -1,4 +1,4 @@
-"""Names: the rules (common.py, s06_names.py) on made-up tags, and the titles of known buildings in the last build.
+"""Names: the rules (names.py, s06_names.py) on made-up tags, and the titles of known buildings in the last build.
 
 The second part reads the build's work files (work/<city>/names.json); it is skipped when they are not there.
 Add a row to tests/expected/<city>-names.md whenever a name is fixed, so it cannot quietly break again.
@@ -7,7 +7,7 @@ import json
 import unittest
 from pathlib import Path
 
-from pipeline.common import building_name, marker, other_names, tidy_listing
+from pipeline.names import building_name, marker, other_names, tidy_listing
 from pipeline.s06_names import full_title
 from pipeline.stories_md import table
 
@@ -53,7 +53,7 @@ class Rules(unittest.TestCase):
         self.assertEqual(building_name({"addr:housenumber": "4", "addr:street": "High Pavement"}), (None, None))
 
     def test_house_numbers(self):
-        from pipeline.common import house_numbers
+        from pipeline.names import house_numbers
         self.assertEqual([house_numbers(n) for n in ("15;16", "3;5;7", "2-4", "12")], ["15 and 16", "3, 5 and 7", "2–4", "12"])
 
     def test_markers(self):

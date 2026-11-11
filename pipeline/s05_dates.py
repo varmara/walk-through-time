@@ -31,7 +31,8 @@ import re
 
 import math
 
-from .common import APPROX, AREA, CENTURY, EXACT, bbox, centroid, load, log, point_in_ring, save, work
+from .common import APPROX, AREA, CENTURY, EXACT, load, log, save, work
+from .geo import bbox, centroid, point_in_ring
 
 RANK = {EXACT: 3, APPROX: 2, CENTURY: 1, AREA: 0}
 HOMES = {"house", "detached", "semidetached_house", "terrace", "residential", "apartments", "bungalow", "flats",
@@ -96,7 +97,7 @@ def wikidata_year(info):
 def info_for(b, i, wd, listing):
     """The building's Wikidata item: the one Historic England's list entry points to, else the outline's
     wikidata tag (unless a business occupies the outline: then the tag is often the company, not the building)."""
-    from .common import occupied
+    from .names import occupied
     t = b["tags"]
     for e in listing.get(str(i), []):
         if f"nhle:{e['ListEntry']}" in wd:
@@ -107,7 +108,7 @@ def info_for(b, i, wd, listing):
 
 def osm_article(t):
     """English Wikipedia title from the outline's tags, unless it probably describes the occupier."""
-    from .common import occupied
+    from .names import occupied
     w = t.get("building:wikipedia") or (t.get("wikipedia") if not occupied(t) else None)
     return w[3:] if w and w.startswith("en:") else None
 

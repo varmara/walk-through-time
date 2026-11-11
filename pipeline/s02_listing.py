@@ -12,7 +12,9 @@ Reads buildings.json, listed.json and places.json. Writes listing.json: {buildin
 """
 import re
 
-from .common import building_at, centroid, load, log, metres, save, tidy_listing
+from .common import load, log, save
+from .geo import building_at, centroid, metres
+from .names import tidy_listing
 
 RANK = {"I": 3, "II*": 2, "II": 1}
 NEAR_NAME = 40

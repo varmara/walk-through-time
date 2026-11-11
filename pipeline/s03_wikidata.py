@@ -7,7 +7,8 @@ Licence: CC0.
 import re
 import time
 
-from .common import http, load, log, save
+from .common import load, log, save
+from .web import http
 
 WDQS = "https://query.wikidata.org/sparql"
 FIELDS = """

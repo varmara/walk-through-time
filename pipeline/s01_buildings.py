@@ -5,7 +5,8 @@ Reads work/<city>/osm.json. Writes:
   base.json       {roads, water, parks}         GeoJSON for the plain base map
   places.json     [{x, y, name, tags, b}]        named points (pubs, museums...), b = building index or null
 """
-from .common import bbox, building_at, centroid, load, log, rnd, save, stitch_rings
+from .common import load, log, save
+from .geo import bbox, building_at, centroid, rnd, stitch_rings
 
 
 def height_of(t):
