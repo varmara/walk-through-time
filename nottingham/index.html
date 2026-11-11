@@ -20,6 +20,7 @@
   // Load the page's own script and styles fresh at least every 10 minutes: GitHub Pages lets browsers cache files
   // for 10 minutes, so without this a visitor can see an old version after an update.
   window.__v = Math.floor(Date.now() / 6e5);
+  document.write('<link rel="stylesheet" href="../app/theme.css?v=' + window.__v + '">');
   document.write('<link rel="stylesheet" href="../app/city.css?v=' + window.__v + '">');
 </script>
 </head>
@@ -121,6 +122,14 @@ window.addEventListener('error', e => { const s = document.getElementById('statu
 window.addEventListener('unhandledrejection', e => { const s = document.getElementById('status'); if (s) s.textContent = 'Error: ' + ((e.reason && e.reason.message) || e.reason); });
 </script>
 <script src="../lib/maplibre-gl.js"></script>
-<script>document.write('<script src="../app/city.js?v=' + window.__v + '"><\/script>');</script>
+<script>
+  // The page's modules (app/city/), each fetched with the same ?v= as the styles, through an import map
+  (function () {
+    var mods = ['util', 'state', 'data', 'map', 'timebar', 'sheet', 'panels', 'cards', 'places', 'main'], imports = {};
+    mods.forEach(function (m) { imports[new URL('../app/city/' + m + '.js', location.href).href] = '../app/city/' + m + '.js?v=' + window.__v; });
+    document.write('<script type="importmap">' + JSON.stringify({ imports: imports }) + '<\/script>');
+  })();
+</script>
+<script type="module" src="../app/city/main.js"></script>
 </body>
 </html>

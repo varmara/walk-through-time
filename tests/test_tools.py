@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parent.parent
 
 class Plan(unittest.TestCase):
     def test_page_only(self):
-        self.assertEqual([p for p in ["app/city.js", "README.md"] if plan.needs_build(p)], [])
+        self.assertEqual([p for p in ["app/city/cards.js", "README.md"] if plan.needs_build(p)], [])
 
     def test_stories_start_at_curated(self):
         self.assertEqual(plan.start_for(["stories/nottingham/01-inns.md", "app/city.css"]), "s04_curated")

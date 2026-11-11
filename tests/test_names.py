@@ -73,7 +73,7 @@ class Rules(unittest.TestCase):
 
 
 def title(n):
-    """The card's title, as the page makes it (app/city.js: placeName)."""
+    """The card's title, as the page makes it (app/city/cards.js: placeName)."""
     if n.get("full") or n.get("name"):
         return n.get("full") or n["name"]
     w = n.get("where")

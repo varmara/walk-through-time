@@ -62,7 +62,11 @@ cities/<id>.json          city settings: area (polygon and bounding box) and sta
 stories/<id>/             hand-written story layers and corrections for the city (Markdown; see CONTRIBUTING.md)
 tests/                    checks run before every publish
 tools/fetch-built.sh      fetch the last build's data and work files, to work on a computer
-app/city.js, app/city.css the shared city page
+app/theme.css             every colour, font and shadow (the look: change it here)
+app/city/*.js             the shared city page, as modules: cards.js (one card layout for buildings, areas and
+                          plaques), map.js, panels.js (Layers and Map sheets), places.js, timebar.js, data.js,
+                          state.js (what every module shares), util.js, main.js (start-up)
+app/city.css              the city page's layout
 <id>/index.html           one page per city
 lib/                      MapLibre GL JS (BSD-3-Clause)
 ```

@@ -430,7 +430,7 @@ def building_name(tags, story=None, label=None, listing_name=None, place=None):
 # A building's story holds its words itself, or points to where they are kept once:
 #   {"layer", "pin": "p12"}                     a plaque: the words are on the plaque's pin
 #   {"layer", "tpl": "architect", "who": ...}   words that are the same but for a name: a template in the package's
-#                                               "templates", filled in by the page (app/city.js: storyOf) and here
+#                                               "templates", filled in by the page (app/city/data.js: storyOf) and here
 TEMPLATES = {"architect": "Designed by {who}, according to Wikidata.",
              "scheduled": "Part of the scheduled monument “{of}”.",
              "locallist": "On the council's local heritage list as “{of}”."}
