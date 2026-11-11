@@ -27,7 +27,7 @@ on:
       - ".github/workflows/build-data.yml"
 
 permissions:
-  contents: write
+  contents: write      # to push the site, work and downloads branches
 
 concurrency:
   group: build-data
@@ -51,7 +51,7 @@ jobs:
           python-version: "3.12"
 
       # The last published data: a build that starts part-way through keeps the files earlier steps wrote, and a
-      # page-only change publishes it as it is. (Before the first publish, main's own data/ is used.)
+      # page-only change publishes it as it is.
       - name: Restore the published data
         run: |
           if git fetch -q --depth 1 origin site 2>/dev/null; then
@@ -210,19 +210,6 @@ jobs:
             git push -q -f "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" site && break
             sleep 20
           done
-
-      # Until GitHub Pages serves the site branch, main's data/ is still what visitors get: keep it up to date.
-      # (Removed once Pages is switched over.)
-      - name: Commit updated data to main (until Pages serves the site branch)
-        if: steps.plan.outputs.start != 'none'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch -q origin main
-          git reset -q FETCH_HEAD
-          git add data
-          if git diff --cached --quiet; then echo "No changes to data."; else
-            git commit -q -m "Update city data" && git push origin HEAD:main; fi
 
       - name: Save new OpenStreetMap downloads
         if: steps.plan.outputs.start != 'none' && hashFiles('work/*/osm.fresh') != ''

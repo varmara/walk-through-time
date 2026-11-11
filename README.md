@@ -114,7 +114,7 @@ itself inspired by Sasha Bogachev's [Paris, building by building](https://paris.
 
 ## Data licences
 
-- OpenStreetMap data © OpenStreetMap contributors, [ODbL](https://www.openstreetmap.org/copyright). The prepared files in `data/` are derived from OpenStreetMap and are available under the same licence.
+- OpenStreetMap data © OpenStreetMap contributors, [ODbL](https://www.openstreetmap.org/copyright). The prepared files in `data/` (on the `site` branch) are derived from OpenStreetMap and are available under the same licence.
 - Natural England data, [Open Government Licence](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/)
 - Historic England data, [Open Government Licence](https://historicengland.org.uk/terms/website-terms-conditions/open-data-hub/)
 - Wikidata, CC0

@@ -2,3 +2,5 @@ __pycache__/
 *.pyc
 work/
 cache/
+# built by the pipeline and published on the site branch (tools/fetch-built.sh)
+data/
