@@ -133,7 +133,7 @@ def visitor(city_id, ctx, out):
                                                         "osm": r["osm"], "km": round(km, 1), "op": t.get("operator"),
                                                         "web": web if web and web.startswith("http") else None,
                                                         "wp": t.get("wikipedia"), "wd": t.get("wikidata"),
-                                                        "text": t.get("description")}.items() if x}})
+                                                        "text": t.get("description")}.items() if x not in (None, "")}})
     if routes:
         meta.append({"id": "routes", "title": "Walking routes", "section": "Visit", "kind": "routes",
                      "intro": "Waymarked walking routes through the city, as OpenStreetMap has them. Most go on far "

@@ -66,11 +66,11 @@ def classify(t):
     return None
 
 
-def overpass(q):
+def overpass(q, tries=2, timeout=240):
     last = None
     for url in OVERPASS:
         try:
-            r = http(url, {"data": q}, tries=2, timeout=240)
+            r = http(url, {"data": q}, tries=tries, timeout=timeout)
             if r.get("remark") and not r.get("elements"):       # a timeout or a runtime error, with nothing in it
                 raise RuntimeError(r["remark"][:200])
             return r["elements"]
@@ -114,7 +114,8 @@ def routes(c):
         if not t.get("name"):
             continue
         try:
-            ways = overpass(f"""[out:json][timeout:120];rel({el['id']});way(r){box};out geom;""")
+            # one try per server and a short wait: a busy server should cost a route, not the build
+            ways = overpass(f"""[out:json][timeout:60];rel({el['id']});way(r){box};out geom;""", tries=1, timeout=90)
         except Exception as e:  # noqa: BLE001 - leave that route out
             log(f"    route {t['name']}: {e}")
             continue
