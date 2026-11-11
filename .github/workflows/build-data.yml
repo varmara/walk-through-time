@@ -188,20 +188,41 @@ jobs:
             sleep 20
           done
 
-      # Checks before anything is published: names of known buildings, and the parsers (tests/)
-      - name: Check
-        if: steps.plan.outputs.start != 'none'
+      # Checks before anything is published (tests/): the naming rules and the titles of known buildings, the
+      # parsers, and that every reference in the data points at something; then the page itself, in a browser.
+      - name: Check the data
         run: python -m unittest discover -s tests -t . -q
+
+      - name: Assemble the site
+        run: |
+          mkdir _site
+          cp -r index.html app lib cities data _site/
+          for c in $(ls cities/*.json | xargs -n1 basename | sed 's/\.json$//'); do cp -r "$c" _site/; done
+          touch _site/.nojekyll          # serve the files as they are
+
+      - name: Restore the test browser
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/pw
+            ~/.cache/ms-playwright
+          key: playwright-1.56.0-${{ runner.os }}
+
+      - name: Check the page in a browser
+        run: |
+          [ -d ~/pw/node_modules/playwright ] || npm i -q --no-save --prefix ~/pw playwright@1.56.0
+          ~/pw/node_modules/.bin/playwright install --with-deps chromium >/dev/null
+          python -m http.server 8642 -d _site >/dev/null 2>&1 &
+          sleep 1
+          for c in $(ls cities/*.json | xargs -n1 basename | sed 's/\.json$//'); do
+            NODE_PATH=~/pw/node_modules node tests/page/smoke.cjs http://localhost:8642/ "$c"
+          done
 
       - name: Publish the site
         env:
           TOKEN: ${{ github.token }}
         run: |
-          out=$(mktemp -d)
-          cp -r index.html app lib cities data "$out"/
-          for c in $(ls cities/*.json | xargs -n1 basename | sed 's/\.json$//'); do cp -r "$c" "$out"/; done
-          touch "$out/.nojekyll"          # serve the files as they are
-          cd "$out"
+          cd _site
           git init -q -b site
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

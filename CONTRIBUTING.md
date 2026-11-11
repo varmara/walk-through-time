@@ -99,6 +99,7 @@ python -m pipeline.run nottingham --from s04  # then any step onwards, without d
 python -m pipeline.run nottingham            # or everything (downloads take a few minutes)
 python -m unittest discover -s tests -t .     # the checks the build runs before publishing
 python3 -m http.server 8642                   # then open http://localhost:8642/nottingham/
+node tests/page/smoke.cjs http://localhost:8642/   # and the browser check (needs Playwright)
 ```
 
 `data/<city>-report.md` lists every story that was dropped and why, and how each kept story was placed.
