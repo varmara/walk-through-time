@@ -6,16 +6,19 @@
   routes        waymarked walking routes: lines, items r<index>
   basics        toilets, drinking water and benches: points drawn only close up, from the tiles
   museums       Mapping Museums: museums open now and closed since, on their building or as a pin
+  pubheritage   CAMRA's historic pub interiors (stories/<city>/pub-heritage.md): the pub's building
 
 Each returns the layer's meta (as s06_layers.py describes) and fills the Collector with members, stories and pins.
 A pin's extra fields (osm, kind, artist, start, oh, web, wd, wp, artuk, fee, wc) are what its card shows.
 """
 import re
+from pathlib import Path
 
 from .common import load, log, work
 from .geo import building_at, metres
 from .layerdata import grouped
 from .s00_fetch_museums import DATASET
+from .stories_md import table
 
 OSM = ("OpenStreetMap", "https://www.openstreetmap.org/copyright")
 MMSOURCE = {"kind": "Mapping Museums", "title": "Mapping Museums Data, Birkbeck, University of London (CC BY 4.0)", "url": DATASET}
@@ -194,3 +197,51 @@ def museums(city_id, ctx, out):
                         for k, t in (("mm-open", "Open"), ("mm-closed", "Closed since")) if items[k]]}]
 
 
+def norm(s):
+    s = re.sub(r"\b(the|ye|inn|hotel|pub|tavern|and|&)\b", " ", (s or "").lower().replace("’", "'"))
+    return " ".join(re.findall(r"[a-z0-9]+", s))
+
+
+RATING = {"national": ("camra-national", "Of national importance"),
+          "regional": ("camra-regional", "Of regional importance"),
+          "some": ("camra-some", "Of some regional importance")}
+
+
+def the(name):
+    return name if re.match(r"(the|ye)\b", name, re.I) else "the " + name
+
+
+def pub_heritage(city_id, ctx, out):
+    f = Path("stories") / city_id / "pub-heritage.md"
+    if not f.exists():
+        return []
+    pubs = [(i, t) for i, b in enumerate(ctx.buildings) if (t := b["tags"]).get("amenity") in ("pub", "bar") and t.get("name")]
+    pubs += [(p["b"], p["tags"]) for p in ctx.places if p["b"] is not None and p["tags"].get("amenity") in ("pub", "bar")]
+    items, missed = {k: [] for k, _ in RATING.values()}, []
+    for r in table(f):
+        key, title = RATING[r["rating"].strip().lower()]
+        want = norm(r["pub"])
+        cands = [(i, t) for i, t in pubs if norm(t.get("name")) == want]
+        pc = r.get("postcode", "").replace(" ", "").upper()
+        street = norm(r.get("street", "").split(",")[0])
+        exact = [(i, t) for i, t in cands if (t.get("addr:postcode", "").replace(" ", "").upper() == pc)
+                 or (street and norm(t.get("addr:street")) == street)]
+        hit = exact or (cands if len({i for i, _ in cands}) == 1 else [])
+        if not hit:
+            missed.append(r["pub"])
+            continue
+        i = hit[0][0]
+        text = (f"CAMRA, the Campaign for Real Ale, rates the interior of {the(r['pub'])} as {title.lower()} in its "
+                "inventory of historic pub interiors, which records the old bars, snugs and fittings that survive. The "
+                "rating gives the interior no legal protection.")
+        out.add(i, key, "pubheritage", text, {"kind": "CAMRA", "title": f"{r['pub']}: historic pub interior", "url": r["url"]})
+        items[key].append([i, r["pub"]])
+    log(f"s06 historic pub interiors (CAMRA): {sum(len(v) for v in items.values())} matched"
+        + (f"; not on the map or not matched: {', '.join(missed)}" if missed else ""))
+    return [{"id": "pubheritage", "title": "Historic pub interiors", "section": "Heritage", "kind": "rule",
+             "intro": "Pubs whose interiors CAMRA, the Campaign for Real Ale, lists as historically important: old bars, "
+                      "snugs, tiling and fittings that survive. The ratings and links are CAMRA's; the list gives no legal "
+                      "protection.",
+             "source": {"title": "Nottingham CAMRA, heritage interiors", "url": "https://nottingham.camra.org.uk/heritage/camra-heritage-interiors/"},
+             "groups": [{"key": k, "title": t, "count": len(items[k]), "items": grouped(items[k])}
+                        for k, t in RATING.values() if items[k]]}]
