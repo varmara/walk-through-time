@@ -68,6 +68,8 @@ app/city/*.js             the shared city page, as modules: cards.js (one card l
                           plaques), map.js, panels.js (Layers and Map sheets), places.js, timebar.js, data.js,
                           state.js (what every module shares), util.js, main.js (start-up)
 app/city.css              the city page's layout
+sw.js                     keeps what the map has loaded on the phone: repeat visits load little, and streets
+                          already seen work offline
 <id>/index.html           one page per city
 lib/                      MapLibre GL JS (BSD-3-Clause)
 ```

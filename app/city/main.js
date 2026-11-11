@@ -22,6 +22,7 @@ export async function main(){
   setPeriods(S.city.periods);
   drawLegend();
   S.data = await fetchData(`../data/${CITY_ID}.json`);
+  keepOnPhone(S.data.build);
   progress(70, 'reading buildings…');
   S.features = S.data.index ? fromIndex(S.data.index) : S.data.buildings.features;
   if (!S.features.length) throw new Error('no buildings in the map data');
@@ -87,3 +88,10 @@ main().catch(e => {
   $('lpct').textContent = '—';
   $('lstep').textContent = 'Could not load the map: ' + e.message + '. Check your connection and reload the page.';
 });
+
+// what the map has loaded stays on the phone (sw.js): repeat visits load little, and seen streets work offline
+function keepOnPhone(build){
+  if (!('serviceWorker' in navigator) || !build) return;
+  navigator.serviceWorker.register('../sw.js').catch(() => {});
+  navigator.serviceWorker.ready.then(reg => reg.active && reg.active.postMessage({ build, v: window.__v })).catch(() => {});
+}

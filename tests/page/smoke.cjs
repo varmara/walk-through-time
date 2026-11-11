@@ -65,6 +65,19 @@ const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (
     }
   }
 
+  if (known) {           // what was loaded stays on the phone (sw.js): the same building opens with no connection
+    await open('?osm=' + known.osm);
+    check(await page.evaluate(() => !!navigator.serviceWorker && !!navigator.serviceWorker.controller), 'the page keeps what it loads (service worker)');
+    await page.context().setOffline(true);
+    const quiet = errors.length;
+    try {
+      await open('?osm=' + known.osm);
+      check((await text('#sTitle')) === known.title, 'a building already seen opens offline');
+    } catch (e) { check(false, 'a building already seen opens offline (' + e.message.split('\n')[0] + ')'); }
+    await page.context().setOffline(false);
+    errors.length = quiet;    // offline, other files fail to load: expected
+  }
+
   await open('?focus=a0');
   check(/Type/.test(await text('#cFacts')), 'a link to an area opens its card');
 
