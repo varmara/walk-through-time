@@ -96,6 +96,7 @@ input[type=range]{width:100%;accent-color:var(--ink);height:28px;margin:0}
 .facts{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;font-size:15px;margin:0}
 .facts dt{font:400 14px var(--sans);color:var(--muted);padding-top:1px}
 .facts dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.facts .open{color:var(--ok);font-weight:600} .facts .shut{font-weight:600}
 /* links: one style everywhere, in the accent's darker shade, underlined lightly */
 .card a,.src a,.about a{color:var(--link);font-weight:500;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;
   text-decoration-color:color-mix(in srgb,currentColor 40%,transparent)}

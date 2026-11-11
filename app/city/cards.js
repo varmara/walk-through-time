@@ -8,12 +8,26 @@ import { areaOf, centreOf, fstate, isB, loadCard, parseRef, pinOf, saveActive, s
 import { openSheet } from './sheet.js';
 import { applyLayers, renderLayers } from './panels.js';
 import { showPlaces } from './places.js';
+import { hoursText, openNow } from './hours.js';
 
 const J = v => typeof v === 'string' ? JSON.parse(v) : v;      // properties from vector tiles arrive as strings
 const a = (href, text) => `<a href="${esc(href)}" target="_blank" rel="noopener">${esc(text)}</a>`;
 const link = s => a(s.url, s.title);
 const filePage = f => 'https://commons.wikimedia.org/wiki/File:' + encodeURIComponent(f.replace(/ /g, '_'));
 const credit = f => [f.author, f.licence].filter(Boolean).map(esc).join(' · ');
+const host = u => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return u; } };
+// a place's opening hours (open now, in Nottingham's time; the hours) and its website, from OpenStreetMap
+export function openRows(list, title){
+  return (list || []).map(o => {
+    const st = o.oh && openNow(o.oh), lines = [];
+    if (o.name && o.name !== title) lines.push(`<b>${esc(o.name)}</b>${o.what ? ` <span class="muted">${esc(o.what)}</span>` : ''}`);
+    if (st) lines.push(`<span class="${st.open ? 'open' : 'shut'}">${esc(st.text)}</span>`);
+    if (o.oh) lines.push(`<span class="muted">${hoursText(o.oh).map(esc).join('<br>')}</span>`);
+    if (o.web) lines.push(a(o.web, host(o.web)));
+    return [o.oh ? 'Opening hours' : 'Website', lines.join('<br>')];
+  });
+}
+export const HOURS_NOTE = 'Opening hours from OpenStreetMap, which anyone can edit: worth checking before a special trip.';
 export const layerTitle = id => S.layers.find(L => L.id === id)?.title || id;
 
 // ================= The one layout =================
@@ -97,6 +111,8 @@ function buildingCard(p, id){
   if (p.today && !(p.full && p.full.endsWith(p.today))) rows.push(['Today', esc(p.today)]);    // the current occupier; the title is what the building was
   const aka = J(p.aka);
   if (aka && aka.length) rows.push(['Other names', aka.map(esc).join(' · ')]);   // old names, Historic England's, alternatives
+  const open = openRows(J(p.open), p.full || p.name);
+  if (open.length) { rows.push(...open); if (open.some(r => r[0] === 'Opening hours')) open[open.length - 1][1] += `<div class="hint">${esc(HOURS_NOTE)}</div>`; }
   if (p.y != null) {
     const era = eraOf(p.y);
     rows.push(['Built', `${esc(dateText(p.y, p.f, p.per, p.dt))}<span class="pill" style="border-color:${era[3]}">${esc(era[2])}</span>`]);

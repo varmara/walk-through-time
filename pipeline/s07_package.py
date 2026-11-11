@@ -7,7 +7,9 @@
 Building properties: council (the council it is in), name, y (year), f (exact | approx | century), src, alts [{y, f, src}],
 h (height, m), base (bridges: deck height above the ground), levels, kind, osm, grade, listEntry, listName, listUrl, qid, image, article,
 architect, L (",group,group," for map filters), stories [{layer, text, source}],
-sum (one to three sentences) and sumSrc {title, url?, kind}.
+sum (one to three sentences) and sumSrc {title, url?, kind},
+open [{name?, what?, oh?, web?}]: opening hours and websites from OpenStreetMap, of the building itself (no name)
+and of the places inside it (a pub, a museum, a shop), for the card's "Open" rows.
 """
 from datetime import datetime, timezone
 from pathlib import Path
@@ -77,6 +79,25 @@ def main(city_id):
                 out.append({"title": c["title"], "url": c["url"]})
         return out or None
 
+    # opening hours and websites: the building's own, then the places inside it
+    WHAT = ("tourism", "amenity", "shop", "leisure", "office", "craft")
+
+    def open_info(t, name=None):
+        oh = (t.get("opening_hours") or "").strip()
+        web = (t.get("website") or t.get("contact:website") or t.get("url") or "").strip()
+        if not web.startswith("http"):
+            web = ""
+        if not (oh or web):
+            return None
+        what = next((t[k] for k in WHAT if t.get(k) and t[k] not in ("yes", "information")), None)
+        return {k: v for k, v in {"name": name, "what": what and what.replace("_", " "), "oh": oh, "web": web}.items() if v}
+    opens = {}
+    for pl in load(city_id, "places"):
+        if pl["b"] is not None and (o := open_info(pl["tags"], pl["name"])):
+            mine = opens.setdefault(str(pl["b"]), [])
+            if len(mine) < 6 and o not in mine:
+                mine.append(o)
+
     council_of = councils(city_id)
     feats = []
     for i, b in enumerate(buildings):
@@ -103,6 +124,7 @@ def main(city_id):
             "L": ("," + ",".join(lay["member"][k]) + ",") if k in lay["member"] else None,
             "stories": lay["stories"].get(k),
             "sum": (sums.get(k) or {}).get("text"), "sumSrc": (sums.get(k) or {}).get("src"),
+            "open": [o for o in [open_info(t)] if o] + [o for o in opens.get(k, []) if o.get("name") != name or not open_info(t)],
         }
         p["council"] = council_of(*centroid(b["rings"][0]))
         p["coll"] = collections_for(name, p["L"], [s2.get("who") for s2 in p["stories"] or [] if s2.get("who")],

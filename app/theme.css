@@ -13,6 +13,7 @@
   --water:#a8c8d4; --park:#cfd6bb; --road:#f7f5ef;
   --sel:#2a231d;                                    /* the building whose card is open */
   --hl:#1479c9;                                     /* a building lit up: the plaque's building, a place in a set */
+  --ok:#2f6b3a;                                     /* open now */
   --unknown:#dcd6ca; --ghost:#e0ddd4; --marked:#8a6a7a;   /* no date; outside a ticked layer; in it, no date */
   /* eras, oldest to newest, as hand-tinted washes; a city's periods take colours evenly from these */
   --era-1:#7c1d2b; --era-2:#a63a3f; --era-3:#c46a4a; --era-4:#d09a55; --era-5:#c9b46a;
@@ -37,7 +38,7 @@
   :root:not([data-theme="light"]){
     --bg:#1f1b18; --paper:#2a2521; --ink:#ece6dc; --muted:#a59b8e; --line:#3d3631;
     --accent:#e0707c; --link:#eb8b95;
-    --water:#243a44; --park:#262c22; --road:#332d28; --sel:#f4f2ec; --hl:#4db0f0;
+    --water:#243a44; --park:#262c22; --road:#332d28; --sel:#f4f2ec; --hl:#4db0f0; --ok:#7fc08a;
     --unknown:#342e2a; --ghost:#2d2824; --marked:#a8889a;
     --era-1:#b3414f; --era-2:#c95a56; --era-3:#d9825e; --era-4:#e1ac66; --era-5:#d9c67c;
     --era-6:#a6ba84; --era-7:#74ab9e; --era-8:#6a98b8; --era-9:#7b98d0;
@@ -51,7 +52,7 @@
 :root[data-theme="dark"]{
   --bg:#1f1b18; --paper:#2a2521; --ink:#ece6dc; --muted:#a59b8e; --line:#3d3631;
   --accent:#e0707c; --link:#eb8b95;
-  --water:#243a44; --park:#262c22; --road:#332d28; --sel:#f4f2ec; --hl:#4db0f0;
+  --water:#243a44; --park:#262c22; --road:#332d28; --sel:#f4f2ec; --hl:#4db0f0; --ok:#7fc08a;
   --unknown:#342e2a; --ghost:#2d2824; --marked:#a8889a;
   --era-1:#b3414f; --era-2:#c95a56; --era-3:#d9825e; --era-4:#e1ac66; --era-5:#d9c67c;
   --era-6:#a6ba84; --era-7:#74ab9e; --era-8:#6a98b8; --era-9:#7b98d0;

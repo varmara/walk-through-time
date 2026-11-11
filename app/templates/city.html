@@ -126,7 +126,7 @@ window.addEventListener('unhandledrejection', e => { const s = document.getEleme
 <script>
   // The page's modules (app/city/), each fetched with the same ?v= as the styles, through an import map
   (function () {
-    var mods = ['util', 'state', 'data', 'map', 'timebar', 'sheet', 'panels', 'cards', 'places', 'main'], imports = {};
+    var mods = ['util', 'state', 'data', 'map', 'timebar', 'sheet', 'panels', 'hours', 'cards', 'places', 'main'], imports = {};
     mods.forEach(function (m) { imports[new URL('../app/city/' + m + '.js', location.href).href] = '../app/city/' + m + '.js?v=' + window.__v; });
     document.write('<script type="importmap">' + JSON.stringify({ imports: imports }) + '<\/script>');
   })();
