@@ -62,25 +62,32 @@ def page(p, i, city_id, city_name, site):
 <link rel="canonical" href="{e(target)}">
 <meta http-equiv="refresh" content="0; url={e(target)}">
 <script>location.replace({json.dumps(target)});</script>
-</head><body style="font-family:system-ui,sans-serif;padding:2em">
-<p><a href="{e(target)}">Open {e(p['name'])} on the map</a></p>
+<style>{STYLE}</style></head><body><main>
+<p class="go"><a href="{e(target)}">Open {e(p['name'])} on the map</a></p></main>
 </body></html>
 """
 
 
-STYLE = """:root{--bg:#f8f6f2;--ink:#20262b;--muted:#6e6a62;--line:#d6d0c4;--accent:#9c3a2a;color-scheme:light}
-@media (prefers-color-scheme:dark){:root{--bg:#15191c;--ink:#ebe6dc;--muted:#9d978b;--line:#343c42;--accent:#e08a6d;color-scheme:dark}}
-body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 Georgia,"Iowan Old Style",serif}
-main{max-width:680px;margin:0 auto;padding:28px 16px 64px}
-a{color:var(--accent)} .top{font:14px system-ui,sans-serif;display:flex;gap:14px;flex-wrap:wrap;margin-bottom:22px}
-h1{font-size:30px;line-height:1.15;margin:0 0 10px} .intro{font-size:18px;color:var(--ink)}
-.kicker{font:13px system-ui,sans-serif;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 6px}
-h2{font:600 14px system-ui,sans-serif;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:30px 0 4px}
-article{border-top:1px solid var(--line);padding:16px 0}
-article h3{margin:0 0 4px;font-size:21px;line-height:1.25} .meta{font:14px system-ui,sans-serif;color:var(--muted);margin:0 0 6px}
-article p{margin:6px 0} .src{font:13px system-ui,sans-serif;color:var(--muted)}
-.go{font:600 14px system-ui,sans-serif} ul.layers{padding:0;list-style:none} ul.layers li{border-top:1px solid var(--line);padding:12px 0}
-footer{margin-top:40px;font:13px system-ui,sans-serif;color:var(--muted)}"""
+FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
+         '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&family=Spectral:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap">')
+
+# the Survey sheet look of the map page (app/theme.css): survey paper, sepia ink, carmine links; Spectral and Public Sans
+STYLE = """:root{--bg:#f4f2ec;--ink:#2a231d;--muted:#6d6459;--line:#d3cec2;--link:#7c1d2b;
+--sans:"Public Sans",system-ui,-apple-system,sans-serif;--serif:"Spectral",Georgia,"Times New Roman",serif;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#2a2521;--ink:#ece6dc;--muted:#a59b8e;--line:#3d3631;--link:#eb8b95;color-scheme:dark}}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 var(--serif)}
+main{max-width:640px;margin:0 auto;padding:24px 16px 64px}
+a{color:var(--link);text-decoration-color:color-mix(in srgb,var(--link) 40%,transparent);text-underline-offset:2px}
+.top{font:15px/1.4 var(--sans);display:flex;gap:18px;flex-wrap:wrap;margin:0 0 28px}
+h1{font:italic 500 36px/1.1 var(--serif);margin:0 0 12px;letter-spacing:-.01em} .intro{font-size:18px}
+h2{font:600 15px/1.3 var(--sans);color:var(--muted);margin:36px 0 0}
+article{border-top:1px solid var(--line);padding:18px 0}
+article h3{margin:0 0 4px;font:600 22px/1.25 var(--serif)} .meta{font:14px/1.4 var(--sans);color:var(--muted);margin:0 0 8px}
+article p{margin:6px 0} .src{font:13px/1.4 var(--sans);color:var(--muted)}
+.go{font:500 15px/1.4 var(--sans);margin-top:10px} ul.layers{padding:0;list-style:none}
+ul.layers li{border-top:1px solid var(--line);padding:14px 0} ul.layers b{font:600 20px/1.3 var(--serif)}
+ul.layers .n{font:14px var(--sans);color:var(--muted)}
+footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font:13px/1.5 var(--sans);color:var(--muted)}"""
 
 
 def doc(title, desc, image, url, body):
@@ -95,7 +102,7 @@ def doc(title, desc, image, url, body):
 <meta property="og:image" content="{e(image)}"><meta property="og:url" content="{e(url)}">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{e(title)}">
 <meta name="twitter:description" content="{e(desc)}"><meta name="twitter:image" content="{e(image)}">
-<style>{STYLE}</style></head><body><main>
+{FONTS}<style>{STYLE}</style></head><body><main>
 {body}
 </main></body></html>
 """
@@ -110,7 +117,7 @@ def layer_pages(data, city_id, city_name, site, out):
     feats, pins = data["buildings"]["features"], data.get("pins", {}).get("features", [])
     pin_by = {f"p{f['properties']['i']}": f["properties"] for f in pins}
     mapurl = f"{site}{city_id}/"
-    top = (f'<p class="top"><a href="{mapurl}">← The map of {e(city_name)}</a>'
+    top = (f'<p class="top"><a href="{mapurl}">The map of {e(city_name)}</a>'
            f'<a href="layers.html">All stories</a></p>')
 
     def place(r):
@@ -169,7 +176,7 @@ def layer_pages(data, city_id, city_name, site, out):
                             + (f'<p><i>{e(who["text"])}</i></p><p class="src">Wikipedia: <a href="{html.escape(who["url"])}">'
                                f'{e(who["title"])}</a></p>' if who else "")
                             + "".join(f"<p>{e(s['text'])}</p>{src_html(s.get('source'))}" for s in stories[:4])
-                            + f'<p class="go"><a href="{html.escape(link)}">Show on the map →</a></p></article>')
+                            + f'<p class="go"><a href="{html.escape(link)}">Show on the map</a></p></article>')
                 n += 1
             if arts:
                 head = f"<h2>{e(g['title'])}</h2>" if len(L["groups"]) > 1 else ""
@@ -177,9 +184,9 @@ def layer_pages(data, city_id, city_name, site, out):
         if not n:
             continue
         intro = L.get("intro") or ""
-        body = (top + f'<p class="kicker">{e(city_name)} · {e(L.get("section") or "Stories")}</p><h1>{e(L["title"])}</h1>'
+        body = (top + f'<h1>{e(L["title"])}</h1>'
                 + (f'<p class="intro">{e(intro)}</p>' if intro else "")
-                + f'<p class="go"><a href="{mapurl}?layer={urllib.parse.quote(L["id"])}">See all {n} on the map →</a></p>'
+                + f'<p class="go"><a href="{mapurl}?layer={urllib.parse.quote(L["id"])}">See all {n} on the map</a></p>'
                 + "".join(sections)
                 + '<footer>Each story is checked against the source shown with it. Built by the Walk Through Time project '
                   'from open data: OpenStreetMap, Historic England, Wikidata, Wikipedia and Wikimedia Commons.</footer>')
@@ -189,9 +196,9 @@ def layer_pages(data, city_id, city_name, site, out):
         (out / f"layer-{L['id']}.html").write_text(doc(f"{L['title']} · {city_name} · Walk Through Time",
                                                       desc or f"{L['title']} on the 3D map of historic {city_name}.", img, url, body))
         listed.append((L, n))
-    body = (f'<p class="top"><a href="{mapurl}">← The map of {e(city_name)}</a></p><p class="kicker">{e(city_name)}</p>'
+    body = (f'<p class="top"><a href="{mapurl}">The map of {e(city_name)}</a></p>'
             f"<h1>Stories of {e(city_name)}</h1><ul class=\"layers\">"
-            + "".join(f'<li><a href="layer-{L["id"]}.html"><b>{e(L["title"])}</b></a> · {n} places<br>{e(L.get("intro") or "")}</li>'
+            + "".join(f'<li><a href="layer-{L["id"]}.html"><b>{e(L["title"])}</b></a> <span class="n">{n} places</span><br>{e(L.get("intro") or "")}</li>'
                       for L, n in listed) + "</ul>")
     (out / "layers.html").write_text(doc(f"Stories of {city_name} · Walk Through Time",
                                          f"Stories of {city_name}'s buildings, place by place.", f"{site}app/share.png",
