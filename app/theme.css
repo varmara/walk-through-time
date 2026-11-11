@@ -20,7 +20,7 @@
   --era-6:#93a771; --era-7:#5f9488; --era-8:#4c7a99; --era-9:#2e4f7a;
   /* areas on the ground */
   --n-nnr:#3d6b3f; --n-lnr:#5b8a45; --n-sssi:#6b5b8f; --n-ancient:#6e5430; --n-reserve:#3d7f73; --n-lws:#7d8a35;
-  --n-conservation:#9b2335;
+  --n-conservation:#9b2335; --n-parkgarden:#5e7d2e; --n-article4:#a8742a; --n-tpo:#2f6b3a;
   /* the graph page: links, and the kinds of point */
   --edge:#bdb6a8; --k-theme:#9b2335; --k-place:#8b857b; --k-architects:#3d7f73; --k-writers:#2e4f7a;
   --k-science:#6b5b8f; --k-industry:#b07a2a; --k-sport:#a63a3f; --k-arts:#8f3f72; --k-faith:#6e5430;
@@ -43,7 +43,7 @@
     --era-1:#b3414f; --era-2:#c95a56; --era-3:#d9825e; --era-4:#e1ac66; --era-5:#d9c67c;
     --era-6:#a6ba84; --era-7:#74ab9e; --era-8:#6a98b8; --era-9:#7b98d0;
     --n-nnr:#6fb07a; --n-lnr:#93c66e; --n-sssi:#a99cd8; --n-ancient:#c49a5e; --n-reserve:#6cc0b2; --n-lws:#b9c46a;
-    --n-conservation:#e0707c;
+    --n-conservation:#e0707c; --n-parkgarden:#a6c46a; --n-article4:#e0b05e; --n-tpo:#7fc08a;
     --edge:#4a423b; --k-theme:#e0707c; --k-place:#8f877c; --k-architects:#6cc0b2; --k-writers:#7b98d0;
     --k-science:#a99cd8; --k-industry:#e0ab3c; --k-sport:#e07a76; --k-arts:#d98ab8; --k-faith:#c49a5e;
     --k-military:#9cbf4a; --k-public:#6a98b8; --k-other:#b0a697; --k-events:#d9825e;
@@ -57,7 +57,7 @@
   --era-1:#b3414f; --era-2:#c95a56; --era-3:#d9825e; --era-4:#e1ac66; --era-5:#d9c67c;
   --era-6:#a6ba84; --era-7:#74ab9e; --era-8:#6a98b8; --era-9:#7b98d0;
   --n-nnr:#6fb07a; --n-lnr:#93c66e; --n-sssi:#a99cd8; --n-ancient:#c49a5e; --n-reserve:#6cc0b2; --n-lws:#b9c46a;
-  --n-conservation:#e0707c;
+  --n-conservation:#e0707c; --n-parkgarden:#a6c46a; --n-article4:#e0b05e; --n-tpo:#7fc08a;
   --edge:#4a423b; --k-theme:#e0707c; --k-place:#8f877c; --k-architects:#6cc0b2; --k-writers:#7b98d0;
   --k-science:#a99cd8; --k-industry:#e0ab3c; --k-sport:#e07a76; --k-arts:#d98ab8; --k-faith:#c49a5e;
   --k-military:#9cbf4a; --k-public:#6a98b8; --k-other:#b0a697; --k-events:#d9825e;

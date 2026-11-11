@@ -10,6 +10,7 @@ import re
 from .common import city, log, save
 from .web import http
 from .geo import point_in_ring
+from .names import tidy_listing
 
 NHLE = ("https://services-eu1.arcgis.com/ZOdPfBS3aqqDYPUQ/arcgis/rest/services/"
         "National_Heritage_List_for_England_NHLE_v02_VIEW/FeatureServer")
@@ -106,7 +107,7 @@ def main(city_id):
                 continue
             get = lambda *ks: next((pr[k] for k in ks if pr.get(k) not in (None, "")), None)  # noqa: E731
             parks.append({"type": "Feature", "geometry": g, "properties": {
-                "t": "parkgarden", "name": (get("Name", "NAME") or "Registered park or garden").strip(),
+                "t": "parkgarden", "name": tidy_listing((get("Name", "NAME") or "Registered park or garden").strip()),
                 "grade": get("Grade", "GRADE"), "listEntry": get("ListEntry", "LISTENTRY", "List_Entry"),
                 "url": get("hyperlink", "Hyperlink", "URL"), "source": "Historic England"}})
     except Exception as e:  # noqa: BLE001 - optional layer

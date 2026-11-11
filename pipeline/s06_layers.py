@@ -1,19 +1,20 @@
 """Resolve every layer to what it contains, grouped into the sections of the page's Layers sheet.
 
 Story layers come from step s04, the People layer from s06_people, rule layers from pipeline/layers.py, nature
-areas from step s00_fetch_nature. Each layer has one or more groups; each group is one tickbox on the page.
+areas from step s00_fetch_nature, and the other areas (conservation areas, parks and gardens, Article 4 areas, tree preservation
+orders) from the s00 steps, in the order of layerdata.AREAS. Each layer has one or more groups; each group is one tickbox on the page.
 
 Writes layers.json:
   meta    [{id, title, section, kind, intro, source?, groups: [{key, title, count, items?}]}]
           items: [[name, [building indexes]]], one per person or story, in first-seen order
-          kind: stories | people | rule (buildings) or areas (nature, drawn on the ground)
+          kind: stories | people | rule (buildings) or areas (drawn on the ground)
   member  {building index: [group keys]}
   stories {building index: [{layer, text, source, place?}]}
   pins    [{x, y, name, layer, group, text, source?, place?}]  places that are not buildings (bridges,
           grounds) and plaques not on a building; layer items refer to them as "p<index>"
 """
 from .common import city, load, log, save, work
-from .layerdata import Collector, grouped
+from .layerdata import AREAS, Collector, grouped
 from .layers import LAYERS, Context
 
 NATURE = [
@@ -24,6 +25,27 @@ NATURE = [
     ("reserve", "Other nature reserves"),
     ("lws", "Local Wildlife Sites"),
 ]
+
+
+AREA_LAYERS = {
+    "conservation": {"id": "conservation", "title": "Conservation areas", "section": "Heritage",
+                     "intro": "Areas of special architectural or historic interest, where the council manages change "
+                              "to protect their character. The outlines are indicative; the council's own maps are "
+                              "definitive.",
+                     "source": {"title": "Historic England, conservation areas", "url": "https://historicengland.org.uk/listing/what-is-designation/local/conservation-areas/"}},
+    "parks": {"id": "parkgarden", "title": "Registered parks and gardens", "section": "Heritage",
+              "intro": "Designed landscapes of special historic interest on Historic England's Register of Parks and "
+                       "Gardens: public parks, cemeteries and the grounds of great houses. Registration is a material "
+                       "consideration in planning, as listing is for buildings.",
+              "source": {"title": "Historic England, National Heritage List for England", "url": "https://historicengland.org.uk/listing/what-is-designation/registered-parks-and-gardens/"}},
+    "article4": {"id": "article4", "title": "Article 4 areas", "section": "Heritage", "settings": "article4",
+                 "intro": "Areas where the council has withdrawn some of the changes a householder could otherwise make "
+                          "without planning permission, such as replacing windows and doors or removing front walls, to "
+                          "keep the character of the streets. Only councils that publish them as map data are shown."},
+    "tpo": {"id": "tpo", "title": "Tree preservation orders", "section": "Nature", "settings": "tpo",
+            "intro": "Trees and groups of trees the council protects: cutting them down, topping or lopping them needs "
+                     "its consent. Only councils that publish them as map data are shown."},
+}
 
 
 def main(city_id):
@@ -110,17 +132,26 @@ def main(city_id):
                  "groups": [g for g in groups if g["count"]]})
     log(f"s06 nature: {len(nature)} areas")
 
-    # conservation areas follow the nature areas in the packaged areas collection: items refer to them as a<index>
-    cons = load(city_id, "conservation") if work(city_id, "conservation").exists() else []
-    if cons:
-        meta.append({"id": "conservation", "title": "Conservation areas", "section": "Heritage", "kind": "areas",
-                     "intro": "Areas of special architectural or historic interest, where the council manages change "
-                              "to protect their character. The outlines are indicative; the council's own maps are "
-                              "definitive.",
-                     "source": {"title": "Historic England, conservation areas", "url": "https://historicengland.org.uk/listing/what-is-designation/local/conservation-areas/"},
-                     "groups": [{"key": "conservation", "title": "Conservation areas", "count": len(cons),
-                                 "items": sorted([[f["properties"]["name"], [f"a{len(nature) + j}"]] for j, f in enumerate(cons)],
-                                                key=lambda x: x[0].lower())}]})
-    log(f"s06 conservation areas: {len(cons)}")
+    # the other areas follow the nature areas in the packaged areas collection (layerdata.AREAS): items refer to
+    # them as a<index>
+    offset = {}
+    n = 0
+    for name in AREAS:
+        offset[name] = n
+        n += len(load(city_id, name)) if work(city_id, name).exists() else 0
+    for name, L in AREA_LAYERS.items():
+        feats = load(city_id, name) if work(city_id, name).exists() else []
+        if not feats:
+            continue
+        items = sorted([[f["properties"]["name"], [f"a{offset[name] + j}"]] for j, f in enumerate(feats)], key=lambda x: x[0].lower())
+        src = L.get("source")
+        if L.get("settings"):
+            ss = settings.get("sources", {}).get(L["settings"]) or []
+            src = {"title": ss[0]["publisher"], "url": ss[0].get("page") or ss[0]["url"]} if ss else None
+        meta.append({"id": L["id"], "title": L["title"], "section": L["section"], "kind": "areas", "intro": L["intro"],
+                     **({"source": src} if src else {}),
+                     "groups": [{"key": L["id"], "title": L["title"], "count": len(feats),
+                                 **({"items": items} if len(items) <= 400 else {})}]})
+        log(f"s06 {L['title'].lower()}: {len(feats)}")
 
     save(city_id, "layers", {"meta": meta, **out.json(), "names": names, "people": ppl["about"]})

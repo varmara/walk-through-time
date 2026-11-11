@@ -7,7 +7,7 @@ and build the whole city before showing anything. Now:
                                       b (buildings: id = building index; y, f, h, base, L for colour, filters and
                                       height), roads (k), water, parks. The phone loads only the tiles on screen,
                                       with simpler outlines when zoomed out.
-                                      Also areas (nature and conservation areas, t = which kind, i = its number).
+                                      Also areas (nature and conservation areas…, t = which kind, i = its number).
   data/<city>.json                    the index: only what the page needs before any card opens: the few buildings
                                       with a name, layers or a listing (see index()), how many buildings stand by
                                       each year (for the count under the slider), layers, pins, and the areas'
@@ -37,6 +37,7 @@ TILE_PROPS = ("y", "f", "h", "base", "L")
 # what the index keeps, for the few buildings that have them; everything else goes to the card files
 SPARSE = ("name", "listName", "L", "stories", "grade")
 AREA_PROPS = ("t", "name")          # in the tiles; the rest of an area's details are in the index
+TILE_ONLY = ("tpo",)                # many small areas, all alike: only in the tiles (the card takes the rest from the layer)
 
 
 def tippecanoe():
@@ -124,7 +125,8 @@ def main(city_id):
         (root / "cards" / f"{n}.json").write_text(json.dumps(chunk, separators=(",", ":"), ensure_ascii=False))
     slim = {k: v for k, v in pkg.items() if k not in ("buildings", "roads", "water", "parks", "nature")}
     # areas: drawn from the tiles; here what their card and the Layers sheet need, and their bounds to fly to
-    slim["areas"] = [{**a["properties"], "bb": bounds(a["geometry"])} for a in areas]
+    slim["areas"] = [None if a["properties"].get("t") in TILE_ONLY else {**a["properties"], "bb": bounds(a["geometry"])}
+                     for a in areas]
     (root / "osm.json").write_text(json.dumps([f["properties"].get("osm") for f in feats], separators=(",", ":")))
     slim.update({"index": index(props), "tiles": {"minzoom": MIN_Z, "maxzoom": MAX_Z, "chunk": CHUNK},
                  "build": time.strftime("%Y%m%d%H%M%S", time.gmtime())})

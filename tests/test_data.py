@@ -55,7 +55,7 @@ class Data(unittest.TestCase):
             def ok(r):
                 if isinstance(r, int):
                     return 0 <= r < n
-                return (r[0] == "p" and int(r[1:]) < len(pins)) or (r[0] == "a" and int(r[1:]) < len(areas))
+                return (r[0] == "p" and int(r[1:]) < len(pins)) or (r[0] == "a" and int(r[1:]) < len(areas) and areas[int(r[1:])] is not None)
             bad = []
             for L in index["layers"]:
                 for g in L["groups"]:
@@ -67,6 +67,8 @@ class Data(unittest.TestCase):
                 if on is not None and not 0 <= on < n:
                     bad.append(f"pin {f['properties'].get('name')}: on {on}")
             for a in areas:
+                if a is None:        # only in the tiles (tree preservation orders)
+                    continue
                 bb = a.get("bb") or []
                 if len(bb) != 4 or not (bb[0] <= bb[2] and bb[1] <= bb[3]):
                     bad.append(f"area {a.get('name')}: bounds {bb}")

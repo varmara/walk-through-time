@@ -1,7 +1,12 @@
 """What the layer steps build up together: which buildings are in which groups, their stories, and pins.
 
+AREAS: the work files of areas drawn on the ground, in the order they are packaged (s07): layer items refer to
+an area as a<index> in that order.
+
 s06_people fills one with the People layer and saves it; s06_layers carries on with it for the other layers.
 """
+
+AREAS = ("nature", "conservation", "parks", "article4", "tpo")
 
 
 def grouped(pairs):

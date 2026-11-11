@@ -151,20 +151,33 @@ function buildingCard(p, id){
 
 // ================= Areas =================
 const AREA_TEXT = {
+  parkgarden: { text: 'A designed landscape on Historic England\'s Register of Parks and Gardens of Special Historic Interest. '
+    + 'Registration protects its character through the planning system; it does not open private grounds to the public.' },
+  article4: { text: 'An Article 4 direction: here some changes that would not otherwise need planning permission, such as new '
+    + 'windows and doors, need the council\'s permission, to keep the character of the street.' },
+  tpo: { text: 'Trees protected by a tree preservation order: cutting them down, topping or lopping them needs the council\'s consent.' },
   conservation: { note: 'The outline is indicative. The council\'s own conservation area maps are definitive.' },
   lws: { text: 'A Local Wildlife Site: a place of local importance for wildlife, chosen by the county\'s Local Wildlife Sites '
     + 'partnership. Most are not nature reserves and have no legal protection, but planning decisions take them into account.' },
 };
+const AREA_TYPE = { parkgarden: 'Registered park or garden', article4: 'Article 4 area', tpo: 'Tree preservation order',
+  conservation: 'Conservation area' };
 export function showArea(p){ renderCard(areaCard(p)); }
 function areaCard(p){
-  const type = (S.groups.get(p.t) || {}).title || 'Nature area';
-  const rows = [['Type', esc(type.replace(/s$/, ''))]];
+  const L = S.layers.find(x => x.id === p.t || x.groups.some(g => g.key === p.t));
+  if (!p.source && L?.source) p = { ...p, source: L.source.title };   // an area only in the tiles: its layer says whose
+  const type = AREA_TYPE[p.t] || ((S.groups.get(p.t) || {}).title || 'Nature area').replace(/s$/, '');
+  const rows = [['Type', esc(type)]];
+
   if (p.designated) rows.push(['Designated', esc(p.designated)]);
   if (p.lpa) rows.push(['Council', esc(p.lpa)]);
+  if (p.grade) rows.push(['Grade', `Grade ${esc(p.grade)}`]);
   rows.push(['Source', esc(p.source)]);
   const t = AREA_TEXT[p.t];
   const stories = t ? [{ ...t, note: t.note || p.credit }] : [];
-  const links = [p.source === 'Natural England' ? a('https://designatedsites.naturalengland.org.uk/', 'Natural England designated sites')
+  const links = [p.t === 'parkgarden' ? a(p.url || 'https://historicengland.org.uk/listing/the-list/list-entry/' + p.listEntry, 'Historic England list entry')
+    : p.t === 'article4' || p.t === 'tpo' ? a(p.url || L?.source?.url || '#', `${p.source}: more about this`)
+    : p.source === 'Natural England' ? a('https://designatedsites.naturalengland.org.uk/', 'Natural England designated sites')
     : p.source === 'Historic England' ? a('https://historicengland.org.uk/listing/what-is-designation/local/conservation-areas/', 'About conservation areas')
     : p.url ? a(p.url, `${p.source}: the map data`)
     : a('https://www.openstreetmap.org/copyright', 'OpenStreetMap')];

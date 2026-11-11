@@ -18,6 +18,7 @@ from collections import Counter
 import urllib.parse
 
 from .common import load, log, save, work
+from .layerdata import AREAS
 from .geo import centroid, point_in_ring
 from .texts import TEMPLATES
 from .s00_fetch_nature import rings_of
@@ -148,9 +149,9 @@ def main(city_id):
     }
     fc = lambda f: {"type": "FeatureCollection", "features": f}  # noqa: E731
     built = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    nature = load(city_id, "nature") if work(city_id, "nature").exists() else []
-    # areas drawn on the ground (nature and conservation areas) travel together; "t" says which kind
-    nature += load(city_id, "conservation") if work(city_id, "conservation").exists() else []
+    # areas drawn on the ground (nature, conservation areas, parks and gardens, Article 4, tree preservation orders)
+    # travel together, in the order of layerdata.AREAS; "t" says which kind
+    nature = [f for name in AREAS if work(city_id, name).exists() for f in load(city_id, name)]
     pins = [{"type": "Feature", "properties": {"i": k, **{kk: v for kk, v in pn.items() if kk not in ("x", "y")}},
              "geometry": {"type": "Point", "coordinates": [pn["x"], pn["y"]]}} for k, pn in enumerate(lay.get("pins", []))]
     for f in pins:          # pins: their layer's group, their person, where they stand

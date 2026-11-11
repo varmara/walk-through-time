@@ -99,7 +99,7 @@ export function drawMap(){
         if (hit) return selectBuilding(hit.id, [e.lngLat.lng, e.lngLat.lat]);
         const area = S.map.getLayer('nature-fill') && S.map.getLayoutProperty('nature-fill', 'visibility') === 'visible'
           && S.map.queryRenderedFeatures(e.point, { layers:['nature-fill'] })[0];
-        if (area) showArea(S.data.areas ? S.data.areas[area.properties.i] : area.properties);
+        if (area) showArea((S.data.areas && S.data.areas[area.properties.i]) || area.properties);   // some areas are only in the tiles
       });
       // start the credits folded behind their (i) button: on a phone they would cover the map
       document.querySelector('.maplibregl-ctrl-attrib')?.classList.remove('maplibregl-compact-show');
