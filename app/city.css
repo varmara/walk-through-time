@@ -110,11 +110,11 @@ input[type=range]{width:100%;accent-color:var(--ink);height:28px;margin:0}
 #cStories{display:grid;gap:10px}
 .summary{display:grid;gap:4px;margin:0 0 10px}
 .credit{margin:4px 0 8px;font-size:12px;color:var(--muted)}
-.dyk,.archive{margin:12px 0 4px}
+.dyk,.archive{margin:12px 0 4px;min-width:0;max-width:100%}
 .dyk h3,.archive h3{font:500 13px var(--sans);color:var(--muted);margin:0 0 6px}
 .dyk p{margin:0 0 8px;font:16px/1.45 var(--serif)}
 .dyk .src{font-size:12px}
-.strip{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.strip{max-width:100%;min-width:0;display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:4px;-webkit-overflow-scrolling:touch}
 .shot{flex:0 0 150px;scroll-snap-align:start;color:var(--muted);text-decoration:none;font-size:12px;line-height:1.3}
 .shot img{width:150px;height:110px;object-fit:cover;border-radius:6px;background:var(--line);display:block;margin-bottom:4px}
 .shot b{color:var(--ink)}
@@ -185,3 +185,14 @@ a.fab{display:grid;place-items:center;text-decoration:none;color:inherit}
 /* a plaque's card: the building it is on */
 .onbuilding{margin-top:10px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;font-size:14px}
 .onbuilding p{margin:4px 0}
+
+/* footnotes: a small number after the words, the sources at the foot of the card */
+sup.fn{font:600 10.5px/1 var(--sans);margin-left:1px;vertical-align:super}
+sup.fn a{text-decoration:none;color:var(--link);padding:0 2px}
+ol.notes{margin:4px 0 14px;padding-left:22px;font:13px/1.45 var(--sans);color:var(--ink)}
+ol.notes li{margin:3px 0;padding:2px 4px;border-radius:4px;overflow-wrap:anywhere}
+ol.notes li.hit{animation:fnhit 1.6s ease-out}
+@keyframes fnhit{from{background:color-mix(in srgb,var(--hl) 22%,transparent)}to{background:transparent}}
+@media (prefers-reduced-motion:reduce){ol.notes li.hit{animation:none;background:color-mix(in srgb,var(--hl) 14%,transparent)}}
+a.who{color:var(--ink);text-decoration-color:color-mix(in srgb,var(--ink) 35%,transparent);text-decoration-style:dotted;text-underline-offset:3px}
+

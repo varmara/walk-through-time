@@ -6,7 +6,8 @@
 
 Building properties: council (the council it is in), name, y (year), f (exact | approx | century), src, alts [{y, f, src}],
 h (height, m), base (bridges: deck height above the ground), levels, kind, osm, grade, listEntry, listName, listUrl, qid, image, article,
-architect, L (",group,group," for map filters), stories [{layer, text, source}],
+architect, archUrl (the architect's Wikipedia article or Wikidata item), cat (its Commons category, for the card's
+photos), L (",group,group," for map filters), stories [{layer, text, source}],
 sum (one to three sentences) and sumSrc {title, url?, kind},
 open [{name?, what?, oh?, web?}]: opening hours and websites from OpenStreetMap, of the building itself (no name)
 and of the places inside it (a pub, a museum, a shop), for the card's "Open" rows.
@@ -142,6 +143,8 @@ def main(city_id):
             "image": info.get("image") or ((photos.get(k) or {}).get("photo") and commons(photos[k]["photo"]["file"])),
             "credit": None if info.get("image") else (photos.get(k) or {}).get("photo"),
             "archive": (photos.get(k) or {}).get("archive"), "dyk": dyk.get(k), "article": article, "architect": info.get("architect") or t.get("architect"),
+            "archUrl": info.get("architectArticle") or (info.get("architectQid") and f"https://www.wikidata.org/wiki/{info['architectQid']}"),
+            "cat": info.get("commonscat"),
             "L": ("," + ",".join(lay["member"][k]) + ",") if k in lay["member"] else None,
             "stories": lay["stories"].get(k),
             "sum": (sums.get(k) or {}).get("text"), "sumSrc": (sums.get(k) or {}).get("src"),

@@ -96,7 +96,7 @@ def main(city_id):
     (root / "cards").mkdir(parents=True)
 
     tmp = Path(tempfile.mkdtemp())
-    tile_feats, props, cards = [], [], {}
+    tile_feats, props, cards, storied = [], [], {}, []
     for i, f in enumerate(feats):
         p = f["properties"]
         tile_feats.append({"type": "Feature", "id": i, "geometry": f["geometry"],
@@ -108,6 +108,8 @@ def main(city_id):
         # the card file has everything but what the index has; stories in full (the index keeps only which)
         rest = {k: v for k, v in p.items() if k not in SPARSE or k == "stories"}
         rest["xy"] = [round(x, 5), round(y, 5)]
+        if p.get("stories"):        # for the card's Nearby row: buildings with a story, and where they are
+            storied.append([i, round(x, 5), round(y, 5)])
         cards.setdefault(i // CHUNK, {})[i] = rest
     write_fc(tmp / "b.json", tile_feats)
     for k in ("roads", "water", "parks"):
@@ -141,6 +143,7 @@ def main(city_id):
     slim = {k: v for k, v in pkg.items() if k not in ("buildings", "roads", "water", "parks", "nature", "routes", "basics")}
     # routes: drawn from the tiles; here what their card needs, and their bounds to fly to
     slim["routes"] = [{**r["properties"], "bb": bounds_lines(r["geometry"])} for r in routes]
+    slim["near"] = storied
     # areas: drawn from the tiles; here what their card and the Layers sheet need, and their bounds to fly to
     slim["areas"] = [None if a["properties"].get("t") in TILE_ONLY else {**a["properties"], "bb": bounds(a["geometry"])}
                      for a in areas]
