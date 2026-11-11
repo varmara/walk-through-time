@@ -12,6 +12,7 @@ Downloading takes most of an hour, so GitHub Actions keeps the last download on 
 its stamp still matches, that is when neither the city's area nor this query has changed.
 """
 import hashlib
+import json
 import time
 from pathlib import Path
 
@@ -59,8 +60,10 @@ def fetch(area):
 
 
 def stamp(city_id):
-    """Fingerprint of everything that decides what is downloaded."""
-    h = hashlib.sha256(Path(f"cities/{city_id}.json").read_bytes())
+    """Fingerprint of everything that decides what is downloaded: the city's area and this script (not the rest of
+    the city's settings, so that adding a council's source does not download OpenStreetMap again)."""
+    c = city(city_id)
+    h = hashlib.sha256(json.dumps([c.get("polygon"), c.get("bbox")]).encode())
     h.update(Path(__file__).read_bytes())
     return h.hexdigest()[:16]
 

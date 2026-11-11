@@ -68,20 +68,21 @@ def local_lists(c):
             log(f"s00 {src.get('title') or src['publisher']}: failed, continuing without it ({e})")
             continue
         n, seen = 0, {}
+        approved = {str(x) for x in src.get("approved", [])}    # the status codes that mean "on the list"
         for f in gj.get("features", []):
             g, pr = f.get("geometry"), f.get("properties") or {}
             status = str(pr.get("STATUS") or "").strip()
             seen[status] = seen.get(status, 0) + 1
             if not g or not rings_of(g) or (poly and not reaches(g, poly)):
                 continue
-            if status and not status.isdigit() and "approv" not in status.lower():
-                continue          # proposed, or turned down
+            if status and status not in approved and "approv" not in status.lower():
+                continue          # not assessed yet, proposed, or turned down: not on the list
             name = next((str(pr[k]).strip() for k in ("DESC_", "NAME", "BUILDING_NAME", "SITE_NAME")
                          if pr.get(k) and str(pr[k]).strip()), None)
             feats.append({"type": "Feature", "geometry": rnd(g),
                           "properties": {"name": name, "council": src.get("council"), "source": src["publisher"]}})
             n += 1
-        log(f"s00 {src.get('title') or src['publisher']}: {n} entries in the area (statuses: {seen})")
+        log(f"s00 {src.get('title') or src['publisher']}: {n} approved entries in the area (by status: {seen})")
     return feats
 
 
