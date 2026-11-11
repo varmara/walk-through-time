@@ -14,20 +14,13 @@ a shared link keeps working, as the page is keyed by OpenStreetMap id).
 """
 import html
 import json
-import os
 import shutil
 import urllib.parse
 from pathlib import Path
 
+from .pages import site_url
 from .common import city, load, log
 from .texts import story_text
-
-
-def site_url():
-    """The published site, e.g. https://varmara.github.io/walk-through-time/ (from GitHub Actions, or a default)."""
-    repo = os.environ.get("GITHUB_REPOSITORY", "varmara/walk-through-time")
-    owner, name = repo.split("/")
-    return f"https://{owner}.github.io/{name}/" if name != f"{owner}.github.io" else f"https://{name}/"
 
 
 def describe(p, city_name):

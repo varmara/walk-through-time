@@ -19,6 +19,8 @@ EVERYTHING = ("cities/", "pipeline/common.py", "pipeline/run.py", "pipeline/__in
 
 def needs_build(p):
     p = p.strip()
+    if p in ("pipeline/pages.py",):        # writes the pages from templates: part of publishing, not of the data
+        return False
     return bool(p) and p.startswith(("pipeline/", "stories/", "cities/", "tests/", ".github/"))
 
 

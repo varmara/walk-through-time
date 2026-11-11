@@ -6,3 +6,7 @@ cache/
 data/
 _site/
 node_modules/
+# written by pipeline/pages.py from app/templates/
+/index.html
+/*/index.html
+/*/graph.html

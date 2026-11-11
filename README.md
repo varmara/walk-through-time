@@ -45,7 +45,7 @@ A GitHub Actions workflow (`.github/workflows/build-data.yml`) runs the pipeline
 **Actions** tab. After the checks in `tests/` pass, it publishes the site to the `site` branch, which GitHub
 Pages serves: the page's files from `main` plus the built data, as a single commit replaced each time. So `main`
 holds only code and stories and does not grow with every build, and a change to the page alone (`app/`,
-`index.html`, `<city>/`) is published in about a minute without rebuilding. The last build's intermediate files are
+`app/templates/`, `sw.js`) is published in about a minute without rebuilding. The last build's intermediate files are
 kept on the `work` branch, so a step can be run again on a computer without downloading everything:
 `tools/fetch-built.sh` fetches both the data and the work files.
 
@@ -70,7 +70,8 @@ app/city/*.js             the shared city page, as modules: cards.js (one card l
 app/city.css              the city page's layout
 sw.js                     keeps what the map has loaded on the phone: repeat visits load little, and streets
                           already seen work offline
-<id>/index.html           one page per city
+app/templates/            the landing page and each city's map and graph pages; pipeline/pages.py writes
+                          them from the city settings (run it to open the site locally)
 lib/                      MapLibre GL JS (BSD-3-Clause)
 ```
 
@@ -104,8 +105,9 @@ to add one.
    council with none of a kind is covered by the national sources (Historic England, Natural England, Open
    Plaques and OpenStreetMap). `cities/nottingham.json` is an example with four councils.
 2. Optionally add `stories/<id>/` with story layers (Markdown; see CONTRIBUTING.md).
-3. Copy `nottingham/index.html` to `<id>/index.html` and change `data-city` and the titles.
-4. Add the city to the list on the landing page `index.html`.
+3. In the settings' `page`, say what the city's pages say in search results (`description`), when shared
+   (`share`) and on the landing page (`tagline`). The pages themselves, and the city's row on the landing page,
+   are written from `app/templates/` when the site is published.
 
 The workflow builds the new city's data on the next push.
 

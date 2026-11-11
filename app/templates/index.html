@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- The landing page, written by pipeline/pages.py with a row per city. Edit this, not the written copy. -->
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
@@ -9,8 +10,8 @@
 <meta property="og:site_name" content="Walk Through Time">
 <meta property="og:title" content="Walk Through Time">
 <meta property="og:description" content="Historic cities in 3D, building by building.">
-<meta property="og:image" content="https://varmara.github.io/walk-through-time/app/share.png">
-<meta property="og:url" content="https://varmara.github.io/walk-through-time/">
+<meta property="og:image" content="{{site}}app/share.png">
+<meta property="og:url" content="{{site}}">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="app/logo.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -49,7 +50,7 @@ footer a{color:inherit}
   </header>
   <section class="cities" aria-label="Cities">
     <div class="lbl">Cities</div>
-    <a class="city" href="nottingham/"><div><b>Nottingham</b><span>From the city centre across the Trent · 3D · prototype</span></div><span class="go">→</span></a>
+{{cities}}
     <div class="city soon"><div><b>More cities</b><span>coming later</span></div></div>
   </section>
   <footer>Data: © OpenStreetMap contributors (ODbL) · Historic England (OGL) · Wikidata (CC0) · Wikipedia (CC BY-SA). Historic maps: National Library of Scotland.</footer>

@@ -94,7 +94,7 @@ Heritage, Today, ...). A dataset the pipeline does not download yet needs a fetc
 ## Checking your layer
 
 ```bash
-tools/fetch-built.sh                          # the last build's data and work files, from GitHub
+tools/fetch-built.sh                          # the last build's data and work files, from GitHub, and the pages
 python -m pipeline.run nottingham --from s04  # then any step onwards, without downloading anything
 python -m pipeline.run nottingham            # or everything (downloads take a few minutes)
 python -m unittest discover -s tests -t .     # the checks the build runs before publishing

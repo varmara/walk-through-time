@@ -11,6 +11,7 @@ if [ "$what" != work ]; then
   git fetch -q --depth 1 origin site
   rm -rf data && git archive FETCH_HEAD data | tar -x
   echo "data/ from the site branch ($(git log -1 --format=%s FETCH_HEAD))"
+  python3 -m pipeline.pages          # and the pages, from app/templates/
 fi
 if [ "$what" != data ]; then
   git fetch -q --depth 1 origin work

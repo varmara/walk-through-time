@@ -22,9 +22,7 @@ on:
       - "tests/**"
       - "app/**"
       - "lib/**"
-      - "index.html"
       - "sw.js"
-      - "nottingham/**"
       - ".github/workflows/build-data.yml"
 
 permissions:
@@ -197,8 +195,8 @@ jobs:
       - name: Assemble the site
         run: |
           mkdir _site
-          cp -r index.html sw.js app lib cities data _site/
-          for c in $(ls cities/*.json | xargs -n1 basename | sed 's/\.json$//'); do cp -r "$c" _site/; done
+          cp -r sw.js app lib cities data _site/
+          python -m pipeline.pages _site     # the landing page and each city's pages, from app/templates/
           touch _site/.nojekyll          # serve the files as they are
 
       - name: Restore the test browser

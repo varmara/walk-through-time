@@ -2,6 +2,12 @@
   "id": "nottingham",
   "name": "Nottingham",
   "area": "City centre, Sneinton, the Meadows, and south of the Trent: Wilford, West Bridgford and Clifton",
+  "page": {
+    "_about": "What the city's pages say: in search results (description), when shared (share), on the landing page (tagline).",
+    "description": "Nottingham in 3D, from the city centre south across the Trent to Wilford, West Bridgford and Clifton, every building coloured by the year it was built.",
+    "share": "Historic Nottingham in 3D, building by building: when each was built, its stories and the people behind it.",
+    "tagline": "From the city centre across the Trent · 3D · prototype"
+  },
   "polygon": [
     [
       -1.164,
