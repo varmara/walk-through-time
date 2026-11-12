@@ -82,8 +82,15 @@ input[type=range]{width:100%;accent-color:var(--ink);height:28px;margin:0}
 .chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:7px 12px;min-height:36px;font-weight:600;font-size:13px;cursor:pointer}
 .chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .legend{display:flex;flex-wrap:wrap;gap:4px 12px}
-.legend div{display:flex;align-items:center;gap:5px;font:400 13px var(--sans);color:var(--muted);white-space:nowrap}
+.legend div,.legend .per{display:flex;align-items:center;gap:5px;font:400 13px var(--sans);color:var(--muted);white-space:nowrap}
 .legend i{flex:0 0 12px;height:12px;border-radius:2px}
+/* a period is a switch: tap to hide its buildings (struck through, its swatch hollow) */
+.legend .per{background:none;border:0;padding:6px 2px;margin:-6px 0;cursor:pointer;color:var(--ink)}
+.legend .per[aria-pressed="false"]{color:var(--muted);text-decoration:line-through}
+.legend .per[aria-pressed="false"] i{background:transparent!important;box-shadow:inset 0 0 0 1.5px var(--muted)}
+.legend .per:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.legend .perall{flex-basis:100%;display:flex;gap:16px;margin-top:2px}
+.legend .linkish{background:none;border:0;padding:6px 0;font:500 13px var(--sans);color:var(--accent);cursor:pointer}
 .note{margin:0;font:400 13px/1.35 var(--sans);color:var(--muted)}
 .periods{margin:2px 0 4px;font-size:13px}
 .periods summary{cursor:pointer;color:var(--link);font-size:14px}

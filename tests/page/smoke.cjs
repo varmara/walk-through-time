@@ -49,7 +49,7 @@ const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (
   await page.click('#bMap').catch(() => {});
   await open('');
   await page.click('#bMap');
-  check((await page.$$('#legend div')).length >= 5, 'the Map sheet shows the legend of periods');
+  check((await page.$$('#legend [data-per]')).length >= 5, 'the Map sheet shows the legend of periods');
 
   if (known) {
     await open('?osm=' + known.osm);

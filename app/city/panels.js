@@ -107,7 +107,19 @@ export function applyLayers(){
 
 // ================= Map panel =================
 export function toggle(btn, fn){ btn.onclick = () => { const on = btn.getAttribute('aria-pressed') !== 'true'; btn.setAttribute('aria-pressed', on); fn(on); }; }
-toggle($('tUnknown'), on => { S.showUnknown = on; updateYear(); });
+const offPeriod = key => key === NODATE ? !S.showUnknown : S.periodsOff.has(key);
+function setPeriods(keys, on){
+  for (const k of keys) {
+    if (k === NODATE) S.showUnknown = on;
+    else if (on) S.periodsOff.delete(k); else S.periodsOff.add(k);
+  }
+  store.set('periods', JSON.stringify([...S.periodsOff]));
+  store.set('undated', S.showUnknown ? '' : 'off');
+  $('legend').querySelectorAll('[data-per]').forEach(b => b.setAttribute('aria-pressed', !offPeriod(b.dataset.per)));
+  updateYear();
+}
+try { for (const k of JSON.parse(store.get('periods') || '[]')) S.periodsOff.add(k); } catch {}
+if (store.get('undated') === 'off') S.showUnknown = false;
 // the hills: on unless this visitor turned them off (a slow phone, say)
 toggle($('tHills'), on => { store.set('hills', on ? 'on' : 'off'); setHills(on); });
 export function groundNote(){
@@ -132,10 +144,19 @@ $('mtSave').onclick = () => {
   const k = $('mtKey').value.trim(); if (!k) return;
   store.set('mtKey', k); addNls(k); setBase('nls');
 };
+// The legend's periods are switches: tap one to hide or show its buildings, or show all or none at once. The choice
+// is remembered per visitor ('periods': the labels hidden; 'undated': off).
+const NODATE = 'no date';
 export function drawLegend(){
-  $('legend').innerHTML = ERAS.map(e => `<div><i style="background:${e[3]}"></i>${e[2]}</div>`).join('')
-    + `<div><i style="background:var(--unknown)"></i>no date</div>`
-    + `<div><i style="background:var(--marked)"></i>in a ticked layer, no date</div>`;
+  const sw = (key, colour, label) => `<button type="button" class="per" data-per="${esc(key)}" aria-pressed="${!offPeriod(key)}">`
+    + `<i style="background:${colour}"></i>${esc(label)}</button>`;
+  $('legend').innerHTML = ERAS.map(e => sw(e[2], e[3], e[2])).join('')
+    + sw(NODATE, 'var(--unknown)', 'no date')
+    + `<div><i style="background:var(--marked)"></i>in a ticked layer, no date</div>`
+    + `<span class="perall"><button type="button" class="linkish" data-all="1">Show all</button>`
+    + `<button type="button" class="linkish" data-all="0">Hide all</button></span>`;
+  $('legend').querySelectorAll('[data-per]').forEach(b => b.onclick = () => setPeriods([b.dataset.per], offPeriod(b.dataset.per)));
+  $('legend').querySelectorAll('[data-all]').forEach(b => b.onclick = () => setPeriods([...ERAS.map(e => e[2]), NODATE], b.dataset.all === '1'));
   $('legendNotes')?.remove();
   const notes = ERAS.filter(e => e[4]);
   const src = (S.city && S.city.periodSources) || [];

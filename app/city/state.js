@@ -18,6 +18,7 @@ export const S = {
   pins: {},              // marker key -> maplibregl.Marker, for the places strip
   playing: null,         // Play running
   showUnknown: true,     // buildings with no date shown
+  periodsOff: new Set(), // periods (their labels) hidden from the map: the Map sheet's legend
   cardFiles: {},         // card file number -> Promise
   osmIds: null,          // OpenStreetMap id of every building, loaded for links that name one
 };

@@ -1,5 +1,5 @@
 // Walk Through Time, city page: The year slider and Play.
-import { $, MAX_YEAR, fmt } from './util.js';
+import { $, ERAS, MAX_YEAR, fmt } from './util.js';
 import { S } from './state.js';
 
 // ================= Year slider =================
@@ -16,7 +16,11 @@ export function updateYear(){
   const Y = curYear();
   $('yearOut').textContent = +yearIn.value === 0 ? 'by ' + Y : Y;
   if (!S.map || !S.map.getLayer('b')) return;
-  const f = ['any', ['all', ['has', 'y'], ['<=', ['get', 'y'], Y]]];
+  // dated buildings standing by the year, in the periods the legend shows; undated ones if shown
+  const shown = ERAS.filter(e => !S.periodsOff.has(e[2]));
+  const inPeriods = shown.length === ERAS.length ? true
+    : ['any', false, ...shown.map(e => ['all', ['>=', ['get', 'y'], e[0]], ['<=', ['get', 'y'], e[1]]])];
+  const f = ['any', ['all', ['has', 'y'], ['<=', ['get', 'y'], Y], inPeriods]];
   if (S.showUnknown) f.push(['!', ['has', 'y']]);
   S.map.setFilter('b', f);
   // in the Map sheet, how many have a date: "2% have a date and 34% an estimate for their area"

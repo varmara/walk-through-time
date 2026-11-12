@@ -87,9 +87,8 @@
 
   <div class="panel" id="pMap" hidden>
     <div class="seclbl">Colours: when it was built</div>
-    <div class="legend" id="legend"></div>
-    <p class="note">Paler colours mean the date is approximate. Grey: no date in open data yet. <span id="dated"></span></p>
-    <div class="chips"><button class="chip" id="tUnknown" aria-pressed="true">Show undated buildings</button></div>
+    <div class="legend" id="legend" role="group" aria-label="Periods shown on the map"></div>
+    <p class="note">Tap a period to hide or show its buildings. Paler colours mean the date is approximate. Grey: no date in open data yet. <span id="dated"></span></p>
     <div class="seclbl">Background</div>
     <div class="chips" role="group" aria-label="Background map">
       <button class="chip" data-base="none" aria-pressed="true">Plain</button>
