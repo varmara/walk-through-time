@@ -12,6 +12,18 @@ jobs:
       - run: pip install -q "rasterio==1.4.3" "numpy==2.2.6" "pillow==11.3.0"
       - name: Council Tax areas
         run: python -m pipeline.run nottingham --only s00_fetch_voa 2>&1 | head -8
+      - name: One square, as it is
+        run: |
+          curl -sS -L -A "walk-through-time/1.0" -o sq.zip https://environment.data.gov.uk/tiles/collections/survey/lidar_composite_dtm/2022/2/SK5535
+          unzip -o -q sq.zip
+          python3 - <<'PY'
+          import rasterio, numpy as np
+          with rasterio.open("SK53ne_DTM_2m.tif") as s:
+              print(s.profile)
+              a = s.read(1, masked=True)
+              print("min", a.min(), "max", a.max(), "mean", a.mean(), "masked", a.mask.mean() if a.mask is not np.ma.nomask else 0)
+              print(a[2000:2003, 2000:2003])
+          PY
       - name: Ground tiles
         run: |
           mkdir -p data/nottingham
