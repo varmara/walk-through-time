@@ -28,11 +28,11 @@ export async function main(){
   if (!S.features.length) throw new Error('no buildings in the map data');
   let known = 0;
   let estimated = 0;
-  S.features.forEach((f, i) => {
+  if (!(S.data.index && S.data.index.hist)) S.features.forEach((f, i) => {     // an older file: count them here
     f.id = i;
     if (f.properties.y != null) f.properties.f === 'area' ? estimated++ : known++;
   });
-  if (S.data.index && S.data.index.hist) {
+  else {
     S.hist = { years: S.data.index.hist, undated: S.data.index.undated };
     estimated = S.data.index.estimated;
     known = S.features.length - S.data.index.undated - estimated;

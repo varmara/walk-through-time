@@ -8,7 +8,7 @@ Live site: https://varmara.github.io/walk-through-time/
 
 | City | Page | Status |
 |---|---|---|
-| Nottingham | [`nottingham/`](nottingham/) | Prototype: city centre, the Meadows, and south of the Trent (Wilford, West Bridgford, Clifton) in 3D, coloured by construction year |
+| Nottingham | [`nottingham/`](nottingham/) | Greater Nottingham and its satellite towns (Long Eaton, Ilkeston, Eastwood, Hucknall, Calverton, Bingham, Cotgrave, Keyworth, Ruddington) in 3D on the real ground, coloured by construction year |
 
 ## How it works
 

@@ -35,12 +35,13 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-24.04      # pinned: the test browser (Playwright) and the cached tippecanoe are built for it
-    timeout-minutes: 150     # the OpenStreetMap download alone can take over an hour
+    timeout-minutes: 350     # GitHub's limit is 360; a first download of a big area can take hours
     env:
       # Scheduled runs and "refresh" runs download everything again; others reuse the saved download.
       REFRESH: ${{ github.event_name == 'schedule' || inputs.refresh == true }}
       WTT_CACHE: ${{ github.workspace }}/cache    # saved answers from web services (pipeline/web.py)
       WTT_RAW: ${{ github.workspace }}/raw        # raw downloads kept in the raw-data release (tools/raw.sh)
+      WTT_OSM_MINUTES: 240     # past this, the OpenStreetMap step stops and the next build carries on
       # a refresh asks again only for what is older than a month; other builds use saved answers of any age
       WTT_MAX_AGE_DAYS: ${{ (github.event_name == 'schedule' || inputs.refresh == true) && '30' || '' }}
     steps:
@@ -160,14 +161,15 @@ jobs:
             python -m pipeline.run $cities --reuse-downloads
           fi
 
+      # these two also after a failed pipeline, so a download cut short is not lost
       - name: Keep new raw downloads and open web answers in the raw-data release
-        if: steps.plan.outputs.start != 'none'
+        if: always() && steps.plan.outputs.start != 'none'
         env:
           GH_TOKEN: ${{ github.token }}
         run: sh tools/raw.sh save
 
       - name: Save web answers for the next build
-        if: steps.plan.outputs.start != 'none'
+        if: always() && steps.plan.outputs.start != 'none'
         uses: actions/cache/save@v5
         with:
           path: cache

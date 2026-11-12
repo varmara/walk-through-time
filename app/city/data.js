@@ -8,11 +8,18 @@ import { S } from './state.js';
 // vector tiles; the rest of a card's details from a card file, when the card opens (loadCard).
 export const FLAGS = { e:'exact', a:'approx', c:'century', r:'area' };
 export function fromIndex(ix){
-  const out = new Array(ix.n);
   if (!ix.dxy) {             // the index has only the few named, listed or layered buildings; the rest is in the card files
-    for (let i = 0; i < ix.n; i++) out[i] = { properties: { ...(ix.props[i] || {}) } };
-    return out;
+    // made when first asked for: a few hundred thousand empty buildings would cost a phone 60 MB at start
+    const made = new Array(ix.n);
+    return new Proxy(made, { get(t, k){
+      if (typeof k === 'string' && k.charCodeAt(0) >= 48 && k.charCodeAt(0) <= 57) {
+        const i = +k;
+        if (i < ix.n && t[i] === undefined) t[i] = { id: i, properties: { ...(ix.props[i] || {}) } };
+      }
+      return t[k];
+    } });
   }
+  const out = new Array(ix.n);
   let x = 0, y = 0;          // older index: every building's centre and year
   for (let i = 0; i < ix.n; i++) {
     x += ix.dxy[2 * i]; y += ix.dxy[2 * i + 1];

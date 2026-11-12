@@ -14,6 +14,7 @@ Downloading takes most of an hour, so GitHub Actions keeps the last download on 
 its stamp still matches, that is when neither the city's area nor this query has changed.
 """
 import hashlib
+import os
 import json
 import time
 import urllib.parse
@@ -122,9 +123,17 @@ def main(city_id):
     elements, seen = [], set()
     ts = list(tiles(c["bbox"], poly))
     saved = 0
+    # a first download of a big area can take longer than one build may run: past $WTT_OSM_MINUTES the step stops
+    # (each square fetched so far is saved), and the next build carries on from there
+    budget = float(os.environ.get("WTT_OSM_MINUTES") or 0) * 60
+    t0 = time.time()
     for n, t in enumerate(ts, 1):
         area = f"({t['s']},{t['w']},{t['n']},{t['e']})"
         was = cached_tile(area)
+        if not was and budget and time.time() - t0 > budget:
+            left = sum(1 for u in ts[n - 1:] if not cached_tile(f"({u['s']},{u['w']},{u['n']},{u['e']})"))
+            raise SystemExit(f"s00 OpenStreetMap: stopped after {budget / 60:.0f} minutes with {left} of {len(ts)} "
+                             "squares still to fetch; they are saved so far, and the next build carries on")
         got = fetch(area)
         new = 0
         for el in got:
