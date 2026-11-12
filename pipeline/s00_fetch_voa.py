@@ -21,8 +21,11 @@ from .web import UA, cached, http, keep
 from .geo import point_in_ring
 
 CTSOP = "https://assets.publishing.service.gov.uk/media/648affc9b32b9e0012a96867/CTSOP4_1_2020-2023_03_31.zip"
-LSOA = ("https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/"
-        "Lower_layer_Super_Output_Areas_December_2021_Boundaries_EW_BSC_V4/FeatureServer/0/query")
+# The ONS's 2021 small-area boundaries, tried in order (a version is sometimes withdrawn behind a sign-in): the
+# generalised ones first (BGC: drawn to 20 m, so homes near an edge fall in the right area), then the simpler BSC.
+LSOAS = [("https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/"
+          f"Lower_layer_Super_Output_Areas_December_2021_Boundaries_EW_{v}/FeatureServer/0/query")
+         for v in ("BGC_V5", "BGC_V4", "BGC_V3", "BSC_V4", "BSC_V3")]
 
 # Build periods as the estimate uses them: single years from 2009 are summed into one period.
 PERIODS = [("before 1900", 1800, 1899), ("1900–1918", 1900, 1918), ("1919–1929", 1919, 1929),
@@ -59,13 +62,23 @@ def count(v):
 def main(city_id):
     c = city(city_id)
     b, poly = c["bbox"], c.get("polygon")
-    try:
-        gj = http(LSOA, params={"where": "1=1", "geometry": f"{b['w']},{b['s']},{b['e']},{b['n']}",
-                                "geometryType": "esriGeometryEnvelope", "inSR": "4326",
-                                "spatialRel": "esriSpatialRelIntersects", "outFields": "LSOA21CD,LSOA21NM",
-                                "outSR": "4326", "returnGeometry": "true", "geometryPrecision": "5", "f": "geojson"})
-    except Exception as e:  # noqa: BLE001 - the estimate is optional
-        log(f"s00 VOA: LSOA boundaries failed, no estimates this run ({e})")
+    gj, last = None, None
+    for url in LSOAS:
+        try:
+            got = http(url, params={"where": "1=1", "geometry": f"{b['w']},{b['s']},{b['e']},{b['n']}",
+                                    "geometryType": "esriGeometryEnvelope", "inSR": "4326",
+                                    "spatialRel": "esriSpatialRelIntersects", "outFields": "LSOA21CD,LSOA21NM",
+                                    "outSR": "4326", "returnGeometry": "true", "geometryPrecision": "5", "f": "geojson"})
+        except Exception as e:  # noqa: BLE001 - try the next version
+            last = e
+            continue
+        if got.get("features"):
+            gj = got
+            log(f"s00 VOA: small-area boundaries from {url.split('/services/')[1].split('/')[0]}")
+            break
+        last = str(got)[:200]
+    if gj is None:      # the estimate is optional
+        log(f"s00 VOA: no small-area boundaries this run, so no estimates ({last})")
         save(city_id, "voa", [])
         return
     areas = {}
@@ -78,8 +91,6 @@ def main(city_id):
         code = pr.get("LSOA21CD") or next((v for k, v in pr.items() if k.upper().endswith("CD")), None)
         areas[code] = {"code": code, "name": pr.get("LSOA21NM"), "rings": rings}
     log(f"s00 VOA: {len(areas)} small areas (LSOAs) in the city's area")
-    if not areas:      # say why: an error from the service, or none of its areas inside the map
-        log(f"    the boundaries service answered: {str(gj)[:300]}")
 
     try:
         req = urllib.request.Request(CTSOP, headers={"User-Agent": UA})
