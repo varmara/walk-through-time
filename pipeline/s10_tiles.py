@@ -96,11 +96,23 @@ def main(city_id):
     (root / "cards").mkdir(parents=True)
 
     tmp = Path(tempfile.mkdtemp())
+    # the ground (s09_ground): its tiles, and how much taller a building on a slope is drawn so its uphill side
+    # is not buried (the map stands a building at the ground under its middle)
+    try:
+        ground = load(city_id, "ground")
+    except FileNotFoundError:
+        ground = {}
+    if ground and not Path(ground.get("tiles", "")).exists():
+        log("s10 tiles: the ground's tiles are not here (a build that did not run s09_ground); no hills")
+        ground = {}
+    rise = ground.get("rise", {})
     tile_feats, props, cards, storied = [], [], {}, []
     for i, f in enumerate(feats):
         p = f["properties"]
-        tile_feats.append({"type": "Feature", "id": i, "geometry": f["geometry"],
-                           "properties": {k: p[k] for k in TILE_PROPS if k in p}})
+        tp = {k: p[k] for k in TILE_PROPS if k in p}
+        if str(i) in rise and "h" in tp:
+            tp["h"] = round(tp["h"] + rise[str(i)], 1)
+        tile_feats.append({"type": "Feature", "id": i, "geometry": f["geometry"], "properties": tp})
         g = f["geometry"]
         ring = g["coordinates"][0] if g["type"] == "Polygon" else g["coordinates"][0][0]
         x, y = centroid(ring)
@@ -138,6 +150,8 @@ def main(city_id):
     size = sum(f.stat().st_size for f in tiles.rglob("*.pbf"))
     shutil.rmtree(tmp, ignore_errors=True)
 
+    if ground:
+        shutil.copytree(ground["tiles"], root / "ground")
     for n, chunk in cards.items():
         (root / "cards" / f"{n}.json").write_text(json.dumps(chunk, separators=(",", ":"), ensure_ascii=False))
     slim = {k: v for k, v in pkg.items() if k not in ("buildings", "roads", "water", "parks", "nature", "routes", "basics")}
@@ -148,6 +162,8 @@ def main(city_id):
     slim["areas"] = [None if a["properties"].get("t") in TILE_ONLY else {**a["properties"], "bb": bounds(a["geometry"])}
                      for a in areas]
     (root / "osm.json").write_text(json.dumps([f["properties"].get("osm") for f in feats], separators=(",", ":")))
+    if ground:
+        slim["ground"] = ground["meta"]
     slim.update({"index": index(props), "tiles": {"minzoom": MIN_Z, "maxzoom": MAX_Z, "chunk": CHUNK},
                  "build": time.strftime("%Y%m%d%H%M%S", time.gmtime())})
     out_json.write_text(json.dumps(slim, separators=(",", ":"), ensure_ascii=False))

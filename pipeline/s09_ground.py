@@ -5,8 +5,13 @@
            as GeoTIFF. Open Government Licence; "© Environment Agency copyright and/or database right".
   area     the city's box and MARGIN around it, so the hills do not end in a cliff at the map's edge; beyond the
            survey, and in its few gaps (water, glass), the nearest height is carried on.
-  tiles    data/<city>/ground/{z}/{x}/{y}.png, zoom MIN_Z to MAX_Z, 256 px, "Terrarium" encoding (MapLibre's
+  tiles    data/<city>/ground/{z}/{x}/{y}.png (copied there by s10_tiles), zoom MIN_Z to MAX_Z, 256 px, "Terrarium" encoding (MapLibre's
            raster-dem): red * 256 + green + blue / 256 - 32768 metres, heights to 0.1 m (enough, and the PNGs smaller).
+
+Buildings on a slope: the map stands each building at the ground under its middle, so on a steep street (the
+Park's cliff, Mapperley) its uphill side would be buried. For each building this step measures how far the ground
+under its outline rises above its middle (`rise`, in work/<city>/ground.json), and s10_tiles makes the building
+that much taller; the map already sinks a building's foot 10 m into the ground on its downhill side.
 
 The tiles are kept in $WTT_CACHE (with the downloads) under a fingerprint of the area and this script, so a build
 that changes neither reuses them instead of downloading 100 MB again (the downloads themselves are not kept). Needs rasterio, numpy and Pillow (the build
@@ -23,7 +28,7 @@ import urllib.request
 import zipfile
 from pathlib import Path
 
-from .common import city, log
+from .common import city, load, log, save
 from .web import UA
 
 SEARCH = "https://environment.data.gov.uk/backend/catalog/api/tiles/collections/survey/search"
@@ -121,7 +126,7 @@ def build(c, out, cache):
             if not tif.exists():
                 tif.write_bytes(zf.read(name))
         tifs.append(tif)
-    log(f"s10 ground: {len(sq)} squares of the {PRODUCT} {RES} ({', '.join(sorted({s['year'] for s in sq}))})")
+    log(f"s09 ground: {len(sq)} squares of the {PRODUCT} {RES} ({', '.join(sorted({s['year'] for s in sq}))})")
 
     # the squares side by side on their common 2 m grid (rasterio's merge gave a mosaic of zeros here)
     srcs = [rasterio.open(t) for t in tifs]
@@ -147,6 +152,10 @@ def build(c, out, cache):
     if not valid.all():
         h = fillnodata(np.where(valid, h, 0), mask=valid.astype("uint8"), max_search_distance=400)
     log(f"    after filling the gaps: {float(h.min()):.0f} to {float(h.max()):.0f} m")
+    # kept, at 4 m and to 0.1 m, for measuring buildings on slopes (main, rises)
+    small = np.round(h[::2, ::2] * 10).astype("int16")
+    np.savez_compressed(out / "dem.npz", dm=small, transform=np.array(tuple(transform * Affine.scale(2)))[:6],
+                        crs=np.array(crs.to_wkt()))
     # the edges carried outwards, so tiles at the margin have ground under them
     pad = 1500
     h = np.pad(h, pad, mode="edge")
@@ -160,7 +169,7 @@ def build(c, out, cache):
             reproject(h, dst, src_transform=transform, src_crs=crs,
                       dst_transform=rasterio.transform.from_bounds(left, bottom, right, top, TILE, TILE),
                       dst_crs="EPSG:3857", resampling=Resampling.average if z < MAX_Z else Resampling.bilinear)
-            p = out / str(z) / str(x) / f"{y}.png"
+            p = out / "tiles" / str(z) / str(x) / f"{y}.png"
             p.parent.mkdir(parents=True, exist_ok=True)
             buf = io.BytesIO()
             Image.fromarray(terrarium(dst), "RGB").save(buf, "PNG", optimize=True)
@@ -187,7 +196,8 @@ def main(city_id):
         try:
             import numpy, rasterio, PIL  # noqa: F401
         except ImportError:
-            log("s10 ground: rasterio, numpy or Pillow is missing; the map has no hills this build")
+            log("s09 ground: rasterio, numpy or Pillow is missing; the map has no hills this build")
+            save(city_id, "ground", {})
             return
         downloads = root / "downloads"
         downloads.mkdir(parents=True, exist_ok=True)
@@ -198,20 +208,49 @@ def main(city_id):
         try:
             build(c, tmp, downloads)
         except Exception as e:  # noqa: BLE001 - the map works without hills
-            log(f"s10 ground: no hills this build: {e}")
+            log(f"s09 ground: no hills this build: {e}")
+            save(city_id, "ground", {})
             return
         tmp.rename(done)
         shutil.rmtree(downloads, ignore_errors=True)     # the tiles are kept; the squares are 100 MB
     else:
-        log("s10 ground: the tiles of the last build (area and script unchanged)")
-    dest = Path("data") / city_id / "ground"
-    shutil.rmtree(dest, ignore_errors=True)
-    shutil.copytree(done, dest)
+        log("s09 ground: the tiles of the last build (area and script unchanged)")
     meta = json.loads((done / "ground.json").read_text())
-    (dest / "ground.json").unlink()
-    # the index tells the page there is ground, and where
-    idx = Path(f"data/{city_id}.json")
-    if idx.exists():
-        d = json.loads(idx.read_text())
-        d["ground"] = meta
-        idx.write_text(json.dumps(d, separators=(",", ":"), ensure_ascii=False))
+    rise = rises(city_id, done / "dem.npz")
+    save(city_id, "ground", {"tiles": str(done / "tiles"), "meta": meta, "rise": rise})
+    log(f"    {len(rise)} buildings stand on a slope: made taller by up to {max(rise.values(), default=0):.0f} m")
+
+
+def rises(city_id, dem):
+    """{building index: metres} where the ground under a building's outline rises more than a metre above the
+    ground under its middle (the vertices' average, as the map takes it)."""
+    import numpy as np
+    from rasterio.crs import CRS
+    from rasterio.transform import Affine
+    from rasterio.warp import transform as reproject_points
+    d = np.load(dem)
+    dm, t, crs = d["dm"], Affine(*d["transform"].tolist()), CRS.from_wkt(str(d["crs"]))
+    feats = load(city_id, "package")["buildings"]["features"]
+    xs, ys, owner = [], [], []
+    for i, f in enumerate(feats):
+        g = f["geometry"]
+        ring = g["coordinates"][0] if g["type"] == "Polygon" else g["coordinates"][0][0]
+        ring = ring[:-1] if len(ring) > 1 and ring[0] == ring[-1] else ring
+        pts = ring + [[sum(p[0] for p in ring) / len(ring), sum(p[1] for p in ring) / len(ring)]]   # the middle last
+        xs += [p[0] for p in pts]
+        ys += [p[1] for p in pts]
+        owner.append(len(pts))
+    ex, ny = reproject_points("EPSG:4326", crs, xs, ys)
+    inv = ~t
+    cols, rows = inv * (np.array(ex), np.array(ny))
+    rows = np.clip(rows.astype(int), 0, dm.shape[0] - 1)
+    cols = np.clip(cols.astype(int), 0, dm.shape[1] - 1)
+    g = dm[rows, cols] / 10.0
+    out, k = {}, 0
+    for i, n in enumerate(owner):
+        part = g[k:k + n]
+        k += n
+        r = float(part[:-1].max() - part[-1])
+        if r > 1:
+            out[str(i)] = round(r * 2) / 2
+    return out
