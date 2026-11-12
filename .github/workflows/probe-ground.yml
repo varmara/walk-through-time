@@ -11,7 +11,12 @@ jobs:
           python-version: "3.12"
       - run: pip install -q "rasterio==1.4.3" "numpy==2.2.6" "pillow==11.3.0"
       - name: Council Tax areas
-        run: python -u -m pipeline.run nottingham --only s00_fetch_voa
+        run: |
+          for v in BGC_V5 BGC_V4 BGC_V3 BSC_V4 BSC_V3 BFC_V10 BFE_V10 BFC_V8; do
+            u="https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Lower_layer_Super_Output_Areas_December_2021_Boundaries_EW_$v/FeatureServer/0"
+            echo "== $v: $(curl -sS "$u?f=json" | head -c 300)"
+            echo "   query: $(curl -sS "$u/query?where=1%3D1&geometry=-1.16,52.94,-1.15,52.95&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&returnGeometry=false&f=json" | head -c 400)"
+          done
       - name: One square, as it is
         if: false
         run: |
