@@ -7,13 +7,24 @@ jobs:
     steps:
       - run: |
           UA="walk-through-time/1.0 (+https://github.com/varmara/walk-through-time)"
-          for base in lidar-composite-digital-terrain-model-dtm-2m lidar-composite-digital-terrain-model-dtm-1m \
-                      lidar-composite-digital-terrain-model-dtm-2m-2022 lidar-composite-digital-terrain-model-dtm-1m-2022; do
-            for svc in wcs wms; do
-              u="https://environment.data.gov.uk/spatialdata/$base/$svc?service=$svc&request=GetCapabilities"
-              code=$(curl -sS -A "$UA" -o cap.xml -w '%{http_code} %{size_download}' "$u" || echo fail)
-              echo "== $base $svc: $code"; head -c 1500 cap.xml | tr '\n' ' ' | grep -o '<[a-zA-Z:]*\(Identifier\|CoverageId\|Name\)>[^<]*' | head -8; echo
-            done
+          B=https://environment.data.gov.uk/spatialdata/lidar-composite-digital-terrain-model-dtm-2m/wcs
+          for v in 2.0.1 1.1.1 1.0.0; do
+            echo "== wcs $v"; curl -sS -A "$UA" "$B?service=WCS&request=GetCapabilities&version=$v" | head -c 3000 | tr '\n' ' ' | grep -o '<[a-zA-Z0-9:]*\(Identifier\|CoverageId\|name\|Title\|Exception\)[^>]*>[^<]*' | head -12; echo
           done
-          echo "== survey catalogue"
-          curl -sS -A "$UA" -o s.json -w '%{http_code} %{size_download}\n' "https://environment.data.gov.uk/backend/catalog/api/tiles/collections/survey/search?bbox=-1.2,52.94,-1.14,52.96" ; head -c 800 s.json; echo
+          echo "== survey search (POST)"
+          curl -sS -A "$UA" -X POST -H 'Content-Type: application/geo+json' -o s.json -w '%{http_code} %{size_download}\n' \
+            "https://environment.data.gov.uk/backend/catalog/api/tiles/collections/survey/search" \
+            -d '{"type":"Polygon","coordinates":[[[-1.16,52.95],[-1.14,52.95],[-1.14,52.96],[-1.16,52.96],[-1.16,52.95]]]}'
+          python3 - <<'PY'
+          import json
+          try:
+              d = json.load(open("s.json"))
+          except Exception as e:
+              print("not json", open("s.json").read()[:500]); raise SystemExit
+          print(type(d), list(d)[:10] if isinstance(d, dict) else len(d))
+          rs = d.get("results", d) if isinstance(d, dict) else d
+          for r in (rs if isinstance(rs, list) else [])[:40]:
+              p = r.get("product", {}); y = r.get("year", {}); res = r.get("resolution", {})
+              print(p.get("id") or p.get("label"), "|", y.get("label") if isinstance(y, dict) else y, "|", res.get("label") if isinstance(res, dict) else res,
+                    "|", r.get("tile", {}).get("id") if isinstance(r.get("tile"), dict) else "", "|", r.get("uri") or r.get("url"))
+          PY
