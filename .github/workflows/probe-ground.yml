@@ -7,24 +7,13 @@ jobs:
     steps:
       - run: |
           UA="walk-through-time/1.0 (+https://github.com/varmara/walk-through-time)"
-          B=https://environment.data.gov.uk/spatialdata/lidar-composite-digital-terrain-model-dtm-2m/wcs
-          for v in 2.0.1 1.1.1 1.0.0; do
-            echo "== wcs $v"; curl -sS -A "$UA" "$B?service=WCS&request=GetCapabilities&version=$v" | head -c 3000 | tr '\n' ' ' | grep -o '<[a-zA-Z0-9:]*\(Identifier\|CoverageId\|name\|Title\|Exception\)[^>]*>[^<]*' | head -12; echo
-          done
-          echo "== survey search (POST)"
-          curl -sS -A "$UA" -X POST -H 'Content-Type: application/geo+json' -o s.json -w '%{http_code} %{size_download}\n' \
+          curl -sS -A "$UA" -X POST -H 'Content-Type: application/geo+json' -o s.json \
             "https://environment.data.gov.uk/backend/catalog/api/tiles/collections/survey/search" \
             -d '{"type":"Polygon","coordinates":[[[-1.16,52.95],[-1.14,52.95],[-1.14,52.96],[-1.16,52.96],[-1.16,52.95]]]}'
-          python3 - <<'PY'
-          import json
-          try:
-              d = json.load(open("s.json"))
-          except Exception as e:
-              print("not json", open("s.json").read()[:500]); raise SystemExit
-          print(type(d), list(d)[:10] if isinstance(d, dict) else len(d))
-          rs = d.get("results", d) if isinstance(d, dict) else d
-          for r in (rs if isinstance(rs, list) else [])[:40]:
-              p = r.get("product", {}); y = r.get("year", {}); res = r.get("resolution", {})
-              print(p.get("id") or p.get("label"), "|", y.get("label") if isinstance(y, dict) else y, "|", res.get("label") if isinstance(res, dict) else res,
-                    "|", r.get("tile", {}).get("id") if isinstance(r.get("tile"), dict) else "", "|", r.get("uri") or r.get("url"))
-          PY
+          python3 -c "
+          import json; d=json.load(open('s.json'))
+          r=[x for x in d['results'] if x['product']['id']=='lidar_composite_dtm' and x['resolution']['label']=='2m'][0]
+          print(json.dumps(r, indent=1)[:2500])"
+          U=https://environment.data.gov.uk/tiles/collections/survey/lidar_composite_dtm/2022/2/SK5535
+          curl -sS -A "$UA" -L -o t.bin -D h.txt -w 'code %{http_code} size %{size_download} type %{content_type}\n' "$U"; cat h.txt | head -20; file t.bin
+          (unzip -l t.bin 2>/dev/null || true) | head
