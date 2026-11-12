@@ -241,7 +241,10 @@ function nearby(id, xy){
       const m = d(...f.geometry.coordinates); if (m <= 150) out.push({ ref: 'p' + k, m, name: f.properties.name });
     }
   });
-  return out.filter(o => o.name).sort((p, q) => p.m - q.m).slice(0, 3);
+  // one place in two outlines, or a building and its plaque, share a name: the nearer of them, once
+  const seen = new Set();
+  return out.filter(o => o.name).sort((p, q) => p.m - q.m)
+    .filter(o => { const k = o.name.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; }).slice(0, 3);
 }
 const walkTo = ([x, y]) => /iPhone|iPad|Macintosh/.test(navigator.userAgent)
   ? `https://maps.apple.com/?daddr=${y},${x}&dirflg=w` : `https://www.google.com/maps/dir/?api=1&destination=${y},${x}&travelmode=walking`;
