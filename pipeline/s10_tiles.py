@@ -14,9 +14,12 @@ and build the whole city before showing anything. Now:
                                       with a name, layers or a listing (see index()), how many buildings stand by
                                       each year (for the count under the slider), layers, pins, and the areas'
                                       names and bounds. Small however big the map gets: no outlines, no centres.
-  data/<city>/osm.json                OpenStreetMap id of every building, for links that name one (?osm=way/123).
+  data/<city>/osm/<n>.json            OpenStreetMap id -> building number, for links that name one (?osm=way/123),
+                                      in OSM_PARTS files by the id's number (n = number % OSM_PARTS), so a link
+                                      loads a few kilobytes, not the list of every building.
   data/<city>/cards/<n>.json          everything else about a building (its centre, year, summary, photos, stories,
-                                      sources, height…), CHUNK buildings per file, loaded when a card opens.
+                                      sources, height…), CHUNK buildings per file (a few kilobytes gzipped), loaded when
+                                      a card opens.
                                       Buildings are numbered in map order (s01), so one file is one part of town.
 tippecanoe (github.com/felt/tippecanoe, BSD) must be on the PATH, or named by $TIPPECANOE. Without it this step
 writes the old single file instead, which the page can still read.
@@ -33,7 +36,8 @@ from pathlib import Path
 from .common import load, log
 from .geo import centroid
 
-CHUNK = 1000
+CHUNK = 250
+OSM_PARTS = 64
 MIN_Z, MAX_Z = 10, 15         # zoomed out (10-11) the smallest buildings are left out so tiles stay small
 TILE_PROPS = ("y", "f", "h", "base", "L")
 # what the index keeps, for the few buildings that have them; everything else goes to the card files
@@ -94,6 +98,7 @@ def main(city_id):
     root = Path("data") / city_id
     shutil.rmtree(root, ignore_errors=True)
     (root / "cards").mkdir(parents=True)
+    (root / "osm").mkdir()
 
     tmp = Path(tempfile.mkdtemp())
     # the ground (s09_ground): its tiles, and how much taller a building on a slope is drawn so its uphill side
@@ -161,10 +166,17 @@ def main(city_id):
     # areas: drawn from the tiles; here what their card and the Layers sheet need, and their bounds to fly to
     slim["areas"] = [None if a["properties"].get("t") in TILE_ONLY else {**a["properties"], "bb": bounds(a["geometry"])}
                      for a in areas]
-    (root / "osm.json").write_text(json.dumps([f["properties"].get("osm") for f in feats], separators=(",", ":")))
+    parts = {}
+    for i, f in enumerate(feats):
+        osm = f["properties"].get("osm")
+        if osm:
+            parts.setdefault(int(osm.split("/")[1]) % OSM_PARTS, {})[osm] = i
+    for n, part in parts.items():
+        (root / "osm" / f"{n}.json").write_text(json.dumps(part, separators=(",", ":")))
     if ground:
         slim["ground"] = ground["meta"]
-    slim.update({"index": index(props), "tiles": {"minzoom": MIN_Z, "maxzoom": MAX_Z, "chunk": CHUNK},
+    slim.update({"index": index(props), "tiles": {"minzoom": MIN_Z, "maxzoom": MAX_Z, "chunk": CHUNK,
+                                                                   "osmParts": OSM_PARTS},
                  "build": time.strftime("%Y%m%d%H%M%S", time.gmtime())})
     out_json.write_text(json.dumps(slim, separators=(",", ":"), ensure_ascii=False))
     log(f"s10 tiles: {n_tiles} tiles ({size / 1e6:.1f} MB gzipped) in {time.time() - t0:.0f} s; "

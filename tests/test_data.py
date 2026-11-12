@@ -1,6 +1,6 @@
 """The published data holds together: every reference points at something that exists.
 
-Reads what the page loads (data/<city>.json, data/<city>/cards/, osm.json, tiles, share pages, the graph). Skipped
+Reads what the page loads (data/<city>.json, data/<city>/cards/, osm/, tiles, share pages, the graph). Skipped
 for a city whose data is not here (tools/fetch-built.sh data fetches the last published data).
 A broken reference here is a dead tap on the map: a layer item that opens nothing, a plaque whose building is
 missing, a story with no words.
@@ -22,7 +22,16 @@ def load(city):
     for f in (d / city / "cards").glob("*.json"):
         for k, v in json.loads(f.read_text()).items():
             cards[int(k)] = (int(f.stem), v)
-    return index, cards, json.loads((d / city / "osm.json").read_text())
+    if (d / city / "osm").is_dir():     # OpenStreetMap id -> building, in parts by the id's number
+        parts = index["tiles"]["osmParts"]
+        osm = [None] * index["index"]["n"]
+        for f in (d / city / "osm").glob("*.json"):
+            for k, i in json.loads(f.read_text()).items():
+                assert int(k.split("/")[1]) % parts == int(f.stem), f"{k} in the wrong part"
+                osm[i] = k
+    else:                                # older builds: one list of every id
+        osm = json.loads((d / city / "osm.json").read_text())
+    return index, cards, osm
 
 
 class Data(unittest.TestCase):
@@ -37,7 +46,7 @@ class Data(unittest.TestCase):
     def test_every_building_has_a_card_in_its_file(self):
         for city, index, cards, osm in self.each():
             n, chunk = index["index"]["n"], index["tiles"]["chunk"]
-            self.assertEqual(len(osm), n, "osm.json has one id per building")
+            self.assertEqual(len(osm), n, "one OpenStreetMap id per building")
             self.assertEqual(sorted(cards), list(range(n)), "every building is in a card file")
             wrong = [i for i, (f, _) in cards.items() if f != i // chunk]
             self.assertFalse(wrong[:5], "buildings in the wrong card file")

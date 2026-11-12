@@ -37,7 +37,7 @@ open data ──► pipeline/ (Python, numbered steps) ──► data/<city>.jso
 | `s06_summaries` | One to three sentences per named or listed building: the start of its Wikipedia article, or written only from facts in the data (use and street, date, listing, architect) |
 | `s07_package` | Gathers everything the page shows, and writes the data report `data/<city>-report.md` |
 | `s09_ground` | The shape of the ground for the map's hills: the Environment Agency's 2 m laser-survey ground model (LIDAR Composite DTM, OGL), as elevation tiles; and how much taller to draw each building on a slope so its uphill side is not buried |
-| `s10_tiles` | Writes what the page loads: vector tiles (`data/<city>/tiles/`, made with [tippecanoe](https://github.com/felt/tippecanoe)), a small index of every building (`data/<city>.json`) and card files loaded when a card opens (`data/<city>/cards/`); copies in the ground's tiles (`data/<city>/ground/`) |
+| `s10_tiles` | Writes what the page loads: vector tiles (`data/<city>/tiles/`, made with [tippecanoe](https://github.com/felt/tippecanoe)), a small index of every building (`data/<city>.json`) and card files of 250 buildings loaded when a card opens (`data/<city>/cards/`), OpenStreetMap ids in 64 small parts for shared links (`data/<city>/osm/`); copies in the ground's tiles (`data/<city>/ground/`) |
 | `s11_changes` | Lists what changed since the last build (`data/<city>-changes.md`): buildings renamed, re-dated or re-listed, and outlines that came or went. The thing to look over after the twice-yearly refresh |
 | `s08_graph` | Writes `data/<city>-graph.json` for the graph page (`<city>/graph.html`): people and story themes linked to places by checked stories |
 

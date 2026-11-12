@@ -49,7 +49,12 @@ export function loadCard(id){       // the card's details, merged into the build
 }           // for links that name an OpenStreetMap id
 export async function byOsm(osm){
   if (!tiled()) return S.features.findIndex(f => f.properties.osm === osm);
-  S.osmIds = S.osmIds || await fetchJSON(`../data/${CITY_ID}/osm.json?v=${S.data.build}`);
+  const parts = S.data.tiles.osmParts;
+  if (parts) {                       // one small file by the id's number (pipeline/s10_tiles.py)
+    const part = await fetchJSON(`../data/${CITY_ID}/osm/${+osm.split('/')[1] % parts}.json?v=${S.data.build}`).catch(() => ({}));
+    return part[osm] ?? -1;
+  }
+  S.osmIds = S.osmIds || await fetchJSON(`../data/${CITY_ID}/osm.json?v=${S.data.build}`);   // older builds: every id
   return S.osmIds.indexOf(osm);
 }
 // Gzipped vector tiles: GitHub Pages serves them as they are, so the page unpacks them itself.

@@ -5,12 +5,16 @@
 //     changes whenever they do, so a kept copy is always right: served from the phone, fetched only once
 //   everything else from this site (the index, the pages): fetched fresh, the kept copy used only when offline
 //   other sites (fonts, base maps, photos): left to the browser
+// Map and ground tiles are kept apart from the rest (TILES, at most MAX_TILES, the oldest dropped first): a few
+// thousand of them in one store made looking up a card's file there slow on a phone.
 // When a page has loaded a newer build, it tells this worker (postMessage {build, v}), which drops older copies.
-const KEEP = 'wtt-1';
+const KEEP = 'wtt-2', TILES = 'wtt-tiles-1', MAX_TILES = 3000;
+const isTile = url => /\/data\/[^/]+\/(tiles|ground)\//.test(url.pathname);
+let puts = 0;
 
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', e => e.waitUntil((async () => {
-  for (const k of await caches.keys()) if (k !== KEEP) await caches.delete(k);
+  for (const k of await caches.keys()) if (k !== KEEP && k !== TILES) await caches.delete(k);
   await self.clients.claim();
 })()));
 
@@ -22,12 +26,21 @@ self.addEventListener('fetch', e => {
 });
 
 async function kept(req){
-  const cache = await caches.open(KEEP);
+  const tile = isTile(new URL(req.url));
+  const cache = await caches.open(tile ? TILES : KEEP);
   const hit = await cache.match(req);
   if (hit) return hit;
   const r = await fetch(req);
-  if (r.ok) cache.put(req, r.clone());
+  if (r.ok) {
+    cache.put(req, r.clone()).catch(() => {});
+    if (tile && ++puts % 200 === 0) trim(cache);
+  }
   return r;
+}
+
+async function trim(cache){         // the oldest tiles first (a store lists them in the order they were put)
+  const ks = await cache.keys();
+  for (const k of ks.slice(0, Math.max(0, ks.length - MAX_TILES))) await cache.delete(k);
 }
 
 async function fresh(req){
@@ -49,12 +62,14 @@ self.addEventListener('message', e => {
   const { build, v } = e.data || {};
   if (!build) return;
   e.waitUntil((async () => {
-    const cache = await caches.open(KEEP);
-    for (const req of await cache.keys()) {
-      const u = new URL(req.url), rv = u.searchParams.get('v');
-      if (!rv) continue;
-      const isData = u.pathname.includes('/data/');
-      if ((isData && rv !== String(build)) || (!isData && v && rv !== String(v))) await cache.delete(req);
+    for (const name of [KEEP, TILES]) {
+      const cache = await caches.open(name);
+      for (const req of await cache.keys()) {
+        const u = new URL(req.url), rv = u.searchParams.get('v');
+        if (!rv) continue;
+        const isData = u.pathname.includes('/data/');
+        if ((isData && rv !== String(build)) || (!isData && v && rv !== String(v))) await cache.delete(req);
+      }
     }
   })());
 });

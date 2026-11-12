@@ -198,12 +198,21 @@ export function selectBuilding(id, at){
   fstate(id, { sel:true });
   const go = c => c && S.map.easeTo({ center:c, zoom:Math.max(S.map.getZoom(), 16.5), duration:700,
     padding: innerWidth >= 760 ? { right: 400 } : { bottom: innerHeight * 0.45 } });
-  if (at || centreOf(id)) go(at || centreOf(id));
-  else loadCard(id).then(() => S.selectedId === id && go(centreOf(id))).catch(() => {});
-  if (S.features[id].full || !tiled()) return showCard(id);
+  if (S.features[id].full || !tiled()) { if (at || centreOf(id)) go(at || centreOf(id)); return showCard(id); }
+  // the card first, then the glide: moving the map (with hills, especially) loads tiles and keeps a phone busy,
+  // and the card's file would wait behind them
   renderCard({ title: refName(id), rows: [['Loading…', '']] });     // the title at once, the details when their file arrives
-  loadCard(id).then(() => S.selectedId === id && showCard(id))
-    .catch(() => { if (S.selectedId === id) renderCard({ title: refName(id), rows: [['Could not load', 'Check the connection and tap the building again.']] }); });
+  const t0 = performance.now();
+  loadCard(id).then(() => {
+    if (S.selectedId !== id) return;
+    showCard(id);
+    if (/[?&]timing\b/.test(location.search)) console.log(`card ${id}: ${Math.round(performance.now() - t0)} ms`);
+    requestAnimationFrame(() => S.selectedId === id && go(at || centreOf(id)));
+  }).catch(() => {
+    if (S.selectedId !== id) return;
+    go(at || centreOf(id));
+    renderCard({ title: refName(id), rows: [['Could not load', 'Check the connection and tap the building again.']] });
+  });
 }
 export function showCard(id){ renderCard(buildingCard(S.features[id].properties, id)); }
 
