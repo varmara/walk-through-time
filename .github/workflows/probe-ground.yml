@@ -13,6 +13,7 @@ jobs:
       - name: Council Tax areas
         run: python -m pipeline.run nottingham --only s00_fetch_voa 2>&1 | head -8
       - name: One square, as it is
+        if: false
         run: |
           curl -sS -L -A "walk-through-time/1.0" -o sq.zip https://environment.data.gov.uk/tiles/collections/survey/lidar_composite_dtm/2022/2/SK5535
           unzip -o -q sq.zip

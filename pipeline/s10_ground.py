@@ -132,8 +132,11 @@ def build(c, out, cache):
         s.close()
     h = mosaic[0].astype("float32")
     valid = (h != nodata) & np.isfinite(h) & (h > -100)
-    log(f"    {h.shape[1]} x {h.shape[0]} cells, {100 * valid.mean():.1f}% surveyed")
-    h = fillnodata(np.where(valid, h, 0), mask=valid.astype("uint8"), max_search_distance=400)
+    log(f"    {h.shape[1]} x {h.shape[0]} cells, {100 * valid.mean():.1f}% surveyed, "
+        f"{float(h[valid].min()):.0f} to {float(h[valid].max()):.0f} m")
+    if not valid.all():
+        h = fillnodata(np.where(valid, h, 0), mask=valid.astype("uint8"), max_search_distance=400)
+    log(f"    after filling the gaps: {float(h.min()):.0f} to {float(h.max()):.0f} m")
     # the edges carried outwards, so tiles at the margin have ground under them
     pad = 1500
     h = np.pad(h, pad, mode="edge")
