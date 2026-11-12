@@ -152,11 +152,12 @@ function addGround(){
   S.map.addSource('ground', dem);
   S.map.addSource('groundShade', { ...dem });
   const dark = isDark();
+  // light: dark brown shadows; dark: the shadows drawn whitish, as dark shading cannot be seen on a dark map
   S.map.addLayer({ id:'hillshade', type:'hillshade', source:'groundShade', paint:{
-    'hillshade-exaggeration':['interpolate', ['linear'], ['zoom'], 11, 0.45, 16, 0.25],
-    'hillshade-shadow-color': dark ? 'rgba(0,0,0,0.55)' : 'rgba(60,45,30,0.35)',
-    'hillshade-highlight-color': dark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.35)',
-    'hillshade-accent-color': dark ? 'rgba(0,0,0,0.3)' : 'rgba(60,45,30,0.2)',
+    'hillshade-exaggeration':['interpolate', ['linear'], ['zoom'], 11, 0.75, 16, 0.5],
+    'hillshade-shadow-color': dark ? 'rgba(255,250,240,0.55)' : 'rgba(45,30,15,0.62)',
+    'hillshade-highlight-color': dark ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0.3)',
+    'hillshade-accent-color': dark ? 'rgba(255,250,240,0.28)' : 'rgba(45,30,15,0.32)',
     'hillshade-illumination-direction':315 } });
   setHills(store.get('hills') !== 'off');
 }
