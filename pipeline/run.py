@@ -9,8 +9,8 @@
 import argparse
 import importlib
 
-STEPS = ["s00_fetch_osm", "s00_fetch_bridges", "s00_fetch_heritage", "s00_fetch_nature", "s00_fetch_plaques", "s00_fetch_voa", "s00_fetch_councils", "s00_fetch_visitor", "s00_fetch_museums", "s01_buildings", "s02_listing", "s02_listing_dates", "s03_wikidata",
-         "s04_curated", "s04_residents", "s05_dates", "s06_people", "s06_layers", "s06_names", "s06_summaries", "s06_photos", "s07_package", "s08_graph", "s09_share", "s09_ground", "s10_tiles", "s11_changes"]
+STEPS = ["s00_fetch_osm", "s00_fetch_land", "s00_fetch_bridges", "s00_fetch_heritage", "s00_fetch_nature", "s00_fetch_plaques", "s00_fetch_voa", "s00_fetch_councils", "s00_fetch_visitor", "s00_fetch_museums", "s01_buildings", "s02_listing", "s02_listing_dates", "s03_wikidata",
+         "s04_curated", "s04_residents", "s05_dates", "s06_people", "s06_land", "s06_layers", "s06_names", "s06_summaries", "s06_photos", "s07_package", "s08_graph", "s09_share", "s09_ground", "s10_tiles", "s11_changes"]
 
 
 def main():

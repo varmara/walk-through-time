@@ -387,6 +387,31 @@ function pinCard(p){
 
 // ================= Walking routes, and toilets, water and benches =================
 const NETWORK = { iwn: 'International walking route', nwn: 'National walking route', rwn: 'Regional walking route', lwn: 'Local walking route' };
+// ================= the land: brooks, woods, old railways and canals… (pipeline/s06_land.py) =================
+const LAND_KIND = { brook: 'Brook or stream', pond: 'Pond', wood: 'Wood', rail: 'Disused railway', canal: 'Lost canal',
+  oldsite: 'Historic site', cemetery: 'Cemetery or churchyard', allot: 'Allotments', orchard: 'Orchard' };
+// from the map: the tile's properties, with its named place's details (from the index) when it has one
+export function showLand(p){
+  const e = p.i != null && (S.data.land || [])[p.i];
+  renderCard(landCard(e ? { ...p, ...e } : p));
+}
+function landCard(p){
+  const type = p.k || LAND_KIND[p.t] || 'Place';
+  const rows = [['Type', esc(type)]];
+  const src = s => !s ? '' : /^https?:/.test(s) ? ` <span class="muted">(${a(s, host(s))})</span>` : ` <span class="muted">(${esc(s)})</span>`;
+  if (p.t === 'rail' || p.t === 'canal') {
+    if (p.from) rows.push(['Opened', esc(p.from) + src(p.fromSrc)]);
+    if (p.to) rows.push(['Closed', esc(p.to) + src(p.toSrc)]);
+    if (!p.from && !p.to) rows.push(['Years', '<span class="muted">Not recorded yet</span>']);
+  }
+  if (p.date) rows.push(['Date', esc(p.date)]);
+  if (p.u) rows.push(['Runs', 'Underground here, in a culvert']);
+  if (p.km) rows.push(['On this map', `${esc(p.km)} km`]);
+  rows.push(['Source', 'OpenStreetMap']);
+  const links = placeLinks({ wp: p.wp, wd: p.wd, osm: p.osm || p.o });
+  return { title: p.name || type, rows, stories: [], links };
+}
+
 export function showRoute(i){ const r = routeOf('r' + i); if (r) renderCard(routeCard(r.properties)); }
 function routeCard(p){
   const rows = [];
@@ -446,5 +471,5 @@ export function openRef(r){
   if (!S.active.has(key)) { S.active.add(key); saveActive(); renderLayers(); applyLayers(); }
   S.map.fitBounds([[bb[0], bb[1]], [bb[2], bb[3]]],
     { padding: innerWidth >= 760 ? { top: 60, bottom: 60, left: 60, right: 420 } : { top: 80, left: 30, right: 70, bottom: innerHeight * 0.45 }, maxZoom: 17, duration: 800 });
-  r[0] === 'r' ? renderCard(routeCard(f.properties)) : showArea(f.properties);
+  r[0] === 'r' ? renderCard(routeCard(f.properties)) : r[0] === 'l' ? renderCard(landCard(f.properties)) : showArea(f.properties);
 }

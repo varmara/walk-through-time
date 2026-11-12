@@ -83,6 +83,7 @@ Tables in the same folder, each with a Note column saying why:
 | `collections.md` | collections of old pictures that are linked, not copied (not openly licensed) |
 | `credits.md` | the name each linked collection's website goes by, in the card's "More photos from …" |
 | `architects.md` | architects as OpenStreetMap or a Wikipedia table names them (`T. Cecil Howitt`), made plain, with their article when the name alone does not find it, or another page about them (linked only) when there is no article |
+| `old-lines.md` | the years a disused railway or lost canal opened and closed, by its name in OpenStreetMap, with the source checked; these come before Wikidata's and OpenStreetMap's own dates |
 | `architects-to-find.md` | architects on the map with no article or page found yet, and where to look; for editors, not read by the build |
 
 ## 2. A rule layer (from an open dataset)

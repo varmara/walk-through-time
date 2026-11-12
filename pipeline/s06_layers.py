@@ -1,6 +1,6 @@
 """Resolve every layer to what it contains, grouped into the sections of the page's Layers sheet.
 
-Story layers come from step s04, the People layer from s06_people, rule layers from pipeline/layers.py, nature
+Story layers come from step s04, the People layer from s06_people, the land's layers from s06_land, rule layers from pipeline/layers.py, nature
 areas from step s00_fetch_nature, the layers for visitors and the lists (Mapping Museums, CAMRA) from
 visitorlayers.py, and the other areas (conservation areas, parks and gardens, Article 4 areas, tree preservation
 orders) from the s00 steps, in the order of layerdata.AREAS. Each layer has one or more groups; each group is one tickbox on the page.
@@ -137,6 +137,8 @@ def main(city_id):
                  "source": {"title": "Natural England open data", "url": "https://naturalengland-defra.opendata.arcgis.com/"},
                  "groups": [g for g in groups if g["count"]]})
     log(f"s06 nature: {len(nature)} areas")
+    if work(city_id, "land").exists():     # brooks, woods, old railways and canals, historic sites… (s06_land)
+        meta += load(city_id, "land")["meta"]
 
     # the other areas follow the nature areas in the packaged areas collection (layerdata.AREAS): items refer to
     # them as a<index>

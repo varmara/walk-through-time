@@ -1,6 +1,7 @@
 // Walk Through Time, city page: The year slider and Play.
 import { $, ERAS, MAX_YEAR, fmt } from './util.js';
 import { S } from './state.js';
+import { setLand } from './map.js';
 
 // ================= Year slider =================
 // Piecewise scale: little was built before 1700, so the early centuries get a short stretch of the track.
@@ -23,6 +24,7 @@ export function updateYear(){
   const f = ['any', ['all', ['has', 'y'], ['<=', ['get', 'y'], Y], inPeriods]];
   if (S.showUnknown) f.push(['!', ['has', 'y']]);
   S.map.setFilter('b', f);
+  if (S.landTypes) setLand(S.landTypes, Y);       // old railways and canals: drawn from the year they opened
   // in the Map sheet, how many have a date: "2% have a date and 34% an estimate for their area"
   const pct = n => Math.round(n / S.stats.total * 100) + '%';
   $('dated').textContent = `Of ${fmt(S.stats.total)} buildings, ${pct(S.stats.known)} have a date`

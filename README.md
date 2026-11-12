@@ -19,6 +19,7 @@ open data ──► pipeline/ (Python, numbered steps) ──► data/<city>.jso
 | Step | What it does |
 |---|---|
 | `s00_fetch_osm` | Buildings, roads, water, parks and named places from OpenStreetMap |
+| `s00_fetch_land` | The land's other shapes from OpenStreetMap, in a second, lighter request over the same squares: brooks and springs, woods, disused railways and lost canals, historic sites, cemeteries, allotments and orchards |
 | `s00_fetch_heritage` | Listed buildings and scheduled monuments from Historic England |
 | `s00_fetch_plaques` | Commemorative plaques (Open Plaques, public domain), as published with locations by the councils that do (Nottingham City Council), and plaques mapped in OpenStreetMap |
 | `s00_fetch_nature` | Nature Reserves, SSSIs and ancient woodland from Natural England; other nature reserves from OpenStreetMap; Local Wildlife Sites from the council that publishes them |
@@ -30,6 +31,7 @@ open data ──► pipeline/ (Python, numbered steps) ──► data/<city>.jso
 | `s04_curated` | Hand-written stories (Markdown in `stories/<city>/`) checked against Wikipedia and placed on buildings |
 | `s05_dates` | One year per building with its precision (exact, approximate, century) and source; keeps every date that disagrees with it |
 | `s06_people` | The People layer: hand-written entries, commemorative plaques (each a pin linked both ways with its building), well-known residents from Wikipedia and architects from Wikidata, with who each person was from their Wikipedia article |
+| `s06_land` | Those shapes sorted into layers (with ponds from the main download), and the years each old railway or canal opened and closed: from `stories/<city>/old-lines.md`, then Wikidata, then OpenStreetMap |
 | `s06_layers` | Every other layer resolved to its buildings: story layers, rule layers (`pipeline/layers.py`) and areas |
 | `s04_residents` | Well-known residents: people tied to the city in Wikidata whose Wikipedia article names a house number and street here, matched to the building by its OpenStreetMap address |
 | `s06_photos` | Photos from Wikimedia Commons (many imported from Geograph): a current photo where Wikidata has none, and up to six old photographs per building, one per decade, never older than the building |

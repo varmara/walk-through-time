@@ -189,6 +189,9 @@ def main(city_id):
     # travel together, in the order of layerdata.AREAS; "t" says which kind
     nature = [f for name in AREAS if work(city_id, name).exists() for f in load(city_id, name)]
     extra = {k: fc(load(city_id, k) if work(city_id, k).exists() else []) for k in ("routes", "basics")}
+    # brooks, woods, old railways and canals… (s06_land): drawn from the tiles, their named places in the index
+    land = load(city_id, "land") if work(city_id, "land").exists() else {"features": [], "entries": []}
+    extra["land"] = {**fc(land["features"]), "entries": land["entries"]}
     pins = [{"type": "Feature", "properties": {"i": k, **{kk: v for kk, v in pn.items() if kk not in ("x", "y")}},
              "geometry": {"type": "Point", "coordinates": [pn["x"], pn["y"]]}} for k, pn in enumerate(lay.get("pins", []))]
     for f in pins:          # pins: their layer's group, their person, where they stand

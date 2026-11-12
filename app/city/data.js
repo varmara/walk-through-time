@@ -78,7 +78,8 @@ export const hasPins = key => ['stories', 'people', 'rule', 'pins'].includes(kin
 
 // ================= Place references =================
 // Layer items point at buildings (a number), pins ("p<index>": places that are not buildings, plaques on no
-// building), areas ("a<index>": conservation and nature areas…) or walking routes ("r<index>").
+// building), areas ("a<index>": conservation and nature areas…), walking routes ("r<index>") or the land's
+// named places ("l<index>": brooks, woods, old railways…).
 export const parseRef = x => typeof x === 'number' ? x : /^\d+$/.test(x) ? +x : x;
 export const isB = r => typeof r === 'number';
 export const pinOf = r => S.data.pins.features[+r.slice(1)];
@@ -100,8 +101,13 @@ export function routeOf(r){
   const pts = f.geometry.coordinates.flat(), xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
   return { properties: f.properties, bb: [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)] };
 }
-// a pin, an area or a route: { properties, … }
-export const refOf = r => r[0] === 'p' ? pinOf(r) : r[0] === 'r' ? routeOf(r) : areaOf(r);
+// one of the land's named places (a brook, a disused railway with all its parts…): its details and bounds
+export function landOf(r){
+  const e = (S.data.land || [])[+r.slice(1)];
+  return e && { properties: { ...e, i: +r.slice(1) }, bb: e.bb };
+}
+// a pin, an area, a route or a place on the land: { properties, … }
+export const refOf = r => r[0] === 'p' ? pinOf(r) : r[0] === 'r' ? routeOf(r) : r[0] === 'l' ? landOf(r) : areaOf(r);
 export function ringsOf(g){ return g.type === 'Polygon' ? [g.coordinates[0]] : g.type === 'MultiPolygon' ? g.coordinates.map(p => p[0]) : []; }
 export function refCentre(r){
   if (isB(r)) return centreOf(r);

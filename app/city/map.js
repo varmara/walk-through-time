@@ -1,9 +1,9 @@
 // Walk Through Time, city page: The map: MapLibre layers for buildings (coloured by era), roads, water, parks, areas and pins.
-import { AREA_TYPES, BASICS, CITY_ID, ERAS, FADE, PIN_LAYERS, mix, store, tok } from './util.js';
+import { AREA_TYPES, BASICS, CITY_ID, ERAS, FADE, LAND, PIN_LAYERS, mix, store, tok } from './util.js';
 import { S } from './state.js';
 import { marksBuildings } from './data.js';
 import { turnNeedle } from './sheet.js';
-import { selectBuilding, showArea, showBasic, showPin, showRoute } from './cards.js';
+import { selectBuilding, showArea, showBasic, showLand, showPin, showRoute } from './cards.js';
 import { drawPins } from './places.js';
 
 export function isDark(){
@@ -33,6 +33,7 @@ export function buildingColour(){
 }
 export const pinColour = () => ['match', ['get', 'layer'], ...PIN_LAYERS.flatMap(L => [L, tok('--p-' + L)]), tok('--marked')];
 export const basicColour = () => ['match', ['get', 't'], ...BASICS.flatMap(k => [k, tok('--b-' + k)]), tok('--muted')];
+export const landColour = () => ['match', ['get', 't'], ...LAND.flatMap(t => [t, tok('--l-' + t)]), tok('--muted')];
 export const natureColour = () => ['match', ['get', 't'], ...AREA_TYPES.flatMap(t => [t, tok('--n-' + t)]), tok('--n-reserve')];
 
 export function drawMap(){
@@ -69,6 +70,7 @@ export function drawMap(){
         paint:{ 'line-color':tok('--road'), 'line-width':['interpolate', ['linear'], ['zoom'], 13, ['match', ['get','k'], 'major', 1.5, 0.4], 18, ['match', ['get','k'], 'major', 14, 3]] } });
       addGround();
 
+      if (T) addLand(src);
       // areas (nature, conservation): from the tiles, or the older data file's GeoJSON
       const areaSrc = T && S.data.areas ? src('areas') : { source:'nature' };
       if (!(T && S.data.areas)) S.map.addSource('nature', { type:'geojson', data: S.data.nature || { type:'FeatureCollection', features:[] } });
@@ -117,11 +119,17 @@ export function drawMap(){
         if (basic) return showBasic(basic.properties);
         const route = near('routes', 6);
         if (route) return showRoute(route.properties.i);
+        const land = S.map.getLayer('land-pt') && ['land-pt', 'land-open', 'land-gone', 'land-line', 'land-under']
+          .map(id => near(id, 7)).find(Boolean);
+        if (land) return showLand(land.properties);
         const hit = S.map.queryRenderedFeatures(e.point, { layers:['b'] })[0];
         if (hit) return selectBuilding(hit.id, [e.lngLat.lng, e.lngLat.lat]);
         const area = S.map.getLayer('nature-fill') && S.map.getLayoutProperty('nature-fill', 'visibility') === 'visible'
           && S.map.queryRenderedFeatures(e.point, { layers:['nature-fill'] })[0];
-        if (area) showArea((S.data.areas && S.data.areas[area.properties.i]) || area.properties);   // some areas are only in the tiles
+        if (area) return showArea((S.data.areas && S.data.areas[area.properties.i]) || area.properties);   // some areas are only in the tiles
+        const ground = S.map.getLayer('land-fill') && S.map.getLayoutProperty('land-fill', 'visibility') === 'visible'
+          && S.map.queryRenderedFeatures(e.point, { layers:['land-fill'] })[0];
+        if (ground) showLand(ground.properties);
       });
       // start the credits folded behind their (i) button: on a phone they would cover the map
       document.querySelector('.maplibregl-ctrl-attrib')?.classList.remove('maplibregl-compact-show');
@@ -138,6 +146,52 @@ export function addNls(key){
   if (S.map.getSource('nls')) S.map.removeSource('nls');
   S.map.addSource('nls', { type:'raster', url:`https://api.maptiler.com/tiles/uk-osgb10k1888/tiles.json?key=${encodeURIComponent(key)}`, tileSize:256 });
   S.map.addLayer({ id:'nls', type:'raster', source:'nls', layout:{ visibility:'none' }, paint:{ 'raster-opacity':0.85 } }, S.map.getLayer('parks') ? 'parks' : undefined);
+}
+
+// ================= the land: brooks, woods, old railways and canals, historic sites… (pipeline/s06_land.py) =========
+// One tile layer, drawn as several map layers: areas, their edges, lines, culverted brooks (dotted), points close up,
+// and the old railways and canals twice: solid in the years they were in use, dashed once closed (setLand).
+const LINES = ['rail', 'canal'];
+const LAND_BASE = {
+  'land-fill': ['==', ['geometry-type'], 'Polygon'],
+  'land-edge': ['==', ['geometry-type'], 'Polygon'],
+  'land-line': ['all', ['==', ['geometry-type'], 'LineString'], ['!', ['in', ['get', 't'], ['literal', LINES]]], ['!', ['has', 'u']]],
+  'land-under': ['all', ['==', ['geometry-type'], 'LineString'], ['has', 'u']],
+  'land-open': ['all', ['==', ['geometry-type'], 'LineString'], ['in', ['get', 't'], ['literal', LINES]]],
+  'land-gone': ['all', ['==', ['geometry-type'], 'LineString'], ['in', ['get', 't'], ['literal', LINES]]],
+  'land-pt': ['==', ['geometry-type'], 'Point'],
+};
+function addLand(src){
+  const width = (a, b) => ['interpolate', ['linear'], ['zoom'], 11, a, 17, b];
+  const hidden = { visibility:'none' };
+  S.map.addLayer({ id:'land-fill', type:'fill', ...src('land'), layout:hidden, paint:{ 'fill-color':landColour(),
+    'fill-opacity':['match', ['get', 't'], 'wood', 0.42, 'pond', 0.6, 'oldsite', 0.22, 0.32] } });
+  S.map.addLayer({ id:'land-edge', type:'line', ...src('land'), layout:hidden, paint:{ 'line-color':landColour(),
+    'line-width':['match', ['get', 't'], 'oldsite', 1.8, 0.8], 'line-opacity':0.8 } });
+  S.map.addLayer({ id:'land-line', type:'line', ...src('land'), layout:{ ...hidden, 'line-cap':'round', 'line-join':'round' },
+    paint:{ 'line-color':landColour(), 'line-width':['interpolate', ['linear'], ['zoom'],
+      11, ['match', ['get', 't'], 'brook', 1, 1.5], 17, ['match', ['get', 't'], 'brook', 3.5, 4]] } });
+  S.map.addLayer({ id:'land-under', type:'line', ...src('land'), layout:{ ...hidden, 'line-cap':'round' },
+    paint:{ 'line-color':landColour(), 'line-width':width(1, 3), 'line-dasharray':[0.4, 2] } });
+  S.map.addLayer({ id:'land-gone', type:'line', ...src('land'), layout:hidden,
+    paint:{ 'line-color':landColour(), 'line-width':width(2, 5), 'line-dasharray':[2, 1.4] } });
+  S.map.addLayer({ id:'land-open', type:'line', ...src('land'), layout:{ ...hidden, 'line-cap':'round', 'line-join':'round' },
+    paint:{ 'line-color':landColour(), 'line-width':width(2.5, 6) } });
+  S.map.addLayer({ id:'land-pt', type:'circle', ...src('land'), minzoom:13, layout:hidden, paint:{
+    'circle-radius':['interpolate', ['linear'], ['zoom'], 13, 3, 18, 7], 'circle-color':landColour(),
+    'circle-stroke-color':tok('--on-strong'), 'circle-stroke-width':1.5, 'circle-pitch-alignment':'map' } });
+}
+// the ticked kinds, and the year on the slider: a railway or canal is drawn from the year it opened, solid until
+// it closed and dashed after (one with no closing year: dashed, as it is gone now)
+export function setLand(types, Y){
+  if (!S.map || !S.map.getLayer('land-fill')) return;
+  const opened = ['any', ['!', ['has', 'y0']], ['<=', ['get', 'y0'], Y]];
+  const inUse = ['all', ['has', 'y1'], ['>', ['get', 'y1'], Y]];
+  const when = { 'land-open': ['all', opened, inUse], 'land-gone': ['all', opened, ['!', inUse]] };
+  for (const [id, base] of Object.entries(LAND_BASE)) {
+    S.map.setLayoutProperty(id, 'visibility', types.length ? 'visible' : 'none');
+    S.map.setFilter(id, ['all', base, ['in', ['get', 't'], ['literal', types.length ? types : ['none']]], when[id] || true]);
+  }
 }
 
 // ================= the ground: hills from the Environment Agency's survey (pipeline/s10_ground.py) =================

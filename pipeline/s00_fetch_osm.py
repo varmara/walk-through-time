@@ -81,16 +81,16 @@ def query(area):
     (relation["building"]["type"="multipolygon"]{area}; relation["natural"="water"]{area};); out body geom qt;"""
 
 
-def cached_tile(area):
+def cached_tile(area, ask=query):
     """Whether a square's answer is saved (from any of the servers)."""
-    body = urllib.parse.urlencode({"data": query(area)}).encode()
+    body = urllib.parse.urlencode({"data": ask(area)}).encode()
     return any(cached("application/json", url, body) is not None for url in OVERPASS)
 
 
-def fetch(area):
+def fetch(area, ask=query):
     # ways and points: their tags and shape; relations (buildings and water drawn as multipolygons, e.g. the
     # Arkwright Building around its courtyard) need "body" too, or Overpass sends them without their members
-    q = query(area)
+    q = ask(area)
     last = None
     for attempt in range(3):
         for url in OVERPASS:
@@ -117,7 +117,10 @@ def reusable(city_id):
     return osm.exists() and st.exists() and st.read_text().strip() == stamp(city_id)
 
 
-def main(city_id):
+def squares(city_id, ask=query, label="OpenStreetMap", minutes=None, partial=False):
+    """Every element the query finds in the city's squares, each once and only those in its polygon.
+    partial: past the time limit or on a square that fails twice, return what was fetched instead of stopping
+    the build (for layers that can be shown in part while the rest is fetched by the next build)."""
     c = city(city_id)
     poly = c.get("polygon")
     elements, seen = [], set()
@@ -125,7 +128,7 @@ def main(city_id):
     saved = 0
     # a first download of a big area can take longer than one build may run: past $WTT_OSM_MINUTES the step stops
     # (each square fetched so far is saved), and the next build carries on from there
-    budget = float(os.environ.get("WTT_OSM_MINUTES") or 0) * 60
+    budget = float(minutes if minutes is not None else os.environ.get("WTT_OSM_MINUTES") or 0) * 60
     t0 = time.time()
     # a square every server fails on (busy, or timing out) goes to the back of the queue and is tried once more
     # after the rest, after a pause; if it fails again, the step stops with everything else saved
@@ -133,20 +136,27 @@ def main(city_id):
     while queue:
         n, t = queue.pop(0)
         area = f"({t['s']},{t['w']},{t['n']},{t['e']})"
-        was = cached_tile(area)
+        was = cached_tile(area, ask)
         if not was and budget and time.time() - t0 > budget:
-            left = 1 + sum(1 for _, u in queue if not cached_tile(f"({u['s']},{u['w']},{u['n']},{u['e']})"))
-            raise SystemExit(f"s00 OpenStreetMap: stopped after {budget / 60:.0f} minutes with {left} of {len(ts)} "
-                             "squares still to fetch; they are saved so far, and the next build carries on")
+            left = 1 + sum(1 for _, u in queue if not cached_tile(f"({u['s']},{u['w']},{u['n']},{u['e']})", ask))
+            msg = (f"s00 {label}: stopped after {budget / 60:.0f} minutes with {left} of {len(ts)} "
+                   "squares still to fetch; they are saved so far, and the next build carries on")
+            if partial:
+                log(msg)
+                break
+            raise SystemExit(msg)
         try:
-            got = fetch(area)
+            got = fetch(area, ask)
         except RuntimeError as e:
+            if n in failed and partial:
+                log(f"s00 {label}: square {n} failed twice ({e}); left out until the next build")
+                continue
             if n in failed:
-                raise SystemExit(f"s00 OpenStreetMap: square {n} failed twice ({e}); the others are saved, and the "
+                raise SystemExit(f"s00 {label}: square {n} failed twice ({e}); the others are saved, and the "
                                  "next build carries on") from e
             failed.add(n)
             queue.append((n, t))
-            log(f"s00 OpenStreetMap square {n}/{len(ts)}: every server failed; trying again at the end")
+            log(f"s00 {label} square {n}/{len(ts)}: every server failed; trying again at the end")
             time.sleep(60)
             continue
         new = 0
@@ -157,10 +167,15 @@ def main(city_id):
                 elements.append(el)
                 new += 1
         saved += was
-        log(f"s00 OpenStreetMap square {n}/{len(ts)}: {new} new elements{' (saved answer)' if was else ''}")
+        log(f"s00 {label} square {n}/{len(ts)}: {new} new elements{' (saved answer)' if was else ''}")
         if not was:
             time.sleep(3)
     log(f"    {saved} of {len(ts)} squares from saved answers")
+    return elements
+
+
+def main(city_id):
+    elements = squares(city_id)
     save(city_id, "osm", {"elements": elements})
     work(city_id, "osm").with_suffix(".stamp").write_text(stamp(city_id))
     work(city_id, "osm").with_suffix(".fresh").write_text("1")

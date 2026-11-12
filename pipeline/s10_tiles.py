@@ -9,7 +9,8 @@ and build the whole city before showing anything. Now:
                                       with simpler outlines when zoomed out.
                                       Also areas (nature and conservation areas…, t = which kind, i = its number),
                                       routes (walking routes: i, name) and basics (toilets, water, benches: t and
-                                      a few details, in the zoom 14 and 15 tiles only, drawn close up).
+                                      a few details, in the zoom 14 and 15 tiles only, drawn close up), and land
+                                      (brooks, woods, old railways and canals… from s06_land: t, i, k, u, y0, y1, o).
   data/<city>.json                    the index: only what the page needs before any card opens: the few buildings
                                       with a name, layers or a listing (see index()), how many buildings stand by
                                       each year (for the count under the slider), layers, pins, and the areas'
@@ -140,6 +141,8 @@ def main(city_id):
     write_fc(tmp / "routes.json", [{"type": "Feature", "geometry": r["geometry"],
                                     "properties": {k: r["properties"][k] for k in ("i", "name") if k in r["properties"]}}
                                    for r in routes])
+    land = pkg.get("land", {})
+    write_fc(tmp / "land.json", land.get("features", []))
     write_fc(tmp / "basics.json", [{**f, "tippecanoe": {"minzoom": 14}} for f in pkg.get("basics", {}).get("features", [])])
 
     t0 = time.time()
@@ -148,7 +151,7 @@ def main(city_id):
            "--drop-smallest-as-needed", "--extend-zooms-if-still-dropping", "--no-tile-stats",
            "-L", f"b:{tmp / 'b.json'}", "-L", f"roads:{tmp / 'roads.json'}",
            "-L", f"water:{tmp / 'water.json'}", "-L", f"parks:{tmp / 'parks.json'}", "-L", f"areas:{tmp / 'areas.json'}",
-           "-L", f"routes:{tmp / 'routes.json'}", "-L", f"basics:{tmp / 'basics.json'}"]
+           "-L", f"routes:{tmp / 'routes.json'}", "-L", f"land:{tmp / 'land.json'}", "-L", f"basics:{tmp / 'basics.json'}"]
     subprocess.run(cmd, check=True)
     (tiles / "metadata.json").unlink(missing_ok=True)
     n_tiles = sum(1 for _ in tiles.rglob("*.pbf"))
@@ -159,7 +162,9 @@ def main(city_id):
         shutil.copytree(ground["tiles"], root / "ground")
     for n, chunk in cards.items():
         (root / "cards" / f"{n}.json").write_text(json.dumps(chunk, separators=(",", ":"), ensure_ascii=False))
-    slim = {k: v for k, v in pkg.items() if k not in ("buildings", "roads", "water", "parks", "nature", "routes", "basics")}
+    slim = {k: v for k, v in pkg.items() if k not in ("buildings", "roads", "water", "parks", "nature", "routes", "basics", "land")}
+    # the land's named places (s06_land): what their card and the Layers sheet need; the shapes are in the tiles
+    slim["land"] = land.get("entries", [])
     # routes: drawn from the tiles; here what their card needs, and their bounds to fly to
     slim["routes"] = [{**r["properties"], "bb": bounds_lines(r["geometry"])} for r in routes]
     slim["near"] = storied

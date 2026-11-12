@@ -2,8 +2,8 @@
 import { $, CITY_ID, ERAS, PIN_LAYERS, SECTIONS, esc, fmt, store } from './util.js';
 import { S } from './state.js';
 import { hasPins, isArea, kindOf, marksBuildings, parseRef, saveActive } from './data.js';
-import { addNls, buildingColour, setHills } from './map.js';
-import { updateYear } from './timebar.js';
+import { addNls, buildingColour, setHills, setLand } from './map.js';
+import { curYear, updateYear } from './timebar.js';
 import { openRef } from './cards.js';
 import { showPlaces } from './places.js';
 
@@ -25,6 +25,7 @@ export function renderLayers(){
         const sw = L.kind === 'areas' ? `<span class="sw" style="background:var(--n-${esc(g.key)})"></span>`
           : L.kind === 'points' ? `<span class="sw dot" style="background:var(--b-${esc(g.key)})"></span>`
           : L.kind === 'routes' ? '<span class="sw line" style="background:var(--route)"></span>'
+          : L.kind === 'land' ? `<span class="sw${['brook', 'rail', 'canal'].includes(g.key) ? ' line' : g.key === 'oldsite' ? ' edge' : ''}" style="--c:var(--l-${esc(g.key)})"></span>`
           : PIN_LAYERS.includes(L.id) ? `<span class="sw dot" style="background:var(--p-${esc(L.id)})"></span>` : '';
         html.push(`<label class="lrow"${single ? '' : ' style="padding-left:14px"'}><input type="checkbox" data-g="${esc(g.key)}"${S.active.has(g.key) ? ' checked' : ''}>${sw}
           <span>${esc(title)}</span><span class="n">${fmt(g.count)}</span>
@@ -97,6 +98,8 @@ export function applyLayers(){
   S.map.setFilter('basics', ['in', ['get', 't'], ['literal', basics.length ? basics : ['none']]]);
   S.map.setLayoutProperty('storypins', 'visibility', pinGroups.length ? 'visible' : 'none');
   S.map.setFilter('storypins', ['in', ['get', 'group'], ['literal', pinGroups.length ? pinGroups : ['none']]]);
+  S.landTypes = [...S.active].filter(k => kindOf(k) === 'land');
+  setLand(S.landTypes, curYear());
   const types = [...S.active].filter(isArea);
   const vis = types.length ? 'visible' : 'none';
   ['nature-fill', 'nature-line'].forEach(id => {
