@@ -12,10 +12,21 @@ jobs:
       - run: pip install -q "rasterio==1.4.3" "numpy==2.2.6" "pillow==11.3.0"
       - name: Council Tax areas
         run: |
-          for v in BGC_V5 BGC_V4 BGC_V3 BSC_V4 BSC_V3 BFC_V10 BFE_V10 BFC_V8; do
-            u="https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Lower_layer_Super_Output_Areas_December_2021_Boundaries_EW_$v/FeatureServer/0"
-            echo "== $v: $(curl -sS "$u?f=json" | head -c 300)"
-            echo "   query: $(curl -sS "$u/query?where=1%3D1&geometry=-1.16,52.94,-1.15,52.95&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&returnGeometry=false&f=json" | head -c 400)"
+          U="https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Lower_layer_Super_Output_Areas_December_2021_Boundaries_EW_BSC_V4/FeatureServer/0?f=json"
+          echo "== with a referer: $(curl -sS -H 'Referer: https://geoportal.statistics.gov.uk/' "$U" | head -c 200)"
+          for host in open-geography-portalx-ons.hub.arcgis.com geoportal.statistics.gov.uk; do
+            for slug in lower-layer-super-output-areas-december-2021-boundaries-ew-bsc-v4-2 lower-layer-super-output-areas-december-2021-boundaries-ew-bgc-v5-2; do
+              r=$(curl -sS -L "https://$host/api/v3/datasets/ons::$slug" | head -c 100000)
+              id=$(echo "$r" | python3 -c "import sys,json
+          try: d=json.load(sys.stdin); print(d['data']['id'])
+          except Exception as e: print('none', str(e)[:80])")
+              echo "== $host $slug: id $id; $(echo "$r" | head -c 150)"
+              item=${id%%_*}
+              if [ "$item" != none ]; then
+                code=$(curl -sS -L -o g.json -w '%{http_code} %{size_download}' "https://$host/api/download/v1/items/$item/geojson?layers=0&geometry=%7B%22xmin%22%3A-1.16%2C%22ymin%22%3A52.94%2C%22xmax%22%3A-1.15%2C%22ymax%22%3A52.95%7D")
+                echo "   download: $code $(head -c 200 g.json)"
+              fi
+            done
           done
       - name: One square, as it is
         if: false
