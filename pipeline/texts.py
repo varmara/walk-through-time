@@ -7,6 +7,9 @@
 #                                               "templates", filled in by the page (app/city/data.js: storyOf) and here
 TEMPLATES = {"architect": "Designed by {who}, according to Wikidata.",
              "architect-osm": "Designed by {who}, according to OpenStreetMap.",
+             "architect-list": "Designed by {who}, according to the table of buildings in Wikipedia's article {article}.",
+             "architect-list-unsure": "Probably designed by {who}: the table of buildings in Wikipedia's article {article} "
+                                      "gives the name with a question mark.",
              "scheduled": "Part of the scheduled monument “{of}”.",
              "locallist": "On the council's local heritage list as “{of}”."}
 

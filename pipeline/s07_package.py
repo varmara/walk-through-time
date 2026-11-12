@@ -120,17 +120,18 @@ def main(city_id):
             if len(mine) < 6 and o not in mine:
                 mine.append(o)
 
-    about, by_b = lay.get("people", {}), lay.get("architects", {})
+    about, by_b, links = lay.get("people", {}), lay.get("architects", {}), lay.get("architectLinks", {})
 
     def architects(k, info):
-        """[[name, link or null], ...]: Wikidata's architect, else those a story or OpenStreetMap names (s06_people),
-        each linked to their Wikipedia article where one was found, else to Wikidata's item."""
+        """[[name, link or null, 1 if uncertain], ...]: Wikidata's architect, else those a story, a Wikipedia table or
+        OpenStreetMap names (s06_people), each linked to their Wikipedia article where one was found, else to another
+        page about them (architects.md), else to Wikidata's item."""
         out = []
-        for n in by_b.get(k, []):
-            url = (about.get(n) or {}).get("url")
+        for n, unsure in by_b.get(k, []):
+            url = (about.get(n) or {}).get("url") or links.get(n)
             if not url and n == info.get("architect"):
                 url = info.get("architectArticle") or (info.get("architectQid") and f"https://www.wikidata.org/wiki/{info['architectQid']}")
-            out.append([n, url or None])
+            out.append([n, url or None] + ([1] if unsure else []))
         return out
 
     council_of = councils(city_id)

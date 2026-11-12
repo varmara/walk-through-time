@@ -162,4 +162,5 @@ def main(city_id):
     save(city_id, "routes", routes)
     save(city_id, "basics", basics)
     save(city_id, "layers", {"meta": meta, **out.json(), "names": names, "people": ppl["about"],
-                             "architects": ppl.get("architects", {})})
+                             "architects": ppl.get("architects", {}),
+                             "architectLinks": ppl.get("architectLinks", {})})

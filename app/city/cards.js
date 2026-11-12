@@ -272,9 +272,9 @@ function buildingCard(p, id){
   // the architects: each linked to their article, and to their other buildings when the People layer has them
   // (an older index has one architect, with archUrl)
   const archs = p.architects || (p.architect ? [[p.architect, p.archUrl]] : []);
-  if (archs.length) rows.push([archs.length > 1 ? 'Architects' : 'Architect', archs.map(([name, url]) => {
+  if (archs.length) rows.push([archs.length > 1 ? 'Architects' : 'Architect', archs.map(([name, url, unsure]) => {
     const n = people().get(name)?.refs.length || 0;
-    return (url ? a(url, name) : esc(name))
+    return (url ? a(url, name) : esc(name)) + (unsure ? ' <span class="muted">(probably)</span>' : '')
       + (n > 1 ? ` <span class="muted">·</span> <a href="#" class="who" data-who="${esc(name)}">${n} buildings</a>` : '');
   }).join('<br>')]);
   const archNames = new Set(archs.map(x => x[0]));

@@ -143,6 +143,7 @@ def load(folder):
     f = folder / "credits.md"
     out["CREDITS"] = {r["site"]: r["credit"] for r in table(f)} if f.exists() else {}
     f = folder / "architects.md"
-    out["ARCHITECTS"] = {r["name in openstreetmap"]: {k: r[k2] for k, k2 in (("name", "architect"), ("article", "wikipedia article"))
+    out["ARCHITECTS"] = {r["name in openstreetmap"]: {k: r[k2] for k, k2 in (("name", "architect"), ("article", "wikipedia article"),
+                                                                                   ("source", "other source"))
                                                       if r.get(k2)} for r in table(f)} if f.exists() else {}
     return out
