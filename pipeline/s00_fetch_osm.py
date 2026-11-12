@@ -127,14 +127,28 @@ def main(city_id):
     # (each square fetched so far is saved), and the next build carries on from there
     budget = float(os.environ.get("WTT_OSM_MINUTES") or 0) * 60
     t0 = time.time()
-    for n, t in enumerate(ts, 1):
+    # a square every server fails on (busy, or timing out) goes to the back of the queue and is tried once more
+    # after the rest, after a pause; if it fails again, the step stops with everything else saved
+    queue, failed = list(enumerate(ts, 1)), set()
+    while queue:
+        n, t = queue.pop(0)
         area = f"({t['s']},{t['w']},{t['n']},{t['e']})"
         was = cached_tile(area)
         if not was and budget and time.time() - t0 > budget:
-            left = sum(1 for u in ts[n - 1:] if not cached_tile(f"({u['s']},{u['w']},{u['n']},{u['e']})"))
+            left = 1 + sum(1 for _, u in queue if not cached_tile(f"({u['s']},{u['w']},{u['n']},{u['e']})"))
             raise SystemExit(f"s00 OpenStreetMap: stopped after {budget / 60:.0f} minutes with {left} of {len(ts)} "
                              "squares still to fetch; they are saved so far, and the next build carries on")
-        got = fetch(area)
+        try:
+            got = fetch(area)
+        except RuntimeError as e:
+            if n in failed:
+                raise SystemExit(f"s00 OpenStreetMap: square {n} failed twice ({e}); the others are saved, and the "
+                                 "next build carries on") from e
+            failed.add(n)
+            queue.append((n, t))
+            log(f"s00 OpenStreetMap square {n}/{len(ts)}: every server failed; trying again at the end")
+            time.sleep(60)
+            continue
         new = 0
         for el in got:
             key = (el["type"], el["id"])
