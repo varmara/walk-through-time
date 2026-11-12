@@ -13,8 +13,6 @@ no Wikipedia article found"), which is where new ones appear. Not read by the bu
 | Thomas Wright | three buildings, 1882–1884 | a common name: needs a page that ties him to these |
 | William Holbrook | one building, 1906 | |
 | John Simpson | Nottingham General Hospital, Standard Court (1781) | a common name |
-| Ernest A Sudbury | Westwood, 3 Clumber Road East (1910) | in the Park Estate's table on Wikipedia, with no article |
-| E.M. Lacey | Hillside, 5 Clumber Road East (1904) | as above |
-| Julian Marsh | Lenton View, 11a Lenton Avenue | as above |
+| Julian Marsh | Lenton View, 11a Lenton Avenue | in the Park Estate's table on Wikipedia, with no article |
 | D.L. Booth | one building, 1933 | initials only |
 | W.J. Smith | one building, 1934 | initials only |

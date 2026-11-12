@@ -291,8 +291,8 @@ def main(city_id):
                 if not person_like(name) and not fixed:
                     continue
                 url = "https://en.wikipedia.org/wiki/" + urllib.parse.quote(article.replace(" ", "_"))
-                person(i, "architects", name, TEMPLATES["architect-list-unsure" if unsure else "architect-list"].format(
-                    who=name, article=article), tpl="architect-list", source={"title": article, "url": url, "kind": "Wikipedia"})
+                tpl = "architect-list-unsure" if unsure else "architect-list"
+                person(i, "architects", name, TEMPLATES[tpl].format(who=name), tpl=tpl, source={"title": article, "url": url, "kind": "Wikipedia"})
         elif b["tags"].get("architect"):
             t = b["tags"]
             qids = [q.strip() for q in (t.get("architect:wikidata") or "").split(";")]
