@@ -12,7 +12,7 @@ import { S } from './state.js';
 import { areaOf, byOsm, fromIndex, loadCard, pinOf, refOf, saveActive, tiled } from './data.js';
 import { drawMap } from './map.js';
 import { updateYear } from './timebar.js';
-import { applyLayers, drawLegend, renderLayers } from './panels.js';
+import { applyLayers, drawLegend, groundNote, renderLayers } from './panels.js';
 import { openRef, selectBuilding } from './cards.js';
 import { showPlaces } from './places.js';
 
@@ -38,6 +38,7 @@ export async function main(){
     known = S.features.length - S.data.index.undated - estimated;
   }
   S.stats = { total: S.features.length, known, estimated };
+  groundNote();
 
   S.layers = (S.data.layers || []).map(L => ({ ...L, groups: (L.groups || []).map(g => Array.isArray(g) ? { key: g[0], title: g[1] } : g) }));
   S.layers.forEach(L => L.groups.forEach(g => S.groups.set(g.key, { ...g, layer: L })));

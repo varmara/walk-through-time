@@ -1,19 +1,26 @@
-# Temporary: which Environment Agency LIDAR services answer from GitHub's servers (for the hills on the map).
+# Temporary: checks for the hills on the map and the Council Tax areas, from GitHub's servers.
 name: Probe ground data
 on: workflow_dispatch
 jobs:
   probe:
     runs-on: ubuntu-24.04
     steps:
-      - run: |
-          UA="walk-through-time/1.0 (+https://github.com/varmara/walk-through-time)"
-          curl -sS -A "$UA" -X POST -H 'Content-Type: application/geo+json' -o s.json \
-            "https://environment.data.gov.uk/backend/catalog/api/tiles/collections/survey/search" \
-            -d '{"type":"Polygon","coordinates":[[[-1.16,52.95],[-1.14,52.95],[-1.14,52.96],[-1.16,52.96],[-1.16,52.95]]]}'
-          python3 -c "
-          import json; d=json.load(open('s.json'))
-          r=[x for x in d['results'] if x['product']['id']=='lidar_composite_dtm' and x['resolution']['label']=='2m'][0]
-          print(json.dumps(r, indent=1)[:2500])"
-          U=https://environment.data.gov.uk/tiles/collections/survey/lidar_composite_dtm/2022/2/SK5535
-          curl -sS -A "$UA" -L -o t.bin -D h.txt -w 'code %{http_code} size %{size_download} type %{content_type}\n' "$U"; cat h.txt | head -20; file t.bin
-          (unzip -l t.bin 2>/dev/null || true) | head
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: pip install -q "rasterio==1.4.3" "numpy==2.2.6" "pillow==11.3.0"
+      - name: Council Tax areas
+        run: python -m pipeline.run nottingham --only s00_fetch_voa 2>&1 | head -8
+      - name: Ground tiles
+        run: |
+          mkdir -p data/nottingham
+          echo '{}' > data/nottingham.json
+          python -m pipeline.run nottingham --only s10_ground
+          du -sh data/nottingham/ground; find data/nottingham/ground -name '*.png' | wc -l
+          python3 -c "import json;print(json.load(open('data/nottingham.json'))['ground'])"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ground
+          path: data/nottingham/ground
+          retention-days: 3

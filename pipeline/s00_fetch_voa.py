@@ -78,6 +78,8 @@ def main(city_id):
         code = pr.get("LSOA21CD") or next((v for k, v in pr.items() if k.upper().endswith("CD")), None)
         areas[code] = {"code": code, "name": pr.get("LSOA21NM"), "rings": rings}
     log(f"s00 VOA: {len(areas)} small areas (LSOAs) in the city's area")
+    if not areas:      # say why: an error from the service, or none of its areas inside the map
+        log(f"    the boundaries service answered: {str(gj)[:300]}")
 
     try:
         req = urllib.request.Request(CTSOP, headers={"User-Agent": UA})

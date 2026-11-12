@@ -2,7 +2,7 @@
 import { $, CITY_ID, ERAS, PIN_LAYERS, SECTIONS, esc, fmt, store } from './util.js';
 import { S } from './state.js';
 import { hasPins, isArea, kindOf, marksBuildings, parseRef, saveActive } from './data.js';
-import { addNls, buildingColour } from './map.js';
+import { addNls, buildingColour, setHills } from './map.js';
 import { updateYear } from './timebar.js';
 import { openRef } from './cards.js';
 import { showPlaces } from './places.js';
@@ -108,6 +108,16 @@ export function applyLayers(){
 // ================= Map panel =================
 export function toggle(btn, fn){ btn.onclick = () => { const on = btn.getAttribute('aria-pressed') !== 'true'; btn.setAttribute('aria-pressed', on); fn(on); }; }
 toggle($('tUnknown'), on => { S.showUnknown = on; updateYear(); });
+// the hills: on unless this visitor turned them off (a slow phone, say)
+toggle($('tHills'), on => { store.set('hills', on ? 'on' : 'off'); setHills(on); });
+export function groundNote(){
+  const G = S.data && S.data.ground;
+  $('groundRow').hidden = !G;
+  if (!G) return;
+  $('tHills').setAttribute('aria-pressed', store.get('hills') !== 'off');
+  $('groundNote').textContent = `The ground as it is today, from the Environment Agency's laser survey (to ${G.year}), `
+    + `at true scale: from ${G.range[0]} to ${G.range[1]} m above sea level. Railway cuttings, the canal and filled-in land changed it over time.`;
+}
 document.querySelectorAll('[data-base]').forEach(btn => btn.onclick = () => setBase(btn.dataset.base));
 export function setBase(kind){
   document.querySelectorAll('[data-base]').forEach(b => b.setAttribute('aria-pressed', b.dataset.base === kind));

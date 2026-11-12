@@ -133,6 +133,10 @@ jobs:
           make -C /tmp/tippecanoe -j4 tippecanoe
           mkdir -p ~/tippecanoe && cp /tmp/tippecanoe/tippecanoe ~/tippecanoe/
 
+      - name: Install the tools for the ground's tiles
+        if: steps.plan.outputs.start != 'none'
+        run: pip install -q "rasterio==1.4.3" "numpy==2.2.6" "pillow==11.3.0"     # pipeline/s10_ground.py
+
       - name: Run the pipeline for every city
         if: steps.plan.outputs.start != 'none'
         env:

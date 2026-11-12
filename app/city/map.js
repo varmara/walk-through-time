@@ -48,7 +48,8 @@ export function drawMap(){
         light:{ anchor:'map', position:[1.4, 210, 35], intensity: isDark() ? 0.35 : 0.45 } }
     });
     S.map.addControl(new maplibregl.AttributionControl({ compact:true, customAttribution:
-      '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors · Historic England (OGL) · Natural England (OGL) · Wikidata (CC0) · Wikipedia (CC BY-SA)' }), 'bottom-right');
+      '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors · Historic England (OGL) · Natural England (OGL) · Wikidata (CC0) · Wikipedia (CC BY-SA)'
+      + (S.data.ground ? ' · Ground: ' + S.data.ground.credit + ' (OGL)' : '') }), 'bottom-right');
 
     S.map.on('load', () => {
       S.map.addSource('osm', { type:'raster', tiles:['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize:256, maxzoom:19 });
@@ -66,6 +67,7 @@ export function drawMap(){
         paint:{ 'line-color':tok('--water'), 'line-width':['interpolate', ['linear'], ['zoom'], 13, 2, 17, 10] } });
       S.map.addLayer({ id:'roads', type:'line', ...src('roads'), layout:{ 'line-cap':'round', 'line-join':'round' },
         paint:{ 'line-color':tok('--road'), 'line-width':['interpolate', ['linear'], ['zoom'], 13, ['match', ['get','k'], 'major', 1.5, 0.4], 18, ['match', ['get','k'], 'major', 14, 3]] } });
+      addGround();
 
       // areas (nature, conservation): from the tiles, or the older data file's GeoJSON
       const areaSrc = T && S.data.areas ? src('areas') : { source:'nature' };
@@ -137,3 +139,30 @@ export function addNls(key){
   S.map.addSource('nls', { type:'raster', url:`https://api.maptiler.com/tiles/uk-osgb10k1888/tiles.json?key=${encodeURIComponent(key)}`, tileSize:256 });
   S.map.addLayer({ id:'nls', type:'raster', source:'nls', layout:{ visibility:'none' }, paint:{ 'raster-opacity':0.85 } }, S.map.getLayer('parks') ? 'parks' : undefined);
 }
+
+// ================= the ground: hills from the Environment Agency's survey (pipeline/s10_ground.py) =================
+// Two sources over the same tiles, as MapLibre advises: one raises the map (terrain), one shades it (hillshade).
+function addGround(){
+  const G = S.data.ground;
+  if (!G) return;
+  const url = new URL(`../data/${CITY_ID}/ground/{z}/{x}/{y}.png?v=${S.data.build}`, location.href).href
+    .replace('%7Bz%7D', '{z}').replace('%7Bx%7D', '{x}').replace('%7By%7D', '{y}');
+  const dem = { type:'raster-dem', tiles:[url], tileSize:G.tileSize || 256, encoding:G.encoding || 'terrarium',
+    minzoom:G.minzoom, maxzoom:G.maxzoom, bounds:G.bounds };
+  S.map.addSource('ground', dem);
+  S.map.addSource('groundShade', { ...dem });
+  const dark = isDark();
+  S.map.addLayer({ id:'hillshade', type:'hillshade', source:'groundShade', paint:{
+    'hillshade-exaggeration':['interpolate', ['linear'], ['zoom'], 11, 0.45, 16, 0.25],
+    'hillshade-shadow-color': dark ? 'rgba(0,0,0,0.55)' : 'rgba(60,45,30,0.35)',
+    'hillshade-highlight-color': dark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.35)',
+    'hillshade-accent-color': dark ? 'rgba(0,0,0,0.3)' : 'rgba(60,45,30,0.2)',
+    'hillshade-illumination-direction':315 } });
+  setHills(store.get('hills') !== 'off');
+}
+export function setHills(on){
+  if (!S.map || !S.map.getSource('ground')) return;
+  S.map.setTerrain(on ? { source:'ground', exaggeration:1 } : null);
+  S.map.setLayoutProperty('hillshade', 'visibility', on ? 'visible' : 'none');
+}
+
