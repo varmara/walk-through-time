@@ -103,7 +103,6 @@ def build(c, out, cache):
     from PIL import Image
     from rasterio.enums import Resampling
     from rasterio.fill import fillnodata
-    from rasterio.merge import merge
     from rasterio.transform import Affine
     from rasterio.warp import reproject
 
@@ -124,14 +123,24 @@ def build(c, out, cache):
         tifs.append(tif)
     log(f"s10 ground: {len(sq)} squares of the {PRODUCT} {RES} ({', '.join(sorted({s['year'] for s in sq}))})")
 
+    # the squares side by side on their common 2 m grid (rasterio's merge gave a mosaic of zeros here)
     srcs = [rasterio.open(t) for t in tifs]
-    nodata = srcs[0].nodata if srcs[0].nodata is not None else -9999
-    mosaic, transform = merge(srcs, nodata=nodata)
+    res = srcs[0].res[0]
+    left, top = min(x.bounds.left for x in srcs), max(x.bounds.top for x in srcs)
+    right, bottom = max(x.bounds.right for x in srcs), min(x.bounds.bottom for x in srcs)
+    h = np.full((round((top - bottom) / res), round((right - left) / res)), np.nan, "float32")
+    for x in srcs:
+        a = x.read(1).astype("float32")
+        if x.nodata is not None:
+            a[a == np.float32(x.nodata)] = np.nan
+        r0, c0 = round((top - x.bounds.top) / res), round((x.bounds.left - left) / res)
+        part = h[r0:r0 + a.shape[0], c0:c0 + a.shape[1]]
+        np.copyto(part, a, where=np.isnan(part))
+    transform = Affine(res, 0, left, 0, -res, top)
     crs = srcs[0].crs
-    for s in srcs:
-        s.close()
-    h = mosaic[0].astype("float32")
-    valid = (h != nodata) & np.isfinite(h) & (h > -100)
+    for x in srcs:
+        x.close()
+    valid = np.isfinite(h) & (h > -100)
     log(f"    {h.shape[1]} x {h.shape[0]} cells, {100 * valid.mean():.1f}% surveyed, "
         f"{float(h[valid].min()):.0f} to {float(h[valid].max()):.0f} m")
     if not valid.all():
