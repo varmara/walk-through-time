@@ -11,7 +11,7 @@ jobs:
           python-version: "3.12"
       - run: pip install -q "rasterio==1.4.3" "numpy==2.2.6" "pillow==11.3.0"
       - name: Council Tax areas
-        run: python -m pipeline.run nottingham --only s00_fetch_voa 2>&1 | head -8
+        run: python -u -m pipeline.run nottingham --only s00_fetch_voa
       - name: One square, as it is
         if: false
         run: |
@@ -26,6 +26,7 @@ jobs:
               print(a[2000:2003, 2000:2003])
           PY
       - name: Ground tiles
+        if: false
         run: |
           mkdir -p data/nottingham
           echo '{}' > data/nottingham.json
