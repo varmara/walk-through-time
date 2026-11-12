@@ -154,6 +154,7 @@ def build(c, out, cache):
     log(f"    after filling the gaps: {float(h.min()):.0f} to {float(h.max()):.0f} m")
     # kept, at 4 m and to 0.1 m, for measuring buildings on slopes (main, rises)
     small = np.round(h[::2, ::2] * 10).astype("int16")
+    out.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(out / "dem.npz", dm=small, transform=np.array(tuple(transform * Affine.scale(2)))[:6],
                         crs=np.array(crs.to_wkt()))
     # the edges carried outwards, so tiles at the margin have ground under them
