@@ -6,7 +6,7 @@ const { chromium } = require('playwright');
 const BASE = (process.argv[2] || 'http://localhost:8642/').replace(/\/?$/, '/');
 const CITY = process.argv[3] || 'nottingham';
 // per city: a building to open by link, its title, and a building with a plaque on it
-const KNOWN = { nottingham: { osm: 'way/120036353', title: 'The Bell Inn', plaque: 'way/268513978' } };
+const KNOWN = { nottingham: { osm: 'way/120036353', title: 'The Bell Inn', plaque: 'way/122280349' } };   // Newdigate House: an Open Plaques plaque (the council's are off)
 const known = KNOWN[CITY];
 const failures = [];
 const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (!ok) failures.push(what); };
