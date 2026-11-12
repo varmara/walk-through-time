@@ -131,6 +131,7 @@ def build(c, out, cache):
     h = np.full((round((top - bottom) / res), round((right - left) / res)), np.nan, "float32")
     for x in srcs:
         a = x.read(1).astype("float32")
+        log(f"    {Path(x.name).name}: {x.width} x {x.height}, {np.nanmin(a):.1f} to {np.nanmax(a):.1f}, nodata {x.nodata}")
         if x.nodata is not None:
             a[a == np.float32(x.nodata)] = np.nan
         r0, c0 = round((top - x.bounds.top) / res), round((x.bounds.left - left) / res)
