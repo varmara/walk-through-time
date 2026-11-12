@@ -10,18 +10,6 @@
   },
   "polygon": [
     [
-      -1.164,
-      52.96
-    ],
-    [
-      -1.13,
-      52.96
-    ],
-    [
-      -1.13,
-      52.9585
-    ],
-    [
       -1.116,
       52.9585
     ],
@@ -86,22 +74,58 @@
       52.938
     ],
     [
+      -1.186,
+      52.946
+    ],
+    [
+      -1.193,
+      52.956
+    ],
+    [
+      -1.198,
+      52.972
+    ],
+    [
+      -1.194,
+      52.988
+    ],
+    [
+      -1.181,
+      52.993
+    ],
+    [
       -1.166,
-      52.944
+      52.9955
     ],
     [
-      -1.164,
-      52.944
+      -1.15,
+      52.995
     ],
     [
-      -1.164,
-      52.96
+      -1.133,
+      52.9935
+    ],
+    [
+      -1.116,
+      52.989
+    ],
+    [
+      -1.11,
+      52.977
+    ],
+    [
+      -1.112,
+      52.966
+    ],
+    [
+      -1.116,
+      52.9585
     ]
   ],
   "bbox": {
     "s": 52.887,
     "w": -1.218,
-    "n": 52.96,
+    "n": 52.9955,
     "e": -1.095
   },
   "home": {
@@ -227,7 +251,12 @@
       }
     ]
   },
-  "architect_lists": [{"article": "The Park Estate", "within": "The Park"}],
+  "architect_lists": [
+    {
+      "article": "The Park Estate",
+      "within": "The Park"
+    }
+  ],
   "residents": {
     "_about": "For finding well-known residents in Wikipedia (s04_residents): the Wikidata items of the city (places in them count too), other places' names, and words that place a sentence here.",
     "items": [
