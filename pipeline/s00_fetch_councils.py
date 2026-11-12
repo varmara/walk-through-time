@@ -16,7 +16,7 @@ orders, which make it an offence to cut down or damage the trees without the cou
 Writes work/<city>/councils.json: [{code, name, geometry}], work/<city>/locallist.json: GeoJSON features with
 {name, council, status}, and work/<city>/article4.json and tpo.json: areas {t, name, council, source, url, credit}.
 """
-from .common import city, log, save
+from .common import city, log, save, sources
 from .web import http
 from .s00_fetch_nature import reaches, rings_of, rnd
 
@@ -66,7 +66,7 @@ def councils(c):
 def local_lists(c):
     b, poly = c["bbox"], c.get("polygon")
     feats = []
-    for src in c.get("sources", {}).get("localList", []):
+    for src in sources(c, "localList"):
         try:
             gj = arcgis(src["url"] + "/query", b)
         except Exception as e:  # noqa: BLE001 - optional
@@ -96,7 +96,7 @@ def council_areas(c, kind, t, name_of):
     leave the area out (a revoked order, say)."""
     b, poly = c["bbox"], c.get("polygon")
     feats = []
-    for src in c.get("sources", {}).get(kind, []):
+    for src in sources(c, kind):
         try:
             gj = arcgis(src["url"] + "/query", b)
         except Exception as e:  # noqa: BLE001 - optional

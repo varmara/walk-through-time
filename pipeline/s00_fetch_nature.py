@@ -14,7 +14,7 @@ Writes work/<city>/nature.json: GeoJSON features with properties {t: type key, n
 Only areas whose centre lies inside the city's polygon are kept, so large sites just across the boundary
 stay out. OpenStreetMap reserves whose centre lies inside a Natural England area are left out as duplicates.
 """
-from .common import city, log, save
+from .common import city, log, save, sources
 from .web import http
 from .geo import point_in_ring
 
@@ -124,7 +124,7 @@ def main(city_id):
         n += 1
     log(f"s00 OpenStreetMap nature reserves: {n} more areas")
 
-    for src in c.get("sources", {}).get("wildlife", []):
+    for src in sources(c, "wildlife"):
         key, url, field, publisher = "lws", src["url"] + "/query", src.get("nameField", "NAME"), src["publisher"]
         try:
             gj = http(url, params={

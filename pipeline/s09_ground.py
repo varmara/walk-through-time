@@ -13,8 +13,9 @@ Park's cliff, Mapperley) its uphill side would be buried. For each building this
 under its outline rises above its middle (`rise`, in work/<city>/ground.json), and s10_tiles makes the building
 that much taller; the map already sinks a building's foot 10 m into the ground on its downhill side.
 
-The tiles are kept in $WTT_CACHE (with the downloads) under a fingerprint of the area and this script, so a build
-that changes neither reuses them instead of downloading 100 MB again (the downloads themselves are not kept). Needs rasterio, numpy and Pillow (the build
+The squares are kept as downloaded in $WTT_RAW (the build keeps that folder in the repo's "raw-data" release:
+tools/raw.sh) and used again while younger than $WTT_MAX_AGE_DAYS (any age, if unset), so only missing squares
+are downloaded. The tiles are kept in $WTT_CACHE under a fingerprint of the area and this script. Needs rasterio, numpy and Pillow (the build
 installs them); without them the step says so and the map has no hills.
 """
 import hashlib
@@ -29,7 +30,7 @@ import zipfile
 from pathlib import Path
 
 from .common import city, load, log, save
-from .web import UA
+from .web import UA, fresh
 
 SEARCH = "https://environment.data.gov.uk/backend/catalog/api/tiles/collections/survey/search"
 PRODUCT, RES = "lidar_composite_dtm", "2m"
@@ -115,18 +116,21 @@ def build(c, out, cache):
     sq = squares(box)
     if not sq:
         raise RuntimeError("the survey catalogue found no ground model for this area")
-    tifs = []
+    tifs, got = [], 0
+    unpacked = out / "unpacked"
+    unpacked.mkdir(parents=True, exist_ok=True)
     for s in sq:
-        z = cache / f"{s['label']}.zip"
-        if not z.exists():
+        z = cache / f"ground-{s['label']}.zip"
+        if not fresh(z):
             z.write_bytes(fetch(s["uri"]))
+            got += 1
         with zipfile.ZipFile(z) as zf:
             name = next(n for n in zf.namelist() if n.lower().endswith(".tif"))
-            tif = cache / name
-            if not tif.exists():
-                tif.write_bytes(zf.read(name))
+            tif = unpacked / name
+            tif.write_bytes(zf.read(name))
         tifs.append(tif)
-    log(f"s09 ground: {len(sq)} squares of the {PRODUCT} {RES} ({', '.join(sorted({s['year'] for s in sq}))})")
+    log(f"s09 ground: {len(sq)} squares of the {PRODUCT} {RES} ({', '.join(sorted({s['year'] for s in sq}))}), "
+        f"{got} downloaded, {len(sq) - got} kept from earlier")
 
     # the squares side by side on their common 2 m grid (rasterio's merge gave a mosaic of zeros here)
     srcs = [rasterio.open(t) for t in tifs]
@@ -146,6 +150,7 @@ def build(c, out, cache):
     crs = srcs[0].crs
     for x in srcs:
         x.close()
+    shutil.rmtree(unpacked, ignore_errors=True)
     valid = np.isfinite(h) & (h > -100)
     log(f"    {h.shape[1]} x {h.shape[0]} cells, {100 * valid.mean():.1f}% surveyed, "
         f"{float(h[valid].min()):.0f} to {float(h[valid].max()):.0f} m")
@@ -200,7 +205,7 @@ def main(city_id):
             log("s09 ground: rasterio, numpy or Pillow is missing; the map has no hills this build")
             save(city_id, "ground", {})
             return
-        downloads = root / "downloads"
+        downloads = Path(os.environ.get("WTT_RAW") or "raw")      # the squares as downloaded: kept (tools/raw.sh)
         downloads.mkdir(parents=True, exist_ok=True)
         for old in root.glob("tiles-*"):
             shutil.rmtree(old, ignore_errors=True)
@@ -213,7 +218,6 @@ def main(city_id):
             save(city_id, "ground", {})
             return
         tmp.rename(done)
-        shutil.rmtree(downloads, ignore_errors=True)     # the tiles are kept; the squares are 100 MB
     else:
         log("s09 ground: the tiles of the last build (area and script unchanged)")
     meta = json.loads((done / "ground.json").read_text())

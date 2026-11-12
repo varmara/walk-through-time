@@ -61,6 +61,10 @@ def count(v):
 
 def main(city_id):
     c = city(city_id)
+    if c.get("councilTaxEstimates") is False:        # switched off in the city's settings
+        log("s00 VOA: area estimates switched off for this city")
+        save(city_id, "voa", [])
+        return
     b, poly = c["bbox"], c.get("polygon")
     gj, last = None, None
     for url in LSOAS:

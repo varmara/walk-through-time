@@ -17,22 +17,48 @@ UA = "walk-through-time/1.0 (+https://github.com/varmara/walk-through-time)"
 # ---------------------------------------------------------------- saved answers from web services
 # With $WTT_CACHE set to a folder, every successful answer from a web service (Wikipedia, Wikidata, Commons,
 # Historic England's and Natural England's map services, Overpass…) is saved there, and the same request later
-# is answered from the folder instead of the network. GitHub Actions keeps the folder between builds, so a build
-# after a code or story change asks only for what is new; the scheduled builds start with an empty folder and
-# so fetch everything fresh. Without $WTT_CACHE (e.g. on a laptop) nothing is saved.
+# is answered from the folder instead of the network, so a build asks only for what is new or missing.
+#   open/    answers from openly licensed sources (OPEN): the build also keeps these in the repo's "raw-data"
+#            release (tools/raw.sh), so they outlive GitHub's build cache, which drops what goes unused for a week.
+#   other/   the rest (council map services, other sites' pages read to check a story): kept in the build cache
+#            only, as their terms do not allow passing them on.
+# $WTT_MAX_AGE_DAYS: an answer older than that is asked for again (the twice-yearly refresh sets 30, so nothing is
+# downloaded twice within a month); unset, a saved answer is used however old. Without $WTT_CACHE (e.g. on a
+# laptop) nothing is saved.
+OPEN = ("https://en.wikipedia.org/", "https://commons.wikimedia.org/", "https://query.wikidata.org/",
+        "https://www.wikidata.org/", "https://overpass-api.de/", "https://overpass.private.coffee/",
+        "https://overpass.kumi.systems/",
+        "https://services-eu1.arcgis.com/ZOdPfBS3aqqDYPUQ/",      # Historic England (OGL)
+        "https://services.arcgis.com/JJzESW51TqeY9uat/",          # Natural England (OGL)
+        "https://services1.arcgis.com/ESMARspQHYMw9BZ9/",         # ONS boundaries (OGL)
+        "https://environment.data.gov.uk/", "https://assets.publishing.service.gov.uk/",   # EA, VOA (OGL)
+        "https://openplaques.org/", "https://researchdata.bbk.ac.uk/", "https://doi.org/10.18743/")
+
+
 def _cache_file(*parts):
     root = os.environ.get("WTT_CACHE")
     if not root:
         return None
     key = hashlib.sha1("\n".join(str(p) for p in parts).encode()).hexdigest()
-    d = Path(root) / key[:2]
+    url = str(parts[1]) if len(parts) > 1 else ""
+    d = Path(root) / ("open" if url.startswith(OPEN) else "other") / key[:2]
     d.mkdir(parents=True, exist_ok=True)
-    return d / (key + ".gz")
+    f = d / (key + ".gz")
+    old = Path(root) / key[:2] / (key + ".gz")        # where answers were kept before open/ and other/
+    if not f.exists() and old.exists():
+        old.replace(f)
+    return f
+
+
+def fresh(f):
+    """A saved file young enough to use: any age, unless $WTT_MAX_AGE_DAYS says otherwise."""
+    days = os.environ.get("WTT_MAX_AGE_DAYS")
+    return f.exists() and (not days or time.time() - f.stat().st_mtime < float(days) * 86400)
 
 
 def cached(kind, url, body=None):
     f = _cache_file(kind, url, body)
-    if f and f.exists():
+    if f and fresh(f):
         try:
             return gzip.decompress(f.read_bytes())
         except (OSError, EOFError):

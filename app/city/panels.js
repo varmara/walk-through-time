@@ -111,6 +111,7 @@ toggle($('tUnknown'), on => { S.showUnknown = on; updateYear(); });
 // the hills: on unless this visitor turned them off (a slow phone, say)
 toggle($('tHills'), on => { store.set('hills', on ? 'on' : 'off'); setHills(on); });
 export function groundNote(){
+  $('areaNote').hidden = !(S.stats && S.stats.estimated);     // only when some homes have an area estimate
   const G = S.data && S.data.ground;
   $('groundRow').hidden = !G;
   if (!G) return;
@@ -144,4 +145,4 @@ export function drawLegend(){
     + '</details>');
 }
 drawLegend();
-$('legend').insertAdjacentHTML('afterend', '<p class="note">Palest of all: no date for the building itself, only the period when most homes in its small area were built (Council Tax records).</p>');
+$('legend').insertAdjacentHTML('afterend', '<p class="note" id="areaNote" hidden>Palest of all: no date for the building itself, only the period when most homes in its small area were built (Council Tax records).</p>');

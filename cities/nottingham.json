@@ -206,14 +206,16 @@
         "covers": "all of Nottinghamshire",
         "url": "https://maps164.nottinghamcity.gov.uk/server/rest/services/Core_services/Environment/MapServer/7",
         "nameField": "SITE_NAME",
-        "credit": "© Nottingham City Council. Contains Ordnance Survey data © Crown copyright and database rights."
+        "credit": "© Nottingham City Council. Contains Ordnance Survey data © Crown copyright and database rights.",
+        "off": "Off until Nottingham City Council confirms these layers may be republished: its map terms (geoserver.nottinghamcity.gov.uk/terms) license the Ordnance Survey-based data for viewing only."
       }
     ],
     "plaques": [
       {
         "publisher": "Nottingham City Council",
         "council": "E06000018",
-        "url": "https://maps164.nottinghamcity.gov.uk/server/rest/services/Core_services/Housing_and_Property/MapServer/34"
+        "url": "https://maps164.nottinghamcity.gov.uk/server/rest/services/Core_services/Housing_and_Property/MapServer/34",
+        "off": "Off until Nottingham City Council confirms these layers may be republished: its map terms (geoserver.nottinghamcity.gov.uk/terms) license the Ordnance Survey-based data for viewing only."
       }
     ],
     "localList": [
@@ -227,7 +229,8 @@
         "approved": [
           "4"
         ],
-        "_approved": "STATUS codes: 1 not assessed, 2 recommended to add, 3 recommended to reject, 4 approved"
+        "_approved": "STATUS codes: 1 not assessed, 2 recommended to add, 3 recommended to reject, 4 approved",
+        "off": "Off until Nottingham City Council confirms these layers may be republished: its map terms (geoserver.nottinghamcity.gov.uk/terms) license the Ordnance Survey-based data for viewing only."
       }
     ],
     "article4": [
@@ -237,7 +240,8 @@
         "title": "Nottingham Article 4 directions (historic environment)",
         "url": "https://maps164.nottinghamcity.gov.uk/server/rest/services/Core_services/Planning/MapServer/7",
         "page": "https://nottinghamcity.gov.uk/information-for-business/planning-and-building-control/planning-policy/article-4-directions",
-        "credit": "© Nottingham City Council. Contains Ordnance Survey data © Crown copyright and database rights."
+        "credit": "© Nottingham City Council. Contains Ordnance Survey data © Crown copyright and database rights.",
+        "off": "Off until Nottingham City Council confirms these layers may be republished: its map terms (geoserver.nottinghamcity.gov.uk/terms) license the Ordnance Survey-based data for viewing only."
       }
     ],
     "tpo": [
@@ -247,7 +251,8 @@
         "title": "Nottingham tree preservation orders",
         "url": "https://maps164.nottinghamcity.gov.uk/server/rest/services/Core_services/Planning/MapServer/16",
         "page": "https://www.nottinghamcity.gov.uk/information-for-business/planning-and-building-control/planning-applications/apply-for-planning-permission/tree-preservation-orders-trees-in-conservation-areas/",
-        "credit": "© Nottingham City Council. Contains Ordnance Survey data © Crown copyright and database rights."
+        "credit": "© Nottingham City Council. Contains Ordnance Survey data © Crown copyright and database rights.",
+        "off": "Off until Nottingham City Council confirms these layers may be republished: its map terms (geoserver.nottinghamcity.gov.uk/terms) license the Ordnance Survey-based data for viewing only."
       }
     ]
   },
@@ -281,5 +286,7 @@
       "radford",
       "hockley"
     ]
-  }
+  },
+  "councilTaxEstimates": false,
+  "_councilTaxEstimates": "Off: the ONS's small-area boundaries now need a sign-in (November 2026). True to try again."
 }

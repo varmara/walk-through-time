@@ -11,7 +11,7 @@ subject, type, roles, primary}].
 """
 import re
 
-from .common import city, log, save
+from .common import city, log, save, sources
 from .web import http
 from .geo import point_in_ring
 
@@ -24,7 +24,7 @@ def main(city_id):
     c = city(city_id)
     poly = c.get("polygon")
     out = []
-    for src in c.get("sources", {}).get("plaques", []):
+    for src in sources(c, "plaques"):
         try:
             r = http(src["url"] + "/query", params={"where": "1=1", "outFields": ",".join(FIELDS), "outSR": "4326",
                                                     "returnGeometry": "true", "f": "json"})

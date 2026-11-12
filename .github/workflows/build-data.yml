@@ -39,7 +39,10 @@ jobs:
     env:
       # Scheduled runs and "refresh" runs download everything again; others reuse the saved download.
       REFRESH: ${{ github.event_name == 'schedule' || inputs.refresh == true }}
-      WTT_CACHE: ${{ github.workspace }}/cache    # saved answers from web services (pipeline/common.py)
+      WTT_CACHE: ${{ github.workspace }}/cache    # saved answers from web services (pipeline/web.py)
+      WTT_RAW: ${{ github.workspace }}/raw        # raw downloads kept in the raw-data release (tools/raw.sh)
+      # a refresh asks again only for what is older than a month; other builds use saved answers of any age
+      WTT_MAX_AGE_DAYS: ${{ (github.event_name == 'schedule' || inputs.refresh == true) && '30' || '' }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -72,16 +75,21 @@ jobs:
             echo "No saved download yet; the pipeline will fetch one."
           fi
 
-      # Saved answers from web services, and the last build's intermediate files (work/), from earlier builds.
-      # Scheduled and "refresh" builds start without them, so they fetch and compute everything afresh.
-      # (GitHub drops a cache that no build has used for 7 days; the next build then simply fetches again.)
+      # Saved answers from web services (every build: a refresh asks again only for those over a month old), and
+      # the last build's intermediate files (work/; a refresh computes them afresh). GitHub drops a cache no build
+      # has used for 7 days, so the openly licensed answers and raw downloads are also kept in the raw-data
+      # release (tools/raw.sh).
       - name: Restore saved web answers
-        if: env.REFRESH != 'true'
         uses: actions/cache/restore@v5
         with:
           path: cache
           key: web-${{ github.run_id }}
           restore-keys: web-
+
+      - name: Restore raw downloads and open web answers from the raw-data release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: sh tools/raw.sh fetch
 
       - name: Restore the last build's work files
         id: work
@@ -135,7 +143,7 @@ jobs:
 
       - name: Install the tools for the ground's tiles
         if: steps.plan.outputs.start != 'none'
-        run: pip install -q "rasterio==1.4.3" "numpy==2.2.6" "pillow==11.3.0"     # pipeline/s10_ground.py
+        run: pip install -q "rasterio==1.4.3" "numpy==2.2.6" "pillow==11.3.0"     # pipeline/s09_ground.py
 
       - name: Run the pipeline for every city
         if: steps.plan.outputs.start != 'none'
@@ -151,6 +159,12 @@ jobs:
           else
             python -m pipeline.run $cities --reuse-downloads
           fi
+
+      - name: Keep new raw downloads and open web answers in the raw-data release
+        if: steps.plan.outputs.start != 'none'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: sh tools/raw.sh save
 
       - name: Save web answers for the next build
         if: steps.plan.outputs.start != 'none'

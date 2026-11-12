@@ -17,6 +17,12 @@ def city(city_id):
     return json.loads(Path(f"cities/{city_id}.json").read_text())
 
 
+def sources(c, kind):
+    """A city's council map services of a kind (cities/<city>.json "sources"), leaving out those switched off
+    ("off": why, e.g. until their terms are confirmed)."""
+    return [x for x in c.get("sources", {}).get(kind, []) if not x.get("off")]
+
+
 def work(city_id, name):
     """Intermediate files live in work/<city>/ (not committed)."""
     p = Path("work") / city_id

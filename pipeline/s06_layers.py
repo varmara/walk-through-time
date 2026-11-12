@@ -15,7 +15,7 @@ Writes layers.json, and routes.json and basics.json (GeoJSON features for s07):
   pins    [{x, y, name, layer, group, text, source?, place?}]  places that are not buildings (bridges,
           grounds) and plaques not on a building; layer items refer to them as "p<index>"
 """
-from .common import city, load, log, save, work
+from .common import city, load, log, save, sources, work
 from .layerdata import AREAS, Collector, grouped
 from .layers import LAYERS, Context
 from .visitorlayers import museums, pub_heritage, visitor
@@ -102,6 +102,8 @@ def main(city_id):
             f"{t.get('addr:housenumber', '')} {t['addr:street']}".strip() or "Unnamed building"
 
     for L in LAYERS:
+        if L.get("settings") and not sources(settings, L["settings"]):
+            continue        # its council source is switched off, or the city has none
         res = L["fn"](ctx)
         for i, v in res.items():
             group, extra = v if isinstance(v, tuple) else (v, {})
@@ -115,7 +117,7 @@ def main(city_id):
             groups.append(g)
         src = L.get("source")
         if L.get("settings"):       # the source named in the city's settings (several councils: the first one's)
-            ss = settings.get("sources", {}).get(L["settings"]) or []
+            ss = sources(settings, L["settings"])
             src = (ss[0].get("title") or ss[0]["publisher"], ss[0].get("page") or ss[0]["url"]) if ss else None
         meta.append({"id": L["id"], "title": L["title"], "intro": L["intro"], "section": L.get("section", "Heritage"),
                      "kind": "rule", "groups": groups,
@@ -123,15 +125,15 @@ def main(city_id):
         log(f"s06 {L['id']}: {len(res)} buildings")
 
     nature = load(city_id, "nature") if work(city_id, "nature").exists() else []
-    wild = [w for w in settings.get("sources", {}).get("wildlife", []) if w.get("credit")]
+    wild = [w for w in sources(settings, "wildlife") if w.get("credit")]
     groups = [{"key": k, "title": t, "count": sum(1 for f in nature if f["properties"]["t"] == k)} for k, t in NATURE]
     meta.append({"id": "nature", "title": "Nature", "section": "Nature", "kind": "areas",
                  "intro": "Protected and managed nature areas. National and Local Nature Reserves, Sites of Special "
                           "Scientific Interest and ancient woodland come from Natural England; other reserves from "
-                          "OpenStreetMap. Local Wildlife Sites, places of local importance for wildlife such as stream "
-                          "corridors and old railway lines, come from "
-                          + (" and ".join(f"{w['publisher']}'s map data ({w['credit']})" for w in wild) or "councils' map data")
-                          + ".",
+                          "OpenStreetMap."
+                          + (" Local Wildlife Sites, places of local importance for wildlife such as stream corridors "
+                             "and old railway lines, come from "
+                             + " and ".join(f"{w['publisher']}'s map data ({w['credit']})" for w in wild) + "." if wild else ""),
                  "source": {"title": "Natural England open data", "url": "https://naturalengland-defra.opendata.arcgis.com/"},
                  "groups": [g for g in groups if g["count"]]})
     log(f"s06 nature: {len(nature)} areas")
@@ -150,7 +152,7 @@ def main(city_id):
         items = sorted([[f["properties"]["name"], [f"a{offset[name] + j}"]] for j, f in enumerate(feats)], key=lambda x: x[0].lower())
         src = L.get("source")
         if L.get("settings"):
-            ss = settings.get("sources", {}).get(L["settings"]) or []
+            ss = sources(settings, L["settings"])
             src = {"title": ss[0]["publisher"], "url": ss[0].get("page") or ss[0]["url"]} if ss else None
         meta.append({"id": L["id"], "title": L["title"], "section": L["section"], "kind": "areas", "intro": L["intro"],
                      **({"source": src} if src else {}),
