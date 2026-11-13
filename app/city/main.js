@@ -57,6 +57,10 @@ export async function main(){
   // ?layer=inns (from a layer's page): tick that layer
   const lq = new URLSearchParams(location.search).get('layer'), lyr = lq && S.layers.find(L => L.id === lq);
   if (lyr) { lyr.groups.filter(g => g.count > 0).forEach(g => S.active.add(g.key)); saveActive(); renderLayers(); }
+  // ?group=people-architects,inns (from a group's point on the graph page): tick those layer groups, the rest off
+  const gq = new URLSearchParams(location.search).get('group');
+  const keys = gq ? gq.split(',').filter(k => S.groups.has(k)) : [];
+  if (keys.length) { S.active.clear(); keys.forEach(k => S.active.add(k)); saveActive(); renderLayers(); }
   applyLayers();
   updateYear();
   // ?focus=b12,p3&name=… (from the graph page): open those places, as a set when there are several

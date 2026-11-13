@@ -18,6 +18,7 @@ const KINDS = [
 ];
 const KIND_TITLE = Object.fromEntries(KINDS);
 const kindKey = k => KIND_TITLE[k] ? k : 'other';
+let shownHubs = [];
 let G, sel = null, sim, T = d3.zoomIdentity, ns = [], ls = [], C = {};
 
 // ================= settings (kept in this browser), as in Obsidian =================
@@ -75,6 +76,16 @@ function init(data){
   G.nodes.forEach(n => { if (n.type === 'place' && n.nb.size === 1) { const o = byId.get([...n.nb][0]); if (o.type !== 'place') n.owner = o; } });
   G.byId = byId;
   G.present = new Set(G.nodes.map(n => n.type));
+  // a group point for each colour (each kind of person, and the story themes): tap it to pick out the whole
+  // group, and open it on the map as that layer. Not part of the layout: it sits in the middle of its group.
+  G.hubs = [];
+  for (const [k, title] of KINDS) {
+    const members = G.nodes.filter(n => n.type === k);
+    if (k === 'place' || members.length < 2) continue;
+    const h = { id: 'g:' + k, type: k, label: title, hub: true, members, nb: new Set(members.map(m => m.id)), deg: 0 };
+    h.lit = new Set([...h.nb, ...members.flatMap(m => [...m.nb])]);     // its people and their places, lit when it is tapped
+    G.hubs.push(h); byId.set(h.id, h);
+  }
 
   const sel$ = d3.select(canvas);
   // a person's own pan or zoom (not the page's): from then on the page does not fit the graph by itself
@@ -206,6 +217,7 @@ function draw(gentle){
 // the point under a finger or the pointer, if any (a target of at least 14 px round it)
 const screenR = d => Math.max(1.5, radius(d) * T.k);
 function pick(x, y){
+  for (const h of shownHubs) if (Math.hypot(h.sx - x, h.sy - y) < 22) return h;      // group points first
   let best = null, bd = Infinity;
   for (const n of ns) {
     const [sx, sy] = T.apply([n.x, n.y]), d = Math.hypot(sx - x, sy - y), r = Math.max(14, screenR(n) + 6);
@@ -230,11 +242,12 @@ function paint(){
   frame = 0;
   if (!G) return;
   ctx.clearRect(0, 0, W, H);
-  const near = sel ? G.byId.get(sel).nb : new Set(), focus = !!sel, lw = P.lines;
+  const hubSel = !!sel && sel.startsWith('g:');
+  const near = sel ? (hubSel ? G.byId.get(sel).lit : G.byId.get(sel).nb) : new Set(), focus = !!sel, lw = P.lines;
   // lines (the selection's on top, darker)
   for (const pass of focus ? [0, 1] : [0]) {
     for (const l of ls) {
-      const on = focus && (l.s === sel || l.t === sel);
+      const on = focus && (l.s === sel || l.t === sel || (hubSel && (G.byId.get(sel).nb.has(l.s) || G.byId.get(sel).nb.has(l.t))));
       if (pass !== (on ? 1 : 0)) continue;
       const [x1, y1] = T.apply([l.source.x, l.source.y]), [x2, y2] = T.apply([l.target.x, l.target.y]);
       if (Math.max(x1, x2) < 0 || Math.min(x1, x2) > W || Math.max(y1, y2) < 0 || Math.min(y1, y2) > H) continue;
@@ -265,12 +278,39 @@ function paint(){
     const a = same ? 0 : nameAlpha(d, near) * (lit ? 1 : 0.3);
     if (a > 0.02) names.push([d, x, y + r + 9, a]);
   }
+  // group points: in the middle of their group's points on screen, with the group's name and size
+  shownHubs = [];
+  const hubBoxes = [];
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+  for (const h of G.hubs) {
+    if (off.has(h.type)) continue;
+    const vis = h.members.filter(m => !m.hidden && m.x != null);
+    if (vis.length < 2) continue;
+    const [x, y] = T.apply([d3.mean(vis, m => m.x), d3.mean(vis, m => m.y)]);
+    h.sx = x; h.sy = y; shownHubs.push(h);
+    if (x < -80 || x > W + 80 || y < -80 || y > H + 80) continue;
+    const on = sel === h.id, dim = focus && !on && !near.has(h.id);
+    ctx.globalAlpha = dim ? 0.25 : 1;
+    ctx.beginPath(); ctx.arc(x, y, on ? 13 : 11, 0, 2 * Math.PI);
+    ctx.fillStyle = C.bg; ctx.fill();
+    ctx.lineWidth = on ? 4 : 3; ctx.strokeStyle = C.kind[kindKey(h.type)]; ctx.stroke();
+    ctx.beginPath(); ctx.arc(x, y, 4, 0, 2 * Math.PI); ctx.fillStyle = C.kind[kindKey(h.type)]; ctx.fill();
+    ctx.font = `700 13px ${C.sans}`;
+    const text = `${h.label} · ${h.members.length}`, w = ctx.measureText(text).width + 8;
+    // the name above the ring, or below it if another group's name is there already
+    const hit = b => hubBoxes.some(t => b[0] < t[2] && b[2] > t[0] && b[1] < t[3] && b[3] > t[1]);
+    let ty = y - 22;
+    if (hit([x - w / 2, ty - 9, x + w / 2, ty + 9])) ty = y + 24;
+    ctx.lineWidth = 4; ctx.strokeStyle = C.bg; ctx.strokeText(text, x, ty);
+    ctx.fillStyle = C.ink; ctx.fillText(text, x, ty);
+    hubBoxes.push([x - w / 2, ty - 9, x + w / 2, ty + 9], [x - 14, y - 14, x + 14, y + 14]);
+  }
+  ctx.globalAlpha = 1;
   // names under their points, as in Obsidian, none over another: the selection's first, then its neighbours',
   // then the best-linked; a name that would overlap one already drawn is left out
   const rank = d => d.id === sel ? 0 : near.has(d.id) ? 1 : 2;
   names.sort((p, q) => rank(p[0]) - rank(q[0]) || (q[0].deg + (q[0].folds || 0)) - (p[0].deg + (p[0].folds || 0)));
-  const taken = [];
+  const taken = hubBoxes.slice();
   for (const [d, x, y, a] of names) {
     ctx.font = `${d.id === sel ? 600 : 400} 12px ${C.sans}`;
     const text = d.label + (d.folds ? ` · ${d.folds}` : ''), w = ctx.measureText(text).width + 6;
@@ -350,6 +390,28 @@ function placeZoom(){
   $('zoom').style.bottom = open ? `${$('sheet').offsetHeight + 12}px` : '';
 }
 
+// a group point's sheet: the group, its people (or themes) by how many places they have, and the map button,
+// which opens the map with that layer ticked (pipeline/s06_people.py: people-<kind>; the themes: their layers)
+function groupSheet(h){
+  const placesOf = m => G.links.filter(l => l.s === m.id || l.t === m.id).map(l => l.s === m.id ? l.t : l.s)
+    .filter(x => G.byId.get(x)?.type === 'place');
+  const all = new Set(h.members.flatMap(placesOf));
+  $('sTitle').textContent = h.label;
+  $('sType').textContent = `${h.members.length} ${h.type === 'theme' ? 'story themes' : 'people'} · ${all.size} places`;
+  const keys = h.type === 'theme' ? h.members.map(m => m.id.replace(/^t:/, '')) : ['people-' + h.type];
+  $('go').hidden = !all.size;
+  $('go').textContent = `Show ${all.size} places on the map`;
+  $('go').onclick = () => { location.href = `./?group=${keys.map(encodeURIComponent).join(',')}`; };
+  const rows = h.members.map(m => [m, placesOf(m).length]).sort((a, b) => b[1] - a[1] || a[0].label.localeCompare(b[0].label));
+  $('links').innerHTML = `<h3>${esc(h.label)}</h3>` + rows.map(([m, c]) => `<div class="link">
+      <button data-id="${esc(m.id)}"><i style="background:var(--k-${kindKey(m.type)})"></i>${esc(m.label)}</button>
+      <div class="src">${c} ${c === 1 ? 'place' : 'places'}</div></div>`).join('');
+  $('links').scrollTop = 0;
+  $('links').querySelectorAll('[data-id]').forEach(b => b.onclick = () => {
+    const o = G.byId.get(b.dataset.id); select(o.id, true); setTimeout(() => G.zoomTo(o.x, o.y), 50);
+  });
+}
+
 function select(id, fromCards){
   const wasOpen = !$('sheet').hidden && !$('sheet').classList.contains('peek');
   sel = id;
@@ -358,7 +420,8 @@ function select(id, fromCards){
   if (!id) { $('sheet').hidden = true; $('hint').hidden = false; return; }
   const n = G.byId.get(id);
   $('hint').hidden = true; $('sheet').hidden = false;
-  drawer(fromCards && wasOpen);     // on a phone: the small bar first; the cards when asked for (they stay open
+  drawer(fromCards && wasOpen);
+  if (n.hub) return groupSheet(n);     // on a phone: the small bar first; the cards when asked for (they stay open
                                     // when one card's link leads to the next)
   $('sTitle').textContent = n.label;
   $('sType').textContent = n.type === 'place'
