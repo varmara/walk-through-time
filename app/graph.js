@@ -71,13 +71,11 @@ function init(data){
       .translate(innerWidth / 2, top + (innerHeight - top - 40) / 2).scale(k).translate(-(x0 + x1) / 2, -(y0 + y1) / 2));
   };
 
-  sim = d3.forceSimulation()
-    .force('link', d3.forceLink().id(d => d.id).distance(l => l.how === 'mention' ? 60 : 38).strength(0.6))
-    .force('charge', d3.forceManyBody().strength(d => d.type === 'theme' ? -220 : d.deg > 1 ? -60 : -25).distanceMax(220))
-    .force('collide', d3.forceCollide(d => radius(d) + 2))
-    .force('x', d3.forceX(d => anchor(d)[0]).strength(d => d.type === 'place' ? 0.04 : 0.16))
-    .force('y', d3.forceY(d => anchor(d)[1]).strength(d => d.type === 'place' ? 0.05 : 0.16))
+  sim = d3.forceSimulation().force('link', d3.forceLink().id(d => d.id)).force('charge', d3.forceManyBody().distanceMax(260))
+    .force('collide', d3.forceCollide()).force('x', d3.forceX(d => anchor(d)[0])).force('y', d3.forceY(d => anchor(d)[1]))
     .on('tick', tick).on('end', () => { if (!fitted) { fitted = true; if (!sel) G.fit(); } });
+  forces();
+  layoutPanel();
   draw();
 
   $('find').oninput = () => {
@@ -92,6 +90,41 @@ function init(data){
   $('close').onclick = () => select(null);
   const start = new URLSearchParams(location.search).get('node');
   if (start && byId.has(start)) setTimeout(() => { select(start); const n = byId.get(start); G.zoomTo(n.x, n.y); }, 900);
+}
+
+// ================= the layout's forces, set from the Layout panel (kept in this browser) =================
+//   group    how strongly each person or theme is pulled to its kind's spot (points of one colour together)
+//   links    how strongly a line pulls its two ends together (places to the people and themes they belong to)
+//   length   how long the lines try to be
+//   repel    how strongly points push each other apart
+//   space    the gap kept round each point
+//   places   how strongly places are pulled to the middle (low: they stay by the points they are linked to)
+const DEFAULTS = { group: 0.14, links: 0.9, length: 34, repel: 1, space: 3, places: 0.015 };
+const PARAMS = [
+  ['group', 'Group by colour', 0, 0.5, 0.01], ['links', 'Pull along links', 0, 1, 0.05],
+  ['length', 'Link length', 10, 120, 2], ['repel', 'Push apart', 0, 3, 0.1],
+  ['space', 'Space round points', 0, 20, 1], ['places', 'Places to the middle', 0, 0.15, 0.005],
+];
+const P = { ...DEFAULTS };
+try { Object.assign(P, JSON.parse(localStorage.getItem('graph-layout') || '{}')); } catch {}
+const saveP = () => { try { localStorage.setItem('graph-layout', JSON.stringify(P)); } catch {} };
+function forces(){
+  sim.force('link').distance(l => P.length * (l.how === 'mention' ? 1.6 : 1)).strength(P.links);
+  sim.force('charge').strength(d => P.repel * (d.type === 'theme' ? -220 : d.deg > 1 ? -60 : -25));
+  sim.force('collide').radius(d => radius(d) + P.space);
+  sim.force('x').strength(d => d.type === 'place' ? P.places : P.group);
+  sim.force('y').strength(d => d.type === 'place' ? P.places * 1.2 : P.group);
+}
+function layoutPanel(){
+  const fmt = (v, step) => step < 1 ? (+v).toFixed(step < 0.01 ? 3 : 2) : String(v);
+  $('params').innerHTML = PARAMS.map(([k, t, lo, hi, step]) => `<label class="param"><span>${t}<output id="o-${k}">${fmt(P[k], step)}</output></span>
+    <input type="range" id="p-${k}" min="${lo}" max="${hi}" step="${step}" value="${P[k]}"></label>`).join('')
+    + '<button class="reset" id="pReset">Reset</button>';
+  for (const [k, , , , step] of PARAMS) $('p-' + k).oninput = e => {
+    P[k] = +e.target.value; $('o-' + k).textContent = fmt(P[k], step); saveP();
+    forces(); sim.alpha(0.5).restart();
+  };
+  $('pReset').onclick = () => { Object.assign(P, DEFAULTS); saveP(); layoutPanel(); forces(); sim.alpha(0.8).restart(); };
 }
 
 // Points of one kind (one colour) gather together: each kind is pulled towards its own spot on a circle round the

@@ -40,6 +40,16 @@ a{color:var(--accent)}
 .kind i{width:10px;height:10px;border-radius:50%;flex:none}
 .kind.off{opacity:.45}
 .kind.off i{background:transparent!important;outline:1.5px solid var(--muted)}
+.layout{align-self:flex-start;background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-2);
+  font-size:13px;max-width:min(280px,100%)}
+.layout summary{cursor:pointer;padding:6px 12px;font-weight:600;list-style-position:inside}
+.layout[open] summary{border-bottom:1px solid var(--line)}
+.params{padding:6px 12px 10px;display:flex;flex-direction:column;gap:6px;width:240px;max-width:calc(100vw - 50px)}
+.param{display:flex;flex-direction:column;gap:2px}
+.param span{display:flex;justify-content:space-between;gap:8px}
+.param output{color:var(--muted);font-variant-numeric:tabular-nums}
+.param input{width:100%;accent-color:var(--accent);margin:0;height:28px}
+.reset{align-self:flex-start;margin-top:4px;padding:5px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);cursor:pointer}
 .hint{position:fixed;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);z-index:4;text-align:center;
   font-size:13px;color:var(--muted);pointer-events:none}
 
