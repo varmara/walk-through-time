@@ -15,9 +15,13 @@ const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (
   const browser = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist'] });
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   const errors = [];
-  page.on('pageerror', e => errors.push(e.message));
+  // after the offline check, the map reports tiles it asked for while offline as failed fetches, sometimes many
+  // seconds later: those are expected, so for a while after the connection is back they are not counted
+  let backOnline = 0;
+  const lateOffline = msg => /Failed to fetch/.test(msg) && Date.now() - backOnline < 20000;
+  page.on('pageerror', e => lateOffline(e.message) || errors.push(e.message));
   // the page's own failures, not other sites' (fonts, the OpenStreetMap base map)
-  page.on('console', m => m.type() === 'error' && !/Failed to load resource|net::ERR_/.test(m.text()) && errors.push(m.text()));
+  page.on('console', m => m.type() === 'error' && !/Failed to load resource|net::ERR_/.test(m.text()) && !lateOffline(m.text()) && errors.push(m.text()));
   // (a request cut off because the test moved on is not a failure)
   page.on('requestfailed', r => r.url().startsWith(BASE) && !/ABORTED/.test(r.failure()?.errorText || '')
     && errors.push('could not load ' + r.url().slice(BASE.length) + ' (' + r.failure()?.errorText + ')'));
@@ -86,6 +90,7 @@ const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (
       check((await text('#sTitle')) === known.title, 'a building already seen opens offline');
     } catch (e) { check(false, 'a building already seen opens offline (' + e.message.split('\n')[0] + ')'); }
     await page.context().setOffline(false);
+    backOnline = Date.now();
     // offline, other files fail to load: expected. The map reports some of those failures a moment later (tiles
     // asked for just before the connection came back), so wait for them before counting errors again
     await page.waitForTimeout(2500);
