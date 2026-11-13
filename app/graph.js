@@ -76,6 +76,16 @@ function cardsFor(id){
     fetched.add(url); fetch(url).catch(() => fetched.delete(url));
   }
 }
+// "← Map": back in history when the map is the page just before this one (the phone may still hold it, with its
+// tiles and where it was), a new visit otherwise
+document.querySelector('.brand a')?.addEventListener('click', e => {
+  try {
+    const ref = document.referrer && new URL(document.referrer), map = new URL('./', location.href);
+    if (ref && ref.origin === location.origin && ref.pathname === map.pathname && history.length > 1) {
+      e.preventDefault(); history.back();
+    }
+  } catch {}
+});
 // the map takes a moment to open: say so at once
 function opening(btn, href){ btn.textContent = 'Opening the map…'; btn.disabled = true; location.href = href; }
 // back from the map (the page kept as it was): the button again as it should be

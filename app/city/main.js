@@ -16,6 +16,17 @@ import { applyLayers, drawLegend, groundNote, renderLayers } from './panels.js';
 import { openRef, selectBuilding } from './cards.js';
 import { showPlaces } from './places.js';
 
+// The graph button: back in history when the graph is the page just before this one (the phone may still hold it,
+// laid out and as it was left), a new visit otherwise
+$('bGraph')?.addEventListener('click', e => {
+  try {
+    const ref = document.referrer && new URL(document.referrer);
+    if (ref && ref.origin === location.origin && /\/graph\.html$/.test(ref.pathname) && history.length > 1) {
+      e.preventDefault(); history.back();
+    }
+  } catch {}
+});
+
 export async function main(){
   progress(5, 'loading map data…');
   S.city = await fetchJSON(`../cities/${CITY_ID}.json`);
