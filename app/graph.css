@@ -35,6 +35,9 @@ a{color:var(--accent)}
 .param span{display:flex;justify-content:space-between;gap:8px}
 .param output{color:var(--muted);font-variant-numeric:tabular-nums}
 .param input{width:100%;accent-color:var(--accent);margin:0;height:28px}
+.modes{display:flex;gap:4px;padding:2px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.modes button{flex:1;padding:6px 8px;border:0;border-radius:8px;background:none;cursor:pointer;font-weight:500}
+.modes button[aria-checked="true"]{background:var(--paper);box-shadow:var(--shadow-2);font-weight:600}
 .params h4{margin:4px 0 0;font:600 12px var(--sans);color:var(--muted)}
 .params h4 + .param{margin-top:-2px}
 .check{display:flex;gap:8px;align-items:center;min-height:32px}

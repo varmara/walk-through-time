@@ -20,6 +20,8 @@ const off = new Set();
 let G, sel = null, sim, T = d3.zoomIdentity, ns = [], ls = [], C = {};
 
 // ================= settings (the Layout panel, kept in this browser) =================
+// Layout: Daisies (each person or theme with its places round it on rings, daisies of one colour packed into a
+// constellation, the colours' constellations packed further apart) or Forces (a force-directed layout, as Obsidian)
 // Display
 //   names    the zoom at which every point's name shows (Obsidian's "text fade threshold"); before it, only
 //            story themes and well-linked points, and those next to the selection
@@ -35,10 +37,15 @@ let G, sel = null, sim, T = d3.zoomIdentity, ns = [], ls = [], C = {};
 //   space    the gap kept round each point
 //   orbit    how strongly a place is drawn to the middle of the people and themes it is linked to, so places
 //            are satellites of their points (one linked to two settles between them)
-const DEFAULTS = { names: 2.2, size: 1, lines: 1, fold: true, lonely: false,
+const DEFAULTS = { mode: 'daisy', names: 2.2, size: 1, lines: 1, fold: true, lonely: false,
+  petals: 6, daisies: 10, groups: 70,
   group: 0.14, links: 0.7, length: 34, repel: 1.2, space: 4, orbit: 0.12 };
 const DISPLAY = [['names', 'Names from zoom', 0.5, 5, 0.1], ['size', 'Point size', 0.5, 2.5, 0.1], ['lines', 'Line thickness', 0.3, 4, 0.1]];
 const CHECKS = [['fold', 'Fold places with one link'], ['lonely', 'Hide points with no lines']];
+// Daisies (the default layout, daisyLayout): petals = the gap between a point's places on their rings, daisies =
+// the gap between daisies of one colour, groups = the gap between the colours' constellations
+const DAISY = [['petals', 'Space between petals', 0, 20, 1], ['daisies', 'Space between daisies', 0, 60, 2],
+  ['groups', 'Space between colours', 0, 300, 10]];
 const FORCES = [
   ['group', 'Group by colour', 0, 0.5, 0.01], ['links', 'Pull along links', 0, 1, 0.05],
   ['length', 'Link length', 10, 120, 2], ['repel', 'Push apart', 0, 3, 0.1],
@@ -95,9 +102,17 @@ function init(data){
   const zoom = d3.zoom().scaleExtent([0.15, 8]).clickDistance(6).on('zoom', e => { T = e.transform; redraw(); });
   // dragging a point moves it; dragging elsewhere pans (the drag starts only on a point)
   const drag = d3.drag().container(canvas).clickDistance(6).subject(e => pick(e.x, e.y))
-    .on('start', e => { if (!e.active) sim.alphaTarget(0.06).restart(); e.subject.fx = e.subject.x; e.subject.fy = e.subject.y; })
-    .on('drag', e => { const [x, y] = T.invert([e.x, e.y]); e.subject.fx = x; e.subject.fy = y; })
-    .on('end', e => { if (!e.active) sim.alphaTarget(0); e.subject.fx = e.subject.fy = null; });
+    .on('start', e => { if (P.mode === 'daisy') return; if (!e.active) sim.alphaTarget(0.06).restart(); e.subject.fx = e.subject.x; e.subject.fy = e.subject.y; })
+    .on('drag', e => {
+      const [x, y] = T.invert([e.x, e.y]), d = e.subject;
+      if (P.mode !== 'daisy') { d.fx = x; d.fy = y; return; }
+      // daisies: a point moves with its petals
+      const dx = x - d.x, dy = y - d.y;
+      const moving = [d, ...(d.type === 'place' ? [] : ns.filter(n => n.type === 'place' && n.nb.size && [...n.nb].every(id => id === d.id)))];
+      for (const n of moving) { n.x += dx; n.y += dy; n.tx = n.x; n.ty = n.y; }
+      redraw();
+    })
+    .on('end', e => { if (P.mode === 'daisy') return; if (!e.active) sim.alphaTarget(0); e.subject.fx = e.subject.fy = null; });
   sel$.call(drag).call(zoom).on('dblclick.zoom', null);
   canvas.addEventListener('click', e => { const n = pick(e.offsetX, e.offsetY); select(n ? n.id : null); });
   // buttons as well as pinching: on a phone the points can be too close together to pinch between. They zoom
@@ -212,12 +227,109 @@ function draw(){
     if (around.has(l.target) && l.source.type !== 'place') around.get(l.target).push(l.source);
   }
   canvas.dataset.points = ns.length;          // for the page's checks (tests/page/smoke.cjs)
-  sim.alpha(0.6).restart();
-  redraw();
+  if (P.mode === 'daisy') { sim.stop(); daisyLayout(); }
+  else { sim.alpha(0.6).restart(); redraw(); }
+}
+
+// ================= the daisy layout =================
+// Each person or theme is a daisy: the places linked to it alone round it on rings (petals), as many to a ring as
+// fit. A colour's daisies are packed together without overlapping (d3.packSiblings) into a constellation, and the
+// constellations are packed again, further apart. Places shared by two or more are laid last, each between its
+// daisies, kept off the others' points (a short force layout with everything else fixed). The points glide to
+// their new places (glide) rather than jump.
+// A folded daisy spread out for the selection keeps its size: its petals are put round it on top, so the rest
+// does not move every time a point is tapped.
+const ringOf = d => radius(d) * P.size;
+function daisyLayout(){
+  const hubs = ns.filter(n => n.type !== 'place'), places = ns.filter(n => n.type === 'place');
+  const hubsOf = new Map(places.map(n => [n, []]));
+  for (const l of ls) {
+    if (hubsOf.has(l.source) && l.target.type !== 'place') hubsOf.get(l.source).push(l.target);
+    if (hubsOf.has(l.target) && l.source.type !== 'place') hubsOf.get(l.target).push(l.source);
+  }
+  const petals = new Map(hubs.map(h => [h, []])), extra = new Map(), shared = [];
+  for (const [n, hs] of hubsOf) {
+    if (hs.length !== 1) shared.push(n);
+    else if (P.fold && n.owner && n.owner.id === spreadNow) (extra.get(hs[0]) || extra.set(hs[0], []).get(hs[0])).push(n);
+    else petals.get(hs[0]).push(n);
+  }
+  // rings of petals round a point, from the middle out: returns the daisy's radius, sets the petals' targets
+  const rings = (h, ps, cx, cy, start = -Math.PI / 2) => {
+    const order = ps.slice().sort((a, b) => (a.year ?? 9999) - (b.year ?? 9999) || a.label.localeCompare(b.label));
+    let r = ringOf(h) + P.petals + 6, i = 0, outer = ringOf(h);
+    while (i < order.length) {
+      const s = Math.max(...order.slice(i, i + 40).map(ringOf));
+      r += s;
+      const fit = Math.max(6, Math.floor(2 * Math.PI * r / (2 * s + P.petals)));
+      const k = Math.min(fit, order.length - i), turn = (ringsDone(r) % 2) * Math.PI / k;
+      for (let j = 0; j < k; j++) {
+        const a = start + turn + 2 * Math.PI * j / k, n = order[i + j];
+        n.tx = cx + r * Math.cos(a); n.ty = cy + r * Math.sin(a);
+      }
+      i += k; outer = r + s; r += s + P.petals;
+    }
+    return outer;
+  };
+  let ringCount = 0; const ringsDone = () => ringCount++;     // every other ring turned half a step, like seeds
+  // a daisy's size, laid out at 0,0 for now
+  const daisy = hubs.map(h => { ringCount = 0; return { h, r: rings(h, petals.get(h), 0, 0) + P.daisies / 2, x: 0, y: 0 }; });
+  // constellations: the daisies of one colour packed together, biggest first
+  const byKind = d3.group(daisy, d => d.h.type);
+  const groups = [...byKind].map(([k, ds]) => {
+    ds.sort((a, b) => b.r - a.r);
+    d3.packSiblings(ds);
+    const e = d3.packEnclose(ds);
+    return { k, ds, r: e.r + P.groups / 2, cx: e.x, cy: e.y, x: 0, y: 0 };
+  });
+  groups.sort((a, b) => b.r - a.r);
+  d3.packSiblings(groups);
+  const ox = innerWidth / 2, oy = innerHeight / 2;
+  for (const g of groups) for (const d of g.ds) {
+    const x = ox + g.x + d.x - g.cx, y = oy + g.y + d.y - g.cy;
+    d.h.tx = x; d.h.ty = y;
+    // the first petal points away from the middle of the constellation, so a daisy of one or two petals
+    // stands out from its neighbours
+    const out = Math.hypot(d.x - g.cx, d.y - g.cy) > 1 ? Math.atan2(d.y - g.cy, d.x - g.cx) : -Math.PI / 2;
+    ringCount = 0; rings(d.h, petals.get(d.h), x, y, out);
+    const more = extra.get(d.h);                  // spread for the selection: on top, round its edge
+    if (more) { ringCount = 0; rings(d.h, more, x, y, out); }
+  }
+  // shared places: between their daisies, off everyone else's points
+  if (shared.length) {
+    const fixed = ns.filter(n => !shared.includes(n)).map(n => ({ x: n.tx, y: n.ty, fx: n.tx, fy: n.ty, n }));
+    const free = shared.map((n, i) => {           // the same small offsets every time, so the layout is steady
+      const hs = hubsOf.get(n), m = hs.length ? [d3.mean(hs, h => h.tx), d3.mean(hs, h => h.ty)] : [ox, oy];
+      return { x: m[0] + 2 * Math.cos(i * 2.4), y: m[1] + 2 * Math.sin(i * 2.4), mx: m[0], my: m[1], n };
+    });
+    const all = fixed.concat(free);
+    d3.forceSimulation(all).stop()
+      .force('x', d3.forceX(d => d.mx ?? d.x).strength(d => d.fx == null ? 0.25 : 0))
+      .force('y', d3.forceY(d => d.my ?? d.y).strength(d => d.fx == null ? 0.25 : 0))
+      .force('collide', d3.forceCollide(d => ringOf(d.n) + 3).iterations(2))
+      .tick(120);
+    for (const f of free) { f.n.tx = f.x; f.n.ty = f.y; }
+  }
+  glide();
+}
+// move each point to its target over about half a second
+let gliding = 0, firstFit = true;
+function glide(){
+  for (const n of ns) if (n.x == null) { n.x = n.tx; n.y = n.ty; }
+  const t0 = performance.now(), from = new Map(ns.map(n => [n, [n.x, n.y]]));
+  cancelAnimationFrame(gliding);
+  const step = now => {
+    const t = Math.min(1, (now - t0) / 550), e = d3.easeCubicInOut(t);
+    for (const [n, [x, y]] of from) { n.x = x + (n.tx - x) * e; n.y = y + (n.ty - y) * e; }
+    paintNow();
+    if (t < 1) gliding = requestAnimationFrame(step);
+    else if (firstFit) { firstFit = false; if (!sel) G.fit(); }
+  };
+  gliding = requestAnimationFrame(step);
 }
 
 // a point's size on screen (points grow only slightly as you zoom in)
-const screenR = d => radius(d) * P.size * Math.pow(T.k, 0.2);
+// (forces); in the daisy layout they scale with the zoom like the layout itself, so petals never cover their centre
+const screenR = d => radius(d) * P.size * (P.mode === 'daisy' ? Math.max(T.k, 0.12) : Math.pow(T.k, 0.2));
 // the point under a finger or the pointer, if any (a target of at least 14 px round it)
 function pick(x, y){
   let best = null, bd = Infinity;
@@ -235,6 +347,7 @@ function labelled(d, near){
   return d.type === 'theme' || d.id === sel || near.has(d.id) || k >= t || (k >= t * 0.55 && d.deg >= 2) || d.deg >= 4;
 }
 
+function paintNow(){ cancelAnimationFrame(frame); paint(); }
 function paint(){
   frame = 0;
   if (!G) return;
@@ -292,12 +405,22 @@ function panel(){
   const fmt = (v, step) => step < 1 ? (+v).toFixed(step < 0.01 ? 3 : step < 0.1 ? 2 : 1) : String(v);
   const slider = ([k, t, lo, hi, step]) => `<label class="param"><span>${t}<output id="o-${k}">${fmt(P[k], step)}</output></span>
     <input type="range" id="p-${k}" min="${lo}" max="${hi}" step="${step}" value="${P[k]}"></label>`;
-  $('params').innerHTML = '<h4>Display</h4>' + DISPLAY.map(slider).join('')
+  const daisy = P.mode === 'daisy';
+  $('params').innerHTML = `<div class="modes" role="radiogroup" aria-label="Layout">${[['daisy', 'Daisies'], ['force', 'Forces']].map(([m, t]) =>
+      `<button role="radio" aria-checked="${P.mode === m}" data-mode="${m}">${t}</button>`).join('')}</div>`
+    + '<h4>Display</h4>' + DISPLAY.map(slider).join('')
     + CHECKS.map(([k, t]) => `<label class="check"><input type="checkbox" id="p-${k}"${P[k] ? ' checked' : ''}> ${t}</label>`).join('')
-    + '<h4>Forces</h4>' + FORCES.map(slider).join('') + '<button class="reset" id="pReset">Reset</button>';
-  for (const [k, , , , step] of [...DISPLAY, ...FORCES]) $('p-' + k).oninput = e => {
+    + (daisy ? '<h4>Daisies</h4>' + DAISY.map(slider).join('') : '<h4>Forces</h4>' + FORCES.map(slider).join(''))
+    + '<button class="reset" id="pReset">Reset</button>';
+  $('params').querySelectorAll('[data-mode]').forEach(b => b.onclick = () => {
+    if (P.mode === b.dataset.mode) return;
+    P.mode = b.dataset.mode; saveP(); panel(); draw();
+  });
+  let again = 0;
+  for (const [k, , , , step] of [...DISPLAY, ...(daisy ? DAISY : FORCES)]) $('p-' + k).oninput = e => {
     P[k] = +e.target.value; $('o-' + k).textContent = fmt(P[k], step); saveP();
     if (k === 'names' || k === 'lines') return redraw();
+    if (daisy) { cancelAnimationFrame(again); again = requestAnimationFrame(daisyLayout); return; }
     forces(); sim.alpha(0.5).restart();
   };
   for (const [k] of CHECKS) $('p-' + k).onchange = e => { P[k] = e.target.checked; saveP(); draw(); };
