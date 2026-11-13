@@ -1,10 +1,13 @@
 # Wilford
 id: wilford
+groups: wilford-river = The river and its bridges | wilford-village = The village | wilford-coal = Coal and power
 
 A village on the south bank of the Trent, reached for centuries by ferry and, since the 1870s, by bridge.
 
 ## Wilford Toll Bridge
 - source: en:Wilford Toll Bridge
+- group: wilford-river
+- see: Wilford Suspension Bridge | Clifton Bridge | Sir Robert Clifton's colliery
 - year: 1870
 - check: 1870 | ferry | 400 years | 1974
 
@@ -13,6 +16,8 @@ It was closed to traffic in 1974.
 
 ## Wilford Suspension Bridge
 - source: en:Wilford Suspension Bridge
+- group: wilford-river
+- see: Wilford Toll Bridge
 - check: Arthur Brown | Wilford Hill reservoir | water
 
 A footbridge built by the city's water department, mainly to carry water pipes across the Trent to the
@@ -20,6 +25,7 @@ reservoir on Wilford Hill. The engineer was Arthur Brown.
 
 ## St Wilfrid's Church
 - source: en:St Wilfrid's Church, Wilford
+- group: wilford-village
 - at: name:St Wilfrid's Church
 - check: late 14th century | Gervase de Wilford | 1361 | Henry Kirke White | inspiration
 
@@ -29,6 +35,8 @@ and Clifton.
 
 ## The poet in the churchyard
 - source: en:Wilford
+- group: wilford-village
+- see: Clifton Grove
 - at: name:St Wilfrid's Church
 - names: no
 - check: Henry Kirke White | churchyard | favourite tree
@@ -38,6 +46,8 @@ favourite tree.
 
 ## Ferry Inn
 - source: en:Wilford
+- group: wilford-river
+- see: Wilford Toll Bridge
 - at: osm:way/29385991
 - check: later 19th century | wilford ferry inn | many visitors from nottingham | iremonger | 1958
 
@@ -47,6 +57,7 @@ its landlord until his death in 1958.
 
 ## Wilford House
 - source: en:Wilford
+- group: wilford-village
 - at: osm:way/80847924
 - check: Forman | Wilford House | Smith family
 
@@ -55,6 +66,8 @@ newspaper's successful launch.
 
 ## Sir Robert Clifton's colliery
 - source: en:Robert Juckes Clifton
+- group: wilford-coal
+- see: Clifton Hall | Wilford Toll Bridge
 - at: osm:way/78046105
 - names: no
 - check: coal | 1868 | typhoid | 1869 | 1870
@@ -66,6 +79,8 @@ projects, opened in 1870.
 
 ## Wilford Power Station
 - source: en:Wilford Power Station
+- group: wilford-coal
+- see: Ratcliffe-on-Soar Power Station
 - at: pin:-1.1667,52.9313
 - names: no
 - note: a pin on its site: the power station is gone, and the retail park's sheds are not it
@@ -76,6 +91,7 @@ demolished; the Riverside Retail Park stands on its site.
 
 ## The Nottingham Captain
 - source: en:Jeremiah Brandreth
+- group: wilford-village
 - at: pin:-1.1590,52.9353
 - names: no
 - check: Wilford | 1817 | Nottingham Captain | Derby
@@ -86,6 +102,7 @@ He was hanged for high treason outside Derby Gaol that November, and then behead
 
 ## Captain John Deane
 - source: en:Wilford
+- group: wilford-village
 - at: pin:-1.1578,52.9347
 - names: no
 - check: John Deane | Russian navy

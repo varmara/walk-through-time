@@ -5,6 +5,7 @@ The low ground between the city and the Trent, with two football grounds facing 
 
 ## Trent Bridge
 - source: en:Trent Bridge (bridge)
+- see: A fort at the bridge | Clifton Bridge
 - year: 1868..1871
 - check: Tarbotton | 1156 | stone arches
 - architect: en:Marriott Ogle Tarbotton

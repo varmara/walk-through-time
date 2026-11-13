@@ -1,11 +1,14 @@
 # Science and industry
 id: science
+groups: science-inventions = Inventions and discoveries | science-works = Water, coal and munitions
 
 Where Nottingham invented, made and mined: from the stocking frame to the bicycle, the medicines of Boots, the
 scanner that sees inside the body, and the water, coal and shells the city depended on.
 
 ## The stocking frame
 - source: en:Stocking frame
+- group: science-inventions
+- see: The first Luddites | Framework Knitters' Museum
 - at: pin:-1.0820,53.0368
 - names: no
 - check: William Lee | Calverton | 1589 | 1728
@@ -16,6 +19,7 @@ refused him a patent. The trade grew here, and from 1728 Nottingham was one of i
 
 ## Raleigh Street
 - source: en:Raleigh Bicycle Company
+- group: science-inventions
 - at: pin:-1.1637,52.9580
 - names: no
 - check: Raleigh Street | 1885 | Frank Bowden | 1888 | 1897 | Faraday Road
@@ -26,6 +30,7 @@ it over in 1888, and by 1897 Raleigh had a purpose-built works of seven and a ha
 
 ## Building D10
 - source: en:Boots Factory Site
+- group: science-inventions
 - at: osm:way/37080666
 - check: Owen Williams | 1930 | 1932 | Grade I | Wets
 
@@ -34,6 +39,7 @@ Williams, it is listed Grade I, the largest Grade I-listed structure in Britain.
 
 ## Building D6
 - source: en:Boots Factory Site
+- group: science-inventions
 - at: osm:way/37080661
 - check: Owen Williams | 1935 | 1938 | Drys
 
@@ -42,6 +48,8 @@ Owen Williams's second building for Boots, of 1935–1938, made tablets and loze
 
 ## Ibuprofen
 - source: en:Stewart Adams (chemist)
+- group: science-inventions
+- see: Building D10
 - at: osm:way/242637128
 - names: no
 - check: 1961 | Pennyfoot Street | BioCity | 2013 | blue plaque
@@ -51,6 +59,7 @@ on Pennyfoot Street, is now BioCity, and in 2013 a Royal Society of Chemistry bl
 
 ## The MRI scanner
 - source: en:Peter Mansfield
+- group: science-inventions
 - at: osm:way/23303664
 - names: no
 - check: 1964 | 1978 | 2003 | Paul Lauterbur
@@ -62,6 +71,8 @@ the Nobel Prize in 2003 with Paul Lauterbur.
 
 ## Papplewick Pumping Station
 - source: en:Papplewick Pumping Station
+- group: science-works
+- see: Thomas Hawksley
 - check: 1881 | 1884 | Marriott Ogle Tarbotton | James Watt | 1969 | 1976
 
 Built in 1881–1884 to pump drinking water for Nottingham from deep wells, with two beam engines by James Watt & Co.
@@ -70,6 +81,8 @@ opened as a museum in 1976.
 
 ## Thomas Hawksley
 - source: en:Thomas Hawksley
+- group: science-works
+- see: Papplewick Pumping Station
 - at: osm:way/200941630
 - names: no
 - check: Arnot Hill House | 1807 | Trent Bridge waterworks | 1831 | constant supply
@@ -79,6 +92,7 @@ in 1831, gave Britain its first high-pressure constant supply, which kept dirty 
 
 ## National Shell Filling Factory
 - source: en:National Shell Filling Factory, Chilwell
+- group: science-works
 - check: Chetwynd | 1915 | 1 July 1918 | 134 | Chetwynd Barracks
 
 Viscount Chetwynd built the factory from 1915 to fill shells with explosive; it filled some 19 million during the
@@ -86,6 +100,8 @@ First World War. On 1 July 1918 eight tons of TNT exploded, killing 134 people. 
 
 ## Gedling Colliery
 - source: en:Gedling Country Park
+- group: science-works
+- see: Cotgrave Colliery | Bestwood winding engine
 - names: no
 - check: Gedling Colliery | 1991 | 2015
 

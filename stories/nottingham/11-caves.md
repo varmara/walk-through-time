@@ -6,6 +6,7 @@ known beneath it: cellars, workshops, dwellings and shelters.
 
 ## City of Caves
 - source: en:City of Caves
+- see: Ye Olde Trip to Jerusalem
 - check: tannery | air raid shelter | only known underground tannery | 1500
 
 Caves under the old town, used over the years as a tannery, pub cellars and an air raid shelter. Two caves
@@ -13,6 +14,7 @@ opening onto the cliff face held the only known underground tannery in Britain, 
 
 ## Mortimer's Hole
 - source: en:Nottingham Castle
+- see: culture/Nottingham Castle
 - at: pin:-1.1541,52.9496
 - check: Mortimer's Hole | 1330 | secret tunnel | bound and gagged
 

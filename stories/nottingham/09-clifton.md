@@ -5,6 +5,7 @@ An old village above the Trent, and next to it one of the largest housing estate
 
 ## Clifton Hall
 - source: en:Clifton, Nottingham
+- see: Sir Robert Clifton's colliery | Clifton estate
 - at: name:Clifton Hall
 - check: 700 years | Clifton Hall
 
@@ -27,6 +28,7 @@ is by George Frederick Bodley.
 
 ## Clifton Grove
 - source: en:Henry Kirke White
+- see: The poet in the churchyard
 - at: pin:-1.1876,52.9140
 - check: Clifton Grove | 1803 | butcher | 1806
 
@@ -35,6 +37,7 @@ aged 17. He died in 1806, aged 21.
 
 ## Clifton Bridge
 - source: en:Clifton Bridge (Nottingham)
+- see: Trent Bridge | Wilford Toll Bridge
 - check: 1958 | pre-stressed | Trent Bridge | 1972
 
 Opened in 1958 to take traffic off Trent Bridge, it was then the longest pre-stressed concrete bridge in the

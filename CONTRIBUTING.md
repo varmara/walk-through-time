@@ -22,6 +22,15 @@ Two or three plain sentences on the history behind the layer.
 The square has held markets since the Middle Ages; Goose Fair was held here until 1928.
 ```
 
+A layer that covers several places or themes can split into tickboxes: a `groups:` line under `id:`, each group
+`key = Title` (keys unique across all layers), and a `- group: key` line on every entry:
+
+```markdown
+# Barton in Fabis and Thrumpton
+id: barton
+groups: barton-fabis = Barton in Fabis | thrumpton = Thrumpton
+```
+
 An entry is a `##` heading (the name shown on the card), then its settings as `- key: value` lines, then the
 story as plain text. The settings:
 
@@ -29,9 +38,10 @@ story as plain text. The settings:
 |---|---|
 | `source` | the Wikipedia article (`en:Title`) or Historic England list entry (`he:1254566`) the story rests on; for People, the person's article |
 | `place` | People only: the place's article, which decides the building |
-| `at` | where, when not where the article says: `name:…` (a building's name), `osm:way/123` (an outline), `nhle:1271444` (a list entry), `pin:lon,lat` (a pin) |
+| `at` | where, when not where the article says: `name:…` (a building's name), `osm:way/123` (an outline), `nhle:1271444` (a list entry), `pin:lon,lat` (a pin), `pin:article` (a pin at the article's own point, or the `place` article's: a village, a site where nothing stands) |
 | `year` | when the building standing today was built or opened (`1855`, `c. 1420`, `1841..1844`) |
-| `group` | People only, when Wikidata has no occupation: architects, writers, science, industry, sport, arts, public |
+| `group` | in a layer with `groups:`, the entry's group (its own tickbox); People: the kind of person, when Wikidata has no occupation (architects, writers, science, industry, sport, arts, public) |
+| `see` | other stories to link from this one ("See also" on its card), by their headings, separated by `\|`; write `layer/heading` when two stories share a heading (`culture/Nottingham Castle`) |
 | `names` | `no` when the entry's name is not the building's name (an event: "The castle burned, 1831") |
 | `check` | words the article must contain, separated by `\|` |
 | `quote` | for a Historic England source: a passage copied from the list entry (their site blocks automated reading), one per line |

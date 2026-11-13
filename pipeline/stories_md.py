@@ -4,15 +4,22 @@ A story layer is one file, `NN-<id>.md` (NN sets the order):
 
     # Old inns                        <- the layer's title
     id: inns                          <- settings, one per line (id; kind: people or facts for those layers)
+    groups: inns-old = The oldest | inns-coaching = Coaching inns
+                                      <- optional: the layer's tickboxes, key = title; each entry names its group
 
     The layer's introduction: one paragraph, as many lines as you like.
 
     ## Ye Olde Trip to Jerusalem      <- an entry: the place, person or fact's name
     - source: en:Ye Olde Trip to Jerusalem      (the Wikipedia article it rests on; a person's, for People)
     - place: en:Nottingham Castle               (People: the place's article)
-    - at: name:Ye Olde Trip to Jerusalem        (where, if not where the article says: name:, osm:, nhle:, pin:lon,lat)
+    - at: name:Ye Olde Trip to Jerusalem        (where, if not where the article says: name:, osm:, nhle:, pin:lon,lat,
+                                                 pin:article for a pin at the article's coordinates)
     - year: c. 1650                             (when the building standing today was built)
-    - group: sport                              (People: the kind of person, if Wikidata has none)
+    - group: sport                              (People: the kind of person, if Wikidata has none; a layer
+                                                 with groups: the entry's group key)
+    - see: The castle burned, 1831 | culture/Nottingham Castle
+                                                (other stories to link from this one: their headings, or
+                                                 layer/heading where a heading is used twice)
     - quote: …                                  (passages copied from a Historic England entry, one per line)
     - names: no                                 (the entry's name is not the building's name)
     - check: 1189 | caves                       (words the article must contain, separated by |)
@@ -26,7 +33,7 @@ collections.md, credits.md); each has a Note column for why. See stories/<city>/
 import re
 from pathlib import Path
 
-ENTRY_KEYS = {"source", "place", "at", "year", "group", "quote", "names", "check", "note", "architect"}
+ENTRY_KEYS = {"source", "place", "at", "year", "group", "quote", "names", "check", "note", "architect", "see"}
 
 
 def architects(v):
@@ -79,8 +86,10 @@ def layer(path):
             close()
             cur, body = {"name": line[3:].strip()}, []
         elif cur is None:
-            m = re.match(r"^(id|kind):\s*(.+)$", line)
-            if m and not intro:
+            m = re.match(r"^(id|kind|groups):\s*(.+)$", line)
+            if m and not intro and m[1] == "groups":     # "key = Title | key = Title"
+                L["groups"] = [[k.strip(), t.strip()] for k, _, t in (g.partition("=") for g in m[2].split(" | "))]
+            elif m and not intro:
                 L[m[1]] = m[2].strip()
             elif line.strip():
                 intro.append(line.strip())
@@ -96,6 +105,8 @@ def layer(path):
                     cur.setdefault("quote", []).append(v)
                 elif k == "architect":
                     cur["architect"] = architects(v)
+                elif k == "see":
+                    cur["see"] = [x.strip() for x in v.split(" | ") if x.strip()]
                 elif k == "names":
                     if v.lower() in ("no", "false"):
                         cur["names"] = False

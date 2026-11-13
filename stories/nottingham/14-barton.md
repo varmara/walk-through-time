@@ -1,11 +1,13 @@
 # Barton in Fabis and Thrumpton
 id: barton
+groups: barton-fabis = Barton in Fabis | thrumpton = Thrumpton
 
 Two villages on the south bank of the Trent, upstream from Clifton: Barton, once Barton in the Beans, and
 Thrumpton, with its Jacobean hall.
 
 ## Barton in the Beans
 - source: en:Barton in Fabis
+- group: barton-fabis
 - at: pin:-1.2231,52.8901
 - names: no
 - note: a pin in the village: the story is about the village, not one house
@@ -17,6 +19,7 @@ the parish beside Clifton.
 
 ## St George's Church
 - source: en:Listed buildings in Barton in Fabis
+- group: barton-fabis
 - at: nhle:1248685
 - check: 14th century | 1877 | 1885
 
@@ -24,6 +27,7 @@ A 14th-century church, listed Grade I, altered over the centuries and restored i
 
 ## Manor Farm dovecote
 - source: en:Listed buildings in Barton in Fabis
+- group: barton-fabis
 - at: nhle:1248688
 - year: 1677
 - check: 1677 | octagonal
@@ -32,6 +36,8 @@ An octagonal red-brick dovecote of 1677, listed Grade II.
 
 ## Thrumpton Hall
 - source: en:Thrumpton Hall
+- group: thrumpton
+- see: The staircase | The Byrons of Thrumpton | Owners since 1949
 - check: Babington | priest hole | Pigot | 1617
 
 The Powdrells, a Roman Catholic family, lost their house here after the Babington Plot; part of it survives
@@ -39,6 +45,7 @@ inside the hall, with a priest hole. The Pigots' rose-brick house around it was 
 
 ## The staircase
 - source: en:Thrumpton Hall
+- group: thrumpton
 - names: no
 - check: staircase | John Webb | Inigo Jones
 
@@ -47,6 +54,7 @@ of Inigo Jones.
 
 ## The Byrons of Thrumpton
 - source: en:Thrumpton Hall
+- group: thrumpton
 - names: no
 - check: 1843 | Lucy Wescomb | 1917 | Squarson
 
@@ -56,6 +64,7 @@ its "squarson".
 
 ## Owners since 1949
 - source: en:Thrumpton Hall
+- group: thrumpton
 - names: no
 - check: 1949 | 1994 | Miranda Seymour
 
@@ -63,6 +72,7 @@ George Fitzroy Seymour owned the estate from 1949 to 1994, and Miranda Seymour h
 
 ## All Saints Church
 - source: en:All Saints Church, Thrumpton
+- group: thrumpton
 - at: osm:way/275931476
 - check: 13th century | 1871 | Street
 
@@ -70,6 +80,7 @@ A 13th-century church, listed Grade II*, restored by George Edmund Street in 187
 
 ## An estate village
 - source: en:Thrumpton
+- group: thrumpton
 - at: pin:-1.2432,52.8752
 - names: no
 - check: Emerton | 1745

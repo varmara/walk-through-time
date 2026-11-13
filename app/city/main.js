@@ -78,7 +78,9 @@ export async function openLink(q, first){
   const lq = q.get('layer'), lyr = lq && S.layers.find(L => L.id === lq);
   if (lyr) { lyr.groups.filter(g => g.count > 0).forEach(g => S.active.add(g.key)); ticked = true; }
   const gq = q.get('group');
-  const keys = gq ? gq.split(',').filter(k => S.groups.has(k)) : [];
+  // a group's key, or a story layer's id (the graph's story themes): all its groups
+  const keys = gq ? [...new Set(gq.split(',').flatMap(k => S.groups.has(k) ? [k]
+    : (S.layers.find(L => L.id === k)?.groups || []).filter(g => g.count > 0).map(g => g.key)))] : [];
   if (keys.length) { S.active.clear(); keys.forEach(k => S.active.add(k)); ticked = true; }
   if (ticked) { saveActive(); renderLayers(); applyLayers(); if (!first) updateYear(); }
   // a group's places as numbered cards, person by person (or story by story), each place once
@@ -88,7 +90,8 @@ export async function openLink(q, first){
       const rs = typeof it[0] === 'number' ? [it[0]] : it[1];
       for (const r of rs.map(x => typeof x === 'number' ? x : parseRef(String(x)))) if (!seen.has(r)) { seen.add(r); refs.push(r); }
     }
-    const title = keys.length === 1 ? S.groups.get(keys[0]).title : 'Story themes';
+    const asked = gq.split(','), whole = asked.length === 1 && S.layers.find(L => L.id === asked[0]);
+    const title = whole ? whole.title : keys.length === 1 ? S.groups.get(keys[0]).title : 'Story themes';
     return refs.length ? [title, refs] : null;
   })();
   const focus = q.get('focus'), osm = q.get('osm');

@@ -74,14 +74,17 @@ def main(city_id):
         for e in es:
             if e["b"] is None:   # not a building: a pin
                 e["b"] = out.pin(*e["pin"], e["name"], L["id"], e["group"], e["story"], e["source"], e.get("place"))
+                e["_story"] = out.pins[-1]
             else:
                 out.add(e["b"], e["group"], L["id"], e["story"], e["source"], e.get("place"))
+                e["_story"] = out.stories[str(e["b"])][-1]
         groups = L.get("groups") or [[L["id"], L["title"]]]
         meta.append({"id": L["id"], "title": L["title"], "intro": L.get("intro", ""), "section": "Stories",
                      "kind": "stories",
                      "groups": [{"key": k, "title": t, "count": len({e["b"] for e in es if e["group"] == k}),
                                  "items": grouped([[e["b"], e["name"]] for e in es if e["group"] == k])}
                                 for k, t in groups]})
+    cross_links(cur["entries"], {L["id"] for L in cur["layers"] if L.get("kind") not in ("facts", "people")})
     if not any(m["kind"] == "people" for m in meta):
         meta.append(ppl["meta"])
     # on a building's card, the story layers' stories first, then the People layer's, then the rest
@@ -168,3 +171,28 @@ def main(city_id):
     save(city_id, "layers", {"meta": meta, **out.json(), "names": names, "people": ppl["about"],
                              "architects": ppl.get("architects", {}),
                              "architectLinks": ppl.get("architectLinks", {})})
+
+
+def cross_links(entries, story_layers):
+    """A story's "see also" (stories/<city>/*.md: see): each named story, found by its heading, or layer/heading,
+    becomes [heading, where it is] on the story ("123" a building, "p4" a pin), which the card links to."""
+    placed = [e for e in entries if e["layer"] in story_layers and "_story" in e]
+    by_name, by_full = {}, {}
+    for e in placed:
+        by_name.setdefault(e["name"].lower(), []).append(e)
+        by_full[f"{e['layer']}/{e['name']}".lower()] = e
+    for e in placed:
+        see = []
+        for name in e.get("see", []):
+            hits = [by_full[name.lower()]] if name.lower() in by_full else by_name.get(name.lower(), [])
+            hits = [h for h in hits if h is not e]
+            if len(hits) != 1:
+                log(f"    {e['layer']} / {e['name']}: see {name!r}: " + ("no such story" if not hits else
+                    "more than one story of that name: write it as layer/heading"))
+                continue
+            ref = str(hits[0]["b"])
+            see.append([hits[0]["name"], ref])
+        if see:
+            e["_story"]["see"] = see
+    for e in entries:
+        e.pop("_story", None)

@@ -1,5 +1,6 @@
 # The industrial revolution
 id: industrial
+groups: industrial-textiles = Textiles and the machines | industrial-transport = Coal, canals and railways
 
 How Nottingham and its coalfield helped make the industrial age: an early railway of wood, the first mill of the
 factory system, the canal and the railway that carried the coal, the lace machine, the frame-breakers who fought
@@ -7,6 +8,7 @@ the machines, and the iron and steam that outlasted the pits.
 
 ## Wollaton Wagonway
 - source: en:Wollaton Wagonway
+- group: industrial-transport
 - at: pin:-1.2558,52.9727
 - names: no
 - check: Huntingdon Beaumont | Percival Willoughby | 1604 | Strelley | Wollaton Lane End
@@ -17,6 +19,8 @@ Wollaton Lane End, its wagons drawn by horses. It is described as the first rail
 
 ## Arkwright's first mill
 - source: en:Cotton mill
+- group: industrial-textiles
+- see: The stocking frame
 - at: pin:-1.1440,52.9537
 - names: no
 - check: Arkwright | Nottingham | 1768 | horses | 300
@@ -27,6 +31,8 @@ four storeys and 300 workers.
 
 ## The first Luddites
 - source: en:Luddite
+- group: industrial-textiles
+- see: The stocking frame | Framework Knitters' Museum
 - at: pin:-1.1265,53.0055
 - names: no
 - check: Arnold | 11 March 1811 | wide
@@ -37,6 +43,8 @@ The Luddite movement began in Arnold on 11 March 1811. Across Nottinghamshire th
 
 ## The Leavers lace machine
 - source: en:John Leavers
+- group: industrial-textiles
+- see: lace/Adams Building
 - at: osm:way/100199195
 - names: no
 - check: Leavers | 1813 | Canning Circus | Heathcoat | Grand-Couronne | 1821
@@ -46,6 +54,7 @@ John Leavers lived here, at Canning Circus, where a plaque calls him the invento
 
 ## The Nottingham Canal
 - source: en:Nottingham Canal
+- group: industrial-transport
 - at: osm:way/16536642
 - names: no
 - check: 1792 | William Jessop | 1796 | Langley Mill | Castle Wharf | 1937
@@ -56,6 +65,8 @@ bringing coal to the town. Railways took its trade; most of the main line was ab
 
 ## The railway that began in a pub
 - source: en:Midland Counties Railway
+- group: industrial-transport
+- see: Nottingham station
 - at: osm:way/327309145
 - names: no
 - check: Sun Inn | Eastwood | 1832 | Mansfield and Pinxton | 1839 | Carrington Street
@@ -66,6 +77,8 @@ in 1839.
 
 ## Lowe's Silk Mill
 - source: en:1831 reform riots
+- group: industrial-textiles
+- see: The castle burned, 1831
 - at: pin:-1.2165,52.9265
 - names: no
 - check: Lowe's Silk Mill | Beeston | 11 October
@@ -76,6 +89,8 @@ Castle, and the same day the riots ceased.
 
 ## Bestwood winding engine
 - source: en:Bestwood Country Park
+- group: industrial-transport
+- see: Gedling Colliery | Cotgrave Colliery
 - at: osm:way/181053828
 - year: 1873
 - check: 1873 | vertical steam engine | Bestwood Coal and Iron Company | 1967
@@ -85,6 +100,7 @@ engine of 1873, which lowered the miners and wound up the coal. The pit closed i
 
 ## Bennerley Viaduct
 - source: en:Bennerley Viaduct
+- group: industrial-transport
 - at: osm:way/584872269
 - year: 1877
 - check: wrought iron | 1877 | 1968 | 2022 | Meldon

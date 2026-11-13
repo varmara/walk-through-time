@@ -26,6 +26,7 @@ The county courthouse and gaol, rebuilt to a design by James Gandon. It is now t
 
 ## Nottingham station
 - source: en:Nottingham railway station
+- see: The railway that began in a pub
 - year: 1904
 - check: 1904 | terracotta
 
@@ -49,6 +50,7 @@ part of the City of Caves.
 
 ## The castle burned, 1831
 - source: en:1831 reform riots
+- see: Lowe's Silk Mill | culture/Nottingham Castle
 - at: name:Nottingham Castle
 - names: no
 - check: 8 October 1831 | Duke of Newcastle | hanged | burnt shell

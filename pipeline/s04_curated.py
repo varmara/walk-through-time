@@ -280,7 +280,13 @@ def main(city_id):
             b = how = None
             if not why:
                 at = e.get("at", "")
-                if at.startswith("pin:"):       # an explicit point "lon,lat", for places the article does not locate
+                if at in ("pin", "pin:article"):     # a pin at the article's own point: a village, a site with no building
+                    if a["coords"]:
+                        at = "pinned"
+                        e = {**e, "_how": "pin at the article's coordinates"}
+                    else:
+                        why = "the article has no coordinates for its pin"
+                elif at.startswith("pin:"):       # an explicit point "lon,lat", for places the article does not locate
                     a = {**a, "coords": tuple(float(v) for v in at[4:].split(","))}
                     at = "pinned"
                 if at.startswith("nhle:"):
@@ -314,6 +320,9 @@ def main(city_id):
                     how = e.get("_how") or "pin where the story file puts it" if at == "pinned" else "pin at the article's coordinates (no building there: a bridge, a ground, a square)"
                 elif b is None:
                     why = "could not place it on a building, and the article has no coordinates"
+            if not why and L.get("groups") and L.get("kind") != "people" and e.get("group") not in {k for k, _ in L["groups"]}:
+                log(f"    {L['id']} / {e['name']}: group {e.get('group')!r} is not one of the layer's groups: put in the first")
+                e = {**e, "group": L["groups"][0][0]}
             if why:
                 dropped.append({"layer": L["id"], "name": e["name"], "why": why})
                 continue
@@ -328,13 +337,14 @@ def main(city_id):
                             **({"place": {"title": a["title"], "url": a["url"], "kind": a["kind"]}} if e.get("place") else {}),
                             **({"year": list(parse_year(e["year"]))} if e.get("year") and parse_year(e["year"]) else {}),
                             **({"architect": e["architect"]} if e.get("architect") else {}),
-                            **({"names": False} if e.get("names") is False else {})})
+                            **({"names": False} if e.get("names") is False else {}),
+                            **({"see": e["see"]} if e.get("see") else {})})
         log(f"s04 {L['id']}: {kept}/{len(L['entries'])} stories kept")
     for d in dropped:
         log(f"    dropped {d['layer']} / {d['name']}: {d['why']}")
     meta = []
     for L in layers:
-        m = {k: L[k] for k in ("id", "title", "intro", "kind") if k in L}
+        m = {k: L[k] for k in ("id", "title", "intro", "kind", "groups") if k in L}
         if L.get("kind") == "people":
             used = {e["group"] for e in entries if e["layer"] == L["id"]}
             m["groups"] = [["people-" + k, t] for k, t, _ in PEOPLE_GROUPS if "people-" + k in used]

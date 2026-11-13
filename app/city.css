@@ -131,6 +131,8 @@ input[type=range]{width:100%;accent-color:var(--ink);height:28px;margin:0}
 a.fab{display:grid;place-items:center;text-decoration:none;color:inherit}
 .story{border-top:1px solid var(--line);padding-top:8px;display:grid;gap:4px}
 .story p{margin:0;font:16px/1.45 var(--serif)}
+.story p.see{font:14px/1.4 var(--sans);color:var(--muted)}
+.story p.see a{color:var(--accent)}
 .links{display:flex;flex-wrap:wrap;gap:12px}
 
 /* loader and map controls */

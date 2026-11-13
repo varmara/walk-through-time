@@ -6,6 +6,7 @@ the Salutation is the oldest building, but the Bell has been a pub the longest.
 
 ## Ye Olde Trip to Jerusalem
 - source: en:Ye Olde Trip to Jerusalem
+- see: City of Caves | Mortimer's Hole
 - check: 1189 | sandstone
 
 Claims to date from 1189, a date that rests on tradition rather than records. It is built against the castle

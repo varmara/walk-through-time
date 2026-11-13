@@ -158,7 +158,12 @@ function storyHtml(s, N){
   const refs = N.cite(kinded(s.source)) + N.cite(kinded(s.place));
   return `<div class="story">${s.label ? `<div class="seclbl">${esc(s.label)}</div>` : ''}
     ${s.text ? `<p>${linkPeople(esc(s.text))}${refs}</p>` : refs ? `<p class="src">Source${refs}</p>` : ''}${s.note ? `<p class="src">${esc(s.note)}</p>` : ''}${aboutHtml(s.who, s.source, N)}
-    ${s.pin ? `<p class="go"><a href="#" data-ref="${esc(s.pin)}">See the plaque on the map</a></p>` : ''}</div>`;
+    ${s.pin ? `<p class="go"><a href="#" data-ref="${esc(s.pin)}">See the plaque on the map</a></p>` : ''}${seeHtml(J(s.see))}</div>`;
+}
+// "See also": other stories the story file links to (stories/<city>/*.md: see), each opening where it is
+function seeHtml(see){
+  if (!Array.isArray(see) || !see.length) return '';
+  return `<p class="see">See also: ${see.map(([name, ref]) => `<a href="#" data-ref="${esc(ref)}">${esc(name)}</a>`).join(', ')}</p>`;
 }
 // old photographs, postcards and prints, oldest first, from Commons; each credited and linked to its page
 function archiveHtml(arch){
@@ -381,7 +386,7 @@ function pinCard(p){
   if (WHEELCHAIR[p.wc]) rows.push(['Access', esc(WHEELCHAIR[p.wc])]);
   if (p.op || p.gov) rows.push(['Run by', esc(p.op || p.gov)]);
   if (p.acc) rows.push(['Accreditation', esc(p.acc)]);
-  return { title: p.name, rows, stories: [{ text: p.text, source: J(p.source), place: J(p.place), who: p.who }], coll: J(p.coll),
+  return { title: p.name, rows, stories: [{ text: p.text, source: J(p.source), place: J(p.place), who: p.who, see: p.see }], coll: J(p.coll),
            links: placeLinks(p, false) };
 }
 
