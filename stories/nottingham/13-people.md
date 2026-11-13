@@ -8,7 +8,7 @@ link is checked against the Wikipedia articles on the person and the place.
 ## Albert Iremonger
 - source: en:Albert Iremonger
 - place: en:Wilford
-- at: name:Ferry Inn
+- at: osm:way/29385991
 - group: sport
 - check: Wilford | 564 | Ferry Inn
 
@@ -134,3 +134,51 @@ named Bolero Square after their Olympic routine.
 
 Built between 1877 and 1881 for University College Nottingham, where D. H. Lawrence studied during his
 teacher-training years.
+
+## Herbert Kilpin
+- source: en:Herbert Kilpin
+- at: osm:way/116531316
+- group: sport
+- check: 129 Mansfield Road | 191 Mansfield Road | butcher | Milan | 1899
+- note: checked by hand: the article's 129 Mansfield Road, renumbered 191 (not the 129 Mansfield Road far north in Gedling)
+
+Herbert Kilpin, a butcher's son, grew up here with nine older siblings, at what was then 129 Mansfield Road. In
+1899 he was the main founder of the football club that became AC Milan.
+
+## Tinsley Lindley
+- source: en:Tinsley Lindley
+- at: osm:way/243696651
+- group: sport
+- check: 14 Park Terrace | Nottingham Forest | barrister | County Court
+
+Tinsley Lindley, who played for Nottingham Forest and England and became a barrister and county court judge,
+lived here with his family at 14 Park Terrace.
+
+## Albert Nelson Bromley
+- source: en:Albert Nelson Bromley
+- at: osm:way/243866226
+- group: architects
+- check: Newcastle Drive | 1878 | 1934 | Boots
+
+The architect Albert Nelson Bromley designed these houses on Newcastle Drive in 1878, and died here in 1934. His
+buildings in the city include Boots' stores on Pelham Street and Turney Street.
+
+## Mary Kendrick
+- source: en:Mary Kendrick
+- at: pin:-1.1442,52.9581
+- group: science
+- check: Curzon Street | haulage contractor | Thames Barrier | Mersey
+- note: checked by hand: a pin on Curzon Street in Nottingham (the old address matched a Curzon Street in Long Eaton)
+
+Mary Kendrick, the tidal engineer who led the studies of river levels and silt for the Thames Barrier, grew up on
+Curzon Street, where her father was a haulage contractor. She later kept the Mersey navigable as its Acting
+Conservator.
+
+## Dorothea Waddingham
+- source: en:Dorothea Waddingham
+- at: osm:way/1084062040
+- check: 32 Devon Drive | nursing home | Baguley | morphine | 1936
+
+Dorothea Waddingham ran a nursing home in her house here, 32 Devon Drive. She was hanged in 1936 for poisoning two
+of her patients, Louisa Baguley and her daughter Ada, with morphine.
+

@@ -84,9 +84,32 @@ function linkPeople(html){
 }
 function openWho(name){
   const P = people().get(name), info = S.data.people && S.data.people[name];
-  if (P && P.refs.length > 1) return showPlaces(name, P.refs.map(r => typeof r === 'number' ? r : parseRef(String(r))));
-  if (P && P.refs.length === 1 && P.refs[0] !== S.selectedId) return openRef(P.refs[0]);
+  if (P || (info && info.text)) return showPerson(name);
   if (info && info.url) window.open(info.url, '_blank', 'noopener');
+}
+// ================= People =================
+// A person's card: who they were (the opening of their Wikipedia article), their years, and their places on the
+// map, each opening its own card, and all of them as numbered cards
+export function showPerson(name){
+  const P = people().get(name), info = (S.data.people && S.data.people[name]) || {};
+  const refs = (P ? P.refs : []).map(r => typeof r === 'number' ? r : parseRef(String(r)));
+  const rows = [];
+  if (P && ROLE[P.group.key]) rows.push(['Who', esc(ROLE[P.group.key][0].toUpperCase() + ROLE[P.group.key].slice(1))]);
+  if (info.life) rows.push(['Lived', esc(info.life)]);
+  if (refs.length) rows.push(['On the map', `${refs.length} ${refs.length === 1 ? 'place' : 'places'}`]);
+  const list = () => refs.map((r, i) => `<li><a href="#" data-ref="${esc(String(r))}">${esc(refName(r))}</a></li>`).join('');
+  const after = refs.length ? `<div class="person-places"><h3>${refs.length === 1 ? 'Their place' : 'Their places'}</h3><ol id="personPlaces">${list()}</ol>`
+    + (refs.length > 1 ? `<button class="textbtn allplaces" data-name="${esc(name)}" data-b="${refs.join(',')}">Show all ${refs.length} on the map</button>` : '') + '</div>' : '';
+  unlight();
+  if (S.selectedId != null) { fstate(S.selectedId, { sel:false }); S.selectedId = null; }
+  renderCard({ title: name, rows, after,
+    stories: info.text ? [{ text: info.text, source: { kind: 'Wikipedia', title: info.title, url: info.url } }] : [], links: [] });
+  // the names of buildings whose card files are not here yet: fetched, then the list again
+  const missing = refs.filter(r => isB(r) && !S.features[r].full);
+  if (missing.length && missing.length <= 40) Promise.all(missing.map(r => loadCard(r).catch(() => {}))).then(() => {
+    const ol = document.getElementById('personPlaces');
+    if (ol && $('sTitle').textContent === name) { ol.innerHTML = list(); ol.querySelectorAll('[data-ref]').forEach(x => x.onclick = e => { e.preventDefault(); openRef(parseRef(x.dataset.ref)); }); }
+  });
 }
 // the people tied to a building: name, what they were, a link to their places (or article)
 function connected(id){
@@ -156,6 +179,13 @@ function fill(id, html){ const el = $(id); if (!el) return; el.hidden = !html; e
 const kinded = s => s && { ...s, kind: s.kind || 'Wikipedia' };
 function storyHtml(s, N){
   const refs = N.cite(kinded(s.source)) + N.cite(kinded(s.place));
+  const P = s.who && people().get(s.who);
+  if (s.who && (s.layer === 'people' || P)) {
+    const role = P && ROLE[P.group.key];
+    return `<div class="story person"><div class="pname"><a href="#" class="who" data-who="${esc(s.who)}">${esc(s.who)}</a>${role ? `<span class="muted"> · ${esc(role)}</span>` : ''}</div>
+    ${s.text ? `<p>${linkPeople(esc(s.text))}${refs}</p>` : refs ? `<p class="src">Source${refs}</p>` : ''}${whoLine(s.who)}
+    ${s.pin ? `<p class="go"><a href="#" data-ref="${esc(s.pin)}">See the plaque on the map</a></p>` : ''}${seeHtml(J(s.see))}</div>`;
+  }
   return `<div class="story">${s.label ? `<div class="seclbl">${esc(s.label)}</div>` : ''}
     ${s.text ? `<p>${linkPeople(esc(s.text))}${refs}</p>` : refs ? `<p class="src">Source${refs}</p>` : ''}${s.note ? `<p class="src">${esc(s.note)}</p>` : ''}${aboutHtml(s.who, s.source, N)}
     ${s.pin ? `<p class="go"><a href="#" data-ref="${esc(s.pin)}">See the plaque on the map</a></p>` : ''}${seeHtml(J(s.see))}</div>`;
@@ -185,6 +215,13 @@ function collHtml(cs){
     return '<p>More photos from ' + (list.length === 1 ? a(list[0].url, name)
       : esc(name) + ': ' + list.map(c => a(c.url, c.title)).join(', ')) + '</p>';
   }).join('');
+}
+// one line on who a person was (the first sentence of their article), and their card for more
+function whoLine(who){
+  const p = S.data.people && S.data.people[who];
+  if (!p || !p.text) return '';
+  const m = /^(.{25,}?[a-z0-9)’'"])\.(?=\s|$)/.exec(p.text), first = m ? m[1] + '.' : p.text;
+  return `<p class="wholine">${esc(first)}${p.life ? ` <span class="muted">(${esc(p.life)})</span>` : ''} <a href="#" class="who" data-who="${esc(who)}">More about ${esc(who)}</a></p>`;
 }
 // who a person in the People layer was: the opening sentences of their Wikipedia article
 function aboutHtml(who, source, N){

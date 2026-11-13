@@ -121,12 +121,36 @@ def about_people(want, words):
                 ok.append(t)
         if len(ok) == 1:
             titles[n] = ok[0]
+    life = life_years(sorted(set(titles.values())))
     out = {}
     for n, t in titles.items():
         text = trim(intro.get(t) or "")
         if len(text) > 40:
-            out[n] = {"text": text, "title": t,
+            out[n] = {"text": text, "title": t, **({"life": life[t]} if life.get(t) else {}),
                       "url": "https://en.wikipedia.org/wiki/" + urllib.parse.quote(t.replace(" ", "_"))}
+    return out
+
+
+def life_years(titles):
+    """{article title: "1850–1934"}: the years of birth and death Wikidata gives the article's person (born only:
+    "born 1928"), for the person's card. Fifty articles a request."""
+    from .web import http
+    out = {}
+    year = lambda c: (c[0]["mainsnak"].get("datavalue", {}).get("value", {}).get("time", "")[1:5].lstrip("0") or None) if c else None  # noqa: E731
+    for i in range(0, len(titles), 50):
+        try:
+            r = http("https://www.wikidata.org/w/api.php", params={
+                "action": "wbgetentities", "sites": "enwiki", "titles": "|".join(titles[i:i + 50]), "props": "claims|sitelinks",
+                "sitefilter": "enwiki", "normalize": "1", "format": "json"})
+        except Exception as e:  # noqa: BLE001
+            log(f"    Wikidata years failed: {e}")
+            continue
+        for ent in r.get("entities", {}).values():
+            t = ent.get("sitelinks", {}).get("enwiki", {}).get("title")
+            cl = ent.get("claims", {})
+            b, d = year(cl.get("P569")), year(cl.get("P570"))
+            if t and b:
+                out[t] = f"{b}–{d}" if d else f"born {b}"
     return out
 
 
@@ -229,11 +253,14 @@ def main(city_id):
     log(f"s06 plaques: {len(plaques)} shown as pins ({placed} on or by a building)")
 
     # well-known residents found in their Wikipedia articles (s04_residents)
+    # (a person with a hand-written entry is told there, checked by hand, so not again from their address)
     residents = load(city_id, "residents") if work(city_id, "residents").exists() else []
+    hand = {e["name"] for e in cur["entries"] if L and e["layer"] == L["id"]}
+    residents = [r for r in residents if r["name"] not in hand]
     for r in residents:
         person(r["b"], r["group"], r["name"],
-               f"Lived or worked at {r['address']}, according to Wikipedia: “{r['sentence']}” "
-               f"(House numbers have sometimes changed since.)",
+               f"{r['name']} lived or worked here, at {r['address']}, as their Wikipedia article records "
+               f"(house numbers have sometimes changed since).",
                {"title": r["title"], "url": r["url"], "kind": "Wikipedia"})
     log(f"s06 residents: {len(residents)} addresses of well-known people")
 

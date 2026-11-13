@@ -44,6 +44,18 @@ const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (
     await page.evaluate(el => el.closest('.item').click(), many);
     await page.waitForTimeout(2500);
     check(/^1 of \d+$/.test(await text('#pCount')), 'a person with several places opens the places strip');
+    // a person's card: who they were and their places (the People layer's first person)
+    const name = await page.evaluate(async () => {
+      const { S } = await import(new URL('../app/city/state.js', location.href).href);
+      const g = S.layers.find(L => L.kind === 'people')?.groups.find(g => g.items && g.items.length);
+      if (!g) return null;
+      (await import(new URL('../app/city/cards.js', location.href).href)).showPerson(g.items[0][0]);
+      return g.items[0][0];
+    });
+    if (name) {
+      await page.waitForTimeout(800);
+      check((await text('#sTitle')) === name && (await page.$$('#personPlaces li')).length > 0, "a person's card lists their places");
+    }
   } else check(false, 'a layer lists a person or story with several places');
 
   await page.click('#bMap').catch(() => {});

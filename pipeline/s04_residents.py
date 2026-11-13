@@ -4,7 +4,9 @@
 2. Their article's wikitext is searched, sentence by sentence, for a house number and a street of the city
    ("lived at 12 Park Terrace"), in a sentence about living, moving, dying, working or a house, and naming the
    city or one of its districts in that sentence or the one before (many street names exist in every town).
-3. The address is matched to a building through OpenStreetMap addresses (exact house number and street).
+3. The address is matched to a building through OpenStreetMap addresses (exact house number and street), and,
+   when the sentence names the city itself ("19 Curzon Street in Nottingham"), only to a building inside the
+   city's own council (a Curzon Street in Long Eaton is not it).
 The sentence is kept as the quote; house numbers can have changed since the person lived there, so the card says so.
 
 Writes work/<city>/residents.json: [{name, qid, title, url, sentence, address, b, group}].
@@ -107,6 +109,11 @@ def main(city_id):
         if p["b"] is not None and t.get("addr:street") and t.get("addr:housenumber"):
             addr.setdefault((t["addr:housenumber"].strip().lower(), t["addr:street"].lower()), p["b"])
     streets = {s for _, s in addr}
+    # the council a building is in (s00_fetch_councils), for addresses the article places in the city itself
+    from .s07_package import councils
+    from .geo import centroid
+    council_of, city_name = councils(city_id), city(city_id)["name"].lower()
+    city_council = lambda b: city_name in (council_of(*centroid(buildings[b]["rings"][0])) or city_name).lower()  # noqa: E731
     log(f"s04 residents: {len(addr)} addresses on {len({v for v in addr.values()})} buildings, {len(streets)} streets")
 
     try:
@@ -141,6 +148,9 @@ def main(city_id):
                 if b is None and street.lower().startswith("st "):
                     b = addr.get((num.lower(), "saint " + street.lower()[3:]))
                 if b is None or b in seen:
+                    continue
+                if city_name in here and not city_council(b):
+                    log(f"      {p['name']} — {num} {street}: a building of that address outside {city_name.title()}'s council, left out")
                     continue
                 seen.add(b)
                 found.append({"name": p["name"], "qid": p["qid"], "title": p["title"],

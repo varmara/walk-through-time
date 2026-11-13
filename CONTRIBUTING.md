@@ -82,6 +82,12 @@ The architect Thomas Cecil Howitt designed the Council House.
 
 The person's type comes from their occupations on Wikidata; each type becomes its own tickbox on the page.
 
+On a building's card each person's story sits under their name, with one line on who they were; the name opens
+the person's card (who they were, their years from Wikidata, and all their places on the map). People found
+automatically by an address in their Wikipedia article are placed only on a building of that address in the
+town the article names; once a person has a hand-written entry here, the automatic one is left out, so a wrong
+match is fixed by writing the entry (with a `note` saying it was checked).
+
 ### Corrections and links
 
 Tables in the same folder, each with a Note column saying why:
