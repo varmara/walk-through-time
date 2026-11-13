@@ -6,11 +6,48 @@ import { buildingColour } from './map.js';
 import { closeSheet } from './sheet.js';
 import { openRef, refName } from './cards.js';
 
+// A place's card in the strip: its name, date and the story that ties it to the set; a building whose card file
+// has not arrived yet shows its name (from the index) and fills in when the file comes (fillCard)
+function cardHtml(b, i, name){
+  if (!isB(b)) {
+    const pp = refOf(b).properties;
+    return `<div class="pnum">${i + 1}</div><h3>${esc(refName(b))}</h3>
+      ${pp.text ? `<p>${esc(pp.text)}</p>` : ''}<button class="textbtn" data-open="${b}">Details</button>`;
+  }
+  const f = S.features[b], p = f.properties;
+  if (!f.full) return `<div class="pnum">${i + 1}</div><h3>${esc(refName(b))}</h3><p class="pwait">Loading…</p>
+    <button class="textbtn" data-open="${b}">Details</button>`;
+  const st = storyFor(b, name), era = p.y != null ? eraOf(p.y) : null;
+  return `<div class="pnum">${i + 1}</div>
+    <h3>${esc(refName(b))}</h3>
+    ${p.y != null ? `<div class="pmeta">${esc(dateText(p.y, p.f, p.per, p.dt))}<span class="pill" style="border-color:${era[3]}">${esc(era[2])}</span></div>` : ''}
+    ${st ? `<p>${esc(st.text)}</p>` : ''}
+    <button class="textbtn" data-open="${b}">Details</button>`;
+}
+function fillCard(i){
+  const P = S.places, el = P && $('pCards').querySelector(`[data-i="${i}"]`);
+  if (!el || el.dataset.full) return;
+  if (isB(P.bs[i]) && !S.features[P.bs[i]].full) return;
+  el.innerHTML = cardHtml(P.bs[i], i, P.name); el.dataset.full = '1';
+  el.querySelector('[data-open]').onclick = () => openRef(parseRef(el.querySelector('[data-open]').dataset.open));
+}
+// the cards round the one in view, loaded first (a big set, as a group from the graph, has places in dozens of
+// card files: they come as you swipe, not all before the strip shows)
+function loadAround(i){
+  const P = S.places; if (!P) return;
+  for (let j = Math.max(0, i - 3); j < Math.min(P.bs.length, i + 9); j++) {
+    const b = P.bs[j];
+    if (!isB(b) || S.features[b].full) { fillCard(j); continue; }
+    loadCard(b).then(() => { if (S.places === P) fillCard(j); }).catch(() => {});
+  }
+}
+
 export function showPlaces(name, bs){
-  // the stories' words are in the card files: fetch those first (one or two files for most people and stories)
+  // the stories' words are in the card files. A small set (a person, a story: one or two files) waits for them,
+  // showing the bar meanwhile; a big set, or one whose places' whereabouts need the files, shows at once
   const need = bs.filter(isB).filter(b => !S.features[b].full);
-  if (need.length) {
-    // the bar at once, so the wait shows: its name, and what it is waiting for
+  const placed = bs.every(b => refCentre(b));
+  if (need.length && (need.length <= 12 || !placed)) {
     $('pName').textContent = name; $('pCount').textContent = '';
     $('pCards').innerHTML = `<p class="pwait">Finding ${bs.length} ${bs.length === 1 ? 'place' : 'places'}…</p>`;
     $('placesbar').hidden = false; $('timebar').hidden = true;
@@ -24,20 +61,7 @@ export function showPlaces(name, bs){
   S.map.getSource('places').setData({ type:'FeatureCollection', features: bs.map((b, i) =>
     ({ type:'Feature', properties:{ n: i + 1 }, geometry:{ type:'Point', coordinates: refCentre(b) } })) });
   $('pName').textContent = name;
-  $('pCards').innerHTML = bs.map((b, i) => {
-    if (!isB(b)) {
-      const pp = refOf(b).properties;
-      return `<article class="pcard" data-i="${i}"><div class="pnum">${i + 1}</div><h3>${esc(refName(b))}</h3>
-        ${pp.text ? `<p>${esc(pp.text)}</p>` : ''}<button class="textbtn" data-open="${b}">Details</button></article>`;
-    }
-    const p = S.features[b].properties, st = storyFor(b, name), era = p.y != null ? eraOf(p.y) : null;
-    return `<article class="pcard" data-i="${i}">
-      <div class="pnum">${i + 1}</div>
-      <h3>${esc(refName(b))}</h3>
-      ${p.y != null ? `<div class="pmeta">${esc(dateText(p.y, p.f, p.per, p.dt))}<span class="pill" style="border-color:${era[3]}">${esc(era[2])}</span></div>` : ''}
-      ${st ? `<p>${esc(st.text)}</p>` : ''}
-      <button class="textbtn" data-open="${b}">Details</button></article>`;
-  }).join('');
+  $('pCards').innerHTML = bs.map((b, i) => `<article class="pcard" data-i="${i}"${!isB(b) || S.features[b].full ? ' data-full="1"' : ''}>${cardHtml(b, i, name)}</article>`).join('');
   $('pCards').querySelectorAll('[data-open]').forEach(btn => btn.onclick = () => openRef(parseRef(btn.dataset.open)));
   $('placesbar').hidden = false; $('timebar').hidden = true;
   $('pCards').scrollLeft = 0;
@@ -55,6 +79,7 @@ export function setPlace(i, fly = true){
   if (S.selectedId != null) fstate(S.selectedId, { sel:true });
   Object.entries(S.pins).forEach(([k, m]) => m.getElement().classList.toggle('on', k === 'p' + (i + 1)));
   $('pCards').querySelectorAll('.pcard').forEach(c => c.classList.toggle('on', +c.dataset.i === i));
+  loadAround(i);
   if (fly) S.map.easeTo({ center: refCentre(S.places.bs[i]), zoom: Math.max(S.map.getZoom(), 16.5), duration: 700,
     padding: { bottom: $('placesbar').offsetHeight + 20 } });
 }

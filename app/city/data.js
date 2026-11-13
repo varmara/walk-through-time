@@ -115,9 +115,14 @@ export function refCentre(r){
   const b = refOf(r).bb;
   return [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2];
 }               // marker key -> maplibregl.Marker
+let nearAt = null;                  // building -> [x, y] for the buildings with a story (the index's "near" list)
 export const centreOf = b => {
   if (S.features[b].xy) return S.features[b].xy;
   if (S.features[b].properties.xy) return S.features[b].properties.xy;     // from the card file
+  if (S.data.near) {                // known before its card file arrives: a building with a story
+    nearAt = nearAt || new Map(S.data.near.map(([i, x, y]) => [i, [x, y]]));
+    if (nearAt.has(b)) return nearAt.get(b);
+  }
   const g = S.features[b].geometry;
   if (!g) return null;                                                  // not loaded yet
   const ring = g.type === 'Polygon' ? g.coordinates[0] : g.coordinates[0][0];

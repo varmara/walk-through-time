@@ -9,7 +9,7 @@ import './cards.js';
 import './places.js';
 import { $, CITY_ID, fetchData, fetchJSON, progress, setPeriods } from './util.js';
 import { S } from './state.js';
-import { areaOf, byOsm, fromIndex, loadCard, pinOf, refOf, saveActive, tiled } from './data.js';
+import { areaOf, byOsm, fromIndex, loadCard, parseRef, pinOf, refOf, saveActive, tiled } from './data.js';
 import { drawMap } from './map.js';
 import { updateYear } from './timebar.js';
 import { applyLayers, drawLegend, groundNote, renderLayers } from './panels.js';
@@ -66,6 +66,16 @@ export async function main(){
   const gq = new URLSearchParams(location.search).get('group');
   const keys = gq ? gq.split(',').filter(k => S.groups.has(k)) : [];
   if (keys.length) { S.active.clear(); keys.forEach(k => S.active.add(k)); saveActive(); renderLayers(); }
+  // …and its places as numbered cards, person by person (or story by story), each place once
+  const groupSet = keys.length && (() => {
+    const seen = new Set(), refs = [];
+    for (const k of keys) for (const it of S.groups.get(k).items || []) {
+      const rs = typeof it[0] === 'number' ? [it[0]] : it[1];
+      for (const r of rs.map(x => typeof x === 'number' ? x : parseRef(String(x)))) if (!seen.has(r)) { seen.add(r); refs.push(r); }
+    }
+    const title = q0 => keys.length === 1 ? S.groups.get(keys[0]).title : 'Story themes';
+    return refs.length ? [title(), refs] : null;
+  })();
   applyLayers();
   updateYear();
   // ?focus=b12,p3&name=… (from the graph page): open those places, as a set when there are several
@@ -80,6 +90,7 @@ export async function main(){
     if (i < 0) i = await byOsm(osm).catch(() => -1);
     if (i >= 0) selectBuilding(i);
   } else if (bq != null && +bq < S.features.length) selectBuilding(+bq);
+  if (groupSet) showPlaces(...groupSet);
   if (focus) {
     const refs = focus.split(',').map(x => x[0] === 'b' ? +x.slice(1) : x)
       .filter(r => typeof r === 'number' ? r < S.features.length : r[0] === 'p' ? S.data.pins && pinOf(r) : refOf(r));
