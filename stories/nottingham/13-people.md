@@ -139,20 +139,20 @@ teacher-training years.
 - source: en:Herbert Kilpin
 - at: osm:way/116531316
 - group: sport
-- check: 129 Mansfield Road | 191 Mansfield Road | butcher | Milan | 1899
+- check: 129 Mansfield Road | 191 Mansfield Road | butcher | founding father | AC Milan
 - note: checked by hand: the article's 129 Mansfield Road, renumbered 191 (not the 129 Mansfield Road far north in Gedling)
 
-Herbert Kilpin, a butcher's son, grew up here with nine older siblings, at what was then 129 Mansfield Road. In
-1899 he was the main founder of the football club that became AC Milan.
+Herbert Kilpin, a butcher's son, grew up here with nine older siblings, at what was then 129 Mansfield Road.
+He became the main founding father of AC Milan.
 
 ## Tinsley Lindley
 - source: en:Tinsley Lindley
 - at: osm:way/243696651
 - group: sport
-- check: 14 Park Terrace | Nottingham Forest | barrister | County Court
+- check: 14 Park Terrace | Nottingham Forest | County Court
 
-Tinsley Lindley, who played for Nottingham Forest and England and became a barrister and county court judge,
-lived here with his family at 14 Park Terrace.
+Tinsley Lindley, who played for Nottingham Forest and England and became a county court judge, lived here with
+his family at 14 Park Terrace.
 
 ## Albert Nelson Bromley
 - source: en:Albert Nelson Bromley
