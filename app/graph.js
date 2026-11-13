@@ -47,6 +47,16 @@ function init(data){
     if (!frame) frame = requestAnimationFrame(() => { frame = 0; sizes(); labels(); });
   });
   svg.call(zoom);
+  // buttons as well as pinching: on a phone the points can be too close together to pinch between. They zoom
+  // about the selected point when there is one, so it stays in view, or else the middle of the screen
+  const step = f => {
+    const n = sel && G.byId.get(sel), t = d3.zoomTransform(svg.node());
+    const at = n && n.x != null ? t.apply([n.x, n.y]) : [innerWidth / 2, innerHeight / 2];
+    svg.transition().duration(250).call(zoom.scaleBy, f, at);
+  };
+  $('zIn').onclick = () => step(1.6);
+  $('zOut').onclick = () => step(1 / 1.6);
+  $('zFit').onclick = () => G.fit();
   svg.on('click', e => { if (e.target === svg.node()) select(null); });
   G.zoomTo = (x, y) => svg.transition().duration(600).call(zoom.transform,
     d3.zoomIdentity.translate(innerWidth / 2, innerHeight * (innerWidth >= 760 ? 0.5 : 0.3)).scale(Math.max(zoomK, 1.4)).translate(-x, -y));
@@ -143,9 +153,17 @@ function highlight(){
   G.edges.classed('on', l => !!sel && (l.s === sel || l.t === sel));
 }
 
+// on a phone the sheet covers the bottom of the screen: the zoom buttons sit just above it
+function placeZoom(){
+  const open = !$('sheet').hidden && innerWidth < 760;
+  $('zoom').style.bottom = open ? `${$('sheet').offsetHeight + 12}px` : '';
+}
+addEventListener('resize', () => G && placeZoom());
+
 function select(id){
   sel = id;
   highlight(); labels();
+  requestAnimationFrame(placeZoom);
   if (!id) { $('sheet').hidden = true; $('hint').hidden = false; return; }
   const n = G.byId.get(id);
   $('hint').hidden = true; $('sheet').hidden = false;
