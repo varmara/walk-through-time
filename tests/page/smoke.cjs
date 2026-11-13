@@ -82,7 +82,8 @@ const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (
 
   await page.goto(`${BASE}${CITY}/graph.html`, { waitUntil: 'load' });
   await page.waitForTimeout(3000);
-  check((await page.$$('svg circle, svg .node')).length > 10, 'the graph page draws its points');
+  check(+(await page.$eval('#graph', c => c.dataset.points || 0)) > 10, 'the graph page draws its points');
+  await page.click('#graph', { position: { x: 5, y: 400 } });      // a tap on empty space: no errors
 
   check(!errors.length, 'no errors' + (errors.length ? ': ' + [...new Set(errors)].slice(0, 5).join(' | ') : ''));
   await browser.close();

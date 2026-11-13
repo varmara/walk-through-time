@@ -16,7 +16,7 @@
 </script>
 </head>
 <body data-city="{{id}}">
-<svg id="graph" width="100%" height="100%" aria-label="Graph of people, story themes and places"></svg>
+<canvas id="graph" role="img" aria-label="Graph of people, story themes and places. Use the search box to find one."></canvas>
 <div class="loading" id="loading">Loading the graph…</div>
 
 <div class="top">
@@ -27,7 +27,7 @@
   <div class="kinds" id="kinds" aria-label="Kinds of point to show"></div>
   <details class="layout" id="layout"><summary>Layout</summary><div class="params" id="params"></div></details>
 </div>
-<div class="hint" id="hint">Each line is a checked story. Diamonds are story themes, squares are places. Tap a point.</div>
+<div class="hint" id="hint">Each line is a checked story. Diamonds are story themes, squares are places; a dotted ring holds folded places. Tap a point.</div>
 
 <div class="zoom" id="zoom" aria-label="Zoom">
   <button id="zIn" aria-label="Zoom in">+</button>
