@@ -23,11 +23,16 @@
   <div class="bar">
     <div class="brand"><a href="./" aria-label="Back to the map"><img src="../app/logo.svg" alt="" width="20" height="20">← Map</a></div>
     <input class="find" id="find" type="search" placeholder="Find a person or place" aria-label="Find a person or place" autocomplete="off">
+    <button class="gear" id="gear" aria-label="Graph settings" aria-expanded="false" aria-controls="settings"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
   </div>
-  <div class="kinds" id="kinds" aria-label="Kinds of point to show"></div>
-  <details class="layout" id="layout"><summary>Layout</summary><div class="params" id="params"></div></details>
 </div>
-<div class="hint" id="hint">Each line is a checked story. Diamonds are story themes, squares are places; a dotted ring holds folded places. Tap a point.</div>
+<aside class="settings" id="settings" hidden aria-label="Graph settings">
+  <div class="shd"><b>Graph settings</b>
+    <button id="sReset" aria-label="Restore default settings" title="Restore default settings">↺</button>
+    <button id="sClose" aria-label="Close settings">✕</button></div>
+  <div id="settingsBody"></div>
+</aside>
+<div class="hint" id="hint">Each line is a checked story. A dotted ring holds folded places. Tap a point; the gear has the settings.</div>
 
 <div class="zoom" id="zoom" aria-label="Zoom">
   <button id="zIn" aria-label="Zoom in">+</button>

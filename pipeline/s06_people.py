@@ -173,13 +173,15 @@ def main(city_id):
     titles = {k: t for k, t, _ in PEOPLE_GROUPS} | {"events": "Plaques to events and places"}
     pg = {g["key"]: g for g in people["groups"]}
 
-    def person(b, key, name, story, source, xy=None, qid=None, who=True, on=None, tpl=None):
+    def person(b, key, name, story, source, xy=None, qid=None, who=True, on=None, tpl=None, own=True):
+        # own: the source is about this person (not a list that names them, as Wikipedia's table of the Park
+        # Estate's buildings), so its Wikipedia article can be their summary
         k = "people-" + key
         if k not in pg:
             pg[k] = {"key": k, "title": titles.get(key, key), "count": 0, "items": []}
         who = name if who else None
         if who:
-            wiki_hint(name, source, qid, story)
+            wiki_hint(name, source if own else None, qid, story)
         if b is None:   # a plaque: a pin where it hangs; on a building, the building is in the layer too and its card
             b = out.pin(*xy, name, "people", k, story, source, who=who, on=on)     # quotes the plaque
             if on is not None:
@@ -292,7 +294,8 @@ def main(city_id):
                     continue
                 url = "https://en.wikipedia.org/wiki/" + urllib.parse.quote(article.replace(" ", "_"))
                 tpl = "architect-list-unsure" if unsure else "architect-list"
-                person(i, "architects", name, TEMPLATES[tpl].format(who=name), tpl=tpl, source={"title": article, "url": url, "kind": "Wikipedia"})
+                person(i, "architects", name, TEMPLATES[tpl].format(who=name), tpl=tpl, own=False,
+                       source={"title": article, "url": url, "kind": "Wikipedia"})
         elif b["tags"].get("architect"):
             t = b["tags"]
             qids = [q.strip() for q in (t.get("architect:wikidata") or "").split(";")]
