@@ -53,7 +53,9 @@ Bridge to guard Nottingham against the Danes. Domesday, in 1086, records it as p
 
 ## Won at cards
 - source: en:West Bridgford
+- at: pin:-1.1274,52.9320
 - names: no
+- note: a pin in the town centre: the story is about the whole estate, not one building
 - check: 1523 | game of cards | 1894 | 1972 | Rushcliffe
 
 The Musters family gained the West Bridgford estate in 1523, reputedly by winning it in a game of cards. When
@@ -88,7 +90,9 @@ A church dating from the 12th century, listed Grade II*. Arthur Brewill and Basi
 
 ## Compton Acres
 - source: en:Compton Acres
+- at: pin:-1.1520,52.9166
 - names: no
+- note: a pin in the district: the story is about all of it, not one house
 - check: 1990s | Poole | 2015
 
 A district built mostly in the 1990s, named after a garden in Poole. Its tram, opened in 2015, runs along a

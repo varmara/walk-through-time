@@ -6,7 +6,9 @@ Thrumpton, with its Jacobean hall.
 
 ## Barton in the Beans
 - source: en:Barton in Fabis
+- at: pin:-1.2231,52.8901
 - names: no
+- note: a pin in the village: the story is about the village, not one house
 - check: Barton in the Beans | 1774 | Attenborough | Fairham
 
 The village's older name was Barton in the Beans, after the beans grown here; fabis is Latin for beans. A ferry

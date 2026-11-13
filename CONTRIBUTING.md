@@ -49,6 +49,9 @@ Rules, checked by step `s04_curated` every time the pipeline runs:
 - **The story must be placed on a building or a pin.** The pipeline tries, in order: `at`, the article's Wikidata
   item tagged on an OpenStreetMap outline, the item's Historic England list entry, the article's coordinates, and
   finally the entry's name matching a building or a named place inside one.
+- **A story about an area or a lost building gets a pin** (`at: pin:lon,lat`): a village, a district, an estate,
+  or a building that is gone. Otherwise the article's coordinates can land it on whatever house or shop stands
+  there now, and that building takes the story's name.
 - **A `year` is about the building standing there today** (built, rebuilt or opened), not an earlier building on
   the site. Its digits must appear in the article, and it becomes a date source.
 - **Stories are short and plain:** one or two sentences, what happened and when. Name legends as legends.

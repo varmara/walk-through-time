@@ -76,13 +76,18 @@ def main(city_id):
         if e.get("layer") not in ("people", "facts") and e.get("names", True):
             story_name.setdefault(str(e["b"]), e["name"])
     fallback = dict(lay.get("names", {}))           # plaque addresses
-    inside = {}
+    inside, named = {}, {}
     for pl in load(city_id, "places"):
         if pl["b"] is None:
             continue
         inside.setdefault(str(pl["b"]), []).append(pl["tags"])
         if pl["name"] and not marker(pl["tags"]):
-            fallback.setdefault(str(pl["b"]), pl["name"])
+            named.setdefault(str(pl["b"]), set()).add(pl["name"])
+    # a named place inside names the building only when it is the only one: a parade of shops is not called after
+    # one of them (a tutoring centre's name on a building with a restaurant too)
+    for k, ns in named.items():
+        if len(ns) == 1:
+            fallback.setdefault(k, next(iter(ns)))
     grid = streets(load(city_id, "base"))
 
     out, how = {}, {"hand": 0, "story": 0, "named": 0, "full": 0, "where": 0}

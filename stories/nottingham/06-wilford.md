@@ -38,7 +38,7 @@ favourite tree.
 
 ## Ferry Inn
 - source: en:Wilford
-- at: name:Ferry Inn
+- at: osm:way/29385991
 - check: later 19th century | wilford ferry inn | many visitors from nottingham | iremonger | 1958
 
 Wilford stayed a village until the later 19th century. With woods around it and riverside amenities such as
@@ -47,7 +47,7 @@ its landlord until his death in 1958.
 
 ## Wilford House
 - source: en:Wilford
-- at: name:Wilford House
+- at: osm:way/80847924
 - check: Forman | Wilford House | Smith family
 
 Thomas Forman, who founded the Nottingham Post, bought Wilford House from the Smith family after the
@@ -66,7 +66,9 @@ projects, opened in 1870.
 
 ## Wilford Power Station
 - source: en:Wilford Power Station
+- at: pin:-1.1667,52.9313
 - names: no
+- note: a pin on its site: the power station is gone, and the retail park's sheds are not it
 - check: 1925 | 1981 | Riverside Retail Park
 
 A coal-fired power station on the north bank of the Trent, opened in 1925. It closed in 1981 and was soon

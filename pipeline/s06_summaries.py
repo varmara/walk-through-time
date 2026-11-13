@@ -213,6 +213,9 @@ def main(city_id):
                 continue
         best = (listing.get(k) or [None])[0]
         tags_list = [t] + [pt for pt in inside.get(i, []) if not marker(pt)]   # a war memorial inside is not its use
+        # the place the building is named after first, so "X: a …" says what X is, not what its neighbour is
+        own = (names.get(k, {}).get("today") or names.get(k, {}).get("name") or "").strip().lower()
+        tags_list.sort(key=lambda x: 0 if x is t else 1 if (x.get("name") or "").strip().lower() == own else 2)
         info = info_for(b, i, wd, listing) or {}
         nm = names.get(k, {})
         name, today = nm.get("name"), nm.get("today")
