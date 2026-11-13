@@ -75,14 +75,16 @@ function init(data){
   G.present = new Set(G.nodes.map(n => n.type));
 
   const sel$ = d3.select(canvas);
-  const zoom = d3.zoom().scaleExtent([0.1, 8]).clickDistance(6).on('zoom', e => { T = e.transform; redraw(); });
+  // a person's own pan or zoom (not the page's): from then on the page does not fit the graph by itself
+  const zoom = d3.zoom().scaleExtent([0.1, 8]).clickDistance(6).on('zoom', e => { T = e.transform; if (e.sourceEvent) G.moved = true; redraw(); });
   // dragging a point moves it; dragging elsewhere pans (the drag starts only on a point)
-  const drag = d3.drag().container(canvas).clickDistance(6).subject(e => pick(e.x, e.y))
-    .on('start', e => { if (!e.active) sim.alphaTarget(0.1).restart(); e.subject.fx = e.subject.x; e.subject.fy = e.subject.y; })
-    .on('drag', e => { const [x, y] = T.invert([e.x, e.y]); e.subject.fx = x; e.subject.fy = y; })
-    .on('end', e => { if (!e.active) sim.alphaTarget(0); e.subject.fx = e.subject.fy = null; });
+  // (the subject carries the finger's place on screen, so the drag's x and y stay in screen pixels)
+  const drag = d3.drag().container(canvas).clickDistance(6).subject(e => { const n = pick(e.x, e.y); return n && { n, x: e.x, y: e.y }; })
+    .on('start', e => { if (!e.active) sim.alphaTarget(0.1).restart(); const n = e.subject.n; n.fx = n.x; n.fy = n.y; })
+    .on('drag', e => { const [x, y] = T.invert([e.x, e.y]), n = e.subject.n; n.fx = x; n.fy = y; G.moved = true; })
+    .on('end', e => { if (!e.active) sim.alphaTarget(0); const n = e.subject.n; n.fx = n.fy = null; });
   sel$.call(drag).call(zoom).on('dblclick.zoom', null);
-  canvas.addEventListener('click', e => { const n = pick(e.offsetX, e.offsetY); select(n ? n.id : null); });
+  canvas.addEventListener('click', e => { const n = pick(e.offsetX, e.offsetY); select(n ? n.id : null); if (n) G.reveal(n); });
   // buttons as well as pinching: on a phone the points can be too close together to pinch between. They zoom
   // about the selected point when there is one, so it stays in view, or else the middle of the screen
   const step = f => {
@@ -93,6 +95,14 @@ function init(data){
   $('zIn').onclick = () => step(1.6);
   $('zOut').onclick = () => step(1 / 1.6);
   $('zFit').onclick = () => G.fit();
+  // a tapped point the sheet would cover (on a phone, the bottom half): the graph slides up to show it, at the
+  // same zoom
+  G.reveal = n => requestAnimationFrame(() => {
+    if (!n || n.x == null || $('sheet').hidden || W >= 760) return;
+    const [, sy] = T.apply([n.x, n.y]), room = H - $('sheet').offsetHeight - 30;
+    if (sy > 70 && sy < room) return;
+    sel$.transition().duration(350).call(zoom.translateBy, 0, (70 + room) / 2 / T.k - sy / T.k);
+  });
   G.zoomTo = (x, y) => sel$.transition().duration(600).call(zoom.transform,
     d3.zoomIdentity.translate(W / 2, H * (W >= 760 ? 0.5 : 0.3)).scale(Math.max(T.k, 1.6)).translate(-x, -y));
   // once the layout settles the first time, fit the whole graph on the screen
@@ -108,12 +118,17 @@ function init(data){
 
   sim = d3.forceSimulation().force('link', d3.forceLink().id(d => d.id)).force('charge', d3.forceManyBody())
     .force('x', d3.forceX(0)).force('y', d3.forceY(0)).force('collide', d3.forceCollide())
-    .on('tick', redraw).on('end', () => { if (!fitted) { fitted = true; if (!sel) G.fit(); } });
+    .on('tick', redraw).on('end', () => { if (!fitted) { fitted = true; if (!sel && !G.moved) G.fit(); } });
   forces();
   panel();
   addEventListener('resize', () => { resize(); placeZoom(); });
   colours(); resize();
   draw();
+  // a head start: most of the layout is worked out before the first picture (up to a third of a second, so a slow
+  // phone is not left blank), then fitted to the screen, and the rest settles in view
+  const t0 = performance.now();
+  while (sim.alpha() > 0.08 && performance.now() - t0 < 330) sim.tick();
+  G.fit();
 
   $('find').oninput = () => {
     const q = $('find').value.trim().toLowerCase();
@@ -143,7 +158,7 @@ const radius = d => P.size * (3 + 1.6 * Math.sqrt(d.deg + (d.folds || 0)));
 // the point whose folded places are spread out: the selected one, or the owner of a selected folded place
 const spread = () => { const n = sel && G.byId.get(sel); return !n ? null : n.owner && P.fold ? n.owner.id : n.id; };
 let spreadNow;
-function draw(){
+function draw(gentle){
   spreadNow = spread();
   const folded = n => P.fold && n.owner && n.owner.id !== spreadNow && !off.has(n.owner.type);
   G.nodes.forEach(n => { n.folds = 0; });
@@ -164,7 +179,8 @@ function draw(){
   sim.nodes(ns); sim.force('link').links(ls);
   forces();
   canvas.dataset.points = ns.length;          // for the page's checks (tests/page/smoke.cjs)
-  sim.alpha(0.6).restart();
+  canvas.inspect = () => ({ t: [T.x, T.y, T.k], nodes: ns.map(n => [n.id, n.x, n.y]) });
+  sim.alpha(gentle ? 0.12 : 0.6).restart();     // a tap spreading a point's places: only a nudge, not a shake
   redraw();
 }
 
@@ -221,14 +237,24 @@ function paint(){
       ctx.beginPath(); ctx.arc(x, y, r + Math.max(2, r * 0.25), 0, 2 * Math.PI);
       ctx.lineWidth = 1.2; ctx.strokeStyle = C.kind.place; ctx.setLineDash([2, 2]); ctx.stroke(); ctx.setLineDash([]);
     }
-    const a = nameAlpha(d, near) * (lit ? 1 : 0.3);
+    // a place named as its person (a plaque's "George Henry Hurt"): one name is enough, the person's
+    const same = d.owner && d.id !== sel && d.label === d.owner.label && !d.owner.hidden;
+    const a = same ? 0 : nameAlpha(d, near) * (lit ? 1 : 0.3);
     if (a > 0.02) names.push([d, x, y + r + 9, a]);
   }
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
-  for (const [d, x, y, a] of names) {          // under the point, as in Obsidian
-    ctx.globalAlpha = a;
+  // names under their points, as in Obsidian, none over another: the selection's first, then its neighbours',
+  // then the best-linked; a name that would overlap one already drawn is left out
+  const rank = d => d.id === sel ? 0 : near.has(d.id) ? 1 : 2;
+  names.sort((p, q) => rank(p[0]) - rank(q[0]) || (q[0].deg + (q[0].folds || 0)) - (p[0].deg + (p[0].folds || 0)));
+  const taken = [];
+  for (const [d, x, y, a] of names) {
     ctx.font = `${d.id === sel ? 600 : 400} 12px ${C.sans}`;
-    const text = d.label + (d.folds ? ` · ${d.folds}` : '');
+    const text = d.label + (d.folds ? ` · ${d.folds}` : ''), w = ctx.measureText(text).width + 6;
+    const box = [x - w / 2, y - 8, x + w / 2, y + 8];
+    if (d.id !== sel && taken.some(t => box[0] < t[2] && box[2] > t[0] && box[1] < t[3] && box[3] > t[1])) continue;
+    taken.push(box);
+    ctx.globalAlpha = a;
     ctx.lineWidth = 3; ctx.strokeStyle = C.bg; ctx.strokeText(text, x, y);
     ctx.fillStyle = d.type === 'place' ? C.muted : C.ink; ctx.fillText(text, x, y);
   }
@@ -236,7 +262,7 @@ function paint(){
 }
 
 // ================= the settings panel (Filters, Groups, Display, Forces) =================
-const openSections = new Set(['Filters', 'Groups']);
+const openSections = new Set(['Filters']);      // the others folded, so all four headings show on a phone
 function panel(){
   const fmt = (v, step) => step < 1 ? (+v).toFixed(step < 0.1 ? 2 : 1) : String(v);
   const toggle = (k, t, on) => `<label class="tg"><span>${t}</span><input type="checkbox" role="switch" data-k="${k}"${on ? ' checked' : ''}><i></i></label>`;
@@ -274,7 +300,7 @@ function placeZoom(){
 
 function select(id){
   sel = id;
-  if (spread() !== spreadNow) draw(); else redraw();
+  if (spread() !== spreadNow) draw(true); else redraw();
   requestAnimationFrame(placeZoom);
   if (!id) { $('sheet').hidden = true; $('hint').hidden = false; return; }
   const n = G.byId.get(id);
