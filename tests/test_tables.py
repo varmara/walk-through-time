@@ -24,6 +24,12 @@ class Tables(unittest.TestCase):
                       "Dovecote, Manor Farm", "1677", "octagonal"):
             self.assertIn(words, t)
         self.assertNotIn("coord", t)
+        t2 = table_text("""|-
+| Workshops || {{sort|1840|{{circa|1840}}}} || Cottages of {{circa|1829}}, {{nowrap|now a museum}}.{{sfn|Pevsner|1979}}
+| {{sort|1300|14th century}}""")
+        for words in ("c. 1840", "c. 1829", "now a museum", "14th century"):
+            self.assertIn(words, t2)
+        self.assertNotIn("Pevsner", t2)
         self.assertNotIn("style", t)
 
 

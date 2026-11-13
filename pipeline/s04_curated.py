@@ -66,6 +66,21 @@ _tables = {}
 _cache = {}
 
 
+DROP_TEMPLATES = re.compile(r"^\s*(coord|cite|citation|ref|efn|sfn|harv|ill|convert|refn|note|anchor|clear|nbsp)", re.I)
+
+
+def shown(m):
+    """What a template inside a table cell shows: a date written {{circa|1840}} or {{sort|1300|14th century}} keeps
+    its words ("c. 1840", "14th century"); a coordinate, a reference or a note is left out."""
+    name, *args = [a.strip() for a in m.group(1).split("|")]
+    args = [a for a in args if "=" not in a]
+    if DROP_TEMPLATES.match(name) or not args:
+        return " "
+    if name.lower() in ("circa", "c.", "c"):
+        return " c. " + args[0] + " "
+    return " " + args[-1] + " "
+
+
 def table_text(wt):
     """The words in a page's tables, which the plain-text extract leaves out: wikitable cells ("| 1677 || ...") and
     the fields of table-row templates ("| notes = Mid 17th century ..."), as in the "Listed buildings in ..."
@@ -78,7 +93,7 @@ def table_text(wt):
             m = re.match(r"\s*[\w ]{1,30}=(?!=)(.*)$", cell)      # a template's field: its value
             cell = m.group(1) if m else cell
             for _ in range(3):                                             # templates first ({{coord|…}})
-                cell = re.sub(r"\{\{[^{}]*\}\}", " ", cell)
+                cell = re.sub(r"\{\{([^{}]*)\}\}", shown, cell)
             if "|" in re.sub(r"\[\[[^\]]*\]\]", "", cell) and not cell.strip().startswith("[["):     # a cell's attributes ("style=…| text")
                 cell = cell.rsplit("|", 1)[-1]
             out.append(cell)
