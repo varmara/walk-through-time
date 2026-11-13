@@ -1,10 +1,12 @@
-/* The graph page: people and story themes linked to the places where a checked story ties them.
-   Full-screen graph; a top bar (back to the map, search, settings); a settings panel; a sheet for the tapped point. */
-/* colours, fonts and shadows: app/theme.css */
+/* The graph over the map (app/city/graph.js): people and story themes linked to the places where a checked story
+   ties them. Full-screen graph; a top bar (back to the map, search, settings); a settings panel; a sheet for the
+   tapped point. Read inside the graph's shadow root, so these rules reach only the graph.
+   Colours, fonts and shadows: app/theme.css (its custom properties reach in from the page). */
 
 [hidden]{display:none!important}
-html,body{height:100%;margin:0}
-body{font:15px/1.4 var(--sans);color:var(--ink);background:var(--bg);overflow:hidden}
+:host{position:fixed;inset:0;z-index:60;display:block;font:15px/1.4 var(--sans);color:var(--ink);background:var(--bg);
+  overflow:hidden;-webkit-text-size-adjust:100%}
+:host([hidden]){display:none!important}
 button,input{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 a{color:var(--accent)}

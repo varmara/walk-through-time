@@ -6,6 +6,8 @@ Links keep their evidence, the story text and its source. A person named in anot
 the Lace Market story of a warehouse Hine designed) is linked there too, as in a note that mentions another note.
 """
 import json
+import shutil
+import subprocess
 from pathlib import Path
 
 from .common import load, log
@@ -84,8 +86,22 @@ def main(city_id):
 
     out = {"nodes": list(nodes.values()), "links": links}
     Path(f"data/{city_id}-graph.json").write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")))
+    lay_out(f"data/{city_id}-graph.json")
     kinds = {}
     for n in nodes.values():
         kinds[n["type"]] = kinds.get(n["type"], 0) + 1
     log(f"s08 graph: {len(nodes)} nodes {kinds}, {len(links)} links "
         f"({sum(l['how'] == 'mention' for l in links)} from mentions)")
+
+
+def lay_out(path):
+    """Where the points settle with the default settings, worked out here (pipeline/graph_layout.mjs, with the
+    page's own layout code) so a phone starts from it. Without Node the page works it out itself."""
+    node = shutil.which("node")
+    if not node:
+        log("    graph layout skipped: no Node (the page lays the graph out itself)")
+        return
+    try:
+        subprocess.run([node, str(Path(__file__).with_name("graph_layout.mjs")), path], check=True, timeout=300)
+    except (subprocess.SubprocessError, OSError) as e:
+        log(f"    graph layout skipped: {e} (the page lays the graph out itself)")

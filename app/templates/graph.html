@@ -1,54 +1,16 @@
 <!doctype html>
-<!-- The graph page for each city, written by pipeline/pages.py. Edit this, not the written copies. -->
+<!-- The old address of the graph: it now opens over the map (#graph), so this sends links there, keeping ?node=.
+     Written for each city by pipeline/pages.py. -->
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{name}} graph · Walk Through Time</title>
-<meta name="description" content="People and story themes of {{name}}, linked to the buildings and places where a checked story ties them.">
-<link rel="icon" href="../app/logo.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap">
-<script>
-  window.__v = Math.floor(Date.now() / 6e5);   // fresh files at least every 10 minutes (GitHub Pages caching)
-  document.write('<link rel="stylesheet" href="../app/theme.css?v=' + window.__v + '">');
-  document.write('<link rel="stylesheet" href="../app/graph.css?v=' + window.__v + '">');
-</script>
+<meta name="robots" content="noindex">
+<link rel="canonical" href="{{site}}{{id}}/#graph">
+<script>location.replace('./' + location.search + '#graph');</script>
 </head>
-<body data-city="{{id}}">
-<canvas id="graph" role="img" aria-label="Graph of people, story themes and places. Use the search box to find one."></canvas>
-<div class="loading" id="loading">Loading the graph…</div>
-
-<div class="top">
-  <div class="bar">
-    <div class="brand"><a href="./" aria-label="Back to the map"><img src="../app/logo.svg" alt="" width="20" height="20">← Map</a></div>
-    <input class="find" id="find" type="search" placeholder="Find a person or place" aria-label="Find a person or place" autocomplete="off">
-    <button class="gear" id="gear" aria-label="Graph settings" aria-expanded="false" aria-controls="settings"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-  </div>
-</div>
-<aside class="settings" id="settings" hidden aria-label="Graph settings">
-  <div class="shd"><b>Graph settings</b>
-    <button id="sReset" aria-label="Restore default settings" title="Restore default settings">↺</button>
-    <button id="sClose" aria-label="Close settings">✕</button></div>
-  <div id="settingsBody"></div>
-</aside>
-<div class="hint" id="hint">Each line is a checked story. A dotted ring holds folded places. Tap a point; the gear has the settings.</div>
-
-<div class="zoom" id="zoom" aria-label="Zoom">
-  <button id="zIn" aria-label="Zoom in">+</button>
-  <button id="zOut" aria-label="Zoom out">−</button>
-  <button id="zFit" aria-label="Show the whole graph" title="Show the whole graph"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M3 7V3h4M13 3h4v4M17 13v4h-4M7 17H3v-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-</div>
-
-<div class="sheet" id="sheet" hidden>
-  <button class="grab" id="grab" aria-label="Show or hide the details"><i></i></button>
-  <div class="shead" id="shead"><div style="flex:1;min-width:0"><h2 id="sTitle"></h2><div class="stype" id="sType"></div></div>
-    <button class="close" id="close" aria-label="Close">✕</button></div>
-  <div class="sacts"><button class="go" id="go"></button><button class="more" id="more" aria-controls="links" aria-expanded="false">More</button></div>
-  <div class="links" id="links"></div>
-</div>
-
-<script src="../lib/d3.min.js"></script>
-<script>document.write('<script src="../app/graph.js?v=' + window.__v + '"><\/script>');</script>
+<body>
+<p><a href="./#graph">Open the graph of {{name}}</a></p>
 </body>
 </html>

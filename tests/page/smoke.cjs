@@ -83,10 +83,48 @@ const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (
   await open('?focus=a0');
   check(/Type/.test(await text('#cFacts')), 'a link to an area opens its card');
 
+  // the graph, over the map page (app/city/graph.js, in a shadow root: Playwright's locators reach into it)
+  const g = page.locator('#graphHost');
+  const graphPoints = () => page.evaluate(() => +(document.getElementById('graphHost')?.shadowRoot?.getElementById('graph')?.dataset.points || 0));
+  const graphOpen = () => page.evaluate(() => { const h = document.getElementById('graphHost'); return !!h && !h.hidden; });
+  const cam = () => page.evaluate(async () => { const { S } = await import(new URL('../app/city/state.js', location.href).href); const m = S.map; return [m.getCenter().lng.toFixed(5), m.getCenter().lat.toFixed(5), m.getZoom().toFixed(2)].join(); });
+  await page.waitForTimeout(500);
+  const before = await cam();
+  await page.click('#bGraph');
+  await g.locator('#graph').waitFor({ timeout: 15000 });
+  for (let i = 0; i < 60 && !(await graphPoints()); i++) await page.waitForTimeout(250);
+  check((await graphPoints()) > 10, 'the graph opens over the map and draws its points');
+  check(/#graph$/.test(page.url()), 'the graph has its own address (#graph)');
+  await g.locator('#graph').click({ position: { x: 5, y: 400 } });     // a tap on empty space: no errors
+  await g.locator('#back').click();
+  await page.waitForTimeout(500);
+  check(!(await graphOpen()) && !/#graph/.test(page.url()), '"← Map" closes the graph');
+  check((await cam()) === before, 'the map is where it was after the graph');
+  await page.click('#bGraph'); await page.waitForTimeout(500);
+  check(await graphOpen(), 'the graph opens again');
+  await page.goBack(); await page.waitForTimeout(500);
+  check(!(await graphOpen()), "the phone's Back closes the graph");
+  // "Show on the map" from a found person: the map opens their places in the page, Back returns to the graph
+  await page.click('#bGraph'); await page.waitForTimeout(500);
+  const person = await page.evaluate(() => {
+    const c = document.getElementById('graphHost').shadowRoot.getElementById('graph');
+    return (c.inspect().nodes.find(n => !/^b\d|^p\d|^a\d|^t:/.test(n[0])) || [])[0];
+  });
+  if (person) {
+    const label = await page.evaluate(id => fetch(`../data/${document.body.dataset.city}-graph.json`).then(r => r.json()).then(d => d.nodes.find(n => n.id === id).label), person);
+    await g.locator('#find').fill(label.slice(0, 12)); await page.waitForTimeout(800);
+    await g.locator('#go').click();
+    await page.waitForTimeout(2500);
+    check(!(await graphOpen()) && /focus=/.test(page.url()), '"Show on the map" opens the places on the map, in the page');
+    check(await page.evaluate(() => !document.getElementById('placesbar').hidden || !document.getElementById('sheet').hidden), 'the places are shown');
+    await page.goBack(); await page.waitForTimeout(800);
+    check(await graphOpen(), 'Back from those places returns to the graph');
+  }
+  // the old address of the graph page sends links to the graph over the map
   await page.goto(`${BASE}${CITY}/graph.html`, { waitUntil: 'load' });
-  await page.waitForTimeout(3000);
-  check(+(await page.$eval('#graph', c => c.dataset.points || 0)) > 10, 'the graph page draws its points');
-  await page.click('#graph', { position: { x: 5, y: 400 } });      // a tap on empty space: no errors
+  await page.waitForURL(/#graph$/, { timeout: 10000 }).catch(() => {});
+  for (let i = 0; i < 80 && !(await graphPoints()); i++) await page.waitForTimeout(250);
+  check((await graphPoints()) > 10, 'an old graph.html link opens the graph over the map');
 
   check(!errors.length, 'no errors' + (errors.length ? ': ' + [...new Set(errors)].slice(0, 5).join(' | ') : ''));
   await browser.close();

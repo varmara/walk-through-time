@@ -41,7 +41,7 @@ open data ──► pipeline/ (Python, numbered steps) ──► data/<city>.jso
 | `s09_ground` | The shape of the ground for the map's hills: the Environment Agency's 2 m laser-survey ground model (LIDAR Composite DTM, OGL), as elevation tiles; and how much taller to draw each building on a slope so its uphill side is not buried |
 | `s10_tiles` | Writes what the page loads: vector tiles (`data/<city>/tiles/`, made with [tippecanoe](https://github.com/felt/tippecanoe)), a small index of every building (`data/<city>.json`) and card files of 250 buildings loaded when a card opens (`data/<city>/cards/`), OpenStreetMap ids in 64 small parts for shared links (`data/<city>/osm/`); copies in the ground's tiles (`data/<city>/ground/`) |
 | `s11_changes` | Lists what changed since the last build (`data/<city>-changes.md`): buildings renamed, re-dated or re-listed, and outlines that came or went. The thing to look over after the twice-yearly refresh |
-| `s08_graph` | Writes `data/<city>-graph.json` for the graph page (`<city>/graph.html`): people and story themes linked to places by checked stories |
+| `s08_graph` | Writes `data/<city>-graph.json` for the graph, opened over the map (`<city>/#graph`; laid out here by `pipeline/graph_layout.mjs`): people and story themes linked to places by checked stories |
 
 A GitHub Actions workflow (`.github/workflows/build-data.yml`) runs the pipeline twice a year
 (1 January and 1 July), whenever the pipeline, stories or city settings change, and on demand from the
@@ -69,13 +69,18 @@ tools/fetch-built.sh      fetch the last build's data and work files, to work on
 app/theme.css             every colour, font and shadow (the look: change it here)
 app/city/*.js             the shared city page, as modules: cards.js (one card layout for buildings, areas and
                           plaques), map.js, panels.js (Layers and Map sheets), places.js, timebar.js, data.js,
-                          state.js (what every module shares), util.js, main.js (start-up)
+                          state.js (what every module shares), util.js, main.js (start-up, links, the graph's
+                          opening), graph.js (the graph over the map, loaded the first time it opens),
+                          graphlayout.js (the graph's layout, shared with the build)
 app/city.css              the city page's layout
+app/graph.css             the graph's layout (read inside its shadow root, so it reaches only the graph)
 sw.js                     keeps what the map has loaded on the phone: repeat visits load little, and streets
                           already seen work offline
-app/templates/            the landing page and each city's map and graph pages; pipeline/pages.py writes
-                          them from the city settings (run it to open the site locally)
-lib/                      MapLibre GL JS (BSD-3-Clause)
+app/templates/            the landing page and each city's map page (graph.html only sends old links to the
+                          graph over the map); pipeline/pages.py writes them from the city settings, with the
+                          version of app/ and lib/ that their files carry (?v=): run it again after changing
+                          app/ to see the change locally
+lib/                      MapLibre GL JS (BSD-3-Clause), d3 (ISC)
 ```
 
 ### How a building's year is chosen

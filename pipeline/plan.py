@@ -13,7 +13,8 @@ import sys
 from .run import STEPS
 
 START = {"stories/": "s04_curated", "pipeline/layers.py": "s06_layers", "pipeline/plan.py": None,
-         "tests/": "s10_tiles"}          # the checks run after the last step: run that one again
+         "tests/": "s10_tiles",
+         "app/city/graphlayout.js": "s08_graph", "pipeline/graph_layout.mjs": "s08_graph"}    # the graph's layout is worked out in the build too          # the checks run after the last step: run that one again
 EVERYTHING = ("cities/", "pipeline/common.py", "pipeline/run.py", "pipeline/__init__.py", ".github/workflows/build-data.yml")
 
 
@@ -21,7 +22,8 @@ def needs_build(p):
     p = p.strip()
     if p in ("pipeline/pages.py",):        # writes the pages from templates: part of publishing, not of the data
         return False
-    return bool(p) and p.startswith(("pipeline/", "stories/", "cities/", "tests/", ".github/"))
+    return bool(p) and (p.startswith(("pipeline/", "stories/", "cities/", "tests/", ".github/"))
+                        or p == "app/city/graphlayout.js")
 
 
 def start_for(paths):

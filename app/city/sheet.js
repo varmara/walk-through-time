@@ -40,7 +40,7 @@ export function closeSheet(){
   if (S.selectedId != null && S.map) { fstate(S.selectedId, { sel:false }); S.selectedId = null; }
 }
 $('sClose').onclick = closeSheet;
-addEventListener('keydown', e => { if (e.key === 'Escape' && !sheet.hidden) closeSheet(); });
+addEventListener('keydown', e => { if (e.key === 'Escape' && !sheet.hidden && !document.body.classList.contains('graph-open')) closeSheet(); });
 $('bLayers').onclick = () => S.sheetKind === 'layers' ? closeSheet() : openSheet('layers', 'Layers');
 $('bMap').onclick = () => S.sheetKind === 'map' ? closeSheet() : openSheet('map', 'Map');
 $('bHome').onclick = () => S.map && S.map.easeTo({ ...S.city.home, duration:900 });

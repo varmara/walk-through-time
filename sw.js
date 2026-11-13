@@ -57,7 +57,7 @@ async function fresh(req){
 }
 
 // drop copies from older builds: data files with another ?v= than the build the page has loaded, and the page's
-// scripts and styles from an earlier ten-minute version
+// scripts and styles from an earlier version of their content (pipeline/pages.py)
 self.addEventListener('message', e => {
   const { build, v } = e.data || {};
   if (!build) return;

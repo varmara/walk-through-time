@@ -5,6 +5,7 @@ Adding a city is then its settings (and stories), with no page to copy.
   python -m pipeline.pages            into this folder (index.html, <city>/), to open the site locally
   python -m pipeline.pages _site      into the site the build publishes
 """
+import hashlib
 import html
 import json
 import os
@@ -29,6 +30,16 @@ def fill(template, values):
     return out
 
 
+def version():
+    """The version the pages' own files carry (?v=): a hash of app/ and lib/, so a phone keeps them until one
+    changes (sw.js keeps files with ?v= until the version changes) and fetches them again as soon as one does."""
+    h = hashlib.sha1()
+    for p in sorted([*(ROOT / "app").rglob("*"), *(ROOT / "lib").rglob("*")]):
+        if p.is_file() and "templates" not in p.parts:
+            h.update(str(p.relative_to(ROOT)).encode() + b"\0" + p.read_bytes())
+    return h.hexdigest()[:10]
+
+
 def cities():
     return [json.loads(p.read_text()) | {"id": p.stem} for p in sorted((ROOT / "cities").glob("*.json"))]
 
@@ -36,12 +47,13 @@ def cities():
 def main(out=ROOT):
     out = Path(out)
     site = site_url()
+    v = version()
     city_t, graph_t, index_t = ((TEMPLATES / f).read_text() for f in ("city.html", "graph.html", "index.html"))
     rows = []
     for c in cities():
         page = c.get("page", {})
         e = lambda s: html.escape(s or "", quote=True)  # noqa: E731
-        values = {"id": c["id"], "name": e(c["name"]), "site": site,
+        values = {"id": c["id"], "name": e(c["name"]), "site": site, "v": v,
                   "description": e(page.get("description") or f"{c['name']} in 3D, every building coloured by the year it was built."),
                   "share": e(page.get("share") or f"Historic {c['name']} in 3D, building by building.")}
         (out / c["id"]).mkdir(parents=True, exist_ok=True)
