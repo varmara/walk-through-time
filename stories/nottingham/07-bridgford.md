@@ -46,7 +46,7 @@ and chancel were begun, their foundation stone laid by Lady Byron of Thrumpton H
 - source: en:West Bridgford
 - at: pin:-1.1366,52.9378
 - names: no
-- check: Danish | Trent Bridge | 1086
+- check: south end of Trent Bridge | 1086
 
 The settlement began in the early 10th century, when defences and houses were built at the south end of Trent
 Bridge to guard Nottingham against the Danes. Domesday, in 1086, records it as part of the manor of Clifton.

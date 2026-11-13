@@ -66,6 +66,25 @@ _tables = {}
 _cache = {}
 
 
+def table_text(wt):
+    """The words in a page's tables, which the plain-text extract leaves out: wikitable cells ("| 1677 || ...") and
+    the fields of table-row templates ("| notes = Mid 17th century ..."), as in the "Listed buildings in ..."
+    articles, where every building's date and description is in a table."""
+    from .s04_residents import strip_wikitext
+    out = []
+    for line in re.findall(r"^\s*[|!](?![-}+]).*$", wt, flags=re.M):
+        line = line.strip().lstrip("|!")
+        for cell in re.split(r"\|\||!!", line):
+            m = re.match(r"\s*[\w ]{1,30}=(?!=)(.*)$", cell)      # a template's field: its value
+            cell = m.group(1) if m else cell
+            for _ in range(3):                                             # templates first ({{coord|…}})
+                cell = re.sub(r"\{\{[^{}]*\}\}", " ", cell)
+            if "|" in re.sub(r"\[\[[^\]]*\]\]", "", cell) and not cell.strip().startswith("[["):     # a cell's attributes ("style=…| text")
+                cell = cell.rsplit("|", 1)[-1]
+            out.append(cell)
+    return strip_wikitext("\n".join(out))
+
+
 def article(ref):
     """'en:Title' (Wikipedia) or 'he:1254566' (Historic England list entry) -> {text, url, title, qid, coords, nhle}."""
     if ref in _cache:
@@ -97,7 +116,7 @@ def article(ref):
         wt = w["query"]["pages"][0]["revisions"][0]["slots"]["main"]["content"]
         from .s04_residents import strip_wikitext      # (imported here: that step imports this one)
         items = re.findall(r"^[*#]+.*$", wt, flags=re.M)
-        lists = strip_wikitext("\n".join(items), keep_lists=True)
+        lists = strip_wikitext("\n".join(items), keep_lists=True) + " " + table_text(wt)
     except Exception:  # noqa: BLE001 - the extract alone still works
         pass
     _cache[ref] = {
