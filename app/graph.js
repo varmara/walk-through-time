@@ -98,22 +98,36 @@ function init(data){
 //   length   how long the lines try to be
 //   repel    how strongly points push each other apart
 //   space    the gap kept round each point
-//   places   how strongly places are pulled to the middle (low: they stay by the points they are linked to)
-const DEFAULTS = { group: 0.14, links: 0.9, length: 34, repel: 1, space: 3, places: 0.015 };
+//   orbit    how strongly a place is drawn to the middle of the people and themes it is linked to, so places
+//            are satellites of their points (one linked to two settles between them)
+const DEFAULTS = { group: 0.14, links: 0.7, length: 34, repel: 1.2, space: 4, orbit: 0.12 };
 const PARAMS = [
   ['group', 'Group by colour', 0, 0.5, 0.01], ['links', 'Pull along links', 0, 1, 0.05],
   ['length', 'Link length', 10, 120, 2], ['repel', 'Push apart', 0, 3, 0.1],
-  ['space', 'Space round points', 0, 20, 1], ['places', 'Places to the middle', 0, 0.15, 0.005],
+  ['space', 'Space round points', 0, 20, 1], ['orbit', 'Places round their points', 0, 1, 0.05],
 ];
 const P = { ...DEFAULTS };
-try { Object.assign(P, JSON.parse(localStorage.getItem('graph-layout') || '{}')); } catch {}
-const saveP = () => { try { localStorage.setItem('graph-layout', JSON.stringify(P)); } catch {} };
+try { Object.assign(P, JSON.parse(localStorage.getItem('graph-layout-2') || '{}')); } catch {}
+const saveP = () => { try { localStorage.setItem('graph-layout-2', JSON.stringify(P)); } catch {} };
+// each place pulled to the middle of the points it is linked to (people and themes, as they move)
+let around = new Map();
+function orbit(alpha){
+  const k = P.orbit * alpha;
+  for (const [n, ps] of around) {
+    if (!ps.length) continue;
+    let x = 0, y = 0;
+    for (const m of ps) { x += m.x; y += m.y; }
+    n.vx += (x / ps.length - n.x) * k; n.vy += (y / ps.length - n.y) * k;
+  }
+}
 function forces(){
   sim.force('link').distance(l => P.length * (l.how === 'mention' ? 1.6 : 1)).strength(P.links);
-  sim.force('charge').strength(d => P.repel * (d.type === 'theme' ? -220 : d.deg > 1 ? -60 : -25));
+  sim.force('charge').strength(d => P.repel * (d.type === 'theme' ? -220 : d.type === 'place' ? -20 : d.deg > 1 ? -60 : -25));
   sim.force('collide').radius(d => radius(d) + P.space);
-  sim.force('x').strength(d => d.type === 'place' ? P.places : P.group);
-  sim.force('y').strength(d => d.type === 'place' ? P.places * 1.2 : P.group);
+  sim.force('x').strength(d => d.type === 'place' ? 0 : P.group);         // places: no pull of their own…
+  sim.force('y').strength(d => d.type === 'place' ? 0 : P.group);
+  // …but drawn to their points (and pushed apart less, so they stay close round them)
+  sim.force('orbit', orbit);
 }
 function layoutPanel(){
   const fmt = (v, step) => step < 1 ? (+v).toFixed(step < 0.01 ? 3 : 2) : String(v);
@@ -128,7 +142,7 @@ function layoutPanel(){
 }
 
 // Points of one kind (one colour) gather together: each kind is pulled towards its own spot on a circle round the
-// middle, in the order of the kinds row; places are pulled only lightly, so they settle between the people and
+// middle, in the order of the kinds row; places are not pulled there but drawn round the people and
 // themes they are linked to. The spots are shared out again among the kinds shown when one is switched off.
 let spots = {};
 function placeSpots(ns){
@@ -168,7 +182,13 @@ function draw(){
     return g;
   });
   placeSpots(ns);               // before sim.nodes, which reads each point's spot
-  sim.nodes(ns); sim.force('link').links(ls); sim.alpha(0.8).restart();
+  sim.nodes(ns); sim.force('link').links(ls);
+  around = new Map(ns.filter(n => n.type === 'place').map(n => [n, []]));    // each place's people and themes
+  for (const l of ls) {
+    if (around.has(l.source) && l.target.type !== 'place') around.get(l.source).push(l.target);
+    if (around.has(l.target) && l.source.type !== 'place') around.get(l.target).push(l.source);
+  }
+  sim.alpha(0.8).restart();
   sizes(); highlight(); labels();
 }
 
