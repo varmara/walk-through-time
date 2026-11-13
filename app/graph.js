@@ -37,23 +37,34 @@ let G, sel = null, sim, T = d3.zoomIdentity, ns = [], ls = [], C = {};
 //   space    the gap kept round each point
 //   orbit    how strongly a place is drawn to the middle of the people and themes it is linked to, so places
 //            are satellites of their points (one linked to two settles between them)
-const DEFAULTS = { mode: 'daisy', names: 2.2, size: 1, lines: 1, fold: true, lonely: false,
-  petals: 6, daisies: 10, groups: 70,
+// a phone's screen is small: names later, points a little bigger, colours further apart
+const PHONE = innerWidth < 760;
+const DEFAULTS = { mode: 'daisy', names: PHONE ? 3 : 2.2, size: PHONE ? 1.2 : 1, lines: 1, fold: true, lonely: false,
+  petals: 6, daisies: 10, groups: PHONE ? 120 : 70,
   group: 0.14, links: 0.7, length: 34, repel: 1.2, space: 4, orbit: 0.12 };
-const DISPLAY = [['names', 'Names from zoom', 0.5, 5, 0.1], ['size', 'Point size', 0.5, 2.5, 0.1], ['lines', 'Line thickness', 0.3, 4, 0.1]];
-const CHECKS = [['fold', 'Fold places with one link'], ['lonely', 'Hide points with no lines']];
+// [key, title, lowest, highest, step, what it is for (shown under it)]
+const DISPLAY = [
+  ['names', 'Names from zoom', 0.5, 5, 0.1, 'Higher: fewer names until you zoom in'],
+  ['size', 'Point size', 0.5, 2.5, 0.1, 'Bigger points are easier to see and tap'],
+  ['lines', 'Line thickness', 0.3, 4, 0.1, 'Thicker if lines fade into the background']];
+const CHECKS = [['fold', 'Fold places with one link', 'Tap a point to spread its places out'],
+  ['lonely', 'Hide points with no lines', 'For when the kinds they link to are off']];
 // Daisies (the default layout, daisyLayout): petals = the gap between a point's places on their rings, daisies =
 // the gap between daisies of one colour, groups = the gap between the colours' constellations
-const DAISY = [['petals', 'Space between petals', 0, 20, 1], ['daisies', 'Space between daisies', 0, 60, 2],
-  ['groups', 'Space between colours', 0, 300, 10]];
+const DAISY = [['petals', 'Space between petals', 0, 20, 1, 'More if places are hard to tap'],
+  ['daisies', 'Space between daisies', 0, 60, 2, 'More if daisies of one colour run together'],
+  ['groups', 'Space between colours', 0, 300, 10, 'More to keep colours apart (Show all zooms out further)']];
 const FORCES = [
-  ['group', 'Group by colour', 0, 0.5, 0.01], ['links', 'Pull along links', 0, 1, 0.05],
-  ['length', 'Link length', 10, 120, 2], ['repel', 'Push apart', 0, 3, 0.1],
-  ['space', 'Space round points', 0, 20, 1], ['orbit', 'Places round their points', 0, 1, 0.05],
+  ['group', 'Group by colour', 0, 0.5, 0.01, 'Pulls points of one colour together'],
+  ['links', 'Pull along links', 0, 1, 0.05, 'Pulls linked points together'],
+  ['length', 'Link length', 10, 120, 2, 'How long lines try to be'],
+  ['repel', 'Push apart', 0, 3, 0.1, 'More to loosen dense clusters'],
+  ['space', 'Space round points', 0, 20, 1, 'More to stop points overlapping'],
+  ['orbit', 'Places round their points', 0, 1, 0.05, 'More to keep places tight to their people'],
 ];
 const P = { ...DEFAULTS };
-try { Object.assign(P, JSON.parse(localStorage.getItem('graph-layout-2') || '{}')); } catch {}
-const saveP = () => { try { localStorage.setItem('graph-layout-2', JSON.stringify(P)); } catch {} };
+try { Object.assign(P, JSON.parse(localStorage.getItem('graph-layout-3') || '{}')); } catch {}
+const saveP = () => { try { localStorage.setItem('graph-layout-3', JSON.stringify(P)); } catch {} };
 
 fetch(`../data/${CITY}-graph.json?v=${window.__v || ''}`).then(r => r.json()).then(init)
   .catch(() => { $('loading').textContent = 'The graph could not be loaded.'; });
@@ -403,14 +414,17 @@ function paint(){
 // ================= the Layout panel =================
 function panel(){
   const fmt = (v, step) => step < 1 ? (+v).toFixed(step < 0.01 ? 3 : step < 0.1 ? 2 : 1) : String(v);
-  const slider = ([k, t, lo, hi, step]) => `<label class="param"><span>${t}<output id="o-${k}">${fmt(P[k], step)}</output></span>
-    <input type="range" id="p-${k}" min="${lo}" max="${hi}" step="${step}" value="${P[k]}"></label>`;
+  const slider = ([k, t, lo, hi, step, help]) => `<label class="param"><span>${t}<output id="o-${k}">${fmt(P[k], step)}</output></span>
+    <input type="range" id="p-${k}" min="${lo}" max="${hi}" step="${step}" value="${P[k]}" aria-describedby="h-${k}">
+    <small id="h-${k}">${help}</small></label>`;
   const daisy = P.mode === 'daisy';
   $('params').innerHTML = `<div class="modes" role="radiogroup" aria-label="Layout">${[['daisy', 'Daisies'], ['force', 'Forces']].map(([m, t]) =>
       `<button role="radio" aria-checked="${P.mode === m}" data-mode="${m}">${t}</button>`).join('')}</div>`
     + '<h4>Display</h4>' + DISPLAY.map(slider).join('')
-    + CHECKS.map(([k, t]) => `<label class="check"><input type="checkbox" id="p-${k}"${P[k] ? ' checked' : ''}> ${t}</label>`).join('')
-    + (daisy ? '<h4>Daisies</h4>' + DAISY.map(slider).join('') : '<h4>Forces</h4>' + FORCES.map(slider).join(''))
+    + CHECKS.map(([k, t, help]) => `<label class="check"><input type="checkbox" id="p-${k}"${P[k] ? ' checked' : ''} aria-describedby="h-${k}">
+        <span>${t}<small id="h-${k}">${help}</small></span></label>`).join('')
+    + (daisy ? '<h4>Daisies</h4>' + DAISY.map(slider).join('')
+       : '<h4>Forces</h4><p class="note">Shows how groups connect: shared places pull their people together.</p>' + FORCES.map(slider).join(''))
     + '<button class="reset" id="pReset">Reset</button>';
   $('params').querySelectorAll('[data-mode]').forEach(b => b.onclick = () => {
     if (P.mode === b.dataset.mode) return;
