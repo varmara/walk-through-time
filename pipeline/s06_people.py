@@ -128,6 +128,7 @@ def about_people(want, words):
         if len(text) > 40:
             out[n] = {"text": text, "title": t, **({"life": life[t]} if life.get(t) else {}),
                       "url": "https://en.wikipedia.org/wiki/" + urllib.parse.quote(t.replace(" ", "_"))}
+    log(f"    years of {sum('life' in v for v in out.values())} of {len(out)} people, from Wikidata")
     return out
 
 
@@ -141,9 +142,12 @@ def life_years(titles):
         try:
             r = http("https://www.wikidata.org/w/api.php", params={
                 "action": "wbgetentities", "sites": "enwiki", "titles": "|".join(titles[i:i + 50]), "props": "claims|sitelinks",
-                "sitefilter": "enwiki", "normalize": "1", "format": "json"})
+                "sitefilter": "enwiki", "format": "json"})
         except Exception as e:  # noqa: BLE001
             log(f"    Wikidata years failed: {e}")
+            continue
+        if "error" in r:
+            log(f"    Wikidata years: {r['error'].get('info', r['error'])}")
             continue
         for ent in r.get("entities", {}).values():
             t = ent.get("sitelinks", {}).get("enwiki", {}).get("title")

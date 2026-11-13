@@ -63,13 +63,13 @@ about 1280 and became Earls and Dukes of Kingston, then Earls Manvers. It is lis
 - at: pin:article
 - group: civil-war
 - names: no
-- check: 1645 | Poyntz | Hutchinson | Philip Stanhope | 160 | Shelford Manor
+- check: 1645 | Poyntz | Hutchinson | Philip Stanhope | 160
 - see: Colonel Hutchinson | The castle burned, 1831
-- note: a pin at the article's point; Shelford Manor, which stands there now, was rebuilt from what survived
+- note: a pin at the article's point
 
 In November 1645 Parliament's troops under Sydnam Poyntz, with Colonel John Hutchinson leading the assault,
-stormed Shelford House, held for the King by Philip Stanhope. About 160 of its defenders were killed and the
-house was burnt; the present Shelford Manor was later rebuilt from what survived.
+stormed Shelford House, held for the King by Philip Stanhope. About 160 of its defenders were killed, and the
+house was burnt that night.
 
 ## Colonel Hutchinson
 - source: en:John Hutchinson (Roundhead)
