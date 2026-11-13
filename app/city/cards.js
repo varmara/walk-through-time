@@ -338,7 +338,7 @@ function buildingCard(p, id){
 
   const near = nearby(id, J(p.xy));
   if (near.length) rows.push(['Nearby', near.map(o => `<a href="#" data-ref="${esc(o.ref)}">${esc(o.name)}</a> <span class="muted">${Math.round(o.m / 10) * 10 || 10} m</span>`).join('<br>')]);
-  const stories = (p.stories || []).map(storyOf).map(s => ({ ...s, label: layerTitle(s.layer) }));
+  const stories = (p.stories || []).map(storyOf).map(s => ({ ...s, label: s.layer === 'people' && s.pin ? 'Plaque' : layerTitle(s.layer) }));
   const after = (S.entitiesAt[id] || []).filter(m => !people().has(m.name)).map(m =>
     `<button class="textbtn allplaces" data-name="${esc(m.name)}" data-b="${m.bs.join(',')}">All ${m.bs.length} places: ${esc(m.name)}</button>`).join('');
 
