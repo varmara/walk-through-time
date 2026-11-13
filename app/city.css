@@ -201,3 +201,5 @@ ol.notes li.hit{animation:fnhit 1.6s ease-out}
 @media (prefers-reduced-motion:reduce){ol.notes li.hit{animation:none;background:color-mix(in srgb,var(--hl) 14%,transparent)}}
 a.who{color:var(--ink);text-decoration-color:color-mix(in srgb,var(--ink) 35%,transparent);text-decoration-style:dotted;text-underline-offset:3px}
 
+
+.pwait{margin:6px 4px 10px;color:var(--muted)}

@@ -9,7 +9,13 @@ import { openRef, refName } from './cards.js';
 export function showPlaces(name, bs){
   // the stories' words are in the card files: fetch those first (one or two files for most people and stories)
   const need = bs.filter(isB).filter(b => !S.features[b].full);
-  if (need.length) return Promise.all(need.map(b => loadCard(b).catch(() => {}))).then(() => showPlaces(name, bs));
+  if (need.length) {
+    // the bar at once, so the wait shows: its name, and what it is waiting for
+    $('pName').textContent = name; $('pCount').textContent = '';
+    $('pCards').innerHTML = `<p class="pwait">Finding ${bs.length} ${bs.length === 1 ? 'place' : 'places'}…</p>`;
+    $('placesbar').hidden = false; $('timebar').hidden = true;
+    return Promise.all(need.map(b => loadCard(b).catch(() => {}))).then(() => showPlaces(name, bs));
+  }
   closeSheet();
   clearPlaces(false);
   S.places = { name, bs, i: 0 };

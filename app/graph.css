@@ -72,6 +72,7 @@ a{color:var(--accent)}
 .close{flex:none;width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--bg);cursor:pointer}
 .sacts{display:flex;gap:8px;margin:10px 0 4px}
 .go{flex:1;padding:9px 12px;border-radius:10px;border:0;background:var(--accent);color:var(--on-strong);font-weight:600;cursor:pointer}
+.go:disabled{opacity:.75;cursor:progress}
 .more{flex:none;padding:9px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-weight:600;cursor:pointer}
 .grab{display:none}
 /* on a phone the sheet is a drawer: a small bar (peek) until its cards are asked for */

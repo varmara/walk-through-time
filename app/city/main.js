@@ -26,6 +26,11 @@ export async function main(){
   progress(70, 'reading buildings…');
   S.features = S.data.index ? fromIndex(S.data.index) : S.data.buildings.features;
   if (!S.features.length) throw new Error('no buildings in the map data');
+  // ?focus=b12,b40… (from the graph page): fetch those buildings' card files now, while the map is drawn, not
+  // after (a person's places can be in a dozen files)
+  for (const x of (new URLSearchParams(location.search).get('focus') || '').split(',')) {
+    if (/^b\d+$/.test(x) && +x.slice(1) < S.features.length) loadCard(+x.slice(1)).catch(() => {});
+  }
   let known = 0;
   let estimated = 0;
   if (!(S.data.index && S.data.index.hist)) S.features.forEach((f, i) => {     // an older file: count them here

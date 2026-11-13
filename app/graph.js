@@ -42,6 +42,45 @@ try { Object.assign(P, JSON.parse(localStorage.getItem('graph-settings') || '{}'
 const off = new Set(P.off);
 const saveP = () => { P.off = [...off]; try { localStorage.setItem('graph-settings', JSON.stringify(P)); } catch {} };
 
+// Opening the map from here: its biggest files fetched quietly once the graph has settled (the browser keeps
+// them), so the map opens from the phone rather than the network. Not on a connection set to save data.
+function readyTheMap(){
+  if (readyTheMap.done || navigator.connection?.saveData) return;
+  readyTheMap.done = true;
+  const v = window.__v || '';
+  const files = ['../lib/maplibre-gl.js', '../lib/maplibre-gl.css', `../app/city.css?v=${v}`, `../cities/${CITY}.json`,
+    ...['util', 'state', 'data', 'map', 'timebar', 'sheet', 'panels', 'hours', 'cards', 'places', 'main'].map(m => `../app/city/${m}.js?v=${v}`)];
+  const later = window.requestIdleCallback || (f => setTimeout(f, 1500));
+  later(() => {
+    for (const href of files) { const l = document.createElement('link'); l.rel = 'prefetch'; l.href = href; document.head.appendChild(l); }
+    // the map's index: kept in the browser's cache; its build and card-file size tell us the card files' names
+    fetch(`../data/${CITY}.json`).then(r => r.json()).then(ix => {
+      mapIndex = { build: ix.build, chunk: ix.tiles?.chunk };
+      if (sel) cardsFor(sel);
+    }).catch(() => {});
+  });
+}
+// A tapped person's or theme's places: their card files fetched now, so the map has them when it opens
+// (the map asks for the same files: data/<city>/cards/<n>.json?v=<build>, n = building ÷ chunk)
+let mapIndex = null;
+const fetched = new Set();
+function cardsFor(id){
+  if (!mapIndex?.chunk || !id || id.startsWith('g:')) return;
+  const n0 = G.byId.get(id); if (!n0) return;
+  const ids = n0.type === 'place' ? [id] : [...n0.nb].filter(x => G.byId.get(x)?.type === 'place');
+  const files = new Set(ids.filter(x => /^b\d+$/.test(x)).map(x => Math.floor(+x.slice(1) / mapIndex.chunk)));
+  if (files.size > 30) return;                   // a whole group: the map does not need its cards to open
+  for (const f of files) {
+    const url = `../data/${CITY}/cards/${f}.json?v=${mapIndex.build}`;
+    if (fetched.has(url)) continue;
+    fetched.add(url); fetch(url).catch(() => fetched.delete(url));
+  }
+}
+// the map takes a moment to open: say so at once
+function opening(btn, href){ btn.textContent = 'Opening the map…'; btn.disabled = true; location.href = href; }
+// back from the map (the page kept as it was): the button again as it should be
+addEventListener('pageshow', e => { if (e.persisted && sel) { $('go').disabled = false; select(sel); } });
+
 fetch(`../data/${CITY}-graph.json?v=${window.__v || ''}`).then(r => r.json()).then(init)
   .catch(() => { $('loading').textContent = 'The graph could not be loaded.'; });
 
@@ -132,7 +171,7 @@ function init(data){
   sim = d3.forceSimulation().force('link', d3.forceLink().id(d => d.id)).force('charge', d3.forceManyBody())
     .force('x', d3.forceX(0)).force('y', d3.forceY(0)).force('collide', d3.forceCollide())
     .force('gx', d3.forceX(d => spotOf(d)[0])).force('gy', d3.forceY(d => spotOf(d)[1]))
-    .on('tick', redraw).on('end', () => { if (!fitted) { fitted = true; if (!sel && !G.moved) G.fit(); } });
+    .on('tick', redraw).on('end', () => { readyTheMap(); if (!fitted) { fitted = true; if (!sel && !G.moved) G.fit(); } });
   forces();
   panel();
   addEventListener('resize', () => { resize(); placeZoom(); });
@@ -401,7 +440,7 @@ function groupSheet(h){
   const keys = h.type === 'theme' ? h.members.map(m => m.id.replace(/^t:/, '')) : ['people-' + h.type];
   $('go').hidden = !all.size;
   $('go').textContent = `Show ${all.size} places on the map`;
-  $('go').onclick = () => { location.href = `./?group=${keys.map(encodeURIComponent).join(',')}`; };
+  $('go').onclick = () => opening($('go'), `./?group=${keys.map(encodeURIComponent).join(',')}`);
   const rows = h.members.map(m => [m, placesOf(m).length]).sort((a, b) => b[1] - a[1] || a[0].label.localeCompare(b[0].label));
   $('links').innerHTML = `<h3>${esc(h.label)}</h3>` + rows.map(([m, c]) => `<div class="link">
       <button data-id="${esc(m.id)}"><i style="background:var(--k-${kindKey(m.type)})"></i>${esc(m.label)}</button>
@@ -421,6 +460,7 @@ function select(id, fromCards){
   const n = G.byId.get(id);
   $('hint').hidden = true; $('sheet').hidden = false;
   drawer(fromCards && wasOpen);
+  cardsFor(id);
   if (n.hub) return groupSheet(n);     // on a phone: the small bar first; the cards when asked for (they stay open
                                     // when one card's link leads to the next)
   $('sTitle').textContent = n.label;
@@ -431,7 +471,7 @@ function select(id, fromCards){
   const places = n.type === 'place' ? [id] : mine.map(l => (l.s === id ? l.t : l.s)).filter(x => G.byId.get(x).type === 'place');
   $('go').hidden = !places.length;
   $('go').textContent = places.length > 1 ? `Show ${places.length} places on the map` : 'Show on the map';
-  $('go').onclick = () => { location.href = `./?focus=${places.join(',')}&name=${encodeURIComponent(n.label)}`; };
+  $('go').onclick = () => opening($('go'), `./?focus=${places.join(',')}&name=${encodeURIComponent(n.label)}`);
   const groups = {};
   mine.forEach(l => { const o = G.byId.get(l.s === id ? l.t : l.s); (groups[o.type] = groups[o.type] || []).push([o, l]); });
   $('links').innerHTML = (n.about ? `<div class="about"><p>${esc(n.about.text)}</p><div class="src">Wikipedia: <a href="${esc(n.about.url)}" target="_blank" rel="noopener">${esc(n.about.title)}</a></div></div>` : '')
