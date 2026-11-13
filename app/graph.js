@@ -26,13 +26,15 @@ let G, sel = null, sim, T = d3.zoomIdentity, ns = [], ls = [], C = {};
 // Display  fade: Obsidian's text fade threshold (higher: names appear only when zoomed further in);
 //          size: node size;  lines: link thickness
 // Forces   centre: pulls everything to the middle (a rounder graph);  repel: points push each other apart;
-//          link: lines pull their ends together;  distance: how long lines try to be
+//          link: lines pull their ends together;  distance: how long lines try to be;
+//          group (ours, not Obsidian's): people and themes of one colour pulled to their own area (groupSpots)
 const DEFAULTS = { fold: true, orphans: true, off: [], fade: 0, size: 1, lines: 1,
-  centre: 0.5, repel: 10, link: 1, distance: 30 };
+  centre: 0.5, repel: 10, link: 1, distance: 30, group: 0.5 };
 const SLIDERS = {
   Display: [['fade', 'Text fade threshold', -3, 3, 0.1], ['size', 'Node size', 0.2, 4, 0.1], ['lines', 'Link thickness', 0.2, 4, 0.1]],
   Forces: [['centre', 'Center force', 0, 1, 0.01], ['repel', 'Repel force', 0, 20, 0.5],
-           ['link', 'Link force', 0, 1, 0.01], ['distance', 'Link distance', 5, 250, 1]],
+           ['link', 'Link force', 0, 1, 0.01], ['distance', 'Link distance', 5, 250, 1],
+           ['group', 'Group force', 0, 1, 0.01]],
 };
 const P = { ...DEFAULTS };
 try { Object.assign(P, JSON.parse(localStorage.getItem('graph-settings') || '{}')); } catch {}
@@ -118,6 +120,7 @@ function init(data){
 
   sim = d3.forceSimulation().force('link', d3.forceLink().id(d => d.id)).force('charge', d3.forceManyBody())
     .force('x', d3.forceX(0)).force('y', d3.forceY(0)).force('collide', d3.forceCollide())
+    .force('gx', d3.forceX(d => spotOf(d)[0])).force('gy', d3.forceY(d => spotOf(d)[1]))
     .on('tick', redraw).on('end', () => { if (!fitted) { fitted = true; if (!sel && !G.moved) G.fit(); } });
   forces();
   panel();
@@ -145,8 +148,23 @@ function init(data){
 }
 
 // ================= forces (Obsidian's four) =================
+// Each colour's area: the biggest group in the middle, the others round it, further out the more there are;
+// places have none (they follow their lines)
+let spots = {};
+function groupSpots(){
+  const count = d3.rollup(ns.filter(n => n.type !== 'place'), v => v.length, n => n.type);
+  const kinds = [...count].sort((a, b) => b[1] - a[1]).map(k => k[0]);
+  const R = 9 * Math.sqrt(ns.length) + 40;
+  spots = Object.fromEntries(kinds.map((k, i) => i === 0 ? [k, [0, 0]]
+    : [k, [R * Math.cos(2 * Math.PI * (i - 1) / (kinds.length - 1) - Math.PI / 2), R * Math.sin(2 * Math.PI * (i - 1) / (kinds.length - 1) - Math.PI / 2)]]));
+}
+const spotOf = d => spots[d.type] || [0, 0];
 function forces(){
-  sim.force('x').strength(P.centre * 0.1); sim.force('y').strength(P.centre * 0.1);
+  // the centre force acts less on people and themes while they are grouped, so their areas can sit apart
+  const c = d => P.centre * 0.1 * (d.type !== 'place' && P.group ? 1 - 0.8 * P.group : 1);
+  sim.force('x').strength(c); sim.force('y').strength(c);
+  const g = d => d.type === 'place' ? 0 : P.group * 0.12;
+  sim.force('gx').x(d => spotOf(d)[0]).strength(g); sim.force('gy').y(d => spotOf(d)[1]).strength(g);
   sim.force('charge').strength(d => -P.repel * 6 * (1 + Math.sqrt(d.folds || 0) * 0.4)).distanceMax(400);
   sim.force('link').strength(P.link).distance(P.distance);
   sim.force('collide').radius(d => radius(d) + 1);
@@ -176,6 +194,7 @@ function draw(gentle){
   }
   G.nodes.forEach(n => { n.hidden = true; }); vis.forEach(n => { n.hidden = false; });
   ns = vis;
+  groupSpots();
   sim.nodes(ns); sim.force('link').links(ls);
   forces();
   canvas.dataset.points = ns.length;          // for the page's checks (tests/page/smoke.cjs)
@@ -197,8 +216,12 @@ function pick(x, y){
 
 // Names fade in as you zoom (Obsidian's text fade threshold moves where): fully shown from zoom 2^(fade + 0.6),
 // gone below 2^(fade − 0.4). The selected point and its neighbours are always named.
+// An unnamed building is named only when it is the one tapped ("Unnamed building" a hundred times says nothing).
+const UNNAMED = /^Unnamed /;
 function nameAlpha(d, near){
-  if (d.id === sel || near.has(d.id)) return 1;
+  if (d.id === sel) return 1;
+  if (UNNAMED.test(d.label)) return 0;
+  if (near.has(d.id)) return 1;
   const z = Math.log2(T.k) - P.fade + (d.deg >= 6 ? 1 : d.deg >= 3 ? 0.5 : 0);    // well-linked points sooner
   return Math.max(0, Math.min(1, z + 0.4));
 }
@@ -292,19 +315,51 @@ $('gear').onclick = () => { const open = $('settings').hidden; $('settings').hid
 $('sClose').onclick = () => { $('settings').hidden = true; $('gear').setAttribute('aria-expanded', 'false'); };
 $('sReset').onclick = () => { Object.assign(P, DEFAULTS); off.clear(); saveP(); panel(); draw(); };
 
+// ================= the drawer (on a phone) =================
+// Tapping a point opens a small bar: its name, kind and the map button. Its cards (who, what, the stories and
+// their sources) open when asked for: a tap on the bar or More, or a swipe up; a swipe down folds them again, and
+// another swipe down (or ✕) closes the bar.
+const phone = () => innerWidth < 760;
+function drawer(open){
+  const sh = $('sheet');
+  sh.classList.toggle('peek', phone() && !open);
+  $('more').setAttribute('aria-expanded', String(!phone() || open));
+  $('more').textContent = open ? 'Less' : 'More';
+  if (open) $('links').scrollTop = 0;
+  requestAnimationFrame(() => { placeZoom(); });
+}
+$('more').onclick = e => { e.stopPropagation(); drawer($('sheet').classList.contains('peek')); };
+$('grab').onclick = () => drawer($('sheet').classList.contains('peek'));
+$('shead').onclick = e => { if (e.target.closest('button')) return; if ($('sheet').classList.contains('peek')) drawer(true); };
+{
+  let y0 = null;
+  const start = e => { y0 = e.touches[0].clientY; };
+  const end = e => {
+    if (y0 == null) return;
+    const dy = e.changedTouches[0].clientY - y0; y0 = null;
+    const peek = $('sheet').classList.contains('peek');
+    if (dy < -30 && peek) drawer(true);
+    else if (dy > 30) peek ? select(null) : drawer(false);
+  };
+  for (const el of [$('grab'), $('shead')]) { el.addEventListener('touchstart', start, { passive: true }); el.addEventListener('touchend', end); }
+}
+
 // on a phone the sheet covers the bottom of the screen: the zoom buttons sit just above it
 function placeZoom(){
   const open = !$('sheet').hidden && innerWidth < 760;
   $('zoom').style.bottom = open ? `${$('sheet').offsetHeight + 12}px` : '';
 }
 
-function select(id){
+function select(id, fromCards){
+  const wasOpen = !$('sheet').hidden && !$('sheet').classList.contains('peek');
   sel = id;
   if (spread() !== spreadNow) draw(true); else redraw();
   requestAnimationFrame(placeZoom);
   if (!id) { $('sheet').hidden = true; $('hint').hidden = false; return; }
   const n = G.byId.get(id);
   $('hint').hidden = true; $('sheet').hidden = false;
+  drawer(fromCards && wasOpen);     // on a phone: the small bar first; the cards when asked for (they stay open
+                                    // when one card's link leads to the next)
   $('sTitle').textContent = n.label;
   $('sType').textContent = n.type === 'place'
     ? 'Place' + (n.year != null ? ' · ' + (n.f === 'area' ? 'probably ' : n.f === 'exact' ? '' : 'c. ') + n.year : '')
@@ -326,7 +381,7 @@ function select(id){
     </div>`).join('')).join('');
   $('links').scrollTop = 0;
   $('links').querySelectorAll('[data-id]').forEach(b => b.onclick = () => {
-    const o = G.byId.get(b.dataset.id); select(o.id);
+    const o = G.byId.get(b.dataset.id); select(o.id, true);
     setTimeout(() => G.zoomTo(o.x, o.y), 50);          // a folded place is placed once its owner spreads out
   });
 }

@@ -41,9 +41,10 @@
 </div>
 
 <div class="sheet" id="sheet" hidden>
-  <div class="shead"><div style="flex:1"><h2 id="sTitle"></h2><div class="stype" id="sType"></div></div>
+  <button class="grab" id="grab" aria-label="Show or hide the details"><i></i></button>
+  <div class="shead" id="shead"><div style="flex:1;min-width:0"><h2 id="sTitle"></h2><div class="stype" id="sType"></div></div>
     <button class="close" id="close" aria-label="Close">✕</button></div>
-  <button class="go" id="go"></button>
+  <div class="sacts"><button class="go" id="go"></button><button class="more" id="more" aria-controls="links" aria-expanded="false">More</button></div>
   <div class="links" id="links"></div>
 </div>
 

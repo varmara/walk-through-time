@@ -70,7 +70,22 @@ a{color:var(--accent)}
 .shead h2{margin:0;font:600 22px/1.15 var(--serif);flex:1}
 .stype{font:500 13px var(--sans);color:var(--muted);margin-top:2px}
 .close{flex:none;width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--bg);cursor:pointer}
-.go{margin:10px 0 4px;padding:9px 12px;border-radius:10px;border:0;background:var(--accent);color:var(--on-strong);font-weight:600;cursor:pointer;width:100%}
+.sacts{display:flex;gap:8px;margin:10px 0 4px}
+.go{flex:1;padding:9px 12px;border-radius:10px;border:0;background:var(--accent);color:var(--on-strong);font-weight:600;cursor:pointer}
+.more{flex:none;padding:9px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-weight:600;cursor:pointer}
+.grab{display:none}
+/* on a phone the sheet is a drawer: a small bar (peek) until its cards are asked for */
+@media (max-width:759px){
+  .grab{display:block;align-self:center;width:64px;height:20px;margin:-6px 0 2px;border:0;background:none;cursor:pointer;padding:0}
+  .grab i{display:block;width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto}
+  .sheet{max-height:72vh;transition:max-height .2s ease}
+  .sheet.peek{max-height:none}
+  .sheet.peek .links{display:none}
+  .sheet.peek .shead h2{font-size:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .shead{cursor:pointer}
+}
+@media (min-width:760px){ .more{display:none} }
+@media (prefers-reduced-motion:reduce){ .sheet{transition:none} }
 .links{overflow-y:auto;margin-top:6px;-webkit-overflow-scrolling:touch}
 .links h3{font:500 13px var(--sans);color:var(--muted);margin:10px 0 4px}
 .link{border-top:1px solid var(--line);padding:8px 0}
