@@ -66,7 +66,7 @@ function init(data){
     const ns = sim.nodes(); if (!ns.length) return;
     const xs = ns.map(n => n.x), ys = ns.map(n => n.y), top = 110;
     const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
-    const k = Math.max(0.7, Math.min(3, 0.92 * Math.min(innerWidth / (x1 - x0 || 1), (innerHeight - top - 40) / (y1 - y0 || 1))));
+    const k = Math.max(0.25, Math.min(3, 0.92 * Math.min(innerWidth / (x1 - x0 || 1), (innerHeight - top - 40) / (y1 - y0 || 1))));
     svg.transition().duration(700).call(zoom.transform, d3.zoomIdentity
       .translate(innerWidth / 2, top + (innerHeight - top - 40) / 2).scale(k).translate(-(x0 + x1) / 2, -(y0 + y1) / 2));
   };
@@ -75,7 +75,8 @@ function init(data){
     .force('link', d3.forceLink().id(d => d.id).distance(l => l.how === 'mention' ? 60 : 38).strength(0.6))
     .force('charge', d3.forceManyBody().strength(d => d.type === 'theme' ? -220 : d.deg > 1 ? -60 : -25).distanceMax(220))
     .force('collide', d3.forceCollide(d => radius(d) + 2))
-    .force('x', d3.forceX(innerWidth / 2).strength(0.09)).force('y', d3.forceY(innerHeight / 2).strength(0.11))
+    .force('x', d3.forceX(d => anchor(d)[0]).strength(d => d.type === 'place' ? 0.04 : 0.16))
+    .force('y', d3.forceY(d => anchor(d)[1]).strength(d => d.type === 'place' ? 0.05 : 0.16))
     .on('tick', tick).on('end', () => { if (!fitted) { fitted = true; if (!sel) G.fit(); } });
   draw();
 
@@ -92,6 +93,20 @@ function init(data){
   const start = new URLSearchParams(location.search).get('node');
   if (start && byId.has(start)) setTimeout(() => { select(start); const n = byId.get(start); G.zoomTo(n.x, n.y); }, 900);
 }
+
+// Points of one kind (one colour) gather together: each kind is pulled towards its own spot on a circle round the
+// middle, in the order of the kinds row; places are pulled only lightly, so they settle between the people and
+// themes they are linked to. The spots are shared out again among the kinds shown when one is switched off.
+let spots = {};
+function placeSpots(ns){
+  const kinds = KINDS.map(k => k[0]).filter(k => k !== 'place' && ns.some(n => n.type === k));
+  const R = 120 + 28 * kinds.length, cx = innerWidth / 2, cy = innerHeight / 2;
+  spots = Object.fromEntries(kinds.map((k, i) => {
+    const a = -Math.PI / 2 + 2 * Math.PI * i / kinds.length;
+    return [k, [cx + R * Math.cos(a), cy + R * Math.sin(a)]];
+  }));
+}
+function anchor(d){ return spots[d.type] || [innerWidth / 2, innerHeight / 2]; }
 
 function radius(d){ return d.type === 'theme' ? 11 : d.type === 'place' ? 4 + Math.min(4, d.deg) : 5 + Math.min(7, d.deg * 1.2); }
 function shown(){ const ns = G.nodes.filter(n => !off.has(n.type)), ids = new Set(ns.map(n => n.id));
@@ -119,6 +134,7 @@ function draw(){
       .on('end', (e, d) => { if (!e.active) sim.alphaTarget(0); d.fx = d.fy = null; }));
     return g;
   });
+  placeSpots(ns);               // before sim.nodes, which reads each point's spot
   sim.nodes(ns); sim.force('link').links(ls); sim.alpha(0.8).restart();
   sizes(); highlight(); labels();
 }
