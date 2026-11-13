@@ -191,7 +191,8 @@ def cross_links(entries, story_layers):
                     "more than one story of that name: write it as layer/heading"))
                 continue
             ref = str(hits[0]["b"])
-            see.append([hits[0]["name"], ref])
+            if ref != str(e["b"]):          # another story on the same building is on the same card already
+                see.append([hits[0]["name"], ref])
         if see:
             e["_story"]["see"] = see
     for e in entries:

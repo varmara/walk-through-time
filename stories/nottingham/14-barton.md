@@ -37,7 +37,6 @@ An octagonal red-brick dovecote of 1677, listed Grade II.
 ## Thrumpton Hall
 - source: en:Thrumpton Hall
 - group: thrumpton
-- see: The staircase | The Byrons of Thrumpton | Owners since 1949
 - check: Babington | priest hole | Pigot | 1617
 
 The Powdrells, a Roman Catholic family, lost their house here after the Babington Plot; part of it survives
