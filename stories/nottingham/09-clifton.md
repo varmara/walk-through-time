@@ -32,3 +32,10 @@ is by George Frederick Bodley.
 
 The Nottingham poet Henry Kirke White, a butcher's son, published Clifton Grove, a Sketch in Verse, in 1803,
 aged 17. He died in 1806, aged 21.
+
+## Clifton Bridge
+- source: en:Clifton Bridge (Nottingham)
+- check: 1958 | pre-stressed | Trent Bridge | 1972
+
+Opened in 1958 to take traffic off Trent Bridge, it was then the longest pre-stressed concrete bridge in the
+country. A second bridge beside it, opened in 1972, made the crossing a dual carriageway.

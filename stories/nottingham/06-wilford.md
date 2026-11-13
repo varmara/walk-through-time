@@ -52,3 +52,14 @@ its landlord until his death in 1958.
 
 Thomas Forman, who founded the Nottingham Post, bought Wilford House from the Smith family after the
 newspaper's successful launch.
+
+## Sir Robert Clifton's colliery
+- source: en:Robert Juckes Clifton
+- at: osm:way/78046105
+- names: no
+- check: coal | 1868 | typhoid | 1869 | 1870
+- note: placed on the Wilford Toll Bridge's building: the colliery's site has no outline of its own on the map
+
+Coal was found on the Clifton estate, and work on Clifton Colliery began in 1868. Sir Robert Juckes Clifton,
+the last of the Clifton baronets, died of typhoid in 1869; the colliery and this toll bridge, both his
+projects, opened in 1870.
