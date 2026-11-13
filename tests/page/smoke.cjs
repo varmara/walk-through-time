@@ -74,7 +74,10 @@ const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (
       check((await text('#sTitle')) === known.title, 'a building already seen opens offline');
     } catch (e) { check(false, 'a building already seen opens offline (' + e.message.split('\n')[0] + ')'); }
     await page.context().setOffline(false);
-    errors.length = quiet;    // offline, other files fail to load: expected
+    // offline, other files fail to load: expected. The map reports some of those failures a moment later (tiles
+    // asked for just before the connection came back), so wait for them before counting errors again
+    await page.waitForTimeout(2500);
+    errors.length = quiet;
   }
 
   await open('?focus=a0');
