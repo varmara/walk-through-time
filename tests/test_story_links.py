@@ -50,14 +50,14 @@ class Parse(unittest.TestCase):
         self.assertEqual(L["intro"], "Intro.")
 
     def test_links_resolve(self):
-        pin, story = {"name": "Two"}, {"text": "One's story"}
+        pin, story, third = {"name": "Two"}, {"text": "One's story"}, {"text": "Three's story"}
         es = [{"layer": "x", "name": "One", "b": 12, "see": ["Two", "Nowhere"], "_story": story},
               {"layer": "y", "name": "Two", "b": "p3", "_story": pin},
-              {"layer": "y", "name": "Three", "b": 12, "see": ["One"], "_story": {}}]
+              {"layer": "y", "name": "Three", "b": 12, "see": ["One"], "_story": third}]
         cross_links(es, {"x", "y"})
         self.assertEqual(story["see"], [["Two", "p3"]])
         self.assertNotIn("see", pin)
-        self.assertNotIn("see", es[2])          # the same building: already on its card
+        self.assertNotIn("see", third)          # the same building: already on its card
         self.assertTrue(all("_story" not in e for e in es))
 
 
