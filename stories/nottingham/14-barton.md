@@ -58,3 +58,18 @@ its "squarson".
 - check: 1949 | 1994 | Miranda Seymour
 
 George Fitzroy Seymour owned the estate from 1949 to 1994, and Miranda Seymour has owned it since.
+
+## All Saints Church
+- source: en:All Saints Church, Thrumpton
+- at: osm:way/275931476
+- check: 13th century | 1871 | Street
+
+A 13th-century church, listed Grade II*, restored by George Edmund Street in 1871.
+
+## An estate village
+- source: en:Thrumpton
+- at: pin:-1.2432,52.8752
+- names: no
+- check: Emerton | 1745
+
+Many of Thrumpton's gabled brick houses were built for the estate by John Emerton of Thrumpton Hall, up to 1745.

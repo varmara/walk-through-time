@@ -63,3 +63,29 @@ newspaper's successful launch.
 Coal was found on the Clifton estate, and work on Clifton Colliery began in 1868. Sir Robert Juckes Clifton,
 the last of the Clifton baronets, died of typhoid in 1869; the colliery and this toll bridge, both his
 projects, opened in 1870.
+
+## Wilford Power Station
+- source: en:Wilford Power Station
+- names: no
+- check: 1925 | 1981 | Riverside Retail Park
+
+A coal-fired power station on the north bank of the Trent, opened in 1925. It closed in 1981 and was soon
+demolished; the Riverside Retail Park stands on its site.
+
+## The Nottingham Captain
+- source: en:Jeremiah Brandreth
+- at: pin:-1.1590,52.9353
+- names: no
+- check: Wilford | 1817 | Nottingham Captain | Derby
+- note: a pin in the village: the article does not say where in Wilford he was born
+
+Jeremiah Brandreth, born in Wilford, led the Pentrich rising of 1817 and was known as the Nottingham Captain.
+He was hanged for high treason outside Derby Gaol that November, and then beheaded.
+
+## Captain John Deane
+- source: en:Wilford
+- at: pin:-1.1578,52.9347
+- names: no
+- check: John Deane | Russian navy
+
+Captain John Deane, a former mercenary who had served in the Russian navy, retired to Wilford.
