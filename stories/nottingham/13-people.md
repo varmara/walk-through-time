@@ -23,7 +23,7 @@ Inn.
 
 The poet lived in Wilford in 1804–1805; the church holds two memorials to him.
 
-## Bendigo
+## William Thompson
 - source: en:William Thompson (boxer)
 - place: en:William Thompson (boxer)
 - at: nhle:1271444

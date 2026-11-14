@@ -72,9 +72,9 @@ export const saveActive = () => store.set('layers:' + CITY_ID, JSON.stringify([.
 export const isArea = key => S.groups.get(key)?.layer.kind === 'areas';
 export const kindOf = key => S.groups.get(key)?.layer.kind;
 // a ticked group marks buildings (the rest stay pale) when its layer has buildings in it
-export const marksBuildings = key => ['stories', 'people', 'rule'].includes(kindOf(key));
+export const marksBuildings = key => ['stories', 'topics', 'people', 'rule'].includes(kindOf(key));
 // its places are pins
-export const hasPins = key => ['stories', 'people', 'rule', 'pins'].includes(kindOf(key));
+export const hasPins = key => ['stories', 'topics', 'people', 'rule', 'pins'].includes(kindOf(key));
 
 // ================= Place references =================
 // Layer items point at buildings (a number), pins ("p<index>": places that are not buildings, plaques on no
@@ -138,7 +138,11 @@ export function storyOf(s){
   const J = v => typeof v === 'string' ? JSON.parse(v) : v;
   return { ...s, text: pp.text || '', source: J(pp.source), who: s.who || pp.who, people: J(pp.people) };
 }
-export function storyFor(b, name){
+// the story that ties a building to a set: the named layer's (a story in a topic or a story layer), else the one
+// that names the person or subject, else a person's, else the first
+export function storyFor(b, name, layer){
   const ss = (S.features[b].properties.stories || []).map(storyOf).filter(s => s.text);
-  return ss.find(s => s.text.includes(name) || (s.source && s.source.title === name)) || ss.find(s => s.layer === 'people') || ss[0];
+  return (layer && ss.find(s => s.layer === layer))
+    || ss.find(s => s.text.includes(name) || s.who === name || (s.source && s.source.title === name))
+    || ss.find(s => s.layer === 'people') || ss[0];
 }

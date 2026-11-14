@@ -141,7 +141,7 @@ def layer_pages(data, city_id, city_name, site, out):
 
     listed = []
     for L in data["layers"]:
-        if L["kind"] not in ("stories", "people"):
+        if L["kind"] not in ("stories", "people", "topics"):
             continue
         sections, image, n = [], None, 0
         for g in L["groups"]:
@@ -149,7 +149,12 @@ def layer_pages(data, city_id, city_name, site, out):
             if not items:
                 continue
             arts = []
-            for name, refs in items:
+            for name, refs, *hint in items:
+                hint = hint[0] if hint else {}
+                # a topic's story is the one its line names (a story's layer, a person's, a plaque's own words)
+                want = hint.get("layer") or ("people" if hint.get("person") or hint.get("plaque") else None) \
+                    if L["kind"] == "topics" else L["id"]
+                person = L["kind"] == "people" or hint.get("person")
                 stories, built, first = [], None, None
                 for r in refs:
                     pname, pbuilt, pimg, st = place(r)
@@ -157,9 +162,9 @@ def layer_pages(data, city_id, city_name, site, out):
                     first = first or pname
                     built = built or pbuilt
                     for s in st:
-                        if s.get("layer") != L["id"]:
+                        if want and s.get("layer") != want:
                             continue
-                        if L["kind"] == "people":       # a person's story names them (or is about their building)
+                        if person:       # a person's story names them (or is about their building)
                             last = name.split()[-1].lower()
                             if last not in (s.get("text") or "").lower() and len(refs) > 1:
                                 continue
@@ -169,8 +174,8 @@ def layer_pages(data, city_id, city_name, site, out):
                 more = f" and {len(refs) - 6} more" if len(refs) > 6 else ""
                 link = (f"{mapurl}?layer={urllib.parse.quote(L['id'])}&focus={','.join(ref_key(r) for r in refs)}"
                         f"&name={urllib.parse.quote(name)}")
-                meta = ([built] if built and L["kind"] == "stories" else []) + ([f"{where}{more}"] if L["kind"] == "people" and where else [])
-                who = data.get("people", {}).get(name) if L["kind"] == "people" else None
+                meta = ([built] if built and not person else []) + ([f"{where}{more}"] if person and where else [])
+                who = data.get("people", {}).get(name) if person else None
                 arts.append(f"<article><h3>{e(name)}</h3>"
                             + (f'<p class="meta">{e(" · ".join(meta))}</p>' if meta else "")
                             + (f'<p><i>{e(who["text"])}</i></p><p class="src">Wikipedia: <a href="{html.escape(who["url"])}">'

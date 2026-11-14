@@ -107,6 +107,37 @@ Tables in the same folder, each with a Note column saying why:
 | `old-lines.md` | the years a disused railway or lost canal opened and closed, by its name in OpenStreetMap, with the source checked; these come before Wikidata's and OpenStreetMap's own dates |
 | `architects-to-find.md` | architects on the map with no article or page found yet, and where to look; for editors, not read by the build |
 
+### Topics
+
+The story layers are mostly places (Wilford, Clifton, Rushcliffe). A topic gathers what is told anywhere on the
+map about one subject, and is a layer of its own in the Layers sheet's Topics section and a theme in the graph.
+Each topic is one file, `stories/<city>/topics/<id>.md`; the story layers stay as they are, and anything can be
+in several topics.
+
+```markdown
+# Riot, rebellion and war
+id: war
+
+Nottingham in times of conflict: the castle and the Civil War, the risings and riots of the 19th century, and the
+two World Wars at home.
+
+## The Civil War
+- story: The storming of Shelford House      (a story, by its heading, or layer/heading: culture/Nottingham Castle)
+- person: Charles I                          (someone in the People layer, by name: all their places)
+- plaque: The Chilwell Explosion, 1st July 1918   (a plaque, by its title on the map)
+- building: way/4438894                      (a building, by its OpenStreetMap id)
+```
+
+`##` headings are optional: each is a tickbox of its own. A topic tells nothing new: each card shows the story,
+plaque or person as its own layer tells it, with its source. The build stops on a line that finds nothing or more
+than one thing (a renamed heading, a plaque two places share), naming the file and line.
+
+### Date order
+
+Every set of numbered cards runs in date order: a layer's groups, a topic, a person's places. A story is dated by
+the first year in its text, a plaque by the first year in its words (not when it was put up), a person by the
+year they were born, a building by the year it was built; the undated come last, in the file's order.
+
 ## 2. A rule layer (from an open dataset)
 
 Add a function to `pipeline/layers.py` with the `@layer(...)` decorator. It receives a `Context` (buildings,

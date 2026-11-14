@@ -7,7 +7,7 @@ import { S } from './state.js';
 import { areaOf, centreOf, fstate, isB, loadCard, parseRef, pinOf, refOf, routeOf, saveActive, storyOf, tiled } from './data.js';
 import { openSheet } from './sheet.js';
 import { applyLayers, renderLayers } from './panels.js';
-import { showPlaces } from './places.js';
+import { showGroups, showPlaces } from './places.js';
 import { hoursText, openNow } from './hours.js';
 
 const J = v => typeof v === 'string' ? JSON.parse(v) : v;      // properties from vector tiles arrive as strings
@@ -139,9 +139,14 @@ export function renderCard(c){
     `<p>${linkPeople(esc(d.text))}${N.cite(d.source)}</p>`).join(''));
   fill('cArch', c.archive && c.archive.length && archiveHtml(c.archive));
   fill('cColl', c.coll && c.coll.length && collHtml(c.coll));
-  $('cStories').innerHTML = (c.stories || []).map(st => storyHtml(st, N)).join('') + (c.after || '') + N.html();
+  $('cStories').innerHTML = (c.stories || []).map(st => storyHtml(st, N)).join('') + (c.after || '') + topicsHtml(c.topics) + N.html();
   const card = $('pCard');
   card.querySelectorAll('[data-ref]').forEach(x => x.onclick = e => { e.preventDefault(); openRef(parseRef(x.dataset.ref)); });
+  card.querySelectorAll('[data-topic]').forEach(x => x.onclick = e => {
+    e.preventDefault();
+    const g = S.groups.get(x.dataset.topic);
+    showGroups([x.dataset.topic], g.layer.groups.length > 1 ? `${g.layer.title}: ${g.title}` : g.layer.title);
+  });
   card.querySelectorAll('.allplaces').forEach(btn => btn.onclick = () => showPlaces(btn.dataset.name, btn.dataset.b.split(',').map(parseRef)));
   card.querySelectorAll('[data-who]').forEach(x => x.onclick = e => { e.preventDefault(); openWho(x.dataset.who); });
   card.querySelectorAll('[data-fn]').forEach(x => x.onclick = e => {        // to the source, and show which
@@ -192,6 +197,12 @@ function storyHtml(s, N){
   return `<div class="story">${s.label ? `<div class="seclbl">${esc(s.label)}</div>` : ''}
     ${s.text ? `<p>${linkPeople(esc(s.text))}${refs}</p>` : refs ? `<p class="src">Source${refs}</p>` : ''}${s.note ? `<p class="src">${esc(s.note)}</p>` : ''}${aboutHtml(s.who, s.source, N)}
     ${s.pin ? `<p class="go"><a href="#" data-ref="${esc(s.pin)}">See the plaque on the map</a></p>` : ''}${seeHtml(J(s.see))}</div>`;
+}
+// the topics a place is in (its layer groups of the Topics section: ",war-1831,coal,"), each opening its places
+function topicsHtml(keys){
+  const gs = String(keys || '').split(',').map(k => S.groups.get(k)).filter(g => g && g.layer.kind === 'topics');
+  if (!gs.length) return '';
+  return `<p class="see">In the topics: ${gs.map(g => `<a href="#" data-topic="${esc(g.key)}">${esc(g.layer.groups.length > 1 ? `${g.layer.title} (${g.title})` : g.layer.title)}</a>`).join(', ')}</p>`;
 }
 // "See also": other stories the story file links to (stories/<city>/*.md: see), each opening where it is
 function seeHtml(see){
@@ -267,7 +278,7 @@ export function selectBuilding(id, at){
     renderCard({ title: refName(id), rows: [['Could not load', 'Check the connection and tap the building again.']] });
   });
 }
-export function showCard(id){ renderCard(buildingCard(S.features[id].properties, id)); }
+export function showCard(id){ const c = buildingCard(S.features[id].properties, id); renderCard({ ...c, topics: S.features[id].properties.L }); }
 
 // where a date comes from, as a footnote: the record itself where the card knows it
 const VOA = 'https://www.gov.uk/government/statistics/council-tax-stock-of-properties-2023';
@@ -403,7 +414,7 @@ function areaCard(p){
 
 // ================= Plaques and other pins =================
 export function showPin(p){
-  renderCard(pinCard(p));
+  renderCard({ ...pinCard(p), topics: p.T });
   plaqueOn(p.on == null || p.on === '' ? null : +p.on);
 }
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];

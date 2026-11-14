@@ -13,7 +13,7 @@ export let ERAS = [[0, 1699, 'before 1700'], [1700, 1799, '1700s'], [1800, 1839,
   [1880, 1913, '1880–1913'], [1914, 1945, '1914–45'], [1946, 1979, '1946–79'], [1980, 1999, '1980–99'], [2000, 9999, '2000+']]
   .map((e, i) => [...e, PALETTE[i]]);
 export const FADE = { exact: 0, approx: 0.2, century: 0.35, area: 0.45 };   // how far each precision fades towards the background
-export const SECTIONS = ['Stories', 'Visit', 'People', 'Heritage', 'Nature', 'Today'];
+export const SECTIONS = ['Stories', 'Topics', 'Visit', 'People', 'Heritage', 'Nature', 'Today'];
 export const AREA_TYPES = ['nnr', 'lnr', 'sssi', 'ancient', 'reserve', 'lws', 'conservation', 'parkgarden', 'article4', 'tpo'];   // areas drawn on the ground
 export const PIN_LAYERS = ['attractions', 'art', 'boards', 'museums'];   // pins with a colour of their own (--p-<layer>); other pins --marked
 export const LAND = ['brook', 'pond', 'wood', 'rail', 'canal', 'oldsite', 'cemetery', 'allot', 'orchard'];   // the land's shapes (--l-<key>)

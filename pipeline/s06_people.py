@@ -287,6 +287,8 @@ def main(city_id):
                      qid=p.get("qid"), who=len(persons) == 1, on=b, title=label)
         if len(named_people) > 1:
             out.pins[int(ref[1:])]["people"] = named_people
+            # the plaque is not one of the people: only they are in the layer's groups, under their names
+            pg["people-" + key]["items"].remove([ref, label])
             for n in named_people:
                 wiki_hint(n, None, None, text)
                 k = "people-" + (on_it.get("group") or "other")

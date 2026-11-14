@@ -16,8 +16,9 @@ Writes layers.json, and routes.json and basics.json (GeoJSON features for s07):
           grounds) and plaques not on a building; layer items refer to them as "p<index>"
 """
 from .common import city, load, log, save, sources, work
-from .layerdata import AREAS, Collector, grouped, place_of
+from .layerdata import AREAS, Collector, grouped, in_date_order, place_of
 from .layers import LAYERS, Context
+from .stories_md import slug
 from .visitorlayers import museums, pub_heritage, visitor
 
 NATURE = [
@@ -104,6 +105,11 @@ def main(city_id):
         return t.get("name") or inside.get(i) or names.get(str(i)) or t.get("addr:street") and \
             f"{t.get('addr:housenumber', '')} {t['addr:street']}".strip() or "Unnamed building"
 
+    # ---- topics (stories/<city>/topics/*.md): stories, people, plaques and buildings from any layer, on one subject
+    topic_meta = topic_layers(cur.get("topics") or [], cur["entries"], ppl["meta"], out, ctx.buildings, bname,
+                              {L["id"] for L in cur["layers"] if L.get("kind") not in ("facts", "people")})
+    meta += topic_meta
+
     for L in LAYERS:
         if L.get("settings") and not sources(settings, L["settings"]):
             continue        # its council source is switched off, or the city has none
@@ -167,6 +173,8 @@ def main(city_id):
         log(f"s06 {L['title'].lower()}: {len(feats)}")
 
     meta += visitor_meta + museums(city_id, ctx, out) + pub_heritage(city_id, ctx, out)
+    dates = load(city_id, "dates") if work(city_id, "dates").exists() else {}
+    in_date_order(meta, out.stories, out.pins, dates, ppl["about"])
     save(city_id, "routes", routes)
     save(city_id, "basics", basics)
     save(city_id, "layers", {"meta": meta, **out.json(), "names": names, "people": ppl["about"],
@@ -199,3 +207,85 @@ def cross_links(entries, story_layers):
             e["_story"]["see"] = see
     for e in entries:
         e.pop("_story", None)
+
+
+def topic_layers(topics, entries, people, out, buildings, bname, story_layers):
+    """The Topics section's layers: each topic's members found where the map has them (stories by heading, people
+    by name, plaques by title, buildings by OpenStreetMap id), as items [name, [places], hint] (hint: the story's
+    layer, or that it is a person, a plaque or a building, so a card shows the right story). Each building and
+    pin is marked with the topic's groups, so ticking a topic shows them. Raises on a line that finds nothing or
+    more than one thing, naming the file and line."""
+    by_name, by_full = {}, {}
+    for e in entries:
+        if e["layer"] in story_layers and e.get("b") is not None:
+            by_name.setdefault(e["name"].lower(), []).append(e)
+            by_full.setdefault(f"{e['layer']}/{e['name']}".lower(), []).append(e)
+    persons = {}
+    for g in people["groups"]:
+        if g["key"] == "people-events":
+            continue
+        for name, refs in g["items"]:
+            rs = persons.setdefault(name.lower(), [name, []])[1]
+            rs += [r for r in refs if r not in rs]
+    plaques, osm = {}, {}
+    for k, p in enumerate(out.pins):
+        if p.get("layer") == "people":
+            plaques.setdefault(p["name"].lower(), []).append(f"p{k}")
+    for i, b in enumerate(buildings):
+        osm[b["osm"]] = i
+    problems, meta = [], []
+    for T in topics:
+        tid = T["id"]
+        keys = {g: f"{tid}-{slug(g)}" for g in T["groups"]}
+        items = {}
+        for m in T["members"]:
+            kind, name, where = m["kind"], m["name"], m["line"]
+            if kind == "story":
+                hits = by_full.get(name.lower()) or by_name.get(name.lower(), [])
+                if len({e["layer"] for e in hits}) > 1:
+                    problems.append(f"{where}: story {name!r} is in more than one layer "
+                                    f"({', '.join(sorted({e['layer'] for e in hits}))}): write it as layer/heading")
+                    continue
+                if not hits:
+                    problems.append(f"{where}: no story with the heading {name!r}")
+                    continue
+                item = [hits[0]["name"], list(dict.fromkeys(e["b"] for e in hits)), {"layer": hits[0]["layer"]}]
+            elif kind == "person":
+                hit = persons.get(name.lower())
+                if not hit:
+                    problems.append(f"{where}: no one called {name!r} in the People layer")
+                    continue
+                item = [hit[0], list(hit[1]), {"person": 1}]
+            elif kind == "plaque":
+                hits = plaques.get(name.lower(), [])
+                if len(hits) != 1:
+                    problems.append(f"{where}: " + (f"no plaque titled {name!r}" if not hits else
+                                    f"{len(hits)} plaques are titled {name!r}: name the person instead (person:)"))
+                    continue
+                item = [out.pins[int(hits[0][1:])]["name"], hits, {"plaque": 1}]
+            else:
+                i = osm.get(name if "/" in name else "way/" + name)
+                if i is None:
+                    problems.append(f"{where}: no building {name!r} on the map (write it as way/123 or relation/123)")
+                    continue
+                item = [bname(i), [i], {"building": 1}]
+            key = keys.get(m["group"], tid)
+            items.setdefault(key, []).append(item)
+            for r in item[1]:
+                if isinstance(r, int):
+                    mine = out.member.setdefault(str(r), [])
+                    if key not in mine:
+                        mine.append(key)
+                elif isinstance(r, str) and r.startswith("p"):
+                    p = out.pins[int(r[1:])]
+                    p["T"] = (p.get("T") or ",") + key + "," if f",{key}," not in (p.get("T") or "") else p["T"]
+        groups = [[keys[g], g] for g in T["groups"]] or [[tid, T["title"]]]
+        if tid in items and T["groups"]:
+            groups.insert(0, [tid, "Other"])
+        meta.append({"id": tid, "title": T["title"], "intro": T.get("intro", ""), "section": "Topics", "kind": "topics",
+                     "groups": [{"key": k, "title": t, "count": len({r for it in items.get(k, []) for r in it[1]}),
+                                 "items": items.get(k, [])} for k, t in groups]})
+        log(f"s06 topic {tid}: {sum(len(v) for v in items.values())} members")
+    if problems:
+        raise SystemExit("Topics (stories/<city>/topics/): fix these lines:\n  " + "\n  ".join(problems))
+    return meta

@@ -8,7 +8,7 @@ import { openRef, refName } from './cards.js';
 
 // A place's card in the strip: its name, date and the story that ties it to the set; a building whose card file
 // has not arrived yet shows its name (from the index) and fills in when the file comes (fillCard)
-function cardHtml(b, i, name){
+function cardHtml(b, i, name, hint){
   if (!isB(b)) {
     const pp = refOf(b).properties;
     return `<div class="pnum">${i + 1}</div><h3>${esc(refName(b))}</h3>
@@ -17,7 +17,7 @@ function cardHtml(b, i, name){
   const f = S.features[b], p = f.properties;
   if (!f.full) return `<div class="pnum">${i + 1}</div><h3>${esc(refName(b))}</h3><p class="pwait">Loading…</p>
     <button class="textbtn" data-open="${b}">Details</button>`;
-  const st = storyFor(b, name), era = p.y != null ? eraOf(p.y) : null;
+  const st = storyFor(b, hint?.name || name, hint?.layer), era = p.y != null ? eraOf(p.y) : null;
   return `<div class="pnum">${i + 1}</div>
     <h3>${esc(refName(b))}</h3>
     ${p.y != null ? `<div class="pmeta">${esc(dateText(p.y, p.f, p.per, p.dt))}<span class="pill" style="border-color:${era[3]}">${esc(era[2])}</span></div>` : ''}
@@ -28,7 +28,7 @@ function fillCard(i){
   const P = S.places, el = P && $('pCards').querySelector(`[data-i="${i}"]`);
   if (!el || el.dataset.full) return;
   if (isB(P.bs[i]) && !S.features[P.bs[i]].full) return;
-  el.innerHTML = cardHtml(P.bs[i], i, P.name); el.dataset.full = '1';
+  el.innerHTML = cardHtml(P.bs[i], i, P.name, P.hints?.[i]); el.dataset.full = '1';
   el.querySelector('[data-open]').onclick = () => openRef(parseRef(el.querySelector('[data-open]').dataset.open));
 }
 // the cards round the one in view, loaded first (a big set, as a group from the graph, has places in dozens of
@@ -42,7 +42,9 @@ function loadAround(i){
   }
 }
 
-export function showPlaces(name, bs){
+// hints: for each place, the name and story layer of what put it in the set (a group's or a topic's items), so its
+// card tells that story
+export function showPlaces(name, bs, hints){
   // the stories' words are in the card files. A small set (a person, a story: one or two files) waits for them,
   // showing the bar meanwhile; a big set, or one whose places' whereabouts need the files, shows at once
   const need = bs.filter(isB).filter(b => !S.features[b].full);
@@ -51,17 +53,17 @@ export function showPlaces(name, bs){
     $('pName').textContent = name; $('pCount').textContent = '';
     $('pCards').innerHTML = `<p class="pwait">Finding ${bs.length} ${bs.length === 1 ? 'place' : 'places'}…</p>`;
     $('placesbar').hidden = false; $('timebar').hidden = true;
-    return Promise.all(need.map(b => loadCard(b).catch(() => {}))).then(() => showPlaces(name, bs));
+    return Promise.all(need.map(b => loadCard(b).catch(() => {}))).then(() => showPlaces(name, bs, hints));
   }
   closeSheet();
   clearPlaces(false);
-  S.places = { name, bs, i: 0 };
+  S.places = { name, bs, hints, i: 0 };
   bs.filter(isB).forEach(b => fstate(b, { hl:true }));
   S.map.setPaintProperty('b', 'fill-extrusion-color', buildingColour());
   S.map.getSource('places').setData({ type:'FeatureCollection', features: bs.map((b, i) =>
     ({ type:'Feature', properties:{ n: i + 1 }, geometry:{ type:'Point', coordinates: refCentre(b) } })) });
   $('pName').textContent = name;
-  $('pCards').innerHTML = bs.map((b, i) => `<article class="pcard" data-i="${i}"${!isB(b) || S.features[b].full ? ' data-full="1"' : ''}>${cardHtml(b, i, name)}</article>`).join('');
+  $('pCards').innerHTML = bs.map((b, i) => `<article class="pcard" data-i="${i}"${!isB(b) || S.features[b].full ? ' data-full="1"' : ''}>${cardHtml(b, i, name, hints?.[i])}</article>`).join('');
   $('pCards').querySelectorAll('[data-open]').forEach(btn => btn.onclick = () => openRef(parseRef(btn.dataset.open)));
   $('placesbar').hidden = false; $('timebar').hidden = true;
   $('pCards').scrollLeft = 0;
@@ -69,6 +71,23 @@ export function showPlaces(name, bs){
   const pts = bs.map(refCentre), lons = pts.map(p => p[0]), lats = pts.map(p => p[1]);
   S.map.fitBounds([[Math.min(...lons), Math.min(...lats)], [Math.max(...lons), Math.max(...lats)]],
     { padding: { top: 90, left: 40, right: 70, bottom: $('placesbar').offsetHeight + 40 }, maxZoom: 16.5, duration: 900 });
+}
+// a layer's groups (or a whole story layer or topic, by its id) as one set of numbered cards, in the build's date
+// order, item by item, each place once. Returns false when there is nothing to show
+export function showGroups(keys, title){
+  const seen = new Set(), refs = [], hints = [];
+  for (const k of keys) {
+    const g = S.groups.get(k); if (!g) continue;
+    for (const it of g.items || []) {
+      const rs = typeof it[0] === 'number' ? [it[0]] : it[1], name = typeof it[0] === 'number' ? it[1] : it[0];
+      const h = it[2] || {}, layer = h.layer || (g.layer.kind === 'stories' ? g.layer.id : h.person || h.plaque ? 'people' : null);
+      for (const r of rs.map(x => typeof x === 'number' ? x : parseRef(String(x))))
+        if (!seen.has(r)) { seen.add(r); refs.push(r); hints.push({ name, layer }); }
+    }
+  }
+  if (!refs.length) return false;
+  showPlaces(title, refs, hints);
+  return true;
 }
 export function setPlace(i, fly = true){
   if (!S.places) return;

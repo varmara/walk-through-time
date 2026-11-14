@@ -123,11 +123,66 @@ def layer(path):
     return L
 
 
+TOPIC_KINDS = ("story", "person", "plaque", "building")
+
+
+def slug(s):
+    return re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-")
+
+
+def topic(path):
+    """A topic (topics/<id>.md): stories, people, plaques and buildings from anywhere on the map, on one subject.
+
+        # Riot, rebellion and war         <- the topic's title
+        id: war
+
+        The topic's introduction: one paragraph.
+
+        ## The Civil War                  <- optional: a sub-group (a tickbox of its own)
+        - story: The storming of Shelford House     (a story, by its heading, or layer/heading)
+        - person: Colonel Hutchinson                (someone in the People layer, by name: all their places)
+        - plaque: Plaque to Albert Ball             (a plaque, by its title on the map)
+        - building: way/80847199                    (a building, by its OpenStreetMap id)
+        - note: …                                   (for editors only)
+
+    Anything can be in several topics. The build fails if a line finds nothing, or more than one thing."""
+    T, intro, group, problems = {"groups": [], "members": []}, [], None, []
+    for n, raw in enumerate(Path(path).read_text().splitlines(), 1):
+        line = raw.strip()
+        if not line:
+            continue
+        if raw.startswith("# ") and "title" not in T:
+            T["title"] = line[2:].strip()
+        elif raw.startswith("## "):
+            group = line[3:].strip()
+            T["groups"].append(group)
+        elif m := re.match(r"^- (\w+):\s*(.+)$", line):
+            if m[1] == "note":
+                continue
+            if m[1] not in TOPIC_KINDS:
+                problems.append(f"{Path(path).name}:{n}: '{m[1]}:' is not one of {', '.join(TOPIC_KINDS)}")
+                continue
+            T["members"].append({"kind": m[1], "name": m[2].strip(), "group": group, "line": f"{Path(path).name}:{n}"})
+        elif (m := re.match(r"^id:\s*(\S+)$", line)) and not intro and not T["members"]:
+            T["id"] = m[1]
+        elif not T["groups"] and not T["members"]:
+            intro.append(line)
+        else:
+            problems.append(f"{Path(path).name}:{n}: not a member line ('- story: …', '- person: …', …): {line[:60]}")
+    T.setdefault("id", Path(path).stem)
+    T.setdefault("title", T["id"])
+    T["intro"] = " ".join(intro)
+    if problems:
+        raise ValueError("topics: " + "; ".join(problems))
+    return T
+
+
 def load(folder):
-    """Everything a city's stories folder holds: CURATED and the correction tables."""
+    """Everything a city's stories folder holds: CURATED, TOPICS and the correction tables."""
     folder = Path(folder)
     curated = [layer(p) for p in sorted(folder.glob("[0-9][0-9]-*.md"))]
     out = {"CURATED": curated}
+    out["TOPICS"] = [topic(p) for p in sorted((folder / "topics").glob("*.md")) if p.name.lower() != "readme.md"]
     f = folder / "wikipedia.md"
     out["WIKIPEDIA"] = {r["name on plaque"]: r["wikipedia article"] for r in table(f)} if f.exists() else {}
     for name, key in (("names.md", "NAMES"), ("titles.md", "TITLES")):

@@ -5,8 +5,9 @@ an area as a<index> in that order.
 
 s06_people fills one with the People layer and saves it; s06_layers carries on with it for the other layers.
 """
+import re
 
-AREAS = ("nature", "conservation", "parks", "article4", "tpo")
+AREAS =("nature", "conservation", "parks", "article4", "tpo")
 
 
 def grouped(pairs, where=None, within=150):
@@ -50,6 +51,66 @@ def place_of(buildings, pins):
             return centroid(buildings[ref]["rings"][0])
         return None
     return where
+
+
+YEAR = re.compile(r"(?<![\d,.£$])\b(1[0-9]{3}|20[0-9]{2})\b(?![,.]\d)")
+CENTURY = re.compile(r"\b(\d{1,2})(?:st|nd|rd|th)[ -]century", re.I)
+
+
+def year_in(text):
+    """The first year a text tells of ("the 12th century" is 1100), or None. A plaque's text is its words, not
+    when it was put up ("Plaque put up in 1990: “… born here 1811”" tells of 1811)."""
+    t = text or ""
+    if "“" in t:
+        t = t.split("“", 1)[1]
+    ys = [(m.start(), int(m[1])) for m in YEAR.finditer(t)] + [(m.start(), (int(m[1]) - 1) * 100) for m in CENTURY.finditer(t)]
+    return min(ys)[1] if ys else None
+
+
+def in_date_order(meta, stories, pins, dates, about):
+    """Each story, people or topic group's items, and each item's places, in date order: the year of what it tells
+    (a story's, a plaque's words'), a person's year of birth, a building's year of building. Undated last; ties keep
+    their order. The page's numbered cards follow this order."""
+    def ref_year(r, name=None, layer=None):
+        if isinstance(r, str) and r.startswith("p"):
+            return year_in(pins[int(r[1:])].get("text"))
+        if not isinstance(r, int):
+            return None
+        ss = stories.get(str(r), [])
+
+        def text(s):
+            return s.get("text") or (pins[int(s["pin"][1:])].get("text") if s.get("pin") else "")
+        mine = [s for s in ss if (layer and s.get("layer") == layer) or (name and (s.get("who") == name or name in text(s)))]
+        for s in mine:
+            if (y := year_in(text(s))) is not None:
+                return y
+        return (dates.get(str(r)) or {}).get("y")
+
+    def born(name):
+        m = re.match(r"(\d{3,4})", (about.get(name) or {}).get("life") or "")
+        return int(m[1]) if m else None
+
+    def later(y):
+        return (y is None, y or 0)
+
+    for L in meta:
+        if L.get("kind") not in ("stories", "people", "topics"):
+            continue
+        for g in L["groups"]:
+            items = g.get("items") or []
+            keyed = []
+            for it in items:
+                name, refs = it[0], it[1]
+                hint = it[2] if len(it) > 2 else {}
+                person = L["kind"] == "people" and g["key"] != "people-events" or hint.get("person")
+                layer = hint.get("layer") or (L["id"] if L["kind"] == "stories" else None)
+                ys = {r: ref_year(r, name if person or L["kind"] == "people" else None, layer) for r in refs}
+                it[1] = sorted(refs, key=lambda r: later(ys[r]))
+                first = min((y for y in ys.values() if y is not None), default=None)
+                if hint.get("building"):
+                    first = (dates.get(str(refs[0])) or {}).get("y") if refs else None
+                keyed.append((later(born(name) if person and born(name) is not None else first), it))
+            g["items"] = [it for _, it in sorted(keyed, key=lambda k: k[0])]
 
 
 class Collector:

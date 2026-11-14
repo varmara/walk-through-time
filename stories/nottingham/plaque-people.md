@@ -57,7 +57,7 @@ the kind of person (architects, writers, science, industry, sport, arts, faith, 
 | Sid Standard | Sid Standard | sport |  |
 | George Africanus c1763 | George Africanus | industry |  |
 | Midland Counties Railway | Charles Blacker Vignoles | science | surveyed the railway |
-| "This admirably appointed | Charles J. Phipps & Frank Matcham | architects | the Theatre Royal |
+| "This admirably appointed | C. J. Phipps & Frank Matcham | architects | the Theatre Royal |
 | Herbert Kilpin | Herbert Kilpin | sport |  |
 | Onetime home of Albert Ball | Albert Ball | military |  |
 | This building was erected in 1883 and became the first store | Jesse Boot | industry |  |

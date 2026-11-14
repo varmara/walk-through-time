@@ -62,6 +62,17 @@ const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (
     }
   } else check(false, 'a layer lists a person or story with several places');
 
+  // a topic's places as numbered cards, from its button in the Layers sheet
+  await open('');
+  await page.click('#bLayers');
+  const topicBtn = await page.$('#lSections .section:has(.seclbl:text-is("Topics")) [data-cards]');
+  check(!!topicBtn, 'the Layers sheet has topics');
+  if (topicBtn) {
+    await page.evaluate(b => b.click(), topicBtn);
+    await page.waitForTimeout(3000);
+    check(/^1 of \d+$/.test(await text('#pCount')) && (await page.$$('#pCards .pcard')).length > 1, "a topic's places open as numbered cards");
+  }
+
   await page.click('#bMap').catch(() => {});
   await open('');
   await page.click('#bMap');

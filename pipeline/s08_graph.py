@@ -42,17 +42,25 @@ def main(city_id):
         links.append({"s": a, "t": b, "text": text, "src": src, "how": how})
 
     people = []   # (node id, name)
+    topic_people = []   # (topic node, person node): a person in a topic
     for L in data["layers"]:
-        if L.get("kind") == "stories" and L["id"] != "people":
+        if L.get("kind") in ("stories", "topics") and L["id"] != "people":
+            # a story layer or a topic: linked to its places, and a topic to the people in it
             tid = f"t:{L['id']}"
             nodes[tid] = {"id": tid, "label": L["title"], "type": "theme"}
             for g in L["groups"]:
-                for name, refs in g["items"]:
+                for name, refs, *hint in g["items"]:
+                    hint = hint[0] if hint else {}
+                    if hint.get("person"):
+                        topic_people.append((tid, f"e:{name}"))
+                        continue
                     for x in refs:
                         r = ref(x)
                         info, stories = place_info(r)
                         nodes.setdefault(r, {"id": r, "type": "place", **info})
-                        st = next((s for s in stories if s.get("layer") == L["id"]), None)
+                        want = hint.get("layer") or L["id"]
+                        st = next((s for s in stories if s.get("layer") == want), None) or \
+                            (next((s for s in stories if s.get("text")), None) if L["kind"] == "topics" else None)
                         link(tid, r, st and st.get("text"), st and st.get("source"))
         if L["id"] == "people":
             for g in L["groups"]:
@@ -71,6 +79,10 @@ def main(city_id):
                                     or name.lower() in ((s.get("source") or {}).get("title") or "").lower()), None)
                               or next((s for s in ps if last in (s.get("text") or "").lower()), None))
                         link(eid, r, st and st.get("text"), st and st.get("source"))
+
+    for tid, eid in topic_people:
+        if eid in nodes:
+            link(tid, eid, how="topic")
 
     # mentions: a person's full name in the story of a place they are not yet linked to
     texts = []

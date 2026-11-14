@@ -17,3 +17,5 @@ uses for them), an article the name alone does not find, or, where there is no a
 | Edwin Hill | | | https://leftlion.co.uk/features/2014/11/the-history-of-the-malt-cross-nottingham/ | the Malt Cross, 1877; LeftLion © LeftLion Ltd, linked only |
 | Albert Batzer | Albert Edward Batzer | | https://architecture.arthistoryresearch.net/architects/batzer-albert-edward | Biographical Dictionary of British and Irish Architects 1800–1950 (AHRnet), no licence stated, linked only; the page names no Nottingham work, matched by name |
 | Franklin Ellis | | | https://www.franklinellis.co.uk/ | an architecture practice in Nottingham and Leicester, not a person; the Land Registry, 2 Canal Street |
+| G.T. RIce | G.T. Rice | | | a typing slip in OpenStreetMap: the same architect's houses on Sidney Road, Beeston |
+| G.W. Brough | George W. Brough | | | the same architect as George W. Brough: both names on houses on Marlborough Road, Beeston |

@@ -14,7 +14,7 @@ import { drawMap } from './map.js';
 import { stopPlay, updateYear } from './timebar.js';
 import { applyLayers, drawLegend, groundNote, renderLayers } from './panels.js';
 import { openRef, selectBuilding } from './cards.js';
-import { showPlaces } from './places.js';
+import { showGroups, showPlaces } from './places.js';
 
 export async function main(){
   progress(5, 'loading map data…');
@@ -83,17 +83,9 @@ export async function openLink(q, first){
     : (S.layers.find(L => L.id === k)?.groups || []).filter(g => g.count > 0).map(g => g.key)))] : [];
   if (keys.length) { S.active.clear(); keys.forEach(k => S.active.add(k)); ticked = true; }
   if (ticked) { saveActive(); renderLayers(); applyLayers(); if (!first) updateYear(); }
-  // a group's places as numbered cards, person by person (or story by story), each place once
-  const groupSet = keys.length && (() => {
-    const seen = new Set(), refs = [];
-    for (const k of keys) for (const it of S.groups.get(k).items || []) {
-      const rs = typeof it[0] === 'number' ? [it[0]] : it[1];
-      for (const r of rs.map(x => typeof x === 'number' ? x : parseRef(String(x)))) if (!seen.has(r)) { seen.add(r); refs.push(r); }
-    }
-    const asked = gq.split(','), whole = asked.length === 1 && S.layers.find(L => L.id === asked[0]);
-    const title = whole ? whole.title : keys.length === 1 ? S.groups.get(keys[0]).title : 'Story themes';
-    return refs.length ? [title, refs] : null;
-  })();
+  // a group's places as numbered cards, person by person (or story by story) in date order, each place once
+  const asked = gq ? gq.split(',') : [], whole = asked.length === 1 && S.layers.find(L => L.id === asked[0]);
+  const groupTitle = whole ? whole.title : keys.length === 1 ? S.groups.get(keys[0]).title : 'Story themes';
   const focus = q.get('focus'), osm = q.get('osm');
   // a shared building: the OpenStreetMap id is the lasting key; ?b= is its place in the build the link was made
   // from, used only if it still points at the same building (positions change between builds)
@@ -105,7 +97,7 @@ export async function openLink(q, first){
     if (i < 0) i = await byOsm(osm).catch(() => -1);
     if (i >= 0) selectBuilding(i);
   } else if (bq != null && +bq < S.features.length) selectBuilding(+bq);
-  if (groupSet) showPlaces(...groupSet);
+  if (keys.length) showGroups(keys, groupTitle);
   if (focus) {
     const refs = focus.split(',').map(x => x[0] === 'b' ? +x.slice(1) : x)
       .filter(r => typeof r === 'number' ? r < S.features.length : r[0] === 'p' ? S.data.pins && pinOf(r) : refOf(r));

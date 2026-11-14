@@ -377,5 +377,6 @@ def main(city_id):
     T = _tables.get(city_id, {})
     save(city_id, "curated", {"layers": meta, "entries": entries, "dropped": dropped,
                               **{k.lower(): T.get(k) or default for k, default in (
-                                  ("WIKIPEDIA", {}), ("PLAQUES", {}), ("PLAQUE_PEOPLE", {}), ("ABOUT", {}), ("COLLECTIONS", []), ("NAMES", {}),
+                                  ("WIKIPEDIA", {}), ("PLAQUES", {}), ("PLAQUE_PEOPLE", {}), ("ABOUT", {}), ("TOPICS", []),
+                                  ("COLLECTIONS", []), ("NAMES", {}),
                                   ("TITLES", {}), ("CREDITS", {}), ("ARCHITECTS", {}))}})
