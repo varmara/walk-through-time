@@ -11,7 +11,8 @@ A story layer is one file, `NN-<id>.md` (NN sets the order):
 
     ## Ye Olde Trip to Jerusalem      <- an entry: the place, person or fact's name
     - source: en:Ye Olde Trip to Jerusalem      (the Wikipedia article it rests on; a person's, for People; or
-                                                 he:1254566, or web:https://… for another site's page)
+                                                 he:1254566; or web:https://… for another site's page, read
+                                                 once by hand: then also read: 2026-11-14 and title: the page's)
     - place: en:Nottingham Castle               (People: the place's article)
     - at: name:Ye Olde Trip to Jerusalem        (where, if not where the article says: name:, osm:, nhle:, pin:lon,lat,
                                                  pin:article for a pin at the article's coordinates)
@@ -34,7 +35,8 @@ collections.md, credits.md); each has a Note column for why. See stories/<city>/
 import re
 from pathlib import Path
 
-ENTRY_KEYS = {"source", "place", "at", "year", "group", "quote", "names", "check", "note", "architect", "see"}
+ENTRY_KEYS = {"source", "place", "at", "year", "group", "quote", "names", "check", "note", "architect", "see", "read",
+              "title"}
 
 
 def architects(v):

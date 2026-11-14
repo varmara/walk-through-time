@@ -184,10 +184,10 @@ of her patients, Louisa Baguley and her daughter Ada, with morphine.
 
 ## Helen Watts
 - source: web:https://map.mappingwomenssuffrage.org.uk/items/show/256
+- title: Helen Watts
+- read: 2026-11-14
 - at: osm:way/40324301
 - group: public
-- check: Lenton | Christabel Pankhurst | Holloway | Albert Hall | hunger strike
-- note: from Mapping Women's Suffrage (University of Warwick), in our own words
 
 Helen Watts, the daughter of the vicar of Lenton, joined Nottingham's suffragettes after hearing Christabel
 Pankhurst speak in 1907. In 1909 she served a month in Holloway, was arrested here at the Albert Hall in July
@@ -195,9 +195,10 @@ and let go without charge, and went on hunger strike in Leicester gaol.
 
 ## Nellie Crocker
 - source: web:https://map.mappingwomenssuffrage.org.uk/items/show/260
+- title: Ellen (Nellie) Crocker
+- read: 2026-11-14
 - at: pin:-1.1452,52.9533
 - group: public
-- check: Carlton Street | 1909 | 1912 | Holloway | eighth arrest
 - note: a pin on Carlton Street, where the suffragettes' office at number 6 was: the building is not marked
 
 Nellie Crocker was the suffragettes' organiser in Nottingham from 1909 to 1912, with an office on Carlton Street.
@@ -205,30 +206,135 @@ After her eighth arrest, for attacking a post office in London, she spent three 
 
 ## Helena Dowson
 - source: web:https://map.mappingwomenssuffrage.org.uk/items/show/293
+- title: Helena Brownsword Dowson
+- read: 2026-11-14
 - at: osm:way/40324861
 - group: public
-- check: 1895 | Long Row | 1920 | Meadows | Justice Centre
 - note: placed on the Justice Centre, where a plaque to her was put up in 2020
 
-Helena Dowson ran Nottingham's suffrage society from 1895 and its shop on Long Row. In 1920 she became the
-city's first woman magistrate and a councillor for the Meadows; a plaque here at the Justice Centre remembers her.
+Helena Dowson ran Nottingham's suffrage society from 1895 and its shop on Long Row. In 1920 she became the first
+woman magistrate and a Liberal councillor for the Meadows; a plaque here at the Justice Centre remembers her.
 
 ## Sarah Gray
 - source: web:https://map.mappingwomenssuffrage.org.uk/items/show/253
-- at: pin:-1.1574,52.9532
+- title: Sarah Gray (Dr.)
+- read: 2026-11-14
+- at: pin:-1.1571,52.9531
 - group: science
-- check: 21 Regent Street | first woman GP | 1899 | Medico-Chirurgical
 - note: a pin on Regent Street, near number 21, which is not marked on the map
 
 Sarah Gray, Nottingham's first woman GP, lived and practised at 21 Regent Street. At the Women's Hospital from
 1899 she was refused charge of in-patients; in 1921 she became the first president of the Nottingham
 Medico-Chirurgical Society.
 
+## Margaret Glen-Bott
+- source: web:https://nottinghamwomenshistory.org.uk/wp-content/uploads/2026/05/List-of-Notable-Nottingham-Women.pdf
+- title: List of Notable Nottingham Women
+- read: 2026-11-14
+- at: pin:-1.1566,52.9530
+- group: science
+- note: a pin on Regent Street, near number 15, which is not marked on the map
+
+Margaret Glen-Bott (1891–1969) came to Nottingham in 1916. The first woman gynaecologist to be Honorary Surgeon at
+the Women's Hospital and the Children's Hospital, and later a magistrate, she lived at 15 Regent Street.
+
+## Constance Penswick Smith
+- source: web:https://nottinghamwomenshistory.org.uk/wp-content/uploads/2026/05/List-of-Notable-Nottingham-Women.pdf
+- title: List of Notable Nottingham Women
+- read: 2026-11-14
+- at: pin:-1.1557,52.9530
+- group: public
+- note: a pin on Regent Street, near numbers 4–6, which are not marked on the map
+
+From 1913, at the Girls' Friendly Society hostel at 4–6 Regent Street, Constance Penswick Smith (1878–1938) worked
+to revive Mothering Sunday, with the hostel's superintendent, Ellen Porter.
+
+## Ruth Bryan
+- source: web:https://nottinghamwomenshistory.org.uk/wp-content/uploads/2026/05/List-of-Notable-Nottingham-Women.pdf
+- title: List of Notable Nottingham Women
+- read: 2026-11-14
+- at: pin:-1.1447,52.9504
+- group: writers
+- note: a pin on High Pavement, near number 18, which is not marked on the map
+
+Ruth Bryan (1805–1860) came to Nottingham as a child with her father, a minister. She lived at 18 High Pavement
+and kept a detailed diary from 1822.
+
+## Louisa Clarke
+- source: web:https://nottinghamwomenshistory.org.uk/wp-content/uploads/2026/05/List-of-Notable-Nottingham-Women.pdf
+- title: List of Notable Nottingham Women
+- read: 2026-11-14
+- at: osm:way/243728964
+- group: public
+
+Louisa Clarke opened a day and boarding school for girls in 1874, at 9 Park Terrace; called Western House, it
+moved here, to 30 The Ropewalk, in 1890. Rose Feilmann, who wrote "There are fairies at the bottom of my garden",
+was one of her pupils.
+
+## Jessie Batten
+- source: web:https://nottinghamwomenshistory.org.uk/wp-content/uploads/2026/05/List-of-Notable-Nottingham-Women.pdf
+- title: List of Notable Nottingham Women
+- read: 2026-11-14
+- at: osm:way/243728964
+- group: public
+
+Jessie Batten, a London graduate of 1892, owned Western House school here from 1895. She married in 1910 but kept
+her own name at work, and retired in 1918.
+
+## Ellen Harrington
+- source: web:https://nottinghamwomenshistory.org.uk/wp-content/uploads/2026/05/List-of-Notable-Nottingham-Women.pdf
+- title: List of Notable Nottingham Women
+- read: 2026-11-14
+- at: osm:way/120036349
+- group: public
+
+Ellen Harrington was the first woman librarian of Bromley House, from 1943 to 1983. Her portrait hangs here, in a
+room named after her.
+
+## Edith Ransom
+- source: web:https://nottinghamwomenshistory.org.uk/wp-content/uploads/2026/05/List-of-Notable-Nottingham-Women.pdf
+- title: List of Notable Nottingham Women
+- read: 2026-11-14
+- at: osm:way/120036349
+- group: public
+
+Edith Ransom (1872–1949) was the first woman president of Bromley House Library.
+
+## Louisa May Long
+- source: web:https://nottinghamwomenshistory.org.uk/wp-content/uploads/2026/05/List-of-Notable-Nottingham-Women.pdf
+- title: List of Notable Nottingham Women
+- read: 2026-11-14
+- at: osm:way/23303317
+- group: public
+
+Louisa May Long (1892–1981), who nursed with the 94 Nottingham VAD at Radcliffe on Trent in the First World War,
+was Matron of Florence Boot Hall from 1928 to 1946.
+
+## Kate Watson Wallis
+- source: web:https://nottinghamwomenshistory.org.uk/wp-content/uploads/2026/05/List-of-Notable-Nottingham-Women.pdf
+- title: List of Notable Nottingham Women
+- read: 2026-11-14
+- at: osm:way/16459858
+- group: public
+
+Kate Watson Wallis (1852–1918), a suffragist, lived in the Residence at the Castle with her husband, the Castle Art
+Gallery's first curator.
+
+## Cassandra Willoughby
+- source: web:https://nottinghamwomenshistory.org.uk/wp-content/uploads/2026/05/List-of-Notable-Nottingham-Women.pdf
+- title: List of Notable Nottingham Women
+- read: 2026-11-14
+- at: osm:way/4438894
+- group: arts
+
+Cassandra Willoughby (1670–1735) oversaw the restoration of Wollaton Hall and its gardens.
+
 ## Ann Morley
 - source: web:https://www.mynottinghamnews.co.uk/?p=9966
+- title: The People's Hall
+- read: 2026-11-14
 - at: osm:way/220003541
 - group: industry
-- check: Ann Morley | 1750 | 1843 | 1854 | George Gill
 
 Ann Morley, a businesswoman, built this house in 1750, a rare Georgian town house built by a woman. The
 Nottingham School of Design opened here in 1843, and in 1854 the lace merchant George Gill made it the People's
@@ -236,9 +342,10 @@ Hall, an institute for working men.
 
 ## Vera Anderson
 - source: web:https://www.boots-uk.com/newsroom/features/boots-hidden-heroes-vera-anderson/
+- title: Boots Hidden Heroes: Vera Anderson
+- read: 2026-11-14
 - at: osm:way/17505332
 - group: public
-- check: Printing Works | 8 May 1941 | night watchman | George Medal
 - note: placed on Trent House, the Printing Works as rebuilt after the raid
 
 Vera Anderson, a Boots nurse, was on duty when bombs wrecked the Boots Printing Works here on 8 May 1941. She
@@ -247,18 +354,20 @@ and was awarded the George Medal.
 
 ## Alan Sillitoe
 - source: web:https://openplaques.org/people/25144
+- title: Alan Sillitoe
+- read: 2026-11-14
 - at: osm:way/214484707
 - group: writers
-- check: 38 Manton Crescent | March 4th 1928
 
 A plaque on this house, 38 Manton Crescent in Lenton Abbey, says that the writer Alan Sillitoe was born here on
 4 March 1928.
 
 ## Richard Parkes Bonington
 - source: web:https://openplaques.org/people/24472
+- title: Richard Parkes Bonington
+- read: 2026-11-14
 - at: osm:way/354382265
 - group: arts
-- check: 79 High Street | Arnold | 26 October 1802
 - note: Bonington House, on High Street, Arnold: the plaque's 79 High Street
 
 A plaque on this house, 79 High Street in Arnold, says that the artist Richard Parkes Bonington was born here on
@@ -266,10 +375,10 @@ A plaque on this house, 79 High Street in Arnold, says that the artist Richard P
 
 ## William Booth
 - source: web:https://www.salvationarmy.org.uk/william-booth-birthplace-museum
+- title: William Booth Birthplace Museum
+- read: 2026-11-14
 - at: osm:way/123120708
 - group: faith
-- check: Notintone Place | birthplace | Catherine | Salvation Army
 
 William Booth, who founded the Salvation Army, was born in this house in Notintone Place, Sneinton. It is now the
 William Booth Birthplace Museum, telling the story of Booth, his wife Catherine and their family.
-

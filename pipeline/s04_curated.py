@@ -107,20 +107,21 @@ SITES = {"map.mappingwomenssuffrage.org.uk": "Mapping Women's Suffrage", "openpl
          "mynottinghamnews.co.uk": "My Nottingham News", "boots-uk.com": "Boots UK"}
 
 
+def written_by_hand(e):
+    """A story from another site's page (web:https://…): read once by hand on its `read` date and written in our
+    own words, so the build does not read the site; it is cited with the site's name and that date."""
+    from urllib.parse import urlparse
+    url = e["source"][4:]
+    host = (urlparse(url).hostname or "").removeprefix("www.")
+    return {"text": "", "url": url, "title": e.get("title") or e["name"], "qid": None, "coords": None, "nhle": [],
+            "kind": SITES.get(host, host), "read": e.get("read")}
+
+
 def article(ref):
-    """'en:Title' (Wikipedia), 'he:1254566' (Historic England list entry) or 'web:https://…' (another site's page,
-    its facts checked the same way) -> {text, url, title, qid, coords, nhle, kind}."""
+    """'en:Title' (Wikipedia) or 'he:1254566' (Historic England list entry) -> {text, url, title, qid, coords, nhle}."""
     if ref in _cache:
         return _cache[ref]
     lang, title = ref.split(":", 1)
-    if lang == "web":
-        from urllib.parse import urlparse
-        host = (urlparse(title).hostname or "").removeprefix("www.")
-        page = http_text(title)
-        time.sleep(1)
-        _cache[ref] = {"text": page["text"].lower(), "url": title, "title": page["title"] if page["title"] != title else host,
-                       "qid": None, "coords": None, "nhle": [], "kind": SITES.get(host, host)}
-        return _cache[ref]
     if lang == "he":
         url = f"https://historicengland.org.uk/listing/the-list/list-entry/{title}"
         page = http_text(url)
@@ -253,7 +254,7 @@ def main(city_id):
     for L in layers:
         for e in L["entries"]:
             for ref in filter(None, (e["source"], e.get("place"))):
-                if ref in arts:
+                if ref in arts or ref.startswith("web:"):     # (another site: written by hand, not read here)
                     continue
                 try:
                     arts[ref] = article(ref)
@@ -263,11 +264,6 @@ def main(city_id):
     for L in layers:   # list entries that could not be fetched: check against the quoted passages instead
         for e in L["entries"]:
             for ref in filter(None, (e["source"], e.get("place"))):
-                if arts.get(ref) is None and ref.startswith("web:") and e.get("quote"):     # a site that declined
-                    from urllib.parse import urlparse
-                    host = (urlparse(ref[4:]).hostname or "").removeprefix("www.")
-                    arts[ref] = {"text": " ".join(e["quote"]).lower(), "title": e["name"], "url": ref[4:], "qid": None,
-                                 "coords": None, "nhle": [], "kind": SITES.get(host, host)}
                 if arts.get(ref) is None and ref.startswith("he:") and e.get("quote"):
                     num = ref[3:]
                     arts[ref] = {"text": " ".join(e["quote"]).lower(), "title": f"List entry {num}",
@@ -285,10 +281,17 @@ def main(city_id):
     for L in layers:
         kept = 0
         for e in L["entries"]:
-            src = arts.get(e["source"])
+            hand = e["source"].startswith("web:")
+            src = written_by_hand(e) if hand else arts.get(e["source"])
             a = arts.get(e["place"]) if e.get("place") else src     # the article that places the entry
             why = None
-            if src is None or (e.get("place") and a is None):
+            if hand and not (e.get("read") and re.fullmatch(r"\d{4}-\d{2}-\d{2}", e["read"])):
+                why = "a story written from another site needs the date it was read (read: 2026-11-14)"
+            elif hand and not (e.get("at", "").startswith(("pin:", "osm:", "name:", "nhle:")) and e["at"] != "pin:article"):
+                why = "a story written from another site needs its place (at: osm:…, name:…, nhle:… or pin:lon,lat)"
+            elif hand:
+                pass                    # checked by hand when it was read: no check words
+            elif src is None or (e.get("place") and a is None):
                 why = "Wikipedia article not found"
             else:
                 text = src["text"] + "\n" + (a["text"] if e.get("place") else "")
@@ -354,7 +357,7 @@ def main(city_id):
             entries.append({"layer": L["id"], "group": group, "b": b, "name": e["name"],
                             **({"pin": list(a["coords"])} if b is None else {}),
                             "story": e["story"], "how": how,
-                            "source": {"title": src["title"], "url": src["url"], "kind": src["kind"]},
+                            "source": {"title": src["title"], "url": src["url"], "kind": src["kind"], **({"read": src["read"]} if src.get("read") else {})},
                             **({"place": {"title": a["title"], "url": a["url"], "kind": a["kind"]}} if e.get("place") else {}),
                             **({"year": list(parse_year(e["year"]))} if e.get("year") and parse_year(e["year"]) else {}),
                             **({"architect": e["architect"]} if e.get("architect") else {}),

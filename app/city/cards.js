@@ -36,6 +36,9 @@ export const layerTitle = id => S.layers.find(L => L.id === id)?.title || id;
 // story: { label, text, source, place, who, pin }: a story layer's entry, a plaque's words, an area's description
 // ================= Footnotes: every source on a card, numbered once in reading order =================
 // cite(source) -> a superscript number; html() -> the Sources list at the foot of the card
+// "2026-11-14" -> "14 November 2026": when a source from another site was read (stories/<city>/*.md: read)
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const readDate = d => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d); return m ? `${+m[3]} ${MONTHS[m[2] - 1]} ${m[1]}` : d; };
 export function notes(){
   const list = [], at = new Map();
   const key = s => { try { return decodeURIComponent(s.url || '') || s.title; } catch { return s.url || s.title; } };
@@ -46,6 +49,7 @@ export function notes(){
     return `<sup class="fn"><a href="#" data-fn="${n}" aria-label="Source ${n}">${n}</a></sup>`;
   };
   const one = s => (s.title && s.kind ? esc(s.kind) + ': ' : '') + (s.url ? a(s.url, s.title || s.kind) : esc(s.title || s.kind))
+    + (s.read ? ` <span class="muted">(read ${esc(readDate(s.read))})</span>` : '')
     + (s.note ? ` <span class="muted">${esc(s.note)}</span>` : '');
   const html = () => list.length ? '<h3>Sources</h3><ol class="notes">' + list.map((s, i) => `<li id="fn${i + 1}">${one(s)}</li>`).join('') + '</ol>' : '';
   return { cite, html };
