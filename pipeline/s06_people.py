@@ -15,7 +15,7 @@ import urllib.parse
 
 from .common import city, load, log, save, work
 from .geo import building_at
-from .layerdata import Collector, grouped
+from .layerdata import Collector, grouped, place_of
 from .texts import TEMPLATES
 from .s04_curated import PEOPLE_GROUPS, people_group
 from .s05_dates import info_for
@@ -34,6 +34,15 @@ def plaque_label(text):
     if m:
         return m[1].strip()
     return t[:40].rsplit(" ", 1)[0] + "…" if len(t) > 40 else t
+
+
+def source_title(title):
+    """The plaque list's own title, made a name: 'Site of SWISS MILLS 1886-1984' -> 'Site of Swiss Mills';
+    'Chilwell Hall / Charlton Family' -> 'Chilwell Hall'; 'Thomas Adams (1807 - 1873)' -> 'Thomas Adams'."""
+    t = re.split(r"\s+/\s+", (title or "").strip())[0]
+    t = re.sub(r"\s*\(?\b(?:c\.?\s?)?\d{3,4}\s*[-–]\s*\d{3,4}\)?\s*$", "", t).strip(" ,.")
+    t = " ".join(w.capitalize() if len(w) > 3 and w.isupper() and w.isalpha() else w for w in t.split())
+    return t or None
 
 
 def person_like(name):
@@ -226,7 +235,7 @@ def main(city_id):
     plaques = load(city_id, "plaques") if work(city_id, "plaques").exists() else []
     plaque_fix = cur.get("plaques", {})          # the stories file's corrections, by inscription or subject
     plaque_people = cur.get("plaque_people", {})
-    placed, names = 0, {}
+    placed, names, unnamed = 0, {}, []
     for p in plaques:
         b = building_at(buildings, p["x"], p["y"], near=12)
         if b is not None:
@@ -267,8 +276,12 @@ def main(city_id):
         # the plaque is a place: "Plaque to Dame Laura Knight" (or the place it marks, plaques.md), never the
         # person's bare name; the person is told under their own name on its card
         persons = named_people or ([subject] if subject and key != "events" else [])
+        # a place: its own title in the plaque list ("Moot Hall", "Swine Green"), else its first words, which are
+        # reported (they can be vague: "In this house")
         label = fix.get("label") or (("Plaque to " + " and ".join(persons)) if persons else None) \
-            or plaque_label(text) or "Plaque"
+            or source_title(p.get("title")) or plaque_label(text) or "Plaque"
+        if not (fix.get("label") or persons or source_title(p.get("title"))):
+            unnamed.append(f"{label} (“{text[:60]}”)")
         # every plaque is a pin where it hangs, linked both ways to the building it is on (if any)
         ref = person(None, key, subject if len(persons) == 1 else label, story, src, xy=(p["x"], p["y"]),
                      qid=p.get("qid"), who=len(persons) == 1, on=b, title=label)
@@ -279,6 +292,8 @@ def main(city_id):
                 k = "people-" + (on_it.get("group") or "other")
                 pg.setdefault(k, {"key": k, "title": titles.get(k[7:], k[7:]), "count": 0, "items": []})["items"].append([ref, n])
     log(f"s06 plaques: {len(plaques)} shown as pins ({placed} on or by a building)")
+    for t in unnamed:
+        log(f"    plaque named from its first words (give it a label in plaques.md, or its people in plaque-people.md): {t}")
 
     # well-known residents found in their Wikipedia articles (s04_residents)
     # (a person with a hand-written entry is told there, checked by hand, so not again from their address)
@@ -373,7 +388,8 @@ def main(city_id):
     order = [f"people-{k}" for k, _, _ in PEOPLE_GROUPS] + ["people-events"]
     for g in pg.values():
         g["count"] = len({b for b, _ in g["items"]})
-        g["items"] = grouped(g["items"])
+        # a person is the same person on every plaque and building; a plaque to a place or an event is only itself
+        g["items"] = grouped(g["items"], place_of(buildings, out.pins) if g["key"] == "people-events" else None)
     people["groups"] = sorted(pg.values(), key=lambda g: order.index(g["key"]) if g["key"] in order else 99)
 
     about = about_people(want, c_words(city_id))
@@ -389,5 +405,5 @@ def main(city_id):
     missing = sorted({n for ns in arch.values() for n, _ in ns if n not in about and n not in links and person_like(n)})
     if missing:
         log(f"    architects with no Wikipedia article found: {', '.join(missing)}")
-    save(city_id, "people", {**out.json(), "meta": people, "names": names, "about": about, "architects": arch,
+    save(city_id, "people", {**out.json(), "meta": people, "unnamed": unnamed, "names": names, "about": about, "architects": arch,
                             "architectLinks": links})

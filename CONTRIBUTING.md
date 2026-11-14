@@ -141,3 +141,8 @@ words, then who they were from Wikipedia, or for someone with no article a summa
 hand from another site, with its link and the date it was read). A Wikidata tag on a building that points at a
 person (an architect's, by mistake) is left out.
 
+A plaque to a place takes its own title from the plaque list ("Moot Hall", "Swine Green"); one with neither a
+person, a label nor a title is named from its first words and listed in the build report for a label. Places
+that share a name are one set on the map only when they are next to each other (a pub of two outlines); a person
+is one set wherever they are.
+

@@ -9,6 +9,22 @@ from pipeline.visitorlayers import name_of
 ROOT = Path(__file__).resolve().parent.parent
 
 
+class Sets(unittest.TestCase):
+    def test_same_name_places_stay_apart(self):
+        from pipeline.layerdata import grouped
+        at = {1: (-1.15, 52.95), 2: (-1.15005, 52.95003), 3: (-1.20, 52.90), "p4": (-1.10, 52.97)}
+        got = grouped([[1, "Red Lion"], [2, "Red Lion"], [3, "Red Lion"], ["p4", "In this house"]], at.get)
+        self.assertEqual(got, [["Red Lion", [1, 2]], ["Red Lion", [3]], ["In this house", ["p4"]]])
+        # a person is the same person anywhere
+        self.assertEqual(grouped([[1, "Watson Fothergill"], [3, "Watson Fothergill"]]), [["Watson Fothergill", [1, 3]]])
+
+    def test_source_titles(self):
+        from pipeline.s06_people import source_title
+        self.assertEqual(source_title("Site of SWISS MILLS 1886-1984"), "Site of Swiss Mills")
+        self.assertEqual(source_title("Chilwell Hall / Charlton Family"), "Chilwell Hall")
+        self.assertEqual(source_title("T.H. Barton OBE 1866-1946"), "T.H. Barton OBE")
+
+
 class Titles(unittest.TestCase):
     def test_statues(self):
         art = lambda n, k: name_of({"cat": "art", "tags": {"name": n, "artwork_type": k}})  # noqa: E731

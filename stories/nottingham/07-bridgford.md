@@ -76,7 +76,7 @@ council from 1894 and part of the borough of Rushcliffe from 1972.
 ## The first out-of-town superstore
 - source: en:West Bridgford
 - group: west-bridgford
-- at: osm:way/79373051
+- at: osm:way/80847199
 - names: no
 - check: 1964 | out-of-town superstore | 1966 | Asda | 1999
 

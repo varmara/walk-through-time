@@ -222,6 +222,9 @@ def main(city_id):
         *[f"| {L['section']} | {L['title']} | {g['title']} | {g['count']:,} |" for L in lay["meta"] for g in L["groups"]],
         "", "## Stories dropped by the checks", "",
         *([f"- **{d['layer']} / {d['name']}**: {d['why']}" for d in cur["dropped"]] or ["None."]),
+        "", "## Plaques named from their first words", "",
+        "With no person (plaque-people.md), label (plaques.md) or title of their own: worth a label.", "",
+        *([f"- {t}" for t in lay.get("unnamedPlaques", [])] or ["None."]),
         "", "## Stories and how they were placed", "",
         *[f"- {e['layer']} / {e['name']}: {e['how']}" for e in cur["entries"]],
     ]

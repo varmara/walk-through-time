@@ -16,7 +16,7 @@ from pathlib import Path
 
 from .common import load, log, work
 from .geo import building_at, metres
-from .layerdata import grouped
+from .layerdata import grouped, place_of
 from .s00_fetch_museums import DATASET
 from .stories_md import table
 
@@ -126,7 +126,7 @@ def visitor(city_id, ctx, out):
     }
     for cat, (title, intro) in about.items():
         groups = [{"key": k, "title": t, "count": len(items[k]),
-                   "items": sorted(grouped(items[k]), key=lambda it: it[0].lower())} for k, t in GROUPS[cat]]
+                   "items": sorted(grouped(items[k], place_of(ctx.buildings, out.pins)), key=lambda it: it[0].lower())} for k, t in GROUPS[cat]]
         meta.append({"id": cat, "title": title, "intro": intro, "section": "Visit",
                      "kind": "rule" if cat == "attractions" else "pins", "source": {"title": OSM[0], "url": OSM[1]},
                      "groups": [g for g in groups if g["count"]]})
@@ -203,7 +203,7 @@ def museums(city_id, ctx, out):
                       "at its address.",
              "source": {"title": "Mapping Museums (Birkbeck, CC BY 4.0)", "url": DATASET},
              "groups": [{"key": k, "title": t, "count": len(items[k]),
-                         "items": sorted(grouped(items[k]), key=lambda it: it[0].lower())}
+                         "items": sorted(grouped(items[k], place_of(ctx.buildings, out.pins)), key=lambda it: it[0].lower())}
                         for k, t in (("mm-open", "Open"), ("mm-closed", "Closed since")) if items[k]]}]
 
 
@@ -253,5 +253,5 @@ def pub_heritage(city_id, ctx, out):
                       "snugs, tiling and fittings that survive. The ratings and links are CAMRA's; the list gives no legal "
                       "protection.",
              "source": {"title": "Nottingham CAMRA, heritage interiors", "url": "https://nottingham.camra.org.uk/heritage/camra-heritage-interiors/"},
-             "groups": [{"key": k, "title": t, "count": len(items[k]), "items": grouped(items[k])}
+             "groups": [{"key": k, "title": t, "count": len(items[k]), "items": grouped(items[k], place_of(ctx.buildings, out.pins))}
                         for k, t in RATING.values() if items[k]]}]

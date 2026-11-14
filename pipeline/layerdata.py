@@ -9,14 +9,47 @@ s06_people fills one with the People layer and saves it; s06_layers carries on w
 AREAS = ("nature", "conservation", "parks", "article4", "tpo")
 
 
-def grouped(pairs):
-    """[[building, name], ...] -> [[name, [buildings]]]: one entry per name, with every building it has."""
-    out = {}
+def grouped(pairs, where=None, within=150):
+    """[[building, name], ...] -> [[name, [buildings]]].
+
+    Without `where`, one entry per name, with every building it has: for a person or a story, whose name is the
+    same subject wherever it is. With `where` (ref -> (lon, lat)), for places: a name is joined only with places
+    of that name within `within` metres of one already in the entry (a pub of two outlines, one artwork's two
+    pins), so unrelated places that share a name ("Red Lion", "War memorial", "In this house") stay apart."""
+    if where is None:
+        out = {}
+        for b, name in pairs:
+            bs = out.setdefault(name, [])
+            if b not in bs:
+                bs.append(b)
+        return [[n, bs] for n, bs in out.items()]
+    from math import cos, hypot, radians
+    entries = []                          # [name, [refs], [points]]
     for b, name in pairs:
-        bs = out.setdefault(name, [])
-        if b not in bs:
-            bs.append(b)
-    return [[n, bs] for n, bs in out.items()]
+        p = where(b)
+        near = lambda q: p is not None and q is not None and hypot((p[0] - q[0]) * 111320 * cos(radians(p[1])),  # noqa: E731
+                                                                     (p[1] - q[1]) * 110540) <= within
+        e = next((e for e in entries if e[0] == name and (b in e[1] or any(near(q) for q in e[2]))), None)
+        if e is None:
+            entries.append([name, [b], [p]])
+        elif b not in e[1]:
+            e[1].append(b)
+            e[2].append(p)
+    return [[n, bs] for n, bs, _ in entries]
+
+
+def place_of(buildings, pins):
+    """ref -> (lon, lat): a building's (its outline's middle) or a pin's ("p12"), for grouped()."""
+    from .geo import centroid
+
+    def where(ref):
+        if isinstance(ref, str) and ref.startswith("p"):
+            p = pins[int(ref[1:])]
+            return p["x"], p["y"]
+        if isinstance(ref, int) and 0 <= ref < len(buildings):
+            return centroid(buildings[ref]["rings"][0])
+        return None
+    return where
 
 
 class Collector:

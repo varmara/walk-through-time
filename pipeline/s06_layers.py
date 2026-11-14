@@ -16,7 +16,7 @@ Writes layers.json, and routes.json and basics.json (GeoJSON features for s07):
           grounds) and plaques not on a building; layer items refer to them as "p<index>"
 """
 from .common import city, load, log, save, sources, work
-from .layerdata import AREAS, Collector, grouped
+from .layerdata import AREAS, Collector, grouped, place_of
 from .layers import LAYERS, Context
 from .visitorlayers import museums, pub_heritage, visitor
 
@@ -116,7 +116,8 @@ def main(city_id):
             members = [i for i, v in res.items() if (v[0] if isinstance(v, tuple) else v) == k]
             g = {"key": k, "title": t, "count": len(members)}
             if L.get("list"):   # names to tap in the Layers sheet, A to Z
-                g["items"] = sorted(grouped([[i, bname(i)] for i in members]), key=lambda it: it[0].lower())
+                g["items"] = sorted(grouped([[i, bname(i)] for i in members], place_of(ctx.buildings, out.pins)),
+                                    key=lambda it: it[0].lower())
             groups.append(g)
         src = L.get("source")
         if L.get("settings"):       # the source named in the city's settings (several councils: the first one's)
@@ -169,6 +170,7 @@ def main(city_id):
     save(city_id, "routes", routes)
     save(city_id, "basics", basics)
     save(city_id, "layers", {"meta": meta, **out.json(), "names": names, "people": ppl["about"],
+                             "unnamedPlaques": ppl.get("unnamed", []),
                              "architects": ppl.get("architects", {}),
                              "architectLinks": ppl.get("architectLinks", {})})
 
