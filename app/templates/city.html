@@ -1,0 +1,141 @@
+<!doctype html>
+<!-- The page for each city, written by pipeline/pages.py from cities/<city>.json ({{…}} are filled in). Edit this, not the written copies. -->
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{{name}} · Walk Through Time</title>
+<meta name="description" content="{{description}}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Walk Through Time">
+<meta property="og:title" content="{{name}} · Walk Through Time">
+<meta property="og:description" content="{{share}}">
+<meta property="og:image" content="{{site}}app/share.png">
+<meta property="og:url" content="{{site}}{{id}}/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../app/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap">
+<link rel="stylesheet" href="../lib/maplibre-gl.css?v={{v}}">
+<script>
+  // The page's own scripts and styles carry the version of their content (pipeline/pages.py): a phone keeps them
+  // until they change, and fetches them again as soon as they do.
+  window.__v = '{{v}}';
+  document.write('<link rel="stylesheet" href="../app/theme.css?v=' + window.__v + '">');
+  document.write('<link rel="stylesheet" href="../app/city.css?v=' + window.__v + '">');
+</script>
+</head>
+<body data-city="{{id}}">
+<div id="map" aria-label="3D map of {{name}}"></div>
+
+<div class="top">
+  <a class="brand" href="../" title="Walk Through Time: all cities"><img src="../app/logo.svg" alt="Walk Through Time:" width="20" height="20"><b>{{name}}</b></a>
+  <div class="fabs">
+    <button class="fab" id="bLayers" aria-label="Layers" aria-expanded="false" aria-controls="sheet">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="m3 13 9 5 9-5"/><path d="m3 17.5 9 5 9-5" opacity=".55"/></svg>
+      <span class="badge" id="layerCount" hidden>0</span>
+    </button>
+    <button class="fab" id="bMap" aria-label="Map options and colour key" aria-expanded="false" aria-controls="sheet">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 6 6-2 6 2 6-2v14l-6 2-6-2-6 2V6Z"/><path d="M9 4v14M15 6v14"/></svg>
+    </button>
+    <button class="fab" id="bNorth" aria-label="Turn the map to face north">
+      <svg viewBox="0 0 24 24" aria-hidden="true" id="needle"><path d="M12 3 8.5 12h7L12 3Z" fill="var(--hl)" stroke="var(--hl)"/><path d="M12 21l3.5-9h-7L12 21Z"/></svg>
+    </button>
+    <a class="fab" id="bGraph" href="#graph" aria-label="Graph of people, stories and places">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="7" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="17" r="2.5"/><circle cx="19" cy="16" r="1.8"/><path d="M8.3 7.9 10.6 15M15.6 6.6 8.4 6.8M13.5 15.3l3.3-7.2M14.5 16.8l2.7-.6"/></svg>
+    </a>
+    <button class="fab" id="bHome" aria-label="Back to the starting view">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+    </button>
+  </div>
+</div>
+
+<div class="timebar" id="timebar">
+  <div class="yearrow">
+    <div><div class="yearlbl">The city in</div><span class="year" id="yearOut">2026</span></div>
+    <button class="play" id="play" aria-label="Play the city's growth">▶</button>
+  </div>
+  <div>
+    <input type="range" id="year" min="0" max="1000" step="1" value="1000" aria-label="Year">
+    <div class="ticks" id="ticks"></div>
+  </div>
+  <div class="status" id="status"></div>
+</div>
+
+<section class="placesbar" id="placesbar" hidden aria-label="Places">
+  <div class="phead">
+    <b id="pName"></b>
+    <span class="pcount"><button class="parrow" id="pPrev" aria-label="Previous place">‹</button><span id="pCount"></span><button class="parrow" id="pNext" aria-label="Next place">›</button></span>
+    <button class="close" id="pClose" aria-label="Close places">✕</button>
+  </div>
+  <div class="pcards" id="pCards"></div>
+</section>
+
+<section class="sheet" id="sheet" hidden aria-labelledby="sTitle">
+  <div class="grip" aria-hidden="true"></div>
+  <div class="shead"><h2 id="sTitle"></h2>
+    <button class="close share" id="sShare" aria-label="Share this building" title="Share" hidden>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5l7 6.5-7 6.5v-3.6c-5 0-8.4 1.6-11 5.1 1-5.2 4-10 11-11z"/></svg>
+    </button>
+    <button class="close" id="sClose" aria-label="Close">✕</button></div>
+  <div class="toast" id="toast" role="status" hidden></div>
+
+  <div class="panel" id="pLayers" hidden>
+    <div class="summary"><span id="lSummary">No layers on</span><button class="textbtn" id="lClear">Clear all</button></div>
+    <div id="lSections" class="panel"></div>
+  </div>
+
+  <div class="panel" id="pMap" hidden>
+    <div class="seclbl">Colours: when it was built</div>
+    <div class="legend" id="legend" role="group" aria-label="Periods shown on the map"></div>
+    <p class="note">Tap a period to hide or show its buildings. Paler colours mean the date is approximate. Grey: no date in open data yet. <span id="dated"></span></p>
+    <div class="seclbl">Background</div>
+    <div class="chips" role="group" aria-label="Background map">
+      <button class="chip" data-base="none" aria-pressed="true">Plain</button>
+      <button class="chip" data-base="osm" aria-pressed="false">Street map</button>
+      <button class="chip" data-base="nls" aria-pressed="false">1888–1913 map</button>
+    </div>
+    <div id="groundRow" hidden>
+      <div class="seclbl">Ground</div>
+      <div class="chips"><button class="chip" id="tHills" aria-pressed="true">Hills</button></div>
+      <p class="note" id="groundNote"></p>
+    </div>
+    <div class="keyrow" id="keyRow" hidden>
+      <input id="mtKey" placeholder="MapTiler key for the old map" autocomplete="off" spellcheck="false">
+      <button class="chip" id="mtSave">Save</button>
+    </div>
+    <p class="note" id="dataNote"></p>
+  </div>
+
+  <article class="panel card" id="pCard" hidden>
+    <img id="cImg" alt="" hidden>
+    <p class="credit" id="cCredit" hidden></p>
+    <div class="summary" id="cSum" hidden></div>
+    <dl class="facts" id="cFacts"></dl>
+    <div class="dyk" id="cDyk" hidden></div>
+    <div class="archive" id="cPhotos" hidden></div>
+    <div class="archive" id="cArch" hidden></div>
+      <div id="cColl" class="coll" hidden></div>
+    <div id="cStories"></div>
+    <div class="links" id="cLinks"></div>
+  </article>
+</section>
+
+<div class="loader" id="loader"><div><span>Building the city</span><b id="lpct">0%</b><span id="lstep">loading map data…</span></div></div>
+
+<script>
+window.addEventListener('error', e => { const s = document.getElementById('status'); if (s) s.textContent = 'Error: ' + e.message; });
+window.addEventListener('unhandledrejection', e => { const s = document.getElementById('status'); if (s) s.textContent = 'Error: ' + ((e.reason && e.reason.message) || e.reason); });
+</script>
+<script src="../lib/maplibre-gl.js?v={{v}}"></script>
+<script>
+  // The page's modules (app/city/), each fetched with the same ?v= as the styles, through an import map
+  (function () {
+    var mods = ['util', 'state', 'data', 'map', 'timebar', 'sheet', 'panels', 'hours', 'cards', 'places', 'main', 'graphlayout', 'graph'], imports = {};
+    mods.forEach(function (m) { imports[new URL('../app/city/' + m + '.js', location.href).href] = '../app/city/' + m + '.js?v=' + window.__v; });
+    document.write('<script type="importmap">' + JSON.stringify({ imports: imports }) + '<\/script>');
+  })();
+</script>
+<script type="module" src="../app/city/main.js"></script>
+</body>
+</html>

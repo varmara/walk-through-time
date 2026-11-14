@@ -1,0 +1,286 @@
+{
+  "id": "nottingham",
+  "name": "Nottingham",
+  "area": "Greater Nottingham: the city, Beeston, Arnold, Carlton, West Bridgford, Clifton and Hucknall, with Long Eaton, Ilkeston, Eastwood, Calverton, Bingham, Cotgrave, Keyworth and Ruddington",
+  "page": {
+    "_about": "What the city's pages say: in search results (description), when shared (share), on the landing page (tagline).",
+    "description": "Nottingham in 3D, from the city centre south across the Trent to Wilford, West Bridgford and Clifton, every building coloured by the year it was built.",
+    "share": "Historic Nottingham in 3D, building by building: when each was built, its stories and the people behind it.",
+    "tagline": "From the city centre across the Trent · 3D · prototype"
+  },
+  "polygon": [
+    [
+      -1.33,
+      53.032
+    ],
+    [
+      -1.262,
+      53.045
+    ],
+    [
+      -1.222,
+      53.062
+    ],
+    [
+      -1.18,
+      53.062
+    ],
+    [
+      -1.12,
+      53.058
+    ],
+    [
+      -1.06,
+      53.048
+    ],
+    [
+      -1.055,
+      53.02
+    ],
+    [
+      -1.015,
+      52.998
+    ],
+    [
+      -1.012,
+      52.955
+    ],
+    [
+      -0.97,
+      52.968
+    ],
+    [
+      -0.925,
+      52.958
+    ],
+    [
+      -0.93,
+      52.935
+    ],
+    [
+      -0.985,
+      52.93
+    ],
+    [
+      -1.015,
+      52.905
+    ],
+    [
+      -1.035,
+      52.89
+    ],
+    [
+      -1.065,
+      52.872
+    ],
+    [
+      -1.095,
+      52.858
+    ],
+    [
+      -1.15,
+      52.868
+    ],
+    [
+      -1.2,
+      52.872
+    ],
+    [
+      -1.25,
+      52.875
+    ],
+    [
+      -1.3,
+      52.88
+    ],
+    [
+      -1.335,
+      52.915
+    ],
+    [
+      -1.345,
+      52.95
+    ],
+    [
+      -1.345,
+      52.985
+    ],
+    [
+      -1.335,
+      53.012
+    ],
+    [
+      -1.33,
+      53.032
+    ]
+  ],
+  "bbox": {
+    "s": 52.858,
+    "w": -1.345,
+    "n": 53.062,
+    "e": -0.925
+  },
+  "home": {
+    "center": [
+      -1.145,
+      52.944
+    ],
+    "zoom": 14.6,
+    "pitch": 55,
+    "bearing": -18
+  },
+  "periods": [
+    {
+      "from": 0,
+      "label": "Before 1750",
+      "note": "The old town: the castle on its sandstone rock (11th century), the English borough on the hill and the French borough by the castle, joined by the market place."
+    },
+    {
+      "from": 1750,
+      "label": "1750–1844",
+      "note": "Framework knitting and lace bring people in, but the town cannot spread: its common fields ring it on three sides, so it packs in and gets a name for the worst slums in England."
+    },
+    {
+      "from": 1845,
+      "label": "1845–1876",
+      "note": "The Inclosure Act of 1845 opens the common fields, and the town at last grows outwards onto them."
+    },
+    {
+      "from": 1877,
+      "label": "1877–1913",
+      "note": "The borough takes in Basford, Bulwell, Radford, Sneinton and more in 1877, and becomes a city in 1897. Nottingham is an international centre of lace."
+    },
+    {
+      "from": 1914,
+      "label": "1914–1945",
+      "note": "Between the wars: the new Council House (1927–1929) and the first council estates."
+    },
+    {
+      "from": 1946,
+      "label": "1946–1979",
+      "note": "After the war: the Clifton estate, planned from 1950 and once the largest council estate in Europe, slum clearance, and new shopping centres."
+    },
+    {
+      "from": 1980,
+      "label": "1980–1999"
+    },
+    {
+      "from": 2000,
+      "label": "2000 onwards"
+    }
+  ],
+  "periodSources": [
+    {
+      "title": "History of Nottingham – Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/History_of_Nottingham"
+    },
+    {
+      "title": "The expansion of Nottingham – University of Nottingham Manuscripts and Special Collections",
+      "url": "https://www.nottingham.ac.uk/manuscriptsandspecialcollections/learning/healthhousing/theme1/expansion.aspx"
+    },
+    {
+      "title": "Clifton, Nottingham – Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Clifton,_Nottingham"
+    }
+  ],
+  "councils": {
+    "_about": "The councils whose land the map covers, by ONS code. pipeline/s00_fetch_councils.py fetches their boundaries (ONS, Open Government Licence) and warns about any council in the area that is not listed here. Each source below names the council that publishes it.",
+    "E06000018": "Nottingham City Council",
+    "E07000176": "Rushcliffe Borough Council",
+    "E07000172": "Broxtowe Borough Council",
+    "E07000173": "Gedling Borough Council",
+    "E07000036": "Erewash Borough Council",
+    "E07000170": "Ashfield District Council"
+  },
+  "sources": {
+    "_about": "Council map services the pipeline reads, by kind. A council with no entry for a kind simply has none: plaques there come from OpenStreetMap and Open Plaques, conservation areas from Historic England.",
+    "wildlife": [
+      {
+        "publisher": "Nottingham City Council",
+        "covers": "all of Nottinghamshire",
+        "url": "https://maps164.nottinghamcity.gov.uk/server/rest/services/Core_services/Environment/MapServer/7",
+        "nameField": "SITE_NAME",
+        "credit": "© Nottingham City Council. Contains Ordnance Survey data © Crown copyright and database rights.",
+        "off": "Off until Nottingham City Council confirms these layers may be republished: its map terms (geoserver.nottinghamcity.gov.uk/terms) license the Ordnance Survey-based data for viewing only."
+      }
+    ],
+    "plaques": [
+      {
+        "publisher": "Nottingham City Council",
+        "council": "E06000018",
+        "url": "https://maps164.nottinghamcity.gov.uk/server/rest/services/Core_services/Housing_and_Property/MapServer/34",
+        "off": "Off until Nottingham City Council confirms these layers may be republished: its map terms (geoserver.nottinghamcity.gov.uk/terms) license the Ordnance Survey-based data for viewing only."
+      }
+    ],
+    "localList": [
+      {
+        "publisher": "Nottingham City Council",
+        "council": "E06000018",
+        "title": "Nottingham Local Heritage List",
+        "url": "https://maps164.nottinghamcity.gov.uk/server/rest/services/Core_services/Planning/MapServer/19",
+        "page": "https://www.nottinghamcity.gov.uk/locallist",
+        "credit": "© Nottingham City Council. Contains Ordnance Survey data © Crown copyright and database rights.",
+        "approved": [
+          "4"
+        ],
+        "_approved": "STATUS codes: 1 not assessed, 2 recommended to add, 3 recommended to reject, 4 approved",
+        "off": "Off until Nottingham City Council confirms these layers may be republished: its map terms (geoserver.nottinghamcity.gov.uk/terms) license the Ordnance Survey-based data for viewing only."
+      }
+    ],
+    "article4": [
+      {
+        "publisher": "Nottingham City Council",
+        "council": "E06000018",
+        "title": "Nottingham Article 4 directions (historic environment)",
+        "url": "https://maps164.nottinghamcity.gov.uk/server/rest/services/Core_services/Planning/MapServer/7",
+        "page": "https://nottinghamcity.gov.uk/information-for-business/planning-and-building-control/planning-policy/article-4-directions",
+        "credit": "© Nottingham City Council. Contains Ordnance Survey data © Crown copyright and database rights.",
+        "off": "Off until Nottingham City Council confirms these layers may be republished: its map terms (geoserver.nottinghamcity.gov.uk/terms) license the Ordnance Survey-based data for viewing only."
+      }
+    ],
+    "tpo": [
+      {
+        "publisher": "Nottingham City Council",
+        "council": "E06000018",
+        "title": "Nottingham tree preservation orders",
+        "url": "https://maps164.nottinghamcity.gov.uk/server/rest/services/Core_services/Planning/MapServer/16",
+        "page": "https://www.nottinghamcity.gov.uk/information-for-business/planning-and-building-control/planning-applications/apply-for-planning-permission/tree-preservation-orders-trees-in-conservation-areas/",
+        "credit": "© Nottingham City Council. Contains Ordnance Survey data © Crown copyright and database rights.",
+        "off": "Off until Nottingham City Council confirms these layers may be republished: its map terms (geoserver.nottinghamcity.gov.uk/terms) license the Ordnance Survey-based data for viewing only."
+      }
+    ]
+  },
+  "architect_lists": [
+    {
+      "article": "The Park Estate",
+      "within": "The Park"
+    }
+  ],
+  "residents": {
+    "_about": "For finding well-known residents in Wikipedia (s04_residents): the Wikidata items of the city (places in them count too), other places' names, and words that place a sentence here.",
+    "items": [
+      "Q41262"
+    ],
+    "labels": [
+      "West Bridgford",
+      "Wilford",
+      "Clifton"
+    ],
+    "words": [
+      "nottingham",
+      "west bridgford",
+      "wilford",
+      "clifton",
+      "sneinton",
+      "the meadows",
+      "lace market",
+      "the park estate",
+      "the park, nottingham",
+      "lenton",
+      "radford",
+      "hockley"
+    ]
+  },
+  "councilTaxEstimates": false,
+  "_councilTaxEstimates": "Off: the ONS's small-area boundaries now need a sign-in (November 2026). True to try again."
+}
