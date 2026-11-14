@@ -110,10 +110,13 @@ jobs:
       - name: Choose where to start
         id: plan
         run: |
-          # compare with the commit the restored work files were built from (a queued build can be replaced by a
-          # newer one, so the push's own "before" commit may not be what was last built)
+          # compare with the commit the published data was built from (data/.built_from): a build that failed its
+          # checks saved its work files but published nothing, so its changes are not on the site yet; a queued
+          # build can also be replaced by a newer one, so the push's own "before" commit may not be what was last
+          # built. Without that file, the commit the restored work files were built from.
           start=all
-          last=$(cat work/.source_sha 2>/dev/null || echo "${{ github.event.before }}")
+          last=$(cat data/.built_from 2>/dev/null || cat work/.source_sha 2>/dev/null || echo "${{ github.event.before }}")
+          echo "Comparing with: $last"
           if [ "${{ github.event_name }}" = push ] && [ -n "${{ steps.work.outputs.cache-matched-key }}" ] \
              && git cat-file -e "$last^{commit}" 2>/dev/null; then
             start=$(git diff --name-only "$last" "${{ github.sha }}" | python -m pipeline.plan)
@@ -214,6 +217,8 @@ jobs:
 
       - name: Assemble the site
         run: |
+          # the commit this data was built from (a page-only build keeps the published data's)
+          if [ "${{ steps.plan.outputs.start }}" != none ]; then echo "$GITHUB_SHA" > data/.built_from; fi
           mkdir _site
           cp -r sw.js app lib cities data _site/
           python -m pipeline.pages _site     # the landing page and each city's pages, from app/templates/
