@@ -5,63 +5,55 @@ There are two kinds.
 
 ## 1. A story layer (hand-written)
 
-Stories live in Markdown files in `stories/<city>/`, one file per layer, named `NN-<id>.md` (`NN` sets the order
-in the Layers sheet). Edit them on GitHub or in any text editor; the next data build checks and publishes them.
-
-```markdown
-# Markets
-id: markets
-
-Two or three plain sentences on the history behind the layer.
-
-## Old Market Square
-- source: en:Old Market Square, Nottingham
-- at: pin:-1.1497,52.9529
-- check: market | 1928
-
-The square has held markets since the Middle Ages; Goose Fair was held here until 1928.
-```
-
-A layer that covers several places or themes can split into tickboxes: a `groups:` line under `id:`, each group
-`key = Title` (keys unique across all layers), and a `- group: key` line on every entry:
+A layer is a file in `stories/<city>/`, named `NN-<id>.md` (`NN` sets the order in the Layers sheet), holding
+its title, settings and introduction:
 
 ```markdown
 # Barton in Fabis and Thrumpton
 id: barton
 groups: barton-fabis = Barton in Fabis | thrumpton = Thrumpton
+
+Two or three plain sentences on the history behind the layer.
 ```
 
-An entry is a `##` heading (the name shown on the card), then its settings as `- key: value` lines, then the
-story as plain text. The settings:
+`groups:` splits a layer into tickboxes, each `key = Title` (keys unique across all layers). A layer file can
+also say `kind: people` (the People layer) or `kind: facts` (the "Did you know" facts).
 
-| Setting | Meaning |
+Its stories are notes, one file each in `stories/<city>/notes/stories/`, which name the layer (see Notes below):
+
+```markdown
+---
+type: story
+layer: barton
+group: thrumpton
+source: https://en.wikipedia.org/wiki/Thrumpton_Hall
+check: Babington | priest hole | Pigot | 1617
+at:
+  - https://www.openstreetmap.org/way/55087219
+---
+The Powdrells, a Roman Catholic family, lost their house here after the Babington Plot; part of it survives inside
+the hall, with a priest hole. The Pigots' rose-brick house around it was largely complete by 1617.
+```
+
+Besides those in Notes below, a story note can give:
+
+| Property | Meaning |
 |---|---|
-| `source` | the Wikipedia article (`en:Title`), Historic England list entry (`he:1254566`) or another site's page (`web:https://…`) the story rests on; for People, the person's article or page |
-| `read`, `title` | for another site's page: the date it was read (`2026-11-14`) and the page's title. Such a story is read once by hand and written as a summary in our own words, never its text; the build does not read the site and there is no `check` line; it needs an `at`, and the card cites the site with the date it was read |
-| `place` | People only: the place's article, which decides the building |
-| `at` | where, when not where the article says: `name:…` (a building's name), `osm:way/123` (an outline), `nhle:1271444` (a list entry), `pin:lon,lat` (a pin), `pin:article` (a pin at the article's own point, or the `place` article's: a village, a site where nothing stands) |
+| `name` | the name shown on the map, when the file's name differs (two "St Mary's Church" notes are `St Mary's Church, Clifton` and `St Mary's Church, Nottingham`) |
+| `group` | in a layer with `groups:`, the story's group (its own tickbox) |
 | `year` | when the building standing today was built or opened (`1855`, `c. 1420`, `1841..1844`) |
-| `group` | in a layer with `groups:`, the entry's group (its own tickbox); People: the kind of person, when Wikidata has no occupation (architects, writers, science, industry, sport, arts, public) |
-| `where` | a pin's own name, the place it marks (`21 Regent Street`, `Bendigo's tomb`), so the pin is a place and the person is told under their name |
-| `see` | other stories to link from this one ("See also" on its card), by their headings, separated by `\|`; write `layer/heading` when two stories share a heading (`culture/Nottingham Castle`) |
-| `names` | `no` when the entry's name is not the building's name (an event: "The castle burned, 1831") |
-| `check` | words the article must contain, separated by `\|` |
-| `quote` | for a Historic England source: a passage copied from the list entry (their site blocks automated reading), one per line |
-| `architect` | who designed the building, when Wikidata does not say: their Wikipedia article (`en:Thomas Rickman`), or the name as the story writes it and the article (`Vincent Harris = en:E. Vincent Harris`), separated by `\|`; fills the card's Architect row and links their names |
+| `names: no` | the story's name is not the building's name (an event: "The castle burned, 1831") |
+| `quote` | for a Historic England source: passages copied from the list entry (their site blocks automated reading) |
+| `architect` | who designed the building, when Wikidata does not say: their article (`en:Thomas Rickman`), or the name as the story writes it and the article (`Vincent Harris = en:E. Vincent Harris`), separated by `\|` |
 | `note` | for editors only: why, where from; not shown on the map |
-
-A layer file can say `kind: people` (pairs of a person and a place) or `kind: facts` ("Did you know" facts, each
-shown on its building's card).
 
 Rules, checked by step `s04_curated` every time the pipeline runs:
 
 - **Every story rests on a source.** The words under `check` (a year, a name, a key word) must appear in the
   article. If one is missing, the story is dropped and the build log says which. If the article does not say it,
   the story should not either. Bulleted lists in the article count too.
-- **The story must be placed on a building or a pin.** The pipeline tries, in order: `at`, the article's Wikidata
-  item tagged on an OpenStreetMap outline, the item's Historic England list entry, the article's coordinates, and
-  finally the entry's name matching a building or a named place inside one.
-- **A story about an area or a lost building gets a pin** (`at: pin:lon,lat`): a village, a district, an estate,
+- **The story is placed where its `at:` says:** a building's OpenStreetMap link, or a pin.
+- **A story about an area or a lost building gets a pin** (`Name, latitude, longitude`): a village, a district, an estate,
   or a building that is gone. Otherwise the article's coordinates can land it on whatever house or shop stands
   there now, and that building takes the story's name.
 - **A `year` is about the building standing there today** (built, rebuilt or opened), not an earlier building on
@@ -69,10 +61,10 @@ Rules, checked by step `s04_curated` every time the pipeline runs:
 - **Stories are short and plain:** one or two sentences, what happened and when. Name legends as legends.
 - **No personal details about private people.** Public figures are fine.
 
-### Notes: people and events
+### Notes: stories, events and people
 
-People, and events with the people in them, are notes: one Markdown file each in `stories/<city>/notes/`
-(`people/`, `events/`), as in an Obsidian vault, which the folder can be opened as. A note's name is its file's
+Stories, events with the people in them, and people are notes: one Markdown file each in `stories/<city>/notes/`
+(`stories/`, `events/`, `people/`), as in an Obsidian vault, which the folder can be opened as. A note's name is its file's
 name; two notes cannot share one. Properties go at the top, the text below:
 
 ```markdown
@@ -158,7 +150,7 @@ Nottingham in times of conflict: the castle and the Civil War, the risings and r
 two World Wars at home.
 
 ## The Civil War
-- story: The storming of Shelford House      (a story, by its heading, or layer/heading: culture/Nottingham Castle)
+- story: The storming of Shelford House      (a story, by its name, or layer/name: culture/Nottingham Castle)
 - person: Charles I                          (someone in the People layer, by name: all their places)
 - plaque: The Chilwell Explosion, 1st July 1918   (a plaque, by its title on the map)
 - building: way/4438894                      (a building, by its OpenStreetMap id)

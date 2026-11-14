@@ -38,6 +38,8 @@ from pathlib import Path
 
 import yaml
 
+from .stories_md import architects
+
 TYPES = ("person", "event", "story")
 OSM = re.compile(r"^https?://(?:www\.)?openstreetmap\.org/(way|node|relation)/(\d+)")
 NHLE = re.compile(r"^https?://historicengland\.org\.uk/listing/the-list/list-entry/(\d+)")
@@ -221,7 +223,10 @@ def load(folder, layers):
             if not sources and story:
                 raise NoteError(f"{name}: no source: for its text")
             places = [place(a, name, pins) for a in listed(props.get("at"))]
-            base = {"name": name, "note": name, "source": sources[0] if sources else None, "sources": sources[1:],
+            # the name shown on the map (name:), when the note's own differs: two "St Mary's Church" notes are
+            # "St Mary's Church, Clifton" and "St Mary's Church, Nottingham", each shown as St Mary's Church
+            shown = str(props.get("name") or name)
+            base = {"name": shown, "note": name, "source": sources[0] if sources else None, "sources": sources[1:],
                     "facts": checks(props.get("check")), "story": story, "links": links, "weblinks": web,
                     "cites": {k: fns[k] for k in fns}, "type": kind,
                     **({"read": str(props["read"])} if props.get("read") else {}),
@@ -231,7 +236,9 @@ def load(folder, layers):
                     **({"quote": listed(props.get("quote"))} if props.get("quote") else {}),
                     # other stories to link from this one, as see: in a story file (also [[links]] in its text)
                     **({"see": [WIKILINK.sub(lambda m: m[1], s) for s in listed(props.get("see"))]} if props.get("see") else {}),
-                    **({"names": False} if props.get("names") is False or str(props.get("names")).lower() == "no" else {})}
+                    **({"names": False} if props.get("names") is False or str(props.get("names")).lower() == "no" else {}),
+                    # who designed the building, as in a story file: "en:Thomas Rickman | Vincent Harris = en:E. Vincent Harris"
+                    **({"architect": architects(" | ".join(listed(props.get("architect"))))} if props.get("architect") else {})}
             if kind == "person":
                 if people_layer is None:
                     raise NoteError(f"{name}: a person note, but there is no People layer (kind: people)")
@@ -240,7 +247,9 @@ def load(folder, layers):
                               (ref(wp)[3:] if wp and ref(wp).startswith("en:") else None),
                               **({"group": str(props["kind"])} if props.get("kind") else {})}
                 target, group = people_layer, props.get("kind")
-            else:
+            elif story:
+                if kind == "story" and not props.get("layer"):
+                    raise NoteError(f"{name}: a story needs layer: (the story layer it is told in)")
                 lid = props.get("layer") or "events"
                 if lid not in by_id:
                     if props.get("layer"):
@@ -249,6 +258,8 @@ def load(folder, layers):
                                   "each at the places where it happened, with the people who took part.", "entries": []}
                     layers.append(by_id[lid])
                 target, group = by_id[lid], props.get("group")
+            else:
+                target = group = None       # facts only (a note of "Did you know?" callouts)
             base = {k: v for k, v in base.items() if v not in ((), [], {}, None) or k in ("name", "story")}
             if story:
                 if not places and kind != "person":
@@ -270,7 +281,7 @@ def load(folder, layers):
                     raise NoteError(f"{name}: a fact callout with no source, in a note with none")
                 ftext, flinks, fweb = inline(f["text"])
                 fplaces = [place(a, name, pins) for a in f.get("at", [])] or places
-                fe = {"name": name, "note": name, "source": fsrc[0], "sources": fsrc[1:],
+                fe = {"name": shown, "note": name, "source": fsrc[0], "sources": fsrc[1:],
                       "facts": checks(f.get("check")),
                       "story": ftext, "links": flinks, "weblinks": fweb, "cites": {},
                       **({"read": f.get("read") or base.get("read")} if f.get("read") or base.get("read") else {}),

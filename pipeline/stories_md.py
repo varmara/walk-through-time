@@ -1,6 +1,8 @@
 """Read a city's stories from Markdown files (stories/<city>/), written to be edited by hand.
 
-A story layer is one file, `NN-<id>.md` (NN sets the order):
+Stories, events and people are notes, one file each (notes/**/*.md, read by pipeline/notes.py into the layers'
+entries). A story layer is one file, `NN-<id>.md` (NN sets the order), with its title, settings and introduction;
+it may still hold entries in the older form below, which are read the same way:
 
     # Old inns                        <- the layer's title
     id: inns                          <- settings, one per line (id; kind: people or facts for those layers)
