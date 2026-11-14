@@ -1,7 +1,8 @@
 """Names, dates, architects, photos, Commons categories and Wikipedia links from Wikidata.
 
 Items are found two ways: the building's OpenStreetMap `wikidata` tag, and the Historic England
-list entry number (Wikidata property P1216). Writes wikidata.json: {"Q123": info, "nhle:1234567": info}.
+list entry number (Wikidata property P1216). Writes wikidata.json: {"Q123": info, "nhle:1234567": info, "_people":
+[items that are people, tagged on a building by mistake: left out]}.
 Licence: CC0.
 """
 import re
@@ -18,7 +19,8 @@ FIELDS = """
   OPTIONAL { ?article schema:about ?item ; schema:isPartOf <https://en.wikipedia.org/> }
   OPTIONAL { ?item wdt:P84 ?architect . ?architect rdfs:label ?architectLabel . FILTER(LANG(?architectLabel) = "en")
              OPTIONAL { ?architectArticle schema:about ?architect ; schema:isPartOf <https://en.wikipedia.org/> } }
-  OPTIONAL { ?item rdfs:label ?label . FILTER(LANG(?label) = "en") }"""
+  OPTIONAL { ?item rdfs:label ?label . FILTER(LANG(?label) = "en") }
+  BIND(EXISTS { ?item wdt:P31 wd:Q5 } AS ?human)"""
 
 
 def sparql(q):
@@ -30,11 +32,16 @@ def main(city_id):
     listing = load(city_id, "listing")
     qids = sorted({b["tags"]["wikidata"] for b in buildings if re.match(r"^Q\d+$", b["tags"].get("wikidata", ""))})
     nhle = sorted({str(e["ListEntry"]) for es in listing.values() for e in es})
-    out = {}
+    out, humans = {}, set()
 
     def take(rows, key):
         for r in rows:
             k = key(r)
+            # a building tagged with a person's item (its architect's, as Rutland Chambers in Ilkeston is with
+            # William Dymock Pratt's): a person never names or describes a building, so the tag is left out
+            if r.get("human", {}).get("value") == "true":
+                humans.add(r["item"]["value"].rsplit("/", 1)[-1])
+                continue
             prev = out.get(k, {})
             info = {
                 "qid": r["item"]["value"].rsplit("/", 1)[-1],
@@ -55,17 +62,20 @@ def main(city_id):
     try:
         for i in range(0, len(qids), 200):
             c = qids[i:i + 200]
-            take(sparql(f"SELECT ?item ?inception ?prec ?image ?commonscat ?article ?architect ?architectLabel ?architectArticle ?label WHERE {{ "
+            take(sparql(f"SELECT ?item ?inception ?prec ?image ?commonscat ?article ?architect ?architectLabel ?architectArticle ?label ?human WHERE {{ "
                         f"VALUES ?item {{ {' '.join('wd:' + q for q in c)} }} {FIELDS} }}"),
                  lambda r: r["item"]["value"].rsplit("/", 1)[-1])
             time.sleep(1)
         for i in range(0, len(nhle), 200):
             c = nhle[i:i + 200]
-            take(sparql(f"SELECT ?item ?nhle ?inception ?prec ?image ?commonscat ?article ?architect ?architectLabel ?architectArticle ?label WHERE {{ "
+            take(sparql(f"SELECT ?item ?nhle ?inception ?prec ?image ?commonscat ?article ?architect ?architectLabel ?architectArticle ?label ?human WHERE {{ "
                         f"VALUES ?nhle {{ {' '.join(chr(34) + n + chr(34) for n in c)} }} ?item wdt:P1216 ?nhle . {FIELDS} }}"),
                  lambda r: "nhle:" + r["nhle"]["value"])
             time.sleep(1)
     except Exception as e:  # noqa: BLE001 - Wikidata is optional
         log(f"    Wikidata failed, continuing with what we have: {e}")
+    if humans:
+        log(f"    {len(humans)} buildings tagged with a person's item, not used for them: {', '.join(sorted(humans)[:10])}")
+    out["_people"] = sorted(humans)        # (s07_package: their tags are not the building's)
     save(city_id, "wikidata", out)
     log(f"    {len(out)} items")

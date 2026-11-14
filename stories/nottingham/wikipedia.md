@@ -16,3 +16,10 @@ article, so their card can say who they were. Each checked by hand against the p
 | Charles I | Charles I of England | raised his standard here, 25 August 1642 |
 | Robin Hood | Robin Hood | the statue by the castle |
 | William Thompson | William Thompson (boxer) | "Bendigo" |
+| Marshal Tallard | Camille d'Hostun, duc de Tallard | "In this house lived Marshal Tallart … prisoner of war", 1705–1711 |
+| William Ewart Gladstone | William Ewart Gladstone | "Felled by the Right Hon W. E. Gladstone May 11 1875" |
+| Charles J. Phipps | C. J. Phipps | the Theatre Royal, 1865 |
+| Samuel Bourne | Samuel Bourne | photographer, 1834–1912 |
+| Laura Knight | Laura Knight | "Dame Laura Knight, artist, lived here" |
+| Arthur Mee | Arthur Mee | "Arthur Henry Mee 1875-1943. Journalist" |
+

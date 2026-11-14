@@ -75,9 +75,19 @@ def text_of(p):
     return out
 
 
+# a person's name alone, "Brian Clough" or "Jesse Boot": two to four capitalised words, nothing like "of"
+PERSON_NAME = re.compile(r"(?:Sir |Dame |Lord |Lady )?[A-Z][\w'.-]+(?: [A-Z][\w'.-]+){1,3}")
+
+
 def name_of(p):
+    """A pin's title. A statue or bust named with only the person it shows is "Statue of Brian Clough": the pin is
+    a work of art in a place, not the person."""
     t = p["tags"]
-    return t.get("name") or (t.get("subject") and f"{kind_of(t).capitalize()} of {t['subject']}") or kind_of(t).capitalize()
+    name, k = t.get("name"), kind_of(t)
+    if name and p.get("cat") == "art" and k in ("statue", "bust") \
+            and PERSON_NAME.fullmatch(name) and (t.get("subject") in (None, name)):
+        return f"{k.capitalize()} of {name}"
+    return name or (t.get("subject") and f"{k.capitalize()} of {t['subject']}") or k.capitalize()
 
 
 GROUPS = {

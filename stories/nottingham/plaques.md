@@ -21,3 +21,10 @@ a type (thing, group) when it is not about a person.
 | Eric Irons |  | public |  | magistrate |
 | Constance Shacklock |  | arts |  | contralto |
 | Benjamin Mayo |  | other |  | 'The Old General', a local character, not a soldier |
+| Offices of Watson Fothergill | Watson Fothergill's offices |  |  | a place: Watson Fothergill told under his name |
+| The site of the Hockley Methodist Chapel | Hockley Methodist Chapel |  |  | a place: John Wesley told under his name |
+| Wesley Place Methodist Chapel | Wesley Place Methodist Chapel |  |  | a place |
+| "This admirably appointed | The Theatre Royal |  |  | Phipps and Matcham told under their names |
+| Former offices of the world famous Chilwell | Gregory's Roses |  |  | a place |
+| The White House rebuilt 1910 | The White House |  |  | a place |
+

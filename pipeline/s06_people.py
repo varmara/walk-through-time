@@ -188,7 +188,9 @@ def main(city_id):
             if (e["source"] or {}).get("kind") == "Wikipedia":      # (a person from another site: no Wikipedia guess)
                 wiki_hint(e["name"], e["source"])
             if e["b"] is None:   # not a building: a pin
-                e["b"] = out.pin(*e["pin"], e["name"], L["id"], e["group"], e["story"], e["source"], e.get("place"), e["name"])
+                # (titled with the place it marks, "21 Regent Street", when the entry gives one: a pin is a place)
+                e["b"] = out.pin(*e["pin"], e.get("where") or e["name"], L["id"], e["group"], e["story"], e["source"],
+                                 e.get("place"), e["name"])
             else:
                 out.add(e["b"], e["group"], L["id"], e["story"], e["source"], e.get("place"), e["name"])
         groups = L.get("groups") or [[L["id"], L["title"]]]
@@ -202,7 +204,8 @@ def main(city_id):
     titles = {k: t for k, t, _ in PEOPLE_GROUPS} | {"events": "Plaques to events and places"}
     pg = {g["key"]: g for g in people["groups"]}
 
-    def person(b, key, name, story, source, xy=None, qid=None, who=True, on=None, tpl=None, own=True):
+    def person(b, key, name, story, source, xy=None, qid=None, who=True, on=None, tpl=None, own=True, title=None):
+        # title: a pin's own name, when it is a place (a plaque, a house) rather than the person ("Plaque to …")
         # own: the source is about this person (not a list that names them, as Wikipedia's table of the Park
         # Estate's buildings), so its Wikipedia article can be their summary
         k = "people-" + key
@@ -212,15 +215,17 @@ def main(city_id):
         if who:
             wiki_hint(name, source if own else None, qid, story)
         if b is None:   # a plaque: a pin where it hangs; on a building, the building is in the layer too and its card
-            b = out.pin(*xy, name, "people", k, story, source, who=who, on=on)     # quotes the plaque
+            b = out.pin(*xy, title or name, "people", k, story, source, who=who, on=on)     # quotes the plaque
             if on is not None:
                 out.add(on, k, "people", story, source, who=who, pin_ref=b)
         else:
             out.add(b, k, "people", story, source, who=who or (name if tpl else None), tpl=tpl)
         pg[k]["items"].append([b, name])
+        return b
 
     plaques = load(city_id, "plaques") if work(city_id, "plaques").exists() else []
     plaque_fix = cur.get("plaques", {})          # the stories file's corrections, by inscription or subject
+    plaque_people = cur.get("plaque_people", {})
     placed, names = 0, {}
     for p in plaques:
         b = building_at(buildings, p["x"], p["y"], near=12)
@@ -251,10 +256,28 @@ def main(city_id):
         src = {"title": "Open Plaques", "url": url, "kind": "Open Plaques"}
         if p.get("osm") and not p.get("id"):
             src = {"title": "OpenStreetMap", "url": f"https://www.openstreetmap.org/node/{p['osm']}", "kind": "Plaque mapped in"}
-        label = fix.get("label") or subject or plaque_label(text) or "Plaque"
+        # who the plaque remembers (plaque-people.md): one person makes it theirs, as a plaque with a subject is;
+        # each of several is told on its card under their own name
+        on_it = next((v for k2, v in plaque_people.items() if text.lower().startswith(k2.lower())), {})
+        named_people = on_it.get("people", [])
+        if len(named_people) == 1:          # the table names them as their article does, and their group
+            subject, key = named_people[0], on_it.get("group") or (key if key != "events" else "other")
+        elif len(named_people) > 1:
+            key = on_it.get("group") or key
+        # the plaque is a place: "Plaque to Dame Laura Knight" (or the place it marks, plaques.md), never the
+        # person's bare name; the person is told under their own name on its card
+        persons = named_people or ([subject] if subject and key != "events" else [])
+        label = fix.get("label") or (("Plaque to " + " and ".join(persons)) if persons else None) \
+            or plaque_label(text) or "Plaque"
         # every plaque is a pin where it hangs, linked both ways to the building it is on (if any)
-        person(None, key, label, story, src, xy=(p["x"], p["y"]), qid=p.get("qid"),
-               who=bool(subject) and key != "events", on=b)
+        ref = person(None, key, subject if len(persons) == 1 else label, story, src, xy=(p["x"], p["y"]),
+                     qid=p.get("qid"), who=len(persons) == 1, on=b, title=label)
+        if len(named_people) > 1:
+            out.pins[int(ref[1:])]["people"] = named_people
+            for n in named_people:
+                wiki_hint(n, None, None, text)
+                k = "people-" + (on_it.get("group") or "other")
+                pg.setdefault(k, {"key": k, "title": titles.get(k[7:], k[7:]), "count": 0, "items": []})["items"].append([ref, n])
     log(f"s06 plaques: {len(plaques)} shown as pins ({placed} on or by a building)")
 
     # well-known residents found in their Wikipedia articles (s04_residents)
@@ -354,6 +377,14 @@ def main(city_id):
     people["groups"] = sorted(pg.values(), key=lambda g: order.index(g["key"]) if g["key"] in order else 99)
 
     about = about_people(want, c_words(city_id))
+    # people with no Wikipedia article: a summary written by hand from another site (about.md), cited with the date
+    for n, h in (cur.get("about") or {}).items():
+        if n not in about:
+            from urllib.parse import urlparse
+            host = (urlparse(h["url"]).hostname or "").removeprefix("www.")
+            from .s04_curated import SITES
+            about[n] = {"text": h["text"], "title": n, "url": h["url"], "kind": SITES.get(host, host),
+                        **({"read": h["read"]} if h.get("read") else {})}
     log(f"s06 people: Wikipedia articles for {len(about)} of {len(want)} people")
     missing = sorted({n for ns in arch.values() for n, _ in ns if n not in about and n not in links and person_like(n)})
     if missing:

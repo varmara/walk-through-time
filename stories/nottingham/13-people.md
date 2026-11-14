@@ -27,6 +27,7 @@ The poet lived in Wilford in 1804–1805; the church holds two memorials to him.
 - source: en:William Thompson (boxer)
 - place: en:William Thompson (boxer)
 - at: nhle:1271444
+- where: Bendigo's tomb
 - group: sport
 - check: 11 October 1811 | heavyweight championship of England | St Mary's burial ground | crouching lion
 
@@ -166,6 +167,7 @@ buildings in the city include Boots' stores on Pelham Street and Turney Street.
 ## Mary Kendrick
 - source: en:Mary Kendrick
 - at: pin:-1.1442,52.9581
+- where: Curzon Street
 - group: science
 - check: Curzon Street | haulage contractor | Thames Barrier | Mersey
 - note: checked by hand: a pin on Curzon Street in Nottingham (the old address matched a Curzon Street in Long Eaton)
@@ -198,6 +200,7 @@ and let go without charge, and went on hunger strike in Leicester gaol.
 - title: Ellen (Nellie) Crocker
 - read: 2026-11-14
 - at: pin:-1.1452,52.9533
+- where: The suffragettes' office, Carlton Street
 - group: public
 - note: a pin on Carlton Street, where the suffragettes' office at number 6 was: the building is not marked
 
@@ -220,6 +223,7 @@ woman magistrate and a Liberal councillor for the Meadows; a plaque here at the 
 - title: Sarah Gray (Dr.)
 - read: 2026-11-14
 - at: pin:-1.1571,52.9531
+- where: 21 Regent Street
 - group: science
 - note: a pin on Regent Street, near number 21, which is not marked on the map
 
@@ -232,6 +236,7 @@ Medico-Chirurgical Society.
 - title: List of Notable Nottingham Women
 - read: 2026-11-14
 - at: pin:-1.1566,52.9530
+- where: 15 Regent Street
 - group: science
 - note: a pin on Regent Street, near number 15, which is not marked on the map
 
@@ -243,6 +248,7 @@ the Women's Hospital and the Children's Hospital, and later a magistrate, she li
 - title: List of Notable Nottingham Women
 - read: 2026-11-14
 - at: pin:-1.1557,52.9530
+- where: The Girls' Friendly Society hostel, 4–6 Regent Street
 - group: public
 - note: a pin on Regent Street, near numbers 4–6, which are not marked on the map
 
@@ -254,6 +260,7 @@ to revive Mothering Sunday, with the hostel's superintendent, Ellen Porter.
 - title: List of Notable Nottingham Women
 - read: 2026-11-14
 - at: pin:-1.1447,52.9504
+- where: 18 High Pavement
 - group: writers
 - note: a pin on High Pavement, near number 18, which is not marked on the map
 

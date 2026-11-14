@@ -136,7 +136,7 @@ export function storyOf(s){
   if (!s.pin) return s;
   const pp = pinOf(s.pin)?.properties || {};
   const J = v => typeof v === 'string' ? JSON.parse(v) : v;
-  return { ...s, text: pp.text || '', source: J(pp.source), who: s.who || pp.who };
+  return { ...s, text: pp.text || '', source: J(pp.source), who: s.who || pp.who, people: J(pp.people) };
 }
 export function storyFor(b, name){
   const ss = (S.features[b].properties.stories || []).map(storyOf).filter(s => s.text);

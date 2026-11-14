@@ -42,6 +42,7 @@ story as plain text. The settings:
 | `at` | where, when not where the article says: `name:…` (a building's name), `osm:way/123` (an outline), `nhle:1271444` (a list entry), `pin:lon,lat` (a pin), `pin:article` (a pin at the article's own point, or the `place` article's: a village, a site where nothing stands) |
 | `year` | when the building standing today was built or opened (`1855`, `c. 1420`, `1841..1844`) |
 | `group` | in a layer with `groups:`, the entry's group (its own tickbox); People: the kind of person, when Wikidata has no occupation (architects, writers, science, industry, sport, arts, public) |
+| `where` | a pin's own name, the place it marks (`21 Regent Street`, `Bendigo's tomb`), so the pin is a place and the person is told under their name |
 | `see` | other stories to link from this one ("See also" on its card), by their headings, separated by `\|`; write `layer/heading` when two stories share a heading (`culture/Nottingham Castle`) |
 | `names` | `no` when the entry's name is not the building's name (an event: "The castle burned, 1831") |
 | `check` | words the article must contain, separated by `\|` |
@@ -130,3 +131,13 @@ node tests/page/smoke.cjs http://localhost:8642/   # and the browser check (need
 `data/<city>-changes.md` lists every building whose title, year or listing changed since the last build.
 When you fix a name, add the building to `tests/expected/<city>-names.md` so the fix cannot quietly break again.
 On GitHub the pipeline runs automatically when `stories/`, `pipeline/` or `cities/` change.
+
+## Places stay places
+
+A pin or a building is never titled with a person's bare name. A plaque is "Plaque to Dame Laura Knight", or the
+place it marks (plaques.md); a statue is "Statue of Brian Clough"; a People pin takes `where:`. Who a plaque
+remembers is listed in `plaque-people.md`, and their card tells their story under their own name: the plaque's
+words, then who they were from Wikipedia, or for someone with no article a summary in `about.md` (written by
+hand from another site, with its link and the date it was read). A Wikidata tag on a building that points at a
+person (an architect's, by mistake) is left out.
+

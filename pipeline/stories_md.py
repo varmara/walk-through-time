@@ -36,7 +36,7 @@ import re
 from pathlib import Path
 
 ENTRY_KEYS = {"source", "place", "at", "year", "group", "quote", "names", "check", "note", "architect", "see", "read",
-              "title"}
+              "title", "where"}
 
 
 def architects(v):
@@ -139,6 +139,14 @@ def load(folder):
         fix = {k: r[k] for k in ("label", "group", "type") if r.get(k)}
         plaques[r["inscription starts, or subject"]] = fix
     out["PLAQUES"] = plaques
+    # who each plaque remembers (plaque-people.md), and summaries for people with no Wikipedia article (about.md)
+    f = folder / "plaque-people.md"
+    out["PLAQUE_PEOPLE"] = {r["inscription starts"]: {"people": [n.strip() for n in r["people"].split(" & ") if n.strip()],
+                                                      **({"group": r["group"]} if r.get("group") else {})}
+                            for r in (table(f) if f.exists() else []) if r.get("people")}
+    f = folder / "about.md"
+    out["ABOUT"] = {r["name"]: {"text": r["who"], "url": r["source"], "read": r.get("read") or None}
+                    for r in (table(f) if f.exists() else []) if r.get("name") and r.get("who") and r.get("source")}
     tags = {}
     f = folder / "tags.md"
     for r in (table(f) if f.exists() else []):

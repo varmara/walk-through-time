@@ -106,7 +106,7 @@ export function showPerson(name){
   unlight();
   if (S.selectedId != null) { fstate(S.selectedId, { sel:false }); S.selectedId = null; }
   renderCard({ title: name, rows, after,
-    stories: info.text ? [{ text: info.text, source: { kind: 'Wikipedia', title: info.title, url: info.url } }] : [], links: [] });
+    stories: info.text ? [{ text: info.text, source: { kind: info.kind || 'Wikipedia', title: info.title, url: info.url, read: info.read } }] : [], links: [] });
   // the names of buildings whose card files are not here yet: fetched, then the list again
   const missing = refs.filter(r => isB(r) && !S.features[r].full);
   if (missing.length && missing.length <= 40) Promise.all(missing.map(r => loadCard(r).catch(() => {}))).then(() => {
@@ -218,6 +218,14 @@ function collHtml(cs){
     return '<p>More photos from ' + (list.length === 1 ? a(list[0].url, name)
       : esc(name) + ': ' + list.map(c => a(c.url, c.title)).join(', ')) + '</p>';
   }).join('');
+}
+// A plaque to several people (the Theatre Royal's to Phipps and Matcham): after its words, each person under their
+// own name, with who they were, as one person's plaque is
+function withPeople(stories){
+  return stories.flatMap(s => {
+    const ps = Array.isArray(s.people) ? s.people.filter(n => n !== s.who) : [];
+    return ps.length ? [{ ...s, who: null }, ...ps.map(n => ({ who: n, layer: 'people', text: '' }))] : [s];
+  });
 }
 // one line on who a person was (the first sentence of their article), and their card for more
 function whoLine(who){
@@ -341,7 +349,7 @@ function buildingCard(p, id){
 
   const near = nearby(id, J(p.xy));
   if (near.length) rows.push(['Nearby', near.map(o => `<a href="#" data-ref="${esc(o.ref)}">${esc(o.name)}</a> <span class="muted">${Math.round(o.m / 10) * 10 || 10} m</span>`).join('<br>')]);
-  const stories = (p.stories || []).map(storyOf).map(s => ({ ...s, label: s.layer === 'people' && s.pin ? 'Plaque' : layerTitle(s.layer) }));
+  const stories = withPeople((p.stories || []).map(storyOf).map(s => ({ ...s, label: s.layer === 'people' && s.pin ? 'Plaque' : layerTitle(s.layer) })));
   const after = (S.entitiesAt[id] || []).filter(m => !people().has(m.name)).map(m =>
     `<button class="textbtn allplaces" data-name="${esc(m.name)}" data-b="${m.bs.join(',')}">All ${m.bs.length} places: ${esc(m.name)}</button>`).join('');
 
@@ -426,7 +434,8 @@ function pinCard(p){
   if (WHEELCHAIR[p.wc]) rows.push(['Access', esc(WHEELCHAIR[p.wc])]);
   if (p.op || p.gov) rows.push(['Run by', esc(p.op || p.gov)]);
   if (p.acc) rows.push(['Accreditation', esc(p.acc)]);
-  return { title: p.name, rows, stories: [{ text: p.text, source: J(p.source), place: J(p.place), who: p.who, see: p.see }], coll: J(p.coll),
+  return { title: p.name, rows, stories: withPeople([{ text: p.text, source: J(p.source), place: J(p.place), who: p.who, see: p.see,
+             layer: p.layer, people: J(p.people) }]), coll: J(p.coll),
            links: placeLinks(p, false) };
 }
 

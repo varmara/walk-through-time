@@ -70,6 +70,7 @@ def main(city_id):
     base = load(city_id, "base")
     listing = load(city_id, "listing")
     wd = load(city_id, "wikidata")
+    people_tags = set(wd.pop("_people", []) if isinstance(wd, dict) else [])
     dates = load(city_id, "dates")
     lay = load(city_id, "layers")
     cur = load(city_id, "curated")
@@ -153,7 +154,7 @@ def main(city_id):
             "h": b["h"], "base": b.get("base"), "levels": t.get("building:levels"), "osm": b["osm"],
             "kind": t.get("building") if t.get("building") != "yes" else None,
             "grade": best.get("Grade"), "listEntry": best.get("ListEntry"), "listName": best.get("Name"),
-            "listUrl": best.get("hyperlink"), "qid": info.get("qid") or t.get("wikidata"),
+            "listUrl": best.get("hyperlink"), "qid": info.get("qid") or (t.get("wikidata") if t.get("wikidata") not in people_tags else None),
             "image": info.get("image") or ((photos.get(k) or {}).get("photo") and commons(photos[k]["photo"]["file"])),
             "credit": None if info.get("image") else (photos.get(k) or {}).get("photo"),
             "archive": (photos.get(k) or {}).get("archive"), "dyk": dyk.get(k), "article": article, "architects": architects(k, info),

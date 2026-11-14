@@ -362,7 +362,8 @@ def main(city_id):
                             **({"year": list(parse_year(e["year"]))} if e.get("year") and parse_year(e["year"]) else {}),
                             **({"architect": e["architect"]} if e.get("architect") else {}),
                             **({"names": False} if e.get("names") is False else {}),
-                            **({"see": e["see"]} if e.get("see") else {})})
+                            **({"see": e["see"]} if e.get("see") else {}),
+                            **({"where": e["where"]} if e.get("where") else {})})
         log(f"s04 {L['id']}: {kept}/{len(L['entries'])} stories kept")
     for d in dropped:
         log(f"    dropped {d['layer']} / {d['name']}: {d['why']}")
@@ -376,5 +377,5 @@ def main(city_id):
     T = _tables.get(city_id, {})
     save(city_id, "curated", {"layers": meta, "entries": entries, "dropped": dropped,
                               **{k.lower(): T.get(k) or default for k, default in (
-                                  ("WIKIPEDIA", {}), ("PLAQUES", {}), ("COLLECTIONS", []), ("NAMES", {}),
+                                  ("WIKIPEDIA", {}), ("PLAQUES", {}), ("PLAQUE_PEOPLE", {}), ("ABOUT", {}), ("COLLECTIONS", []), ("NAMES", {}),
                                   ("TITLES", {}), ("CREDITS", {}), ("ARCHITECTS", {}))}})
