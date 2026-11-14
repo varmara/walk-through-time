@@ -36,7 +36,7 @@ story as plain text. The settings:
 
 | Setting | Meaning |
 |---|---|
-| `source` | the Wikipedia article (`en:Title`) or Historic England list entry (`he:1254566`) the story rests on; for People, the person's article |
+| `source` | the Wikipedia article (`en:Title`), Historic England list entry (`he:1254566`) or another site's page (`web:https://…`) the story rests on; for People, the person's article or page. Another site: facts in our own words and a link, never its text, and its rights checked by hand first; a site that declines automated reading takes `quote` lines pasted by hand |
 | `place` | People only: the place's article, which decides the building |
 | `at` | where, when not where the article says: `name:…` (a building's name), `osm:way/123` (an outline), `nhle:1271444` (a list entry), `pin:lon,lat` (a pin), `pin:article` (a pin at the article's own point, or the `place` article's: a village, a site where nothing stands) |
 | `year` | when the building standing today was built or opened (`1855`, `c. 1420`, `1841..1844`) |

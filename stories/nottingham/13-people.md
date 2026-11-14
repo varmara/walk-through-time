@@ -182,3 +182,94 @@ Conservator.
 Dorothea Waddingham ran a nursing home in her house here, 32 Devon Drive. She was hanged in 1936 for poisoning two
 of her patients, Louisa Baguley and her daughter Ada, with morphine.
 
+## Helen Watts
+- source: web:https://map.mappingwomenssuffrage.org.uk/items/show/256
+- at: osm:way/40324301
+- group: public
+- check: Lenton | Christabel Pankhurst | Holloway | Albert Hall | hunger strike
+- note: from Mapping Women's Suffrage (University of Warwick), in our own words
+
+Helen Watts, the daughter of the vicar of Lenton, joined Nottingham's suffragettes after hearing Christabel
+Pankhurst speak in 1907. In 1909 she served a month in Holloway, was arrested here at the Albert Hall in July
+and let go without charge, and went on hunger strike in Leicester gaol.
+
+## Nellie Crocker
+- source: web:https://map.mappingwomenssuffrage.org.uk/items/show/260
+- at: pin:-1.1452,52.9533
+- group: public
+- check: Carlton Street | 1909 | 1912 | Holloway | eighth arrest
+- note: a pin on Carlton Street, where the suffragettes' office at number 6 was: the building is not marked
+
+Nellie Crocker was the suffragettes' organiser in Nottingham from 1909 to 1912, with an office on Carlton Street.
+After her eighth arrest, for attacking a post office in London, she spent three months of 1912 in Holloway.
+
+## Helena Dowson
+- source: web:https://map.mappingwomenssuffrage.org.uk/items/show/293
+- at: osm:way/40324861
+- group: public
+- check: 1895 | Long Row | 1920 | Meadows | Justice Centre
+- note: placed on the Justice Centre, where a plaque to her was put up in 2020
+
+Helena Dowson ran Nottingham's suffrage society from 1895 and its shop on Long Row. In 1920 she became the
+city's first woman magistrate and a councillor for the Meadows; a plaque here at the Justice Centre remembers her.
+
+## Sarah Gray
+- source: web:https://map.mappingwomenssuffrage.org.uk/items/show/253
+- at: pin:-1.1574,52.9532
+- group: science
+- check: 21 Regent Street | first woman GP | 1899 | Medico-Chirurgical
+- note: a pin on Regent Street, near number 21, which is not marked on the map
+
+Sarah Gray, Nottingham's first woman GP, lived and practised at 21 Regent Street. At the Women's Hospital from
+1899 she was refused charge of in-patients; in 1921 she became the first president of the Nottingham
+Medico-Chirurgical Society.
+
+## Ann Morley
+- source: web:https://www.mynottinghamnews.co.uk/?p=9966
+- at: osm:way/220003541
+- group: industry
+- check: Ann Morley | 1750 | 1843 | 1854 | George Gill
+
+Ann Morley, a businesswoman, built this house in 1750, a rare Georgian town house built by a woman. The
+Nottingham School of Design opened here in 1843, and in 1854 the lace merchant George Gill made it the People's
+Hall, an institute for working men.
+
+## Vera Anderson
+- source: web:https://www.boots-uk.com/newsroom/features/boots-hidden-heroes-vera-anderson/
+- at: osm:way/17505332
+- group: public
+- check: Printing Works | 8 May 1941 | night watchman | George Medal
+- note: placed on Trent House, the Printing Works as rebuilt after the raid
+
+Vera Anderson, a Boots nurse, was on duty when bombs wrecked the Boots Printing Works here on 8 May 1941. She
+gave first aid to a dying night watchman through burning debris, then treated casualties at the control centre,
+and was awarded the George Medal.
+
+## Alan Sillitoe
+- source: web:https://openplaques.org/people/25144
+- at: osm:way/214484707
+- group: writers
+- check: 38 Manton Crescent | March 4th 1928
+
+A plaque on this house, 38 Manton Crescent in Lenton Abbey, says that the writer Alan Sillitoe was born here on
+4 March 1928.
+
+## Richard Parkes Bonington
+- source: web:https://openplaques.org/people/24472
+- at: osm:way/354382265
+- group: arts
+- check: 79 High Street | Arnold | 26 October 1802
+- note: Bonington House, on High Street, Arnold: the plaque's 79 High Street
+
+A plaque on this house, 79 High Street in Arnold, says that the artist Richard Parkes Bonington was born here on
+26 October 1802.
+
+## William Booth
+- source: web:https://www.salvationarmy.org.uk/william-booth-birthplace-museum
+- at: osm:way/123120708
+- group: faith
+- check: Notintone Place | birthplace | Catherine | Salvation Army
+
+William Booth, who founded the Salvation Army, was born in this house in Notintone Place, Sneinton. It is now the
+William Booth Birthplace Museum, telling the story of Booth, his wife Catherine and their family.
+

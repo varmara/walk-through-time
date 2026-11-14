@@ -100,11 +100,27 @@ def table_text(wt):
     return strip_wikitext("\n".join(out))
 
 
+# the names of sites other than Wikipedia that stories rest on (web: sources), as their citations show them
+SITES = {"map.mappingwomenssuffrage.org.uk": "Mapping Women's Suffrage", "openplaques.org": "Open Plaques",
+         "leftlion.co.uk": "LeftLion", "nottinghamwomenshistory.org.uk": "Nottingham Women's History Group",
+         "salvationarmy.org.uk": "The Salvation Army", "nottinghamcivicsociety.org.uk": "Nottingham Civic Society",
+         "mynottinghamnews.co.uk": "My Nottingham News", "boots-uk.com": "Boots UK"}
+
+
 def article(ref):
-    """'en:Title' (Wikipedia) or 'he:1254566' (Historic England list entry) -> {text, url, title, qid, coords, nhle}."""
+    """'en:Title' (Wikipedia), 'he:1254566' (Historic England list entry) or 'web:https://…' (another site's page,
+    its facts checked the same way) -> {text, url, title, qid, coords, nhle, kind}."""
     if ref in _cache:
         return _cache[ref]
     lang, title = ref.split(":", 1)
+    if lang == "web":
+        from urllib.parse import urlparse
+        host = (urlparse(title).hostname or "").removeprefix("www.")
+        page = http_text(title)
+        time.sleep(1)
+        _cache[ref] = {"text": page["text"].lower(), "url": title, "title": page["title"] if page["title"] != title else host,
+                       "qid": None, "coords": None, "nhle": [], "kind": SITES.get(host, host)}
+        return _cache[ref]
     if lang == "he":
         url = f"https://historicengland.org.uk/listing/the-list/list-entry/{title}"
         page = http_text(url)
@@ -247,6 +263,11 @@ def main(city_id):
     for L in layers:   # list entries that could not be fetched: check against the quoted passages instead
         for e in L["entries"]:
             for ref in filter(None, (e["source"], e.get("place"))):
+                if arts.get(ref) is None and ref.startswith("web:") and e.get("quote"):     # a site that declined
+                    from urllib.parse import urlparse
+                    host = (urlparse(ref[4:]).hostname or "").removeprefix("www.")
+                    arts[ref] = {"text": " ".join(e["quote"]).lower(), "title": e["name"], "url": ref[4:], "qid": None,
+                                 "coords": None, "nhle": [], "kind": SITES.get(host, host)}
                 if arts.get(ref) is None and ref.startswith("he:") and e.get("quote"):
                     num = ref[3:]
                     arts[ref] = {"text": " ".join(e["quote"]).lower(), "title": f"List entry {num}",

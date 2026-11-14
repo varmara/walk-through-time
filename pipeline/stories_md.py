@@ -10,7 +10,8 @@ A story layer is one file, `NN-<id>.md` (NN sets the order):
     The layer's introduction: one paragraph, as many lines as you like.
 
     ## Ye Olde Trip to Jerusalem      <- an entry: the place, person or fact's name
-    - source: en:Ye Olde Trip to Jerusalem      (the Wikipedia article it rests on; a person's, for People)
+    - source: en:Ye Olde Trip to Jerusalem      (the Wikipedia article it rests on; a person's, for People; or
+                                                 he:1254566, or web:https://… for another site's page)
     - place: en:Nottingham Castle               (People: the place's article)
     - at: name:Ye Olde Trip to Jerusalem        (where, if not where the article says: name:, osm:, nhle:, pin:lon,lat,
                                                  pin:article for a pin at the article's coordinates)

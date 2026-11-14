@@ -185,7 +185,8 @@ def main(city_id):
     if L:
         es = [e for e in cur["entries"] if e["layer"] == L["id"]]
         for e in es:
-            wiki_hint(e["name"], e["source"])
+            if (e["source"] or {}).get("kind") == "Wikipedia":      # (a person from another site: no Wikipedia guess)
+                wiki_hint(e["name"], e["source"])
             if e["b"] is None:   # not a building: a pin
                 e["b"] = out.pin(*e["pin"], e["name"], L["id"], e["group"], e["story"], e["source"], e.get("place"), e["name"])
             else:
