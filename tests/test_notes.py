@@ -104,6 +104,11 @@ class Read(unittest.TestCase):
         self.assertEqual(people["entries"], [])
         self.assertIs(info["people"]["W. G. Grace"]["wikipedia"], False)
 
+    def test_quotes(self):
+        _, (civic, people, facts) = load({"people/A.md": "---\ntype: person\nsource: he:1\nquote:\n  - Paid for by A.\n"
+                                                         "  - \"1908\"\nat:\n  - P, 52.9, -1.1\n---\nText.\n"})
+        self.assertEqual(people["entries"][0]["quote"], ["Paid for by A.", "1908"])
+
     def test_person_text_with_no_place(self):
         _, (civic, people, facts) = load({"people/A.md": "---\ntype: person\nsource: en:A\n---\nWho they were.\n"})
         (p,) = people["entries"]

@@ -268,7 +268,7 @@ def main(city_id):
                     log(f"    {ref}: {ex}")
     for L in layers:   # list entries that could not be fetched: check against the quoted passages instead
         for e in L["entries"]:
-            for ref in filter(None, (e["source"], e.get("place"))):
+            for ref in refs_of(e):
                 if arts.get(ref) is None and ref.startswith("he:") and e.get("quote"):
                     num = ref[3:]
                     arts[ref] = {"text": " ".join(e["quote"]).lower(), "title": f"List entry {num}",

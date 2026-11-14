@@ -103,7 +103,8 @@ When the Lords threw out the Bill, a crowd burned the castle of the
 
 - **Sources.** A Wikipedia or Historic England page is checked: the build reads it and drops the note if a check
   word is missing. Another site's page is written from by hand: give `read:` (the date it was read) and keep
-  facts and links only; the build does not read it.
+  facts and links only; the build does not read it. Historic England blocks the build, so a note resting on a
+  list entry also gives `quote:`, the passages copied from it, which the check words are found in instead.
 - **Footnotes** (`[^name]`) let one paragraph or fact rest on its own page, checked for its own words, or
   `— read: 2026-11-14` for another site's.
 - **Links.** `[[Note]]` or `[[Note|words shown]]` links another note, or a person on the map by the name the

@@ -227,6 +227,8 @@ def load(folder, layers):
                     **({"read": str(props["read"])} if props.get("read") else {}),
                     **({"title": str(props["title"])} if props.get("title") else {}),
                     **({"year": str(props["year"])} if props.get("year") else {}),
+                    # passages copied from a Historic England list entry, which blocks automated requests
+                    **({"quote": listed(props.get("quote"))} if props.get("quote") else {}),
                     # other stories to link from this one, as see: in a story file (also [[links]] in its text)
                     **({"see": [WIKILINK.sub(lambda m: m[1], s) for s in listed(props.get("see"))]} if props.get("see") else {}),
                     **({"names": False} if props.get("names") is False or str(props.get("names")).lower() == "no" else {})}
