@@ -63,7 +63,7 @@ Augustus Pugin, who also designed the interior of the Houses of Parliament, desi
 
 The architect Thomas Cecil Howitt designed the Council House.
 
-## C. J. Phipps
+## Charles J. Phipps
 - source: en:C. J. Phipps
 - place: en:Theatre Royal, Nottingham
 - check: Phipps

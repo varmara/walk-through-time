@@ -21,4 +21,4 @@ article, so their card can say who they were. Each checked by hand against the p
 | Samuel Bourne | Samuel Bourne | photographer, 1834–1912 |
 | Laura Knight | Laura Knight | "Dame Laura Knight, artist, lived here" |
 | Arthur Mee | Arthur Mee | "Arthur Henry Mee 1875-1943. Journalist" |
-
+| Charles J. Phipps | C. J. Phipps | the Theatre Royal, 1865 |
