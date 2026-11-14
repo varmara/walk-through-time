@@ -78,10 +78,11 @@ council from 1894 and part of the borough of Rushcliffe from 1972.
 - group: west-bridgford
 - at: osm:way/79373051
 - names: no
-- check: 1964 | out-of-town superstore | 1999
+- check: 1964 | out-of-town superstore | 1966 | Asda | 1999
 
 In 1964 an American company opened what was called the UK's first major out-of-town superstore on Loughborough
-Road. In 1999 Asda replaced it with a much larger store on the land next to it.
+Road. In 1966 the young Asda chain took it over, and in 1999 replaced it with a much larger store on the land
+next to it.
 
 ## Edwalton station
 - source: en:Edwalton railway station
