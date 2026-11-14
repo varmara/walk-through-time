@@ -53,6 +53,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install the notes' reader
+        run: pip install -q "pyyaml==6.0.2"      # pipeline/notes.py: the notes' properties
+
       # The last published data: a build that starts part-way through keeps the files earlier steps wrote, and a
       # page-only change publishes it as it is.
       - name: Restore the published data

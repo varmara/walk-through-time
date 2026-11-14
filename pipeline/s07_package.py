@@ -76,10 +76,15 @@ def main(city_id):
     cur = load(city_id, "curated")
     sums = load(city_id, "summaries") if work(city_id, "summaries").exists() else {}
     photos = load(city_id, "photos") if work(city_id, "photos").exists() else {}
-    dyk = {}
+    dyk, pin_dyk = {}, {}
     for e in cur["entries"]:
-        if e["layer"] == "facts" and e["b"] is not None:
-            dyk.setdefault(str(e["b"]), []).append({"text": e["story"], "source": e["source"]})
+        if e["layer"] != "facts":
+            continue
+        d = {"text": e["story"], "source": e["source"], **({"weblinks": e["weblinks"]} if e.get("weblinks") else {})}
+        if e["b"] is not None:
+            dyk.setdefault(str(e["b"]), []).append(d)
+        elif e.get("pin"):            # a fact at a pin a note made: on that pin's card
+            pin_dyk.setdefault((round(e["pin"][0], 6), round(e["pin"][1], 6)), []).append(d)
     commons = lambda f: "http://commons.wikimedia.org/wiki/Special:FilePath/" + urllib.parse.quote(f.replace(" ", "_"))  # noqa: E731
     names = load(city_id, "names")              # s06_names: every naming rule is there
 
@@ -197,6 +202,8 @@ def main(city_id):
              "geometry": {"type": "Point", "coordinates": [pn["x"], pn["y"]]}} for k, pn in enumerate(lay.get("pins", []))]
     for f in pins:          # pins: their layer's group, their person, where they stand
         pp = f["properties"]
+        if (d := pin_dyk.get(tuple(round(c, 6) for c in f["geometry"]["coordinates"]))):
+            pp["dyk"] = d
         c = collections_for(pp.get("name"), f",{pp.get('group', '')},", [pp["who"]] if pp.get("who") else [],
                             f["geometry"]["coordinates"])
         if c:

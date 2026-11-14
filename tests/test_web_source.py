@@ -33,7 +33,7 @@ class Files(unittest.TestCase):
                     if e["source"].startswith("web:"):
                         where = f"{folder.name} / {L['id']} / {e['name']}"
                         self.assertRegex(e.get("read", ""), r"^\d{4}-\d{2}-\d{2}$", f"{where}: read: date")
-                        self.assertTrue(re.match(r"(pin:-?\d|osm:|name:|nhle:)", e.get("at", "")), f"{where}: at:")
+                        self.assertTrue(e.get("unplaced") or re.match(r"(pin:-?\d|osm:|name:|nhle:)", e.get("at", "")), f"{where}: at:")
                         self.assertNotIn("facts", e, f"{where}: written by hand, so no check words")
 
 

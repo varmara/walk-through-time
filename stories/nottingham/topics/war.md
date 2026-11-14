@@ -6,7 +6,7 @@ two World Wars at home.
 
 ## The Civil War
 - person: Charles I
-- story: Colonel Hutchinson
+- person: John Hutchinson
 - story: The storming of Shelford House
 - story: St Nicholas' Church
 - story: culture/Nottingham Castle

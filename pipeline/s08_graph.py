@@ -6,6 +6,7 @@ Links keep their evidence, the story text and its source. A person named in anot
 the Lace Market story of a warehouse Hine designed) is linked there too, as in a note that mentions another note.
 """
 import json
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -28,7 +29,8 @@ def main(city_id):
                 [story_text(st, pins, data.get("templates")) for st in p.get("stories") or []]
         if r[0] == "p":
             p = pins[int(r[1:])]["properties"]
-            return {"label": p["name"]}, [{"layer": p.get("layer"), "text": p.get("text"), "source": p.get("source")}]
+            return {"label": p["name"]}, [{"layer": p.get("layer"), "text": p.get("text"), "source": p.get("source"),
+                                           "links": p.get("links")}]
         p = areas[int(r[1:])]["properties"]
         return {"label": p.get("name")}, []
 
@@ -39,6 +41,7 @@ def main(city_id):
         if key in seen:
             return
         seen.add(key)
+        text = re.sub(r"\[\^[\w-]+\]", "", text) if text else text      # (a note's footnote marks)
         links.append({"s": a, "t": b, "text": text, "src": src, "how": how})
 
     people = []   # (node id, name)
@@ -67,7 +70,7 @@ def main(city_id):
                 for name, refs in g["items"]:
                     eid = f"e:{name}"
                     nodes.setdefault(eid, {"id": eid, "label": name, "type": g["key"].replace("people-", ""),
-                                           **({"about": data["people"][name]} if name in data.get("people", {}) else {})})
+                                           **({"about": brief(data["people"][name])} if name in data.get("people", {}) else {})})
                     people.append((eid, name))
                     last = name.split()[-1].lower()
                     for x in refs:
@@ -80,9 +83,22 @@ def main(city_id):
                               or next((s for s in ps if last in (s.get("text") or "").lower()), None))
                         link(eid, r, st and st.get("text"), st and st.get("source"))
 
+    # people with a note but no place of their own (W. G. Grace in the first Test): a point, for their links
+    for name, info in (data.get("people") or {}).items():
+        if info.get("linked") and f"e:{name}" not in nodes:
+            nodes[f"e:{name}"] = {"id": f"e:{name}", "label": name, "type": "other", "about": brief(info)}
     for tid, eid in topic_people:
         if eid in nodes:
             link(tid, eid, how="topic")
+
+    # [[links]] in stories and events (pipeline/notes.py): the person, to the place where the story is told
+    for r, n in list(nodes.items()):
+        if n["type"] != "place":
+            continue
+        for s in place_info(r)[1]:
+            for t in s.get("links") or []:
+                if f"e:{t}" in nodes:
+                    link(f"e:{t}", r, s.get("text"), s.get("source"), how="link")
 
     # mentions: a person's full name in the story of a place they are not yet linked to
     texts = []
@@ -104,6 +120,14 @@ def main(city_id):
         kinds[n["type"]] = kinds.get(n["type"], 0) + 1
     log(f"s08 graph: {len(nodes)} nodes {kinds}, {len(links)} links "
         f"({sum(l['how'] == 'mention' for l in links)} from mentions)")
+
+
+def brief(info):
+    """What the graph shows of a person: who they were (Wikipedia's opening, or their note's own text) and when."""
+    out = {k: info[k] for k in ("text", "title", "url", "life") if info.get(k)}
+    if not out.get("text") and (info.get("own") or {}).get("story"):
+        out["text"] = re.sub(r"\[\^[\w-]+\]", "", info["own"]["story"].split("\n\n")[0])
+    return out
 
 
 def lay_out(path):

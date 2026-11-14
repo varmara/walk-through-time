@@ -47,14 +47,3 @@ whose line a stainless steel channel now marks; Goose Fair was held here until 1
 After large-scale slum clearance, the Broad Marsh shopping centre was officially opened on 25 March 1975. It
 closed in 2020 and was left partially demolished; caves found beneath it, dug into the soft sandstone, became
 part of the City of Caves.
-
-## The castle burned, 1831
-- source: en:1831 reform riots
-- see: Lowe's Silk Mill | culture/Nottingham Castle
-- at: name:Nottingham Castle
-- names: no
-- check: 8 October 1831 | Duke of Newcastle | hanged | burnt shell
-
-When the House of Lords threw out the Second Reform Bill on 8 October 1831, rioting broke out in Nottingham
-and a crowd burned the castle, which belonged to the Duke of Newcastle, an opponent of reform. Three men were
-hanged; the Duke refused to restore the castle, and its burnt shell stood on the rock for years.

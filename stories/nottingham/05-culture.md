@@ -6,7 +6,7 @@ centre.
 
 ## Nottingham Castle
 - source: en:Nottingham Castle
-- see: The castle burned, 1831 | Mortimer's Hole | Colonel Hutchinson
+- see: The castle burned, 1831 | Mortimer's Hole | John Hutchinson
 - check: 1831 | 1878
 
 The medieval castle was demolished after the Civil War and a ducal mansion built on the rock. Rioters burnt

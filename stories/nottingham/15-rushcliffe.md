@@ -58,33 +58,6 @@ in it, probably hidden around 1539, are now at Nottingham Castle Museum, and Rud
 Built around 1500, one of the few brick houses of its time in Nottinghamshire. The Pierreponts held Holme from
 about 1280 and became Earls and Dukes of Kingston, then Earls Manvers. It is listed Grade I.
 
-## The storming of Shelford House
-- source: en:Storming of Shelford House
-- at: pin:article
-- group: civil-war
-- names: no
-- check: 1645 | Poyntz | Hutchinson | Philip Stanhope | 160
-- see: Colonel Hutchinson | The castle burned, 1831
-- note: a pin at the article's point
-
-In November 1645 Parliament's troops under Sydnam Poyntz, with Colonel John Hutchinson leading the assault,
-stormed Shelford House, held for the King by Philip Stanhope. About 160 of its defenders were killed, and the
-house was burnt that night.
-
-## Colonel Hutchinson
-- source: en:John Hutchinson (Roundhead)
-- place: en:Owthorpe
-- at: pin:article
-- group: civil-war
-- names: no
-- check: Owthorpe | 1615 | 1643 | death warrant | 1664 | Memoirs
-- see: The storming of Shelford House | culture/Nottingham Castle
-- note: a pin in Owthorpe, at its article's point: his hall there is gone
-
-John Hutchinson, born at Owthorpe in 1615, held Nottingham Castle for Parliament from 1643 and signed Charles I's
-death warrant. He died a prisoner in 1664 and is buried at Owthorpe; his wife Lucy's Memoirs of his life made
-him famous.
-
 ## The Wise Men of Gotham
 - source: en:Wise Men of Gotham
 - place: en:Gotham, Nottinghamshire
@@ -131,4 +104,3 @@ closed in 1993.
 
 Generating from 1968, with eight cooling towers, it was the last coal-fired power station in Britain. When it
 shut in September 2024 it ended 142 years of coal power in the country.
-

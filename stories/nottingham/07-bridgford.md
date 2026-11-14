@@ -117,18 +117,6 @@ A church dating from the 12th century, listed Grade II*. Arthur Brewill and Basi
 A district built mostly in the 1990s, named after a garden in Poole. Its tram, opened in 2015, runs along a
 disused railway line.
 
-## The first Test, 1899
-- source: en:Australian cricket team in England in 1899
-- at: pin:-1.1322,52.9369
-- group: trent-bridge
-- names: no
-- check: Trent Bridge | Grace | Rhodes | 1899
-- see: Trent Bridge cricket ground
-- note: a pin on the ground, where its own story's pin is
-
-The first Test at Trent Bridge, England against Australia in June 1899, was W. G. Grace's last Test and Wilfred
-Rhodes's first.
-
 ## Lady Bay Bridge
 - source: en:Lady Bay, Nottinghamshire
 - at: osm:way/5205093
@@ -149,4 +137,3 @@ and in 1979 the bridge was turned over to road traffic.
 
 In 1941 a German bomber dropped a line of bombs across Lady Bay. New houses went up on the bomb sites in the 1950s
 and 1960s, and Pinders Ponds, to the east, are thought to be flooded bomb craters.
-

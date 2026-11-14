@@ -90,14 +90,6 @@ opened as a museum in 1976.
 The water engineer Thomas Hawksley was born at Arnot Hill House in 1807. His Trent Bridge waterworks, completed
 in 1831, gave Britain its first high-pressure constant supply, which kept dirty water out of the mains.
 
-## National Shell Filling Factory
-- source: en:National Shell Filling Factory, Chilwell
-- group: science-works
-- check: Chetwynd | 1915 | 1 July 1918 | 134 | Chetwynd Barracks
-
-Viscount Chetwynd built the factory from 1915 to fill shells with explosive; it filled some 19 million during the
-First World War. On 1 July 1918 eight tons of TNT exploded, killing 134 people. The site is now Chetwynd Barracks.
-
 ## Gedling Colliery
 - source: en:Gedling Country Park
 - group: science-works

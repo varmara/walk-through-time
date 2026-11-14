@@ -45,7 +45,7 @@ class Stories(unittest.TestCase):
         self.assertEqual(L["intro"], "Intro on two lines.")
         e = L["entries"][0]
         self.assertEqual(e, {"name": "A place", "source": "en:A", "quote": ["one", "two"], "names": False,
-                             "facts": ("a", "b"), "story": "The story continues."})
+                             "facts": ("a", "b"), "story": "The story continues.", "links": [], "weblinks": []})
 
 
 if __name__ == "__main__":

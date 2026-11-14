@@ -2,8 +2,8 @@
 
 Who each plaque remembers, so its card can tell their story under their name, as a building's card does: the
 plaque's own words, then who they were (the opening of their Wikipedia article, found by their name and the
-plaque's years, or wikipedia.md for a name Wikipedia does not use; or a summary in about.md for someone with no
-article). A row matches a plaque by the start of its inscription; several people are separated by " & ". Group:
+plaque's years, or wikipedia.md for a name Wikipedia does not use; or their note in notes/people/ for someone
+with no article). A row matches a plaque by the start of its inscription; several people are separated by " & ". Group:
 the kind of person (architects, writers, science, industry, sport, arts, faith, military, public, other).
 
 | Inscription starts | People | Group | Note |

@@ -15,7 +15,7 @@ import urllib.parse
 
 from .common import city, load, log, save, work
 from .geo import building_at
-from .layerdata import Collector, grouped, place_of
+from .layerdata import Collector, grouped, more_of, place_of
 from .texts import TEMPLATES
 from .s04_curated import PEOPLE_GROUPS, people_group
 from .s05_dates import info_for
@@ -191,17 +191,32 @@ def main(city_id):
     # ---- hand-written entries (stories/<city>/NN-people.md)
     L = next((x for x in cur["layers"] if x.get("kind") == "people"), None)
     people = {"id": "people", "title": "People", "section": "People", "kind": "people", "groups": []}
+    # person notes (stories/<city>/notes/): the Wikipedia article chosen for them, or none (wikipedia: no)
+    note_people = (cur.get("notes") or {}).get("people", {})
+    nowiki = {n for n, v in note_people.items() if v.get("wikipedia") is False}
+    own = {}         # a person note's own text, for their card: {name: {text, source, sources, cites, weblinks}}
+    for n, v in note_people.items():
+        if v.get("wikipedia"):
+            named[n] = v["wikipedia"]
+        if n not in nowiki:
+            wiki_hint(n)
     if L:
         es = [e for e in cur["entries"] if e["layer"] == L["id"]]
         for e in es:
-            if (e["source"] or {}).get("kind") == "Wikipedia":      # (a person from another site: no Wikipedia guess)
-                wiki_hint(e["name"], e["source"])
+            if e.get("type") == "person" and e["name"] not in own:
+                own[e["name"]] = {k: e[k] for k in ("story", "source", "sources", "cites", "weblinks") if e.get(k)}
+        es = [e for e in es if not e.get("unplaced")]          # (a person's own text with no place: their card only)
+        for e in es:
+            if (e["source"] or {}).get("kind") == "Wikipedia" and e["name"] not in nowiki and e["name"] not in named:
+                wiki_hint(e["name"], e["source"])     # (a person from another site: no Wikipedia guess)
+            elif e["name"] not in nowiki:
+                wiki_hint(e["name"])
             if e["b"] is None:   # not a building: a pin
                 # (titled with the place it marks, "21 Regent Street", when the entry gives one: a pin is a place)
                 e["b"] = out.pin(*e["pin"], e.get("where") or e["name"], L["id"], e["group"], e["story"], e["source"],
-                                 e.get("place"), e["name"])
+                                 e.get("place"), e["name"], extra=more_of(e))
             else:
-                out.add(e["b"], e["group"], L["id"], e["story"], e["source"], e.get("place"), e["name"])
+                out.add(e["b"], e["group"], L["id"], e["story"], e["source"], e.get("place"), e["name"], more=more_of(e))
         groups = L.get("groups") or [[L["id"], L["title"]]]
         people = {"id": L["id"], "title": L["title"], "section": "People", "kind": "people",
                   "groups": [{"key": k, "title": t, "count": len({e["b"] for e in es if e["group"] == k}),
@@ -394,7 +409,14 @@ def main(city_id):
         g["items"] = grouped(g["items"], place_of(buildings, out.pins) if g["key"] == "people-events" else None)
     people["groups"] = sorted(pg.values(), key=lambda g: order.index(g["key"]) if g["key"] in order else 99)
 
-    about = about_people(want, c_words(city_id))
+    about = about_people({n: h for n, h in want.items() if n not in nowiki}, c_words(city_id))
+    # a person note's own text and facts, on their card after (or instead of) Wikipedia's opening
+    for n, o in own.items():
+        about.setdefault(n, {"title": n})["own"] = o
+    for e in cur["entries"]:
+        if e["layer"] == "facts" and e.get("who"):
+            about.setdefault(e["who"], {"title": e["who"]}).setdefault("facts", []).append(
+                {"text": e["story"], "source": e["source"], **({"links": e["links"]} if e.get("links") else {})})
     # people with no Wikipedia article: a summary written by hand from another site (about.md), cited with the date
     for n, h in (cur.get("about") or {}).items():
         if n not in about:

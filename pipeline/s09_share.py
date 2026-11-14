@@ -176,6 +176,7 @@ def layer_pages(data, city_id, city_name, site, out):
                         f"&name={urllib.parse.quote(name)}")
                 meta = ([built] if built and not person else []) + ([f"{where}{more}"] if person and where else [])
                 who = data.get("people", {}).get(name) if person else None
+                who = who if who and who.get("text") else None      # (a note's own text only: told below)
                 arts.append(f"<article><h3>{e(name)}</h3>"
                             + (f'<p class="meta">{e(" · ".join(meta))}</p>' if meta else "")
                             + (f'<p><i>{e(who["text"])}</i></p><p class="src">Wikipedia: <a href="{html.escape(who["url"])}">'

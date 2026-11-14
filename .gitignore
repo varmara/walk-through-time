@@ -11,3 +11,6 @@ node_modules/
 /*/index.html
 /*/graph.html
 raw/
+
+# Obsidian, when a notes folder is opened as a vault: the window layout, not the notes
+stories/*/notes/.obsidian/workspace*

@@ -251,9 +251,14 @@ def main(city_id):
 
     entries, dropped = [], []
     arts = {}
+
+    def refs_of(e):
+        """Every page an entry rests on: its source(s), its place's article, its footnotes' pages."""
+        return [r for r in [e["source"], e.get("place"), *e.get("sources", []),
+                            *(c["source"] for c in e.get("cites", {}).values())] if r]
     for L in layers:
         for e in L["entries"]:
-            for ref in filter(None, (e["source"], e.get("place"))):
+            for ref in refs_of(e):
                 if ref in arts or ref.startswith("web:"):     # (another site: written by hand, not read here)
                     continue
                 try:
@@ -278,31 +283,60 @@ def main(city_id):
         log(f"    occupations from Wikidata failed: {ex}")
         occ = {}
 
+    def page(r, e, read=None, title=None):
+        """A source's page: fetched (Wikipedia, Historic England) or written by hand from another site."""
+        if r.startswith("web:"):
+            return written_by_hand({"source": r, "name": e["name"], "read": read, "title": title})
+        return arts.get(r)
+
+    def read_ok(d):
+        return bool(d and re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(d)))
+
     for L in layers:
         kept = 0
         for e in L["entries"]:
             hand = e["source"].startswith("web:")
-            src = written_by_hand(e) if hand else arts.get(e["source"])
+            src = page(e["source"], e, e.get("read"), e.get("title"))
+            more = [page(r, e, e.get("read")) for r in e.get("sources", [])]
             a = arts.get(e["place"]) if e.get("place") else src     # the article that places the entry
             why = None
-            if hand and not (e.get("read") and re.fullmatch(r"\d{4}-\d{2}-\d{2}", e["read"])):
+            fetched = [s for s in [src, *more] if s and s.get("kind") != "web" and not s.get("read")] + \
+                ([a] if e.get("place") and a else [])
+            if any(r.startswith("web:") for r in [e["source"], *e.get("sources", [])]) and not read_ok(e.get("read")):
                 why = "a story written from another site needs the date it was read (read: 2026-11-14)"
-            elif hand and not (e.get("at", "").startswith(("pin:", "osm:", "name:", "nhle:")) and e["at"] != "pin:article"):
-                why = "a story written from another site needs its place (at: osm:…, name:…, nhle:… or pin:lon,lat)"
-            elif hand:
-                pass                    # checked by hand when it was read: no check words
-            elif src is None or (e.get("place") and a is None):
+            elif hand and not e.get("unplaced") and not (e.get("at", "").startswith(("pin:", "osm:", "name:", "nhle:")) and e["at"] != "pin:article"):
+                why = "a story written from another site needs its place (at: an OpenStreetMap link, or a pin)"
+            elif not hand and (src is None or (e.get("place") and a is None)) or any(s is None for s in more):
                 why = "Wikipedia article not found"
-            else:
-                text = src["text"] + "\n" + (a["text"] if e.get("place") else "")
+            elif fetched:
+                text = "\n".join(s["text"] for s in fetched)
                 # the architects it names: their surnames at least must be in the article
                 facts = list(e.get("facts", ())) + re.findall(r"\d{4}", e.get("year", "")) \
                     + [n.split()[-1] for n, _ in e.get("architect", [])]
                 missing = [f for f in dict.fromkeys(facts) if f.lower() not in text]
                 if missing:
                     why = "articles do not mention: " + ", ".join(missing)
+            # (only other sites: checked by hand when they were read, no check words)
+            cites = {}
+            for k, c in (e.get("cites") or {}).items():       # footnotes: each page checked for its own words
+                cp = page(c["source"], e, c.get("read"), c.get("title"))
+                if why:
+                    break
+                if c["source"].startswith("web:"):
+                    if not read_ok(c.get("read")):
+                        why = f"footnote [^{k}] is another site's page: it needs the date it was read (— read: 2026-11-14)"
+                elif cp is None:
+                    why = f"footnote [^{k}]: Wikipedia article not found"
+                else:
+                    missing = [f for f in c.get("check", ()) if f.lower() not in cp["text"]]
+                    if missing:
+                        why = f"footnote [^{k}]'s page does not mention: " + ", ".join(missing)
+                if cp:
+                    cites[k] = cp
             b = how = None
-            if not why:
+            if not why and e.get("unplaced"):
+                pass                 # a person's own text or fact: on their card, not on a place
+            elif not why:
                 at = e.get("at", "")
                 if at in ("pin", "pin:article"):     # a pin at the article's own point: a village, a site with no building
                     if a["coords"]:
@@ -344,7 +378,7 @@ def main(city_id):
                     how = e.get("_how") or "pin where the story file puts it" if at == "pinned" else "pin at the article's coordinates (no building there: a bridge, a ground, a square)"
                 elif b is None:
                     why = "could not place it on a building, and the article has no coordinates"
-            if not why and L.get("groups") and L.get("kind") != "people" and e.get("group") not in {k for k, _ in L["groups"]}:
+            if not why and L.get("groups") and L.get("kind") != "people" and L.get("kind") != "facts" and e.get("group") not in {k for k, _ in L["groups"]}:
                 log(f"    {L['id']} / {e['name']}: group {e.get('group')!r} is not one of the layer's groups: put in the first")
                 e = {**e, "group": L["groups"][0][0]}
             if why:
@@ -354,10 +388,16 @@ def main(city_id):
             if L.get("kind") == "people":
                 group = "people-" + (e.get("group") or people_group(occ.get(src["qid"], [])) or "other")
             kept += 1
+
+            def cited(s):
+                return {"title": s["title"], "url": s["url"], "kind": s["kind"], **({"read": s["read"]} if s.get("read") else {})}
             entries.append({"layer": L["id"], "group": group, "b": b, "name": e["name"],
-                            **({"pin": list(a["coords"])} if b is None else {}),
+                            **({"pin": list(a["coords"])} if b is None and not e.get("unplaced") else {}),
                             "story": e["story"], "how": how,
-                            "source": {"title": src["title"], "url": src["url"], "kind": src["kind"], **({"read": src["read"]} if src.get("read") else {})},
+                            "source": cited(src),
+                            **({"sources": [cited(s) for s in more]} if more else {}),
+                            **({"cites": {k: cited(s) for k, s in cites.items()}} if cites else {}),
+                            **{k: e[k] for k in ("links", "weblinks", "note", "type", "who", "unplaced") if e.get(k)},
                             **({"place": {"title": a["title"], "url": a["url"], "kind": a["kind"]}} if e.get("place") else {}),
                             **({"year": list(parse_year(e["year"]))} if e.get("year") and parse_year(e["year"]) else {}),
                             **({"architect": e["architect"]} if e.get("architect") else {}),
@@ -378,5 +418,6 @@ def main(city_id):
     save(city_id, "curated", {"layers": meta, "entries": entries, "dropped": dropped,
                               **{k.lower(): T.get(k) or default for k, default in (
                                   ("WIKIPEDIA", {}), ("PLAQUES", {}), ("PLAQUE_PEOPLE", {}), ("ABOUT", {}), ("TOPICS", []),
+                                  ("NOTES", {}),
                                   ("COLLECTIONS", []), ("NAMES", {}),
                                   ("TITLES", {}), ("CREDITS", {}), ("ARCHITECTS", {}))}})

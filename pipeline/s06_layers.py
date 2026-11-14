@@ -16,7 +16,7 @@ Writes layers.json, and routes.json and basics.json (GeoJSON features for s07):
           grounds) and plaques not on a building; layer items refer to them as "p<index>"
 """
 from .common import city, load, log, save, sources, work
-from .layerdata import AREAS, Collector, grouped, in_date_order, place_of
+from .layerdata import AREAS, Collector, grouped, in_date_order, more_of, place_of
 from .layers import LAYERS, Context
 from .stories_md import slug
 from .visitorlayers import museums, pub_heritage, visitor
@@ -73,11 +73,12 @@ def main(city_id):
             continue
         es = [e for e in cur["entries"] if e["layer"] == L["id"]]
         for e in es:
-            if e["b"] is None:   # not a building: a pin
-                e["b"] = out.pin(*e["pin"], e["name"], L["id"], e["group"], e["story"], e["source"], e.get("place"))
+            if e["b"] is None:   # not a building: a pin (named for the place it marks, when the note gives one)
+                e["b"] = out.pin(*e["pin"], e.get("where") or e["name"], L["id"], e["group"], e["story"], e["source"],
+                                 e.get("place"), extra=more_of(e))
                 e["_story"] = out.pins[-1]
             else:
-                out.add(e["b"], e["group"], L["id"], e["story"], e["source"], e.get("place"))
+                out.add(e["b"], e["group"], L["id"], e["story"], e["source"], e.get("place"), more=more_of(e))
                 e["_story"] = out.stories[str(e["b"])][-1]
         groups = L.get("groups") or [[L["id"], L["title"]]]
         meta.append({"id": L["id"], "title": L["title"], "intro": L.get("intro", ""), "section": "Stories",
@@ -85,7 +86,15 @@ def main(city_id):
                      "groups": [{"key": k, "title": t, "count": len({e["b"] for e in es if e["group"] == k}),
                                  "items": grouped([[e["b"], e["name"]] for e in es if e["group"] == k])}
                                 for k, t in groups]})
-    cross_links(cur["entries"], {L["id"] for L in cur["layers"] if L.get("kind") not in ("facts", "people")})
+    # a note's [[links]] to other stories are its "see also", as see: in a story file; to people, they stay links
+    persons = {n for g in ppl["meta"]["groups"] if g["key"] != "people-events" for n, _ in g["items"]}
+    persons |= set((cur.get("notes") or {}).get("people", {}))
+    for e in cur["entries"]:
+        more = [t for t in e.get("links", []) if t not in persons and t != e["name"] and t not in e.get("see", [])]
+        if more:
+            e["see"] = e.get("see", []) + more
+    cross_links(cur["entries"], {L["id"] for L in cur["layers"] if L.get("kind") not in ("facts", "people")}, persons)
+    link_people(cur, ppl)
     if not any(m["kind"] == "people" for m in meta):
         meta.append(ppl["meta"])
     # on a building's card, the story layers' stories first, then the People layer's, then the rest
@@ -183,9 +192,10 @@ def main(city_id):
                              "architectLinks": ppl.get("architectLinks", {})})
 
 
-def cross_links(entries, story_layers):
+def cross_links(entries, story_layers, persons=()):
     """A story's "see also" (stories/<city>/*.md: see): each named story, found by its heading, or layer/heading,
-    becomes [heading, where it is] on the story ("123" a building, "p4" a pin), which the card links to."""
+    becomes [heading, where it is] on the story ("123" a building, "p4" a pin), which the card links to; a person
+    (persons: the People layer's and person notes' names) becomes [name, "who"], opening their card."""
     placed = [e for e in entries if e["layer"] in story_layers and "_story" in e]
     by_name, by_full = {}, {}
     for e in placed:
@@ -196,6 +206,9 @@ def cross_links(entries, story_layers):
         for name in e.get("see", []):
             hits = [by_full[name.lower()]] if name.lower() in by_full else by_name.get(name.lower(), [])
             hits = [h for h in hits if h is not e]
+            if not hits and name in persons:
+                see.append([name, "who"])
+                continue
             if len(hits) != 1:
                 log(f"    {e['layer']} / {e['name']}: see {name!r}: " + ("no such story" if not hits else
                     "more than one story of that name: write it as layer/heading"))
@@ -289,3 +302,29 @@ def topic_layers(topics, entries, people, out, buildings, bname, story_layers):
     if problems:
         raise SystemExit("Topics (stories/<city>/topics/): fix these lines:\n  " + "\n  ".join(problems))
     return meta
+
+
+def link_people(cur, ppl):
+    """[[Links]] in stories and notes (pipeline/notes.py): each must name a note or someone in the People layer.
+    A person linked from a story or event lists it on their card ("In these stories and events": about[name]
+    ["linked"]: [[title, place ref or None, layer]]), and the story keeps the people it links (its "links"),
+    which the graph draws. Raises naming the story and the link that finds nothing."""
+    notes = set((cur.get("notes") or {}).get("names", []))
+    persons = {n for g in ppl["meta"]["groups"] if g["key"] != "people-events" for n, _ in g["items"]}
+    persons |= set((cur.get("notes") or {}).get("people", {}))
+    known = notes | persons | set(ppl["about"]) | {e["name"] for e in cur["entries"]} \
+        | {f"{e['layer']}/{e['name']}" for e in cur["entries"]}
+    problems, about = [], ppl["about"]
+    for e in cur["entries"]:
+        for t in e.get("links", []):
+            if t not in known:
+                problems.append(f"{e['layer']} / {e['name']}: [[{t}]] is neither a note nor a person on the map")
+            elif t in persons and t != e["name"]:
+                ref = e.get("b") if e["layer"] != "people" else None
+                row = [e["name"], ref, e["layer"]]
+                mine = about.setdefault(t, {"title": t}).setdefault("linked", [])
+                if row not in mine:
+                    mine.append(row)
+    if problems:
+        raise SystemExit("Links that find nothing (write the note, or the name as the People layer has it):\n  "
+                         + "\n  ".join(problems))

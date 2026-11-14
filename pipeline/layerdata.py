@@ -113,6 +113,14 @@ def in_date_order(meta, stories, pins, dates, about):
             g["items"] = [it for _, it in sorted(keyed, key=lambda k: k[0])]
 
 
+MORE = ("sources", "cites", "weblinks", "links")
+
+
+def more_of(e):
+    """What a note adds to a story (pipeline/notes.py): its other sources, footnotes' pages and links."""
+    return {k: e[k] for k in MORE if e.get(k)}
+
+
 class Collector:
     """member {building index: [group keys]}, stories {building index: [story]}, pins [pin]."""
 
@@ -131,7 +139,9 @@ class Collector:
                           **({"who": who} if who else {}), **({"on": on} if on is not None else {})})
         return f"p{len(self.pins) - 1}"
 
-    def add(self, i, group, layer_id, story=None, source=None, place=None, who=None, pin_ref=None, tpl=None, of=None):
+    def add(self, i, group, layer_id, story=None, source=None, place=None, who=None, pin_ref=None, tpl=None, of=None,
+            more=None):
+        """more: a note's other sources, footnotes' pages, links (MORE), kept with its story."""
         groups = self.member.setdefault(str(i), [])
         if group not in groups:
             groups.append(group)
@@ -143,6 +153,6 @@ class Collector:
                       **({"source": source} if source else {})}
         elif story:
             story_ = {"layer": layer_id, "text": story, **({"source": source} if source else {}),
-                      **({"place": place} if place else {}), **({"who": who} if who else {})}
+                      **({"place": place} if place else {}), **({"who": who} if who else {}), **(more or {})}
         if story_:
             self.stories.setdefault(str(i), []).append(story_)

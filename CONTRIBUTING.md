@@ -69,26 +69,61 @@ Rules, checked by step `s04_curated` every time the pipeline runs:
 - **Stories are short and plain:** one or two sentences, what happened and when. Name legends as legends.
 - **No personal details about private people.** Public figures are fine.
 
-### People
+### Notes: people and events
 
-In a `kind: people` layer, the facts must appear in the person's and the place's articles taken together:
+People, and events with the people in them, are notes: one Markdown file each in `stories/<city>/notes/`
+(`people/`, `events/`), as in an Obsidian vault, which the folder can be opened as. A note's name is its file's
+name; two notes cannot share one. Properties go at the top, the text below:
 
 ```markdown
-## Thomas Cecil Howitt
-- source: en:Thomas Cecil Howitt
-- place: en:Council House, Nottingham
-- check: Howitt | Council House
+---
+type: event                    # person, event or story
+layer: civic                   # the story layer it is told in (events: an Events layer if none)
+source: https://en.wikipedia.org/wiki/1831_reform_riots      # one page, or a list of pages
+check: 8 October 1831 | Duke of Newcastle                    # words the pages must contain between them
+at:                            # its places
+  - https://www.openstreetmap.org/way/16459858               # a building: its OpenStreetMap link
+  - Lowe's Silk Mill, 52.9265, -1.2165                       # a new pin: its name, latitude, longitude
+  - Bendigo's tomb                                           # a pin another note made
+  - from the article                                         # a pin at the source article's point
+see:
+  - Lowe's Silk Mill           # other stories to link from this one
+---
+When the Lords threw out the Bill, a crowd burned the castle of the
+[[Henry Pelham-Clinton, 4th Duke of Newcastle|Duke of Newcastle]].[^castle]
 
-The architect Thomas Cecil Howitt designed the Council House.
+> [!fact]
+> source: https://en.wikipedia.org/wiki/Nottingham_Castle
+> check: 1878
+>
+> The castle reopened as a museum in 1878.
+
+[^castle]: https://en.wikipedia.org/wiki/Nottingham_Castle — check: 1878 | museum
 ```
 
-The person's type comes from their occupations on Wikidata; each type becomes its own tickbox on the page.
+- **Sources.** A Wikipedia or Historic England page is checked: the build reads it and drops the note if a check
+  word is missing. Another site's page is written from by hand: give `read:` (the date it was read) and keep
+  facts and links only; the build does not read it.
+- **Footnotes** (`[^name]`) let one paragraph or fact rest on its own page, checked for its own words, or
+  `— read: 2026-11-14` for another site's.
+- **Links.** `[[Note]]` or `[[Note|words shown]]` links another note, or a person on the map by the name the
+  People layer gives them (who need not have a note yet). On the person's card, the story is listed under "In
+  these stories and events"; in the graph, the person is linked to its places. A link to a story is its "see
+  also". A building is linked with its OpenStreetMap address, which opens it on the map. The build stops on a
+  `[[link]]` that finds nothing.
+- **Facts** (`> [!fact]`) show under "Did you know?" on the note's places, or the callout's own `at:`; in a
+  person's note, with no `at:`, on their card. A note may hold several.
+- **Places stay places.** A pin is named for the place (a tomb, an address), never for a person.
 
-On a building's card each person's story sits under their name, with one line on who they were; the name opens
-the person's card (who they were, their years from Wikidata, and all their places on the map). People found
-automatically by an address in their Wikipedia article are placed only on a building of that address in the
-town the article names; once a person has a hand-written entry here, the automatic one is left out, so a wrong
-match is fixed by writing the entry (with a `note` saying it was checked).
+A **person** note (`type: person`) may give `kind:` (architects, writers, science, industry, sport, arts, faith,
+military, public, other: else their occupations on Wikidata decide) and `wikipedia:` (the article whose opening
+starts their card, when their name does not find it, or `no`). Their text follows the article's opening on their
+card, and with `at:` it is told on those places' cards under their name. A person note may be properties only:
+the article's opening is then their card.
+
+People found automatically by an address in their Wikipedia article are placed only on a building of that
+address in the town the article names; once a person has a note, the automatic one is left out, so a wrong match
+is fixed by writing the note.
 
 ### Corrections and links
 
@@ -168,8 +203,8 @@ On GitHub the pipeline runs automatically when `stories/`, `pipeline/` or `citie
 A pin or a building is never titled with a person's bare name. A plaque is "Plaque to Dame Laura Knight", or the
 place it marks (plaques.md); a statue is "Statue of Brian Clough"; a People pin takes `where:`. Who a plaque
 remembers is listed in `plaque-people.md`, and their card tells their story under their own name: the plaque's
-words, then who they were from Wikipedia, or for someone with no article a summary in `about.md` (written by
-hand from another site, with its link and the date it was read). A Wikidata tag on a building that points at a
+words, then who they were from Wikipedia, or for someone with no article their note (written by hand from
+another site, with its link and the date it was read). A Wikidata tag on a building that points at a
 person (an architect's, by mistake) is left out.
 
 A plaque to a place takes its own title from the plaque list ("Moot Hall", "Swine Green"); one with neither a

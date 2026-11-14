@@ -78,7 +78,9 @@ def layer(path):
 
     def close():
         if cur is not None:
-            cur["story"] = " ".join(body).strip()
+            # [[links]] to people and notes, and [words](url) links, as in a note (pipeline/notes.py)
+            from .notes import inline
+            cur["story"], cur["links"], cur["weblinks"] = inline(" ".join(body).strip())
             entries.append(cur)
 
     for raw in lines:
@@ -182,6 +184,9 @@ def load(folder):
     folder = Path(folder)
     curated = [layer(p) for p in sorted(folder.glob("[0-9][0-9]-*.md"))]
     out = {"CURATED": curated}
+    # notes (notes/**/*.md): people, events and stories one per file, added to the layers' entries
+    from . import notes
+    out["NOTES"] = notes.load(folder / "notes", curated)
     out["TOPICS"] = [topic(p) for p in sorted((folder / "topics").glob("*.md")) if p.name.lower() != "readme.md"]
     f = folder / "wikipedia.md"
     out["WIKIPEDIA"] = {r["name on plaque"]: r["wikipedia article"] for r in table(f)} if f.exists() else {}

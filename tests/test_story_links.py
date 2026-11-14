@@ -15,7 +15,9 @@ class Files(unittest.TestCase):
         for folder in sorted((ROOT / "stories").iterdir()):
             if not folder.is_dir():
                 continue
-            layers = [L for L in stories_md.load(folder)["CURATED"] if L.get("kind") not in ("people", "facts")]
+            loaded = stories_md.load(folder)
+            layers = [L for L in loaded["CURATED"] if L.get("kind") not in ("people", "facts")]
+            people = set(loaded["NOTES"]["people"])         # see: may name a person with a note
             by_name, by_full = {}, {}
             for L in layers:
                 for e in L["entries"]:
@@ -30,6 +32,8 @@ class Files(unittest.TestCase):
                         self.assertIn(e.get("group"), keys, f"{where}: its group is not one the layer declares")
                         used.add(e.get("group"))
                     for name in e.get("see", []):
+                        if name in people:
+                            continue
                         hits = [by_full[name.lower()]] if name.lower() in by_full else by_name.get(name.lower(), [])
                         self.assertEqual(len([h for h in hits if h is not e]), 1,
                                          f"{where}: see {name!r} must find exactly one other story (layer/heading if two share it)")
