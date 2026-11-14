@@ -202,7 +202,12 @@ function storyHtml(s, N){
 function topicsHtml(keys){
   const gs = String(keys || '').split(',').map(k => S.groups.get(k)).filter(g => g && g.layer.kind === 'topics');
   if (!gs.length) return '';
-  return `<p class="see">In the topics: ${gs.map(g => `<a href="#" data-topic="${esc(g.key)}">${esc(g.layer.groups.length > 1 ? `${g.layer.title} (${g.title})` : g.layer.title)}</a>`).join(', ')}</p>`;
+  // one line per topic (their titles have commas of their own), its groups after it
+  const by = new Map();
+  for (const g of gs) by.set(g.layer, [...(by.get(g.layer) || []), g]);
+  return `<div class="see"><p>In the topics:</p><ul class="topics">${[...by].map(([L, xs]) => `<li>${L.groups.length > 1
+    ? `${esc(L.title)}: ${xs.map(g => `<a href="#" data-topic="${esc(g.key)}">${esc(g.title)}</a>`).join(', ')}`
+    : `<a href="#" data-topic="${esc(xs[0].key)}">${esc(L.title)}</a>`}</li>`).join('')}</ul></div>`;
 }
 // "See also": other stories the story file links to (stories/<city>/*.md: see), each opening where it is
 function seeHtml(see){

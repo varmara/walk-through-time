@@ -1,7 +1,7 @@
 // Walk Through Time, city page: Places: one person or story with several buildings, as numbered pins and a strip of cards that swipe sideways.
 import { $, dateText, eraOf, esc } from './util.js';
 import { S } from './state.js';
-import { fstate, isB, loadCard, parseRef, refCentre, refOf, storyFor } from './data.js';
+import { fstate, isB, loadCard, parseRef, refCentre, refOf, storyFor, tiled } from './data.js';
 import { buildingColour } from './map.js';
 import { closeSheet } from './sheet.js';
 import { openRef, refName } from './cards.js';
@@ -15,7 +15,7 @@ function cardHtml(b, i, name, hint){
       ${pp.text ? `<p>${esc(pp.text)}</p>` : ''}<button class="textbtn" data-open="${b}">Details</button>`;
   }
   const f = S.features[b], p = f.properties;
-  if (!f.full) return `<div class="pnum">${i + 1}</div><h3>${esc(refName(b))}</h3><p class="pwait">Loading…</p>
+  if (!f.full && tiled()) return `<div class="pnum">${i + 1}</div><h3>${esc(refName(b))}</h3><p class="pwait">Loading…</p>
     <button class="textbtn" data-open="${b}">Details</button>`;
   const st = storyFor(b, hint?.name || name, hint?.layer), era = p.y != null ? eraOf(p.y) : null;
   return `<div class="pnum">${i + 1}</div>
@@ -27,7 +27,7 @@ function cardHtml(b, i, name, hint){
 function fillCard(i){
   const P = S.places, el = P && $('pCards').querySelector(`[data-i="${i}"]`);
   if (!el || el.dataset.full) return;
-  if (isB(P.bs[i]) && !S.features[P.bs[i]].full) return;
+  if (isB(P.bs[i]) && !S.features[P.bs[i]].full && tiled()) return;
   el.innerHTML = cardHtml(P.bs[i], i, P.name, P.hints?.[i]); el.dataset.full = '1';
   el.querySelector('[data-open]').onclick = () => openRef(parseRef(el.querySelector('[data-open]').dataset.open));
 }
@@ -37,7 +37,7 @@ function loadAround(i){
   const P = S.places; if (!P) return;
   for (let j = Math.max(0, i - 3); j < Math.min(P.bs.length, i + 9); j++) {
     const b = P.bs[j];
-    if (!isB(b) || S.features[b].full) { fillCard(j); continue; }
+    if (!isB(b) || S.features[b].full || !tiled()) { fillCard(j); continue; }
     loadCard(b).then(() => { if (S.places === P) fillCard(j); }).catch(() => {});
   }
 }
@@ -47,7 +47,8 @@ function loadAround(i){
 export function showPlaces(name, bs, hints){
   // the stories' words are in the card files. A small set (a person, a story: one or two files) waits for them,
   // showing the bar meanwhile; a big set, or one whose places' whereabouts need the files, shows at once
-  const need = bs.filter(isB).filter(b => !S.features[b].full);
+  // (the single data file, with no card files: every building is complete already)
+  const need = tiled() ? bs.filter(isB).filter(b => !S.features[b].full) : [];
   const placed = bs.every(b => refCentre(b));
   if (need.length && (need.length <= 12 || !placed)) {
     $('pName').textContent = name; $('pCount').textContent = '';
@@ -63,7 +64,7 @@ export function showPlaces(name, bs, hints){
   S.map.getSource('places').setData({ type:'FeatureCollection', features: bs.map((b, i) =>
     ({ type:'Feature', properties:{ n: i + 1 }, geometry:{ type:'Point', coordinates: refCentre(b) } })) });
   $('pName').textContent = name;
-  $('pCards').innerHTML = bs.map((b, i) => `<article class="pcard" data-i="${i}"${!isB(b) || S.features[b].full ? ' data-full="1"' : ''}>${cardHtml(b, i, name, hints?.[i])}</article>`).join('');
+  $('pCards').innerHTML = bs.map((b, i) => `<article class="pcard" data-i="${i}"${!isB(b) || S.features[b].full || !tiled() ? ' data-full="1"' : ''}>${cardHtml(b, i, name, hints?.[i])}</article>`).join('');
   $('pCards').querySelectorAll('[data-open]').forEach(btn => btn.onclick = () => openRef(parseRef(btn.dataset.open)));
   $('placesbar').hidden = false; $('timebar').hidden = true;
   $('pCards').scrollLeft = 0;

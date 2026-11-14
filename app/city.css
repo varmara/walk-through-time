@@ -211,3 +211,8 @@ a.who{color:var(--ink);text-decoration-color:color-mix(in srgb,var(--ink) 35%,tr
 
 
 .pwait{margin:6px 4px 10px;color:var(--muted)}
+
+.see ul.topics{margin:4px 0 0;padding-left:18px}
+.see ul.topics li{margin:2px 0}
+div.see{font:14px/1.4 var(--sans);color:var(--muted);margin:12px 0}
+div.see > p{margin:0}
