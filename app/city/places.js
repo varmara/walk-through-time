@@ -74,8 +74,9 @@ export function showPlaces(name, bs, hints){
   requestAnimationFrame(() => {
     if (S.places?.bs !== bs) return;
     const pts = bs.map(refCentre), lons = pts.map(p => p[0]), lats = pts.map(p => p[1]);
-    S.map.fitBounds([[Math.min(...lons), Math.min(...lats)], [Math.max(...lons), Math.max(...lats)]],
-      { padding: { top: 70, left: 16, right: 60, bottom: $('placesbar').offsetHeight + 24 }, maxZoom: 16, duration: 900 });
+    const cam = S.map.cameraForBounds([[Math.min(...lons), Math.min(...lats)], [Math.max(...lons), Math.max(...lats)]],
+      { padding: { top: 70, left: 16, right: 60, bottom: $('placesbar').offsetHeight + 24 }, maxZoom: 16 });
+    if (cam) glide({ ...cam, bearing: S.map.getBearing(), pitch: S.map.getPitch() });
   });
 }
 // a layer's groups (or a whole story layer or topic, by its id) as one set of numbered cards, in the build's date
@@ -95,6 +96,15 @@ export function showGroups(keys, title){
   showPlaces(title, refs, hints);
   return true;
 }
+// From place to place as Google Earth flew: up and out, across, and down again, slower the further it goes, easing
+// in and out (MapLibre's flyTo follows van Wijk and Nuij's "smooth and efficient zooming and panning", the same
+// kind of flight). With reduced motion asked for, a short ease instead.
+const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+const smooth = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+export function glide(camera){
+  if (reduced()) return S.map.easeTo({ ...camera, duration: 300 });
+  S.map.flyTo({ ...camera, speed: 0.5, curve: 1.5, easing: smooth, maxDuration: 6000, essential: true });
+}
 // how close a card takes the map to its place: near enough to pick out the building, with its street round it
 const PLACE_ZOOM = 16;
 export function setPlace(i, fly = true){
@@ -107,7 +117,7 @@ export function setPlace(i, fly = true){
   Object.entries(S.pins).forEach(([k, m]) => m.getElement().classList.toggle('on', k === 'p' + (i + 1)));
   $('pCards').querySelectorAll('.pcard').forEach(c => c.classList.toggle('on', +c.dataset.i === i));
   loadAround(i);
-  if (fly) S.map.easeTo({ center: refCentre(S.places.bs[i]), zoom: Math.max(S.map.getZoom(), PLACE_ZOOM), duration: 700,
+  if (fly) glide({ center: refCentre(S.places.bs[i]), zoom: Math.max(S.map.getZoom(), PLACE_ZOOM),
     padding: { bottom: $('placesbar').offsetHeight + 20 } });
 }
 export function goToCard(i){
