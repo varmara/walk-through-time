@@ -60,7 +60,7 @@ export function filterBuildings(f){
   for (const id of ['b', 'b-flat']) if (S.map.getLayer(id)) S.map.setFilter(id, f);
 }
 // raised (3D) from this zoom; below it, drawn flat: the whole city in 3D is a phone's heaviest work
-export const RAISED_FROM = 13;
+export const RAISED_FROM = 11;
 export const pinColour = () => ['match', ['get', 'layer'], ...PIN_LAYERS.flatMap(L => [L, tok('--p-' + L)]), tok('--marked')];
 export const basicColour = () => ['match', ['get', 't'], ...BASICS.flatMap(k => [k, tok('--b-' + k)]), tok('--muted')];
 export const landColour = () => ['match', ['get', 't'], ...LAND.flatMap(t => [t, tok('--l-' + t)]), tok('--muted')];
