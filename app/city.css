@@ -216,3 +216,7 @@ a.who{color:var(--ink);text-decoration-color:color-mix(in srgb,var(--ink) 35%,tr
 .see ul.topics li{margin:2px 0}
 div.see{font:14px/1.4 var(--sans);color:var(--muted);margin:12px 0}
 div.see > p{margin:0}
+.person-places ul.named{padding-left:18px;margin:4px 0 8px;font:15px/1.6 var(--sans)}
+.person-places ul.named li{margin:3px 0}
+.person-places p.street{margin:6px 0;font:15px/1.5 var(--sans)}
+.person-places p.street b{font-weight:600;margin-right:4px}

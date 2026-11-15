@@ -2,10 +2,10 @@
 // Every card is one layout. A kind of card only says what goes in it (buildingCard, areaCard, pinCard); renderCard
 // draws it into the slots of the sheet in <city>/index.html, in their order there, and hides the empty ones:
 //   image + credit · summary · facts (rows) · Did you know · old pictures · more old pictures · stories · links
-import { $, PRECISION, dateText, eraOf, esc } from './util.js';
+import { $, dateText, eraOf, esc } from './util.js';
 import { S } from './state.js';
 import { areaOf, byOsm, centreOf, fstate, isB, loadCard, parseRef, pinOf, refOf, routeOf, saveActive, storyOf, tiled } from './data.js';
-import { openSheet } from './sheet.js';
+import { openSheet, shareOf } from './sheet.js';
 import { applyLayers, renderLayers } from './panels.js';
 import { showGroups, showPlaces } from './places.js';
 import { hoursText, openNow } from './hours.js';
@@ -18,7 +18,9 @@ const credit = f => [f.author, f.licence].filter(Boolean).map(esc).join(' · ');
 const host = u => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return u; } };
 // a place's opening hours (open now, in Nottingham's time; the hours) and its website, from OpenStreetMap
 export function openRows(list, title){
-  return (list || []).map(o => {
+  // the places inside with only a website: one Website row, each named after its place
+  const webOnly = (list || []).filter(o => !o.oh && o.web);
+  const rows = (list || []).filter(o => o.oh || !o.web).map(o => {
     const st = o.oh && openNow(o.oh), lines = [];
     if (o.name && o.name !== title) lines.push(`<b>${esc(o.name)}</b>${o.what ? ` <span class="muted">${esc(o.what)}</span>` : ''}`);
     if (st) lines.push(`<span class="${st.open ? 'open' : 'shut'}">${esc(st.text)}</span>`);
@@ -26,6 +28,9 @@ export function openRows(list, title){
     if (o.web) lines.push(a(o.web, host(o.web)));
     return [o.oh ? 'Opening hours' : 'Website', lines.join('<br>')];
   });
+  if (webOnly.length) rows.unshift([webOnly.length > 1 ? 'Websites' : 'Website', webOnly.map(o =>
+    (o.name && o.name !== title ? `${esc(o.name)}: ` : '') + a(o.web, host(o.web))).join('<br>')]);
+  return rows;
 }
 export const HOURS_NOTE = 'Opening hours from OpenStreetMap, which anyone can edit: worth checking before a special trip.';
 export const layerTitle = id => S.layers.find(L => L.id === id)?.title || id;
@@ -47,7 +52,8 @@ export function notes(){
     if (!n) { list.push(s); n = list.length; at.set(key(s), n); }
     return `<sup class="fn"><a href="#" data-fn="${n}" aria-label="Source ${n}">${n}</a></sup>`;
   };
-  const one = s => (s.title && s.kind ? esc(s.kind) + ': ' : '') + (s.url ? a(s.url, s.title || s.kind) : esc(s.title || s.kind))
+  // (the kind once when the title says the same: not "Open Plaques: Open Plaques")
+  const one = s => (s.title && s.kind && s.title !== s.kind ? esc(s.kind) + ': ' : '') + (s.url ? a(s.url, s.title || s.kind) : esc(s.title || s.kind))
     + (s.read ? ` <span class="muted">(read ${esc(readDate(s.read))})</span>` : '')
     + (s.note ? ` <span class="muted">${esc(s.note)}</span>` : '');
   const html = () => list.length ? '<h3>Sources</h3><ol class="notes">' + list.map((s, i) => `<li id="fn${i + 1}">${one(s)}</li>`).join('') + '</ol>' : '';
@@ -100,26 +106,72 @@ export function showPerson(name){
   if (P && ROLE[P.group.key]) rows.push(['Who', esc(ROLE[P.group.key][0].toUpperCase() + ROLE[P.group.key].slice(1))]);
   if (info.life) rows.push(['Lived', esc(info.life)]);
   if (refs.length) rows.push(['On the map', `${refs.length} ${refs.length === 1 ? 'place' : 'places'}`]);
-  const list = () => refs.map((r, i) => `<li><a href="#" data-ref="${esc(String(r))}">${esc(refName(r))}</a></li>`).join('');
+  const list = () => placesHtml(refs);
   // the stories and events that link to them ([[links]] in notes): each opens where it is told
   const linked = (info.linked || []).filter(([, r]) => r != null);
   const linkedHtml = linked.length ? `<div class="person-places"><h3>In these stories and events</h3><ul>${linked.map(([t, r]) =>
     `<li><a href="#" data-ref="${esc(String(r))}">${esc(t)}</a></li>`).join('')}</ul></div>` : '';
-  const after = linkedHtml + (refs.length ? `<div class="person-places"><h3>${refs.length === 1 ? 'Their place' : 'Their places'}</h3><ol id="personPlaces">${list()}</ol>`
+  const after = linkedHtml + (refs.length ? `<div class="person-places"><h3>${refs.length === 1 ? 'Their place' : 'Their places'}</h3><div id="personPlaces">${list()}</div>`
     + (refs.length > 1 ? `<button class="textbtn allplaces" data-name="${esc(name)}" data-b="${refs.join(',')}">Show all ${refs.length} on the map</button>` : '') + '</div>' : '');
   unlight();
   if (S.selectedId != null) { fstate(S.selectedId, { sel:false }); S.selectedId = null; }
   // who they were: Wikipedia's opening (unless their note says no), then their note's own words, and its facts
   const o = info.own;
-  const stories = [...(info.text ? [{ text: info.text, source: { kind: info.kind || 'Wikipedia', title: info.title, url: info.url, read: info.read } }] : []),
-    ...(o && o.story ? [{ text: o.story, source: o.source, sources: o.sources, cites: o.cites, weblinks: o.weblinks }] : [])];
-  renderCard({ title: name, rows, after, stories, dyk: info.facts || [], links: [] });
+  // with words of their own note to follow, Wikipedia's first sentence only: the rest would tell it twice
+  const first = t => (/^(.{25,}?[a-z0-9)’'"])\.(?=\s|$)/.exec(t) || [])[1];
+  const opening = info.text && o && o.story && first(info.text) ? first(info.text) + '.' : info.text;
+  const stories = [...(info.text ? [{ text: opening, source: { kind: info.kind || 'Wikipedia', title: info.title, url: info.url, read: info.read } }] : []),
+    // (words told at a place, "designed this showroom": under that place's name)
+    ...(o && o.story ? [{ text: o.story, source: o.source, sources: o.sources, cites: o.cites, weblinks: o.weblinks,
+      label: o.at && o.at.length ? 'At ' + o.at.map(r => placeTitle(typeof r === 'number' ? r : parseRef(String(r)))).join(' and ') : '' }] : [])];
+  renderCard({ title: name, rows, after, stories, dyk: info.facts || [], links: [], share: { title: name, url: shareOf('person', name) } });
   // the names of buildings whose card files are not here yet: fetched, then the list again
   const missing = refs.filter(r => isB(r) && !S.features[r].full);
   if (missing.length && missing.length <= 40) Promise.all(missing.map(r => loadCard(r).catch(() => {}))).then(() => {
     const ol = document.getElementById('personPlaces');
-    if (ol && $('sTitle').textContent === name) { ol.innerHTML = list(); ol.querySelectorAll('[data-ref]').forEach(x => x.onclick = e => { e.preventDefault(); openRef(parseRef(x.dataset.ref)); }); }
+    if (ol && $('sTitle').textContent === name) {
+      ol.innerHTML = list();
+      ol.querySelectorAll('[data-ref]').forEach(x => x.onclick = e => { e.preventDefault(); openRef(parseRef(x.dataset.ref)); });
+      ol.querySelectorAll('.someplaces').forEach(x => x.onclick = e => { e.preventDefault(); showPlaces(x.dataset.name, x.dataset.b.split(',').map(parseRef)); });
+    }
   });
+}
+// a place's name in a list, with no card file needed: its own name, else its address, else the street it is on
+// (S.data.placeNames, from the build), else what the card knows
+function placeTitle(r){
+  const n = (S.data.placeNames || {})[String(r)];
+  if (n && (n[0] || n[1])) return n[0] || (/^\d/.test(n[1]) ? n[1] : `A building on ${n[1]}`);
+  return refName(r);
+}
+// a person's places: each by name; many (an architect's 133) by street, named places first, the same address in
+// several outlines once ("7 to 10, Western Terrace (3)"), each opening its place or places
+function placesHtml(refs){
+  const names = S.data.placeNames || {};
+  const item = (rs, text) => rs.length === 1 ? `<a href="#" data-ref="${esc(String(rs[0]))}">${esc(text)}</a>`
+    : `<a href="#" class="someplaces" data-name="${esc(text)}" data-b="${rs.join(',')}">${esc(text)}</a> <span class="muted">(${rs.length})</span>`;
+  // the same title twice (two plaques to Charles I): the street each stands by, after it
+  const title = r => placeTitle(r);
+  const counts = new Map(); refs.forEach(r => counts.set(title(r), (counts.get(title(r)) || 0) + 1));
+  const tell = r => { const t = title(r), st = (names[String(r)] || [])[2]; return counts.get(t) > 1 && st && !t.includes(st) ? `${t}, ${st}` : t; };
+  if (refs.length <= 12) return `<ol>${refs.map(r => `<li>${item([r], tell(r))}</li>`).join('')}</ol>`;
+  const named = [], streets = new Map(), rest = [];
+  for (const r of refs) {
+    const n = names[String(r)] || [];
+    // a name that is an address ("7 to 10, Western Terrace", as the listing words it) is listed by its street
+    const addr = n[0] && /^\d/.test(n[0]) ? n[0] : !n[0] && n[1] && /^\d/.test(n[1]) ? n[1] : null;
+    const st = n[2] || (addr && (/^\d[^A-Z]*?(?:,\s*|\s)([A-Z][^,]*)$/.exec(addr) || [])[1]);
+    if ((n[0] && !addr) || !isB(r)) named.push(r);
+    else if (st) {        // by street: the address without its street ("7 to 10" on Western Terrace)
+      const k = addr ? (addr.endsWith(st) ? addr.slice(0, -st.length).replace(/[,\s]+$/, '') : addr) : '';
+      const m = streets.get(st) || new Map(); m.set(k, [...(m.get(k) || []), r]); streets.set(st, m);
+    }
+    else rest.push(r);
+  }
+  const byName = new Map(); named.forEach(r => byName.set(tell(r), [...(byName.get(tell(r)) || []), r]));
+  return (byName.size ? `<ul class="named">${[...byName].map(([t, rs]) => `<li>${item(rs, t)}</li>`).join('')}</ul>` : '')
+    + [...streets].sort((x, y) => [...y[1].values()].flat().length - [...x[1].values()].flat().length).map(([st, m]) =>
+      `<p class="street"><b>${esc(st)}</b> ${[...m].sort((x, y) => (parseInt(x[0]) || 1e9) - (parseInt(y[0]) || 1e9)).map(([k, rs]) => item(rs, k || (rs.length > 1 ? 'buildings' : 'a building'))).join(', ')}</p>`).join('')
+    + (rest.length ? `<p class="street">${item(rest, `${rest.length} more ${rest.length === 1 ? 'building' : 'buildings'}`)}</p>` : '');
 }
 // the people tied to a building: name, what they were, a link to their places (or article)
 function connected(id){
@@ -154,6 +206,7 @@ export function renderCard(c){
     showGroups([x.dataset.topic], g.layer.groups.length > 1 ? `${g.layer.title}: ${g.title}` : g.layer.title);
   });
   card.querySelectorAll('.allplaces').forEach(btn => btn.onclick = () => showPlaces(btn.dataset.name, btn.dataset.b.split(',').map(parseRef)));
+  card.querySelectorAll('.someplaces').forEach(x => x.onclick = e => { e.preventDefault(); showPlaces(x.dataset.name, x.dataset.b.split(',').map(parseRef)); });
   card.querySelectorAll('[data-who]').forEach(x => x.onclick = e => { e.preventDefault(); openWho(x.dataset.who); });
   // an OpenStreetMap link in a story's words: that building, on the map
   card.querySelectorAll('[data-osm]').forEach(x => x.onclick = async e => {
@@ -169,6 +222,7 @@ export function renderCard(c){
   });
   $('cLinks').innerHTML = (c.links || []).join('');
   fill('cPhotos', '');
+  S.share = c.share || null;          // a person's or a pin's card: how to share it (a building's: by its outline)
   openSheet('card', c.title);
   if (c.cat) morePhotos(c.cat, c.image && c.image.file, S.selectedId);
 }
@@ -226,7 +280,7 @@ function storyHtml(s, N){
   if (s.who && (s.layer === 'people' || P)) {
     const role = P && ROLE[P.group.key];
     return `<div class="story person"><div class="pname"><a href="#" class="who" data-who="${esc(s.who)}">${esc(s.who)}</a>${role ? `<span class="muted"> · ${esc(role)}</span>` : ''}</div>
-    ${s.text ? prose(s, N, refs) : refs ? `<p class="src">Source${refs}</p>` : ''}${whoLine(s.who)}
+    ${s.text ? prose(s, N, refs) : refs ? `<p class="src">Source${refs}</p>` : ''}${whoLine(s.who, s.own)}
     ${s.pin ? `<p class="go"><a href="#" data-ref="${esc(s.pin)}">See the plaque on the map</a></p>` : ''}${seeHtml(J(s.see))}</div>`;
   }
   return `<div class="story">${s.label ? `<div class="seclbl">${esc(s.label)}</div>` : ''}
@@ -279,11 +333,12 @@ function withPeople(stories){
     return ps.length ? [{ ...s, who: null }, ...ps.map(n => ({ who: n, layer: 'people', text: '' }))] : [s];
   });
 }
-// one line on who a person was (the first sentence of their article), and their card for more
-function whoLine(who){
+// one line on who a person was (the first sentence of their article), and their card for more; after their own
+// note's words (own), which say who they were already, only their years and the link
+function whoLine(who, own){
   const p = S.data.people && S.data.people[who];
-  if (!p || !p.text) return '';
-  const m = /^(.{25,}?[a-z0-9)’'"])\.(?=\s|$)/.exec(p.text), first = m ? m[1] + '.' : p.text;
+  if (!p || (!p.text && !own)) return '';
+  const m = /^(.{25,}?[a-z0-9)’'"])\.(?=\s|$)/.exec(p.text || ''), first = own ? '' : m ? m[1] + '.' : p.text;
   return `<p class="wholine">${esc(first)}${p.life ? ` <span class="muted">(${esc(p.life)})</span>` : ''} <a href="#" class="who" data-who="${esc(who)}">More about ${esc(who)}</a></p>`;
 }
 // who a person in the People layer was: the opening sentences of their Wikipedia article
@@ -376,10 +431,10 @@ function buildingCard(p, id){
   if (p.y != null) {
     // the year with its footnote; how exact it is; other dates, each with its own
     const era = eraOf(p.y), alts = J(p.alts) || (p.alt ? [p.alt] : []);
-    const how = p.f === 'area' ? `No date for this building yet: ${esc(p.sh)}% of homes in its small area were built ${esc(p.per)}, according to Council Tax records.`
-      : esc(PRECISION[p.f] || '') + (alts.length ? '' : `, from ${esc(shortSrc(p.src))}`);
+    // (how exact it is shows in its wording, "c. 1674", "18th century"; where it is from, in its footnote)
+    const how = p.f === 'area' ? `No date for this building yet: ${esc(p.sh)}% of homes in its small area were built ${esc(p.per)}, according to Council Tax records.` : '';
     rows.push(['Built', `${esc(dateText(p.y, p.f, p.per, p.dt))}${N.cite(dateSource(p.src, p))}<span class="pill" style="border-color:${era[3]}">${esc(era[2])}</span>`
-      + `<div class="muted">${how}</div>`
+      + (how ? `<div class="muted">${how}</div>` : '')
       + alts.map(x => `<div>${esc(dateText(x.y, x.f, null, x.text))}${N.cite(dateSource(x.src, p))} <span class="muted">${esc(shortSrc(x.src))}</span></div>`).join('')
       + (alts.length ? `<div class="hint">The first is from ${esc(shortSrc(p.src))}. Sources disagree; they may describe different moments, such as a founding and a rebuilding.</div>` : '')]);
   } else rows.push(['Built', '<span class="muted">not in open data yet</span>']);
@@ -397,11 +452,17 @@ function buildingCard(p, id){
   if (p.grade) rows.push(['Listing', `Grade ${esc(p.grade)} listed`]);
   if (p.council) rows.push(['Council', esc(p.council)]);      // whose planning rules apply, near the city's edges
   if (p.kind !== 'bridge') rows.push(['Height', `≈ ${Math.round(p.h)} m${p.levels ? ' · ' + esc(p.levels) + (p.levels === '1' ? ' storey' : ' storeys') : ''}`]);
-  if (p.kind && p.kind !== 'yes') rows.push(['Type (OSM)', esc(p.kind.replace(/_/g, ' '))]);
+  // what OpenStreetMap calls the building, when it has no name or story to say more (a "retail" Georgian house
+  // says little about it)
+  if (p.kind && p.kind !== 'yes' && !p.name && !(p.stories || []).length) rows.push(['Type (OSM)', esc(p.kind.replace(/_/g, ' '))]);
 
   const near = nearby(id, J(p.xy));
   if (near.length) rows.push(['Nearby', near.map(o => `<a href="#" data-ref="${esc(o.ref)}">${esc(o.name)}</a> <span class="muted">${Math.round(o.m / 10) * 10 || 10} m</span>`).join('<br>')]);
-  const stories = withPeople((p.stories || []).map(storyOf).map(s => ({ ...s, label: s.layer === 'people' && s.pin ? 'Plaque' : layerTitle(s.layer) })));
+  const stories = withPeople((p.stories || []).map(storyOf)
+    .filter(s => !(s.tpl && archNames.has(s.who)))         // "Designed by …": the Architect row says it already
+    .map(s => ({ ...s, label: s.layer === 'people' && s.pin ? 'Plaque' : layerTitle(s.layer) })))
+    // two stories of one layer in a row (two museums in the castle): its title once
+    .map((s, i, all) => i && !s.who && all[i - 1].label === s.label && !all[i - 1].who ? { ...s, label: '' } : s);
   const after = (S.entitiesAt[id] || []).filter(m => !people().has(m.name)).map(m =>
     `<button class="textbtn allplaces" data-name="${esc(m.name)}" data-b="${m.bs.join(',')}">All ${m.bs.length} places: ${esc(m.name)}</button>`).join('');
 
@@ -455,7 +516,8 @@ function areaCard(p){
 
 // ================= Plaques and other pins =================
 export function showPin(p){
-  renderCard({ ...pinCard(p), topics: p.T });
+  const xy = S.data.pins?.features[p.i]?.geometry.coordinates;
+  renderCard({ ...pinCard(p), topics: p.T, share: xy && { title: p.name, url: shareOf('pin', `${xy[1].toFixed(5)},${xy[0].toFixed(5)}`) } });
   plaqueOn(p.on == null || p.on === '' ? null : +p.on);
 }
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -487,7 +549,7 @@ function pinCard(p){
   if (p.op || p.gov) rows.push(['Run by', esc(p.op || p.gov)]);
   if (p.acc) rows.push(['Accreditation', esc(p.acc)]);
   return { title: p.name, rows, stories: withPeople([{ text: p.text, source: J(p.source), place: J(p.place), who: p.who, see: p.see,
-             layer: p.layer, people: J(p.people), sources: J(p.sources), cites: J(p.cites), weblinks: J(p.weblinks) }]),
+             layer: p.layer, people: J(p.people), sources: J(p.sources), cites: J(p.cites), weblinks: J(p.weblinks), own: p.own }]),
            dyk: J(p.dyk), coll: J(p.coll),
            links: placeLinks(p, false) };
 }

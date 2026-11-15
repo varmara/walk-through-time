@@ -18,10 +18,9 @@ file = {"file": title, "year", "author", "licence"}.
 """
 import html
 import re
-import time
 
 from .common import city, load, log, save
-from .web import http
+from .web import http, pause
 from .geo import centroid, metres, point_in_ring
 from .names import building_name, tidy_listing
 
@@ -120,7 +119,7 @@ def main(city_id):
                 except Exception as e:  # noqa: BLE001
                     log(f"    geosearch failed at {lat:.4f},{lon:.4f}: {e}")
                 n_cells += 1
-                time.sleep(0.1)
+                pause(0.1)
             lon += CELL_LON
         lat += CELL_LAT
     log(f"s06 photos: {len(files)} geotagged Commons files in {n_cells} cells")
@@ -184,7 +183,7 @@ def main(city_id):
             if OLD_HINT.search(f[5:]) and not ARTWORK.search(f[5:]) and not NOT_BUILDING.search(norm(f[5:])):
                 matches.setdefault(f, set()).update(bs)
                 n_cat += 1
-        time.sleep(0.05)
+        pause(0.05)
     log(f"    {len(cats)} buildings' Commons categories read: {n_cat} files that look old")
     md = metadata(sorted(matches))
 

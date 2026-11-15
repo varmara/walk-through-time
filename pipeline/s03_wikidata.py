@@ -6,10 +6,9 @@ list entry number (Wikidata property P1216). Writes wikidata.json: {"Q123": info
 Licence: CC0.
 """
 import re
-import time
 
 from .common import load, log, save
-from .web import http
+from .web import http, pause
 
 WDQS = "https://query.wikidata.org/sparql"
 FIELDS = """
@@ -65,13 +64,13 @@ def main(city_id):
             take(sparql(f"SELECT ?item ?inception ?prec ?image ?commonscat ?article ?architect ?architectLabel ?architectArticle ?label ?human WHERE {{ "
                         f"VALUES ?item {{ {' '.join('wd:' + q for q in c)} }} {FIELDS} }}"),
                  lambda r: r["item"]["value"].rsplit("/", 1)[-1])
-            time.sleep(1)
+            pause(1)
         for i in range(0, len(nhle), 200):
             c = nhle[i:i + 200]
             take(sparql(f"SELECT ?item ?nhle ?inception ?prec ?image ?commonscat ?article ?architect ?architectLabel ?architectArticle ?label ?human WHERE {{ "
                         f"VALUES ?nhle {{ {' '.join(chr(34) + n + chr(34) for n in c)} }} ?item wdt:P1216 ?nhle . {FIELDS} }}"),
                  lambda r: "nhle:" + r["nhle"]["value"])
-            time.sleep(1)
+            pause(1)
     except Exception as e:  # noqa: BLE001 - Wikidata is optional
         log(f"    Wikidata failed, continuing with what we have: {e}")
     if humans:

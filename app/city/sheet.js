@@ -9,7 +9,8 @@ import { setPlace } from './places.js';
 export const sheet = $('sheet');
 export function openSheet(kind, title){
   S.sheetKind = kind;
-  $('sShare').hidden = !(kind === 'card' && S.selectedId != null && S.features[S.selectedId]?.properties.osm);
+  // a building's card, or a card that says how to share it (a person's, a pin's: S.share)
+  $('sShare').hidden = !(kind === 'card' && (S.share || (S.selectedId != null && S.features[S.selectedId]?.properties.osm)));
   $('sTitle').textContent = title;
   ['pLayers', 'pMap', 'pCard'].forEach(id => $(id).hidden = true);
   $({ layers:'pLayers', map:'pMap', card:'pCard' }[kind]).hidden = false;
@@ -24,9 +25,15 @@ export function shareLink(p){
   return p.name ? `${site}data/share/${CITY_ID}/${osm.replace('/', '-')}.html` : `${site}${CITY_ID}/?osm=${osm}`;
 }
 export function toast(text){ const t = $('toast'); t.textContent = text; t.hidden = false; clearTimeout(t._h); t._h = setTimeout(() => t.hidden = true, 2200); }
+// a person's or a pin's card: a link to the map that opens it again (?person=…, ?pin=latitude,longitude: a pin's
+// number changes from build to build, where it stands does not)
+export function shareOf(kind, v){
+  const site = new URL('../', location.href).href;
+  return `${site}${CITY_ID}/?${kind}=${kind === 'pin' ? v : encodeURIComponent(v)}`;
+}
 $('sShare').onclick = async () => {
-  const p = S.features[S.selectedId]?.properties; if (!p) return;
-  const url = shareLink(p), title = (p.name || 'A building') + ' · Walk Through Time';
+  const p = !S.share && S.features[S.selectedId]?.properties; if (!S.share && !p) return;
+  const url = S.share ? S.share.url : shareLink(p), title = (S.share ? S.share.title : p.name || 'A building') + ' · Walk Through Time';
   if (navigator.share) { try { await navigator.share({ title, url }); } catch (e) { /* closed */ } return; }
   try { await navigator.clipboard.writeText(url); toast('Link copied'); }
   catch (e) { prompt('Copy this link', url); }

@@ -17,6 +17,21 @@ class Plan(unittest.TestCase):
     def test_shared_code_runs_everything(self):
         self.assertEqual(plan.start_for(["pipeline/common.py"]), "all")
 
+    def test_shared_module_starts_at_its_first_user(self):
+        self.assertEqual(plan.start_for(["pipeline/notes.py"]), "s04_curated")       # read by stories_md, read by s04
+        self.assertEqual(plan.start_for(["pipeline/layerdata.py"]), "s06_people")
+
+    def test_pause_only_after_the_network(self):
+        from unittest import mock
+        from pipeline import web
+        with mock.patch.object(web.time, "sleep") as sleep:
+            web._asked[:] = [5, 5]
+            web.pause(1)                     # every answer since the last pause was a saved one: no wait
+            sleep.assert_not_called()
+            web._asked[0] += 1               # one went to the network
+            web.pause(1)
+            sleep.assert_called_once_with(1)
+
     def test_earliest_step_wins(self):
         self.assertEqual(plan.start_for(["pipeline/s09_share.py", "pipeline/s05_dates.py"]), "s05_dates")
 

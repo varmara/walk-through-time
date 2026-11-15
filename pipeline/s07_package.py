@@ -25,6 +25,7 @@ from .geo import centroid, point_in_ring
 from .texts import TEMPLATES
 from .s00_fetch_nature import rings_of
 from .s05_dates import info_for, osm_article
+from .s06_names import streets, where
 
 
 def councils(city_id):
@@ -90,12 +91,20 @@ def main(city_id):
 
     # links to collections of old pictures that cannot be copied here (see COLLECTIONS in the stories file)
     colls = cur.get("collections", [])
-    cons = [(f["properties"]["name"], rings_of(f["geometry"]))
-            for f in (load(city_id, "conservation") if work(city_id, "conservation").exists() else [])]
+    # only the conservation areas a collection names, each with its bounds: testing every building against every
+    # area's outline took most of this step (13 of 14 minutes)
+    wanted = {a for c in colls for a in c.get("areas", [])}
+    cons = []
+    for f in (load(city_id, "conservation") if work(city_id, "conservation").exists() else []):
+        if f["properties"]["name"] in wanted:
+            rs = rings_of(f["geometry"])
+            xs, ys = [x for r in rs for x, _ in r], [y for r in rs for _, y in r]
+            cons.append((f["properties"]["name"], rs, (min(xs), min(ys), max(xs), max(ys))))
 
     def collections_for(name, layer_keys, whos, xy):
         n = (name or "").lower()
-        areas = {a for a, rs in cons if xy and any(point_in_ring(xy[0], xy[1], r) for r in rs)} if colls else set()
+        areas = {a for a, rs, (x0, y0, x1, y1) in cons
+                 if xy and x0 <= xy[0] <= x1 and y0 <= xy[1] <= y1 and any(point_in_ring(xy[0], xy[1], r) for r in rs)}
         out = []
         for c in colls:
             if (any(x in n for x in c.get("names", [])) or areas & set(c.get("areas", []))
@@ -208,6 +217,27 @@ def main(city_id):
                             f["geometry"]["coordinates"])
         if c:
             pp["coll"] = c
+    # a person's places, for their card's list (the buildings' own names and addresses are in card files the card
+    # has not loaded): {ref: [name, address or street, street]}; a pin, the street it stands by
+    grid = streets(base)
+    place_names = {}
+    for L in lay["meta"]:
+        if L.get("kind") != "people":
+            continue
+        for g in L["groups"]:
+            for _, refs in g.get("items", []):
+                for r in refs:
+                    if str(r) in place_names:
+                        continue
+                    if isinstance(r, int):
+                        fp, t = feats[r]["properties"], buildings[r]["tags"]
+                        w = fp.get("where")
+                        street = t.get("addr:street") or (w if w and not w[0].isdigit() else None)
+                        place_names[str(r)] = [fp.get("name"), w, street]
+                    elif isinstance(r, str) and r.startswith("p"):
+                        pn = lay["pins"][int(r[1:])]
+                        place_names[r] = [pn.get("name"), None, where({}, [pn["x"], pn["y"]], grid)]
+    extra["placeNames"] = place_names
     out = {"city": city_id, "built": built, "stats": stats, "layers": lay["meta"], "nature": fc(nature), "pins": fc(pins),
            "people": lay.get("people", {}), "templates": TEMPLATES, "credits": cur.get("credits", {}),
            **extra, "buildings": fc(feats), "roads": fc(base["roads"]), "water": fc(base["water"]), "parks": fc(base["parks"])}

@@ -56,6 +56,11 @@ def fresh(f):
     return f.exists() and (not days or time.time() - f.stat().st_mtime < float(days) * 86400)
 
 
+def _open(req, timeout):
+    _asked[0] += 1
+    return urllib.request.urlopen(req, timeout=timeout)
+
+
 def cached(kind, url, body=None):
     f = _cache_file(kind, url, body)
     if f and fresh(f):
@@ -74,6 +79,18 @@ def keep(kind, url, body, raw):
         tmp.replace(f)
 
 
+_asked = [0, 0]       # requests that went to the network; and how many had when pause() last waited
+
+
+def pause(seconds):
+    """Wait between requests to a service, politely, only if one went to the network since the last pause: an
+    answer from the saved ones costs the service nothing (a build reading 2,350 saved Commons answers used to
+    wait four minutes for nothing)."""
+    if _asked[0] != _asked[1]:
+        _asked[1] = _asked[0]
+        time.sleep(seconds)
+
+
 def http(url, data=None, params=None, accept="application/json", tries=4, timeout=180):
     if params:
         url += ("&" if "?" in url else "?") + urllib.parse.urlencode(params)
@@ -88,7 +105,7 @@ def http(url, data=None, params=None, accept="application/json", tries=4, timeou
                 "User-Agent": UA, "Accept": accept,
                 **({"Content-Type": "application/x-www-form-urlencoded"} if body else {}),
             })
-            with urllib.request.urlopen(req, timeout=timeout) as r:
+            with _open(req, timeout) as r:
                 raw = r.read()
             out = json.loads(raw.decode("utf-8"))
             failed = isinstance(out, dict) and ("error" in out or "error" in str(out.get("remark", "")).lower())
@@ -113,7 +130,7 @@ def http_bytes(url, tries=3, timeout=180):
     for attempt in range(tries):
         try:
             req = urllib.request.Request(url, headers={"User-Agent": UA})
-            with urllib.request.urlopen(req, timeout=timeout) as r:
+            with _open(req, timeout) as r:
                 raw = r.read()
             keep("bytes", url, None, raw)
             return raw
@@ -132,7 +149,7 @@ def http_text(url, tries=3, timeout=60):
             hit = cached("text/html", url)
             if hit is None:
                 req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept": "text/html"})
-                with urllib.request.urlopen(req, timeout=timeout) as r:
+                with _open(req, timeout) as r:
                     hit = r.read()
                 keep("text/html", url, None, hit)
             raw = hit.decode("utf-8", "replace")

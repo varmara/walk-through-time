@@ -27,13 +27,12 @@ Historic England list entry ("he:1254566"), whose official description is checke
 Writes curated.json: {layers: [...], entries: [{layer, group, b, name, story, source, how, year?}], dropped: [...]}.
 """
 import re
-import time
 from pathlib import Path
 from urllib.parse import quote
 
 from . import stories_md
 from .common import load, log, parse_year, save
-from .web import http, http_text
+from .web import http, http_text, pause
 from .geo import building_at
 from .names import marker
 
@@ -125,7 +124,7 @@ def article(ref):
     if lang == "he":
         url = f"https://historicengland.org.uk/listing/the-list/list-entry/{title}"
         page = http_text(url)
-        time.sleep(1)
+        pause(1)
         _cache[ref] = {"text": page["text"].lower(), "url": url, "title": page["title"] or f"List entry {title}",
                        "qid": None, "coords": None, "nhle": [title], "kind": "Historic England"}
         return _cache[ref]
@@ -133,7 +132,7 @@ def article(ref):
         "action": "query", "prop": "extracts|info|pageprops|coordinates", "explaintext": 1, "inprop": "url",
         "ppprop": "wikibase_item", "coprimary": "primary", "redirects": 1, "format": "json", "titles": title})
     page = next(iter(r["query"]["pages"].values()))
-    time.sleep(0.5)
+    pause(0.5)
     if "missing" in page:
         _cache[ref] = None
         return None

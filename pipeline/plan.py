@@ -8,7 +8,9 @@ or "all" when the whole pipeline must run: the area or the workflow changed, or 
   git diff --name-only BEFORE AFTER | python -m pipeline.plan --needs-build    the changed files a build needs
                                                                               (none: only the page changed)
 """
+import re
 import sys
+from pathlib import Path
 
 from .run import STEPS
 
@@ -26,6 +28,29 @@ def needs_build(p):
                         or p == "app/city/graphlayout.js")
 
 
+def imports(name):
+    """The pipeline modules a module imports (from .x import …, from . import x, import pipeline.x)."""
+    f = Path(__file__).parent / f"{name}.py"
+    if not f.exists():
+        return set()
+    text = f.read_text()
+    found = set(re.findall(r"^\s*from \.(\w+) import", text, re.M)) | set(re.findall(r"^\s*import pipeline\.(\w+)", text, re.M))
+    for group in re.findall(r"^\s*from \. import ([\w, ]+)", text, re.M):
+        found |= {x.strip() for x in group.split(",")}
+    return found
+
+
+def first_user(name):
+    """The first step that uses a shared module, directly or through others; None if no step does."""
+    def uses(mod, seen):
+        if mod in seen:
+            return False
+        seen.add(mod)
+        deps = imports(mod)
+        return name in deps or any(uses(d, seen) for d in deps if d not in STEPS)
+    return next((s for s in STEPS if uses(s, set())), None)
+
+
 def start_for(paths):
     first = None
     for p in paths:
@@ -37,7 +62,8 @@ def start_for(paths):
         step = next((v for k, v in START.items() if p.startswith(k)), "")
         if step == "" and p.startswith("pipeline/") and p.endswith(".py"):
             name = p[len("pipeline/"):-3]
-            step = name if name in STEPS else "all"       # another shared module: run everything
+            # another shared module: from the first step that uses it, directly or through another module
+            step = name if name in STEPS else first_user(name) or "all"
         if step == "all":
             return "all"
         if step and (first is None or STEPS.index(step) < STEPS.index(first)):

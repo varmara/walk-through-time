@@ -206,6 +206,11 @@ def main(city_id):
             if e.get("type") == "person" and e["name"] not in own:
                 own[e["name"]] = {k: e[k] for k in ("story", "source", "sources", "cites", "weblinks") if e.get(k)}
         es = [e for e in es if not e.get("unplaced")]          # (a person's own text with no place: their card only)
+
+        def mine(e):
+            """A note's sources and links; and that the story is the person's own note's (own: 1), whose card the
+            place's card points to without repeating who they were."""
+            return {**more_of(e), **({"own": 1} if e.get("type") == "person" else {})}
         for e in es:
             if (e["source"] or {}).get("kind") == "Wikipedia" and e["name"] not in nowiki and e["name"] not in named:
                 wiki_hint(e["name"], e["source"])     # (a person from another site: no Wikipedia guess)
@@ -214,9 +219,12 @@ def main(city_id):
             if e["b"] is None:   # not a building: a pin
                 # (titled with the place it marks, "21 Regent Street", when the entry gives one: a pin is a place)
                 e["b"] = out.pin(*e["pin"], e.get("where") or e["name"], L["id"], e["group"], e["story"], e["source"],
-                                 e.get("place"), e["name"], extra=more_of(e))
+                                 e.get("place"), e["name"], extra=mine(e))
             else:
-                out.add(e["b"], e["group"], L["id"], e["story"], e["source"], e.get("place"), e["name"], more=more_of(e))
+                out.add(e["b"], e["group"], L["id"], e["story"], e["source"], e.get("place"), e["name"], more=mine(e))
+            # a note's text told at a place (a home, a tomb): on their card, under that place's name
+            if e.get("type") == "person" and e["name"] in own and e["b"] not in own[e["name"]].setdefault("at", []):
+                own[e["name"]]["at"].append(e["b"])
         groups = L.get("groups") or [[L["id"], L["title"]]]
         people = {"id": L["id"], "title": L["title"], "section": "People", "kind": "people",
                   "groups": [{"key": k, "title": t, "count": len({e["b"] for e in es if e["group"] == k}),

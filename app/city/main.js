@@ -13,7 +13,7 @@ import { areaOf, byOsm, fromIndex, loadCard, parseRef, pinOf, refOf, saveActive,
 import { drawMap } from './map.js';
 import { stopPlay, updateYear } from './timebar.js';
 import { applyLayers, drawLegend, groundNote, renderLayers } from './panels.js';
-import { openRef, selectBuilding } from './cards.js';
+import { openRef, selectBuilding, showPerson, showPin } from './cards.js';
 import { showGroups, showPlaces } from './places.js';
 
 export async function main(){
@@ -73,6 +73,8 @@ export async function main(){
 //   ?group=people-architects,inns   those layer groups ticked (the rest off), their places as numbered cards
 //   ?focus=b12,p3&name=…     those places (as a set when there are several)
 //   ?osm=way/123&b=…         a shared building
+//   ?person=Name             a shared person's card
+//   ?pin=52.95533,-1.13998   a shared pin's card: the pin standing there (a plaque, a story's place)
 export async function openLink(q, first){
   let ticked = false;
   const lq = q.get('layer'), lyr = lq && S.layers.find(L => L.id === lq);
@@ -98,6 +100,14 @@ export async function openLink(q, first){
     if (i >= 0) selectBuilding(i);
   } else if (bq != null && +bq < S.features.length) selectBuilding(+bq);
   if (keys.length) showGroups(keys, groupTitle);
+  if (q.get('person')) showPerson(q.get('person'));
+  const pq = /^(-?\d+\.\d+),(-?\d+\.\d+)$/.exec(q.get('pin') || '');
+  if (pq) {
+    const [lat, lon] = [+pq[1], +pq[2]];
+    const d = f => Math.hypot((f.geometry.coordinates[0] - lon) * 67000, (f.geometry.coordinates[1] - lat) * 111000);
+    const best = (S.data.pins?.features || []).reduce((b, f) => !b || d(f) < d(b) ? f : b, null);
+    if (best && d(best) < 15) showPin(best.properties);
+  }
   if (focus) {
     const refs = focus.split(',').map(x => x[0] === 'b' ? +x.slice(1) : x)
       .filter(r => typeof r === 'number' ? r < S.features.length : r[0] === 'p' ? S.data.pins && pinOf(r) : refOf(r));

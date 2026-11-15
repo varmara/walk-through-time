@@ -58,7 +58,10 @@ const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (
     });
     if (name) {
       await page.waitForTimeout(800);
-      check((await text('#sTitle')) === name && (await page.$$('#personPlaces li')).length > 0, "a person's card lists their places");
+      check((await text('#sTitle')) === name && (await page.$$('#personPlaces a')).length > 0, "a person's card lists their places");
+      check(await page.evaluate(() => !document.getElementById('sShare').hidden), "a person's card can be shared");
+      await open('?person=' + encodeURIComponent(name));
+      check((await text('#sTitle')) === name, "a shared person's link opens their card");
     }
   } else check(false, 'a layer lists a person or story with several places');
 
