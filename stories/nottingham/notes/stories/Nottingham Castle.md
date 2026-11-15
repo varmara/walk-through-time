@@ -1,5 +1,6 @@
 ---
 type: story
+when: "11th century"
 source: https://en.wikipedia.org/wiki/Nottingham_Castle
 check: 1831 | 1878
 at:

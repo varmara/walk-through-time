@@ -36,6 +36,11 @@ class Parse(unittest.TestCase):
                           ("story", "The castle burned", "Riots"), ("plaque", "Plaque to Albert Ball", "Riots"),
                           ("building", "way/7", "Riots")])
 
+    def test_a_date_on_a_line(self):
+        T = parsed("- c. 1200: [[The castle burned]]\n- 1930s: [[Charles I]]\n- 13th century: plaque: Plaque to Albert Ball\n- [[The storming of Shelford House]]\n")
+        self.assertEqual([m.get("when") for m in T["members"]], ["c. 1200", "1930s", "13th century", None])
+        self.assertEqual([m["kind"] for m in T["members"]], ["story", "person", "plaque", "story"])
+
     def test_bad_lines(self):
         for body, want in [("## A\n- place: Shelford\n", "is not a member"),
                            ("## A\n- [x](https://example.org)\n", "OpenStreetMap"),
@@ -119,6 +124,25 @@ class DateOrder(unittest.TestCase):
         self.assertEqual([it[0] for it in meta[1]["groups"][0]["items"]], ["A", "B"])
         self.assertEqual(meta[1]["groups"][0]["items"][0][1], ["p0", 3])
         self.assertEqual([it[0] for it in meta[2]["groups"][0]["items"]], ["Z", "A"])     # lists A to Z stay
+
+    def test_dates_given(self):
+        """A note's when: comes before the years in its text; a thread's own date for it before both; a building's
+        two stories of one layer are each dated by their own."""
+        stories = {"1": [{"layer": "s", "nm": "Statue", "text": "Unveiled in 1952.", "when": "c. 1200", "made": "1952"}],
+                   "2": [{"layer": "s", "nm": "Castle", "text": "Burned in 1831.", "when": "11th century"},
+                         {"layer": "s", "nm": "Fire", "text": "Burned in 1831."}],
+                   "3": [{"layer": "s", "nm": "Inn", "text": "Built around 1360."}]}
+        place = [{"id": "s", "kind": "stories", "groups": [{"key": "s", "items": [["Fire", [2]], ["Inn", [3]], ["Statue", [1]], ["Castle", [2]]]}]}]
+        in_date_order(place, stories, [], {}, {"P": {"life": "1796–1855"}})
+        self.assertEqual([it[0] for it in place[0]["groups"][0]["items"]], ["Castle", "Statue", "Inn", "Fire"])
+        thread = [{"id": "t", "kind": "topics", "groups": [{"key": "t", "items": [
+            ["Statue", [1], {"layer": "s", "when": "1952"}], ["P", [3], {"person": 1, "when": "1847"}], ["Inn", [3], {"layer": "s"}]]}]}]
+        in_date_order(thread, stories, [], {}, {"P": {"life": "1796–1855"}})
+        self.assertEqual([it[0] for it in thread[0]["groups"][0]["items"]], ["Inn", "P", "Statue"])   # P by 1847, not 1796
+
+    def test_when_year(self):
+        from pipeline.layerdata import when_year
+        self.assertEqual([when_year(w) for w in ("c. 1200", "1930s", "13th century", "1952", None)], [1200, 1930, 1200, 1952, None])
 
 
 if __name__ == "__main__":

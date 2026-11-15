@@ -1,27 +1,49 @@
 // Walk Through Time, city page: Places: one person or story with several buildings, as numbered pins and a strip of cards that swipe sideways.
-import { $, dateText, eraOf, esc } from './util.js';
+import { $, dateText, eraOf, esc, whenText } from './util.js';
 import { S } from './state.js';
 import { fstate, isB, loadCard, parseRef, refCentre, refOf, storyFor, tiled } from './data.js';
 import { paintBuildings } from './map.js';
 import { closeSheet } from './sheet.js';
-import { openRef, refName } from './cards.js';
+import { openRef, refName, whoBrief } from './cards.js';
 
 // A place's card in the strip: its name, date and the story that ties it to the set; a building whose card file
 // has not arrived yet shows its name (from the index) and fills in when the file comes (fillCard)
+const plain = t => String(t).replace(/\[\^[\w-]+\]/g, '');      // (footnote marks belong to the full card)
+// the year a text tells of, as the build orders by it (pipeline/layerdata.year_in): a plaque's words, not when it
+// was put up; "the 12th century" as it is written
+function toldIn(text){
+  let t = String(text || ''); if (t.includes('“')) t = t.split('“')[1];
+  const ys = [...t.matchAll(/(?<![\d,.£$])\b(1[0-9]{3}|20[0-9]{2})\b(?![,.]\d)/g)].map(m => [m.index, m[1]]);
+  const cs = [...t.matchAll(/\b(\d{1,2}(?:st|nd|rd|th))[ -]century/gi)].map(m => [m.index, m[1] + ' century']);
+  const all = [...ys, ...cs].sort((a, b) => a[0] - b[0]);
+  return all.length ? all[0][1] : '';
+}
+// a card's heading: the story or person that put the place in the set, and where it is, when the place has
+// another name ("The castle burned, 1831 · at Nottingham Castle"; "Lucy Hutchinson · at Owthorpe")
+function heading(b, told){
+  const at = refName(b);
+  return told && told !== at ? `<h3>${esc(told)}</h3><div class="pmeta pat">${/^(Plaque|Statue|Memorial)\b/.test(at) ? '' : 'At '}${esc(at)}</div>` : `<h3>${esc(at)}</h3>`;
+}
 function cardHtml(b, i, name, hint){
   if (!isB(b)) {
-    const pp = refOf(b).properties;
-    return `<div class="pnum">${i + 1}</div><h3>${esc(refName(b))}</h3>
-      ${pp.text ? `<p>${esc(pp.text)}</p>` : ''}<button class="textbtn" data-open="${b}">Details</button>`;
+    const pp = refOf(b).properties, wt = whenText(pp.when, pp.made, hint?.when) || toldIn(pp.text);
+    // a plaque: its words, what happened here, and who the person was
+    return `<div class="pnum">${i + 1}</div>${heading(b, hint?.person ? hint.name : pp.nm)}
+      ${wt ? `<div class="pmeta pwhen">${esc(wt)}</div>` : ''}
+      ${pp.text ? `<p>${esc(plain(pp.text))}</p>` : ''}${pp.here ? `<p class="phere">${esc(pp.here)}</p>` : ''}${pp.who && !pp.own ? whoBrief(pp.who) : ''}
+      <button class="textbtn" data-open="${b}">Details</button>`;
   }
   const f = S.features[b], p = f.properties;
   if (!f.full && tiled()) return `<div class="pnum">${i + 1}</div><h3>${esc(refName(b))}</h3><p class="pwait">Loading…</p>
     <button class="textbtn" data-open="${b}">Details</button>`;
   const st = storyFor(b, hint?.name || name, hint?.layer), era = p.y != null ? eraOf(p.y) : null;
+  // the story's date (what the set is ordered by); the building's own, when the story tells of none
+  const wt = whenText(st?.when, st?.made, hint?.when) || (st && toldIn(st.text));
   return `<div class="pnum">${i + 1}</div>
-    <h3>${esc(refName(b))}</h3>
-    ${p.y != null ? `<div class="pmeta">${esc(dateText(p.y, p.f, p.per, p.dt))}<span class="pill" style="border-color:${era[3]}">${esc(era[2])}</span></div>` : ''}
-    ${st ? `<p>${esc(st.text)}</p>` : ''}
+    ${heading(b, hint?.person ? hint.name : st?.nm)}
+    ${wt ? `<div class="pmeta pwhen">${esc(wt)}</div>`
+      : p.y != null ? `<div class="pmeta">${esc(dateText(p.y, p.f, p.per, p.dt))}<span class="pill" style="border-color:${era[3]}">${esc(era[2])}</span></div>` : ''}
+    ${st ? `<p>${esc(plain(st.text))}</p>` : ''}
     <button class="textbtn" data-open="${b}">Details</button>`;
 }
 function fillCard(i){
@@ -80,7 +102,8 @@ export function showPlaces(name, bs, hints){
   });
 }
 // a layer's groups (or a whole story layer or topic, by its id) as one set of numbered cards, in the build's date
-// order, item by item, each place once. Returns false when there is nothing to show
+// order, item by item: each story at a place once (a building with two stories of the set has a card for each).
+// Returns false when there is nothing to show
 export function showGroups(keys, title){
   const seen = new Set(), refs = [], hints = [];
   for (const k of keys) {
@@ -89,7 +112,7 @@ export function showGroups(keys, title){
       const rs = typeof it[0] === 'number' ? [it[0]] : it[1], name = typeof it[0] === 'number' ? it[1] : it[0];
       const h = it[2] || {}, layer = h.layer || (g.layer.kind === 'stories' ? g.layer.id : h.person || h.plaque ? 'people' : null);
       for (const r of rs.map(x => typeof x === 'number' ? x : parseRef(String(x))))
-        if (!seen.has(r)) { seen.add(r); refs.push(r); hints.push({ name, layer }); }
+        if (!seen.has(r + '|' + name)) { seen.add(r + '|' + name); refs.push(r); hints.push({ name, layer, when: h.when, person: h.person }); }
     }
   }
   if (!refs.length) return false;

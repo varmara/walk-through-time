@@ -54,6 +54,8 @@ Besides those in Notes below, a story note can give:
 |---|---|
 | `name` | the name shown on the map, when the file's name differs (two "St Mary's Church" notes are `St Mary's Church, Clifton` and `St Mary's Church, Nottingham`) |
 | `year` | when the building standing today was built or opened (`1855`, `c. 1420`, `1841..1844`) |
+| `when` | when the story is set (`1952`, `c. 1200`, `1930s`, `13th century`): what its card is dated and ordered by, where the first year in its text is not it (Rock City tells of 1876 first, and is a story of `1980`) |
+| `made` | for a statue or memorial: when it was put up, shown beside `when` (Robin Hood: `when: c. 1200`, `made: 1952`) |
 | `names: no` | the story's name is not the building's name (an event: "The castle burned, 1831") |
 | `quote` | for a Historic England source: passages copied from the list entry (their site blocks automated reading) |
 | `architect` | who designed the building, when Wikidata does not say: their article (`en:Thomas Rickman`), or the name as the story writes it and the article (`Vincent Harris = en:E. Vincent Harris`), separated by `\|` |
@@ -179,9 +181,19 @@ the note and line.
 
 ### Date order
 
-Every set of numbered cards runs in date order: a place's groups, a thread, a person's places. A story is dated by
-the first year in its text, a plaque by the first year in its words (not when it was put up), a person by the
-year they were born, a building by the year it was built; the undated come last, in the index's order.
+Every set of numbered cards runs in date order, and each card shows its date: a place's groups, a thread, a
+person's places. A story is dated by its `when:`, else the first year in its text; a plaque by the first year in
+its words (not when it was put up); a person by the year they were born; a building by the year it was built; the
+undated come last, in the index's order.
+
+A thread can date a line itself, where the story or person comes into it at another time: the date, a colon, then
+the member.
+
+```markdown
+- 1847: [[Feargus O'Connor]]          elected MP that year (else he would sort by his birth, 1796)
+- 1643: [[St Nicholas' Church]]       pulled down in the siege (its own story is dated by the rebuilding, 1678)
+- 1952: [[Statue of Robin Hood]]      on Statues and memorials, by when it was put up; its card shows both dates
+```
 
 ## 2. A rule layer (from an open dataset)
 
@@ -213,7 +225,8 @@ On GitHub the pipeline runs automatically when `stories/`, `pipeline/` or `citie
 A pin or a building is never titled with a person's bare name. A plaque is "Plaque to Dame Laura Knight", or the
 place it marks (plaques.md); a statue is "Statue of Brian Clough"; a People pin takes `where:`. Who a plaque
 remembers is listed in `plaque-people.md`, and their card tells their story under their own name: the plaque's
-words, then who they were from Wikipedia, or for someone with no article their note (written by hand from
+words, what happened at this place (the Here column of `plaque-people.md`: each of a person's plaques tells its
+own part), then who they were from Wikipedia, or for someone with no article their note (written by hand from
 another site, with its link and the date it was read). A Wikidata tag on a building that points at a
 person (an architect's, by mistake) is left out.
 

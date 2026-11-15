@@ -1,5 +1,6 @@
 ---
 type: story
+when: "19th century"
 source: https://en.wikipedia.org/wiki/Wilford
 check: later 19th century | wilford ferry inn | many visitors from nottingham | iremonger | 1958
 at:

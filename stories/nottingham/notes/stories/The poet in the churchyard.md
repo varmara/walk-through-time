@@ -1,5 +1,6 @@
 ---
 type: story
+when: "c. 1800"
 source: https://en.wikipedia.org/wiki/Wilford
 check: Henry Kirke White | churchyard | favourite tree
 at:

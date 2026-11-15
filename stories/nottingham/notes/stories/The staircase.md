@@ -1,5 +1,6 @@
 ---
 type: story
+when: "17th century"
 source: https://en.wikipedia.org/wiki/Thrumpton_Hall
 check: staircase | John Webb | Inigo Jones
 at:

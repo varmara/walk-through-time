@@ -1,5 +1,6 @@
 ---
 type: story
+when: "1906"
 source: https://en.wikipedia.org/wiki/Wilford_Suspension_Bridge
 check: Arthur Brown | Wilford Hill reservoir | water
 at:

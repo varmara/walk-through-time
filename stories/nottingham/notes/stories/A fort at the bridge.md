@@ -1,5 +1,6 @@
 ---
 type: story
+when: "10th century"
 source: https://en.wikipedia.org/wiki/West_Bridgford
 check: south end of Trent Bridge | 1086
 at:

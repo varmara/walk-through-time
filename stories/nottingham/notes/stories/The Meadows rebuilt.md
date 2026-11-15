@@ -1,5 +1,6 @@
 ---
 type: story
+when: "1970s"
 source: https://en.wikipedia.org/wiki/The_Meadows,_Nottingham
 check: pre-1919 | modern council housing | Great Central | 1975
 at:

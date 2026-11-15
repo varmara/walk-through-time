@@ -15,9 +15,9 @@ Soldiers and sailors who lived here, and the two World Wars at home: the munitio
 ## The First World War
 - [[National Shell Filling Factory]]
 - plaque: The Chilwell Explosion, 1st July 1918
-- [[Albert Ball]]
-- [[Louisa May Long]]
-- [[Statue of Captain Albert Ball]]
+- 1917: [[Albert Ball]]
+- 1914: [[Louisa May Long]]
+- 1921: [[Statue of Captain Albert Ball]]
 - [[City War Memorial]]
 
 ## The Second World War
@@ -25,4 +25,4 @@ Soldiers and sailors who lived here, and the two World Wars at home: the munitio
 - [[Tollerton airfield]]
 - [[The Lady Bay bombs]]
 - [[The Nottingham Blitz, 1941]]
-- [[Vera Anderson]]
+- 1941: [[Vera Anderson]]

@@ -222,3 +222,11 @@ div.see > p{margin:0}
 .person-places p.street b{font-weight:600;margin-right:4px}
 .summary .placeson{display:block;margin-bottom:4px}
 .summary .placeson .textbtn{margin-left:4px}
+
+/* a story's dates: on a strip card and over a story on a full card */
+.pwhen{font-weight:600;color:var(--ink,inherit)}
+.swhen{font:600 13px var(--sans);color:var(--muted);margin:0 0 2px}
+.pcard p.phere,.pcard p.pwho{font:13px/1.4 var(--sans);color:var(--muted);margin-top:4px}
+.story p.here{font:14px/1.45 var(--sans)}
+.pat{margin-top:-2px}
+.person-places .here{font-size:13px}

@@ -127,6 +127,8 @@ def brief(info):
     out = {k: info[k] for k in ("text", "title", "url", "life") if info.get(k)}
     if not out.get("text") and (info.get("own") or {}).get("story"):
         out["text"] = re.sub(r"\[\^[\w-]+\]", "", info["own"]["story"].split("\n\n")[0])
+        src = info["own"].get("source") or {}        # (their note's source, not an article they do not have)
+        out = {**out, "title": src.get("title") or out.get("title"), "url": src.get("url"), "kind": src.get("kind")}
     return out
 
 

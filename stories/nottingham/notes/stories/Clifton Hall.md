@@ -1,5 +1,6 @@
 ---
 type: story
+when: "13th century"
 source: https://en.wikipedia.org/wiki/Clifton,_Nottingham
 check: 700 years | Clifton Hall
 at:

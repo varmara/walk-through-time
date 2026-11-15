@@ -1,5 +1,7 @@
 ---
 type: story
+when: "1917"
+made: "1921"
 source: https://en.wikipedia.org/wiki/Statue_of_Captain_Albert_Ball
 check: Henry Poole | 1921 | allegorical | 7 May 1917 | Grade I
 at:

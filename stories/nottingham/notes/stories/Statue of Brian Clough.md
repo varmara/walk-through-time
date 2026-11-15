@@ -1,5 +1,7 @@
 ---
 type: story
+when: "1975"
+made: "2008"
 source: https://en.wikipedia.org/wiki/List_of_public_art_in_Nottingham
 check: Brian Clough | Les Johnson | 2008 | King Street
 at:

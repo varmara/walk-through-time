@@ -140,13 +140,13 @@ export function storyOf(s){
   if (!s.pin) return s;
   const pp = pinOf(s.pin)?.properties || {};
   const J = v => typeof v === 'string' ? JSON.parse(v) : v;
-  return { ...s, text: pp.text || '', source: J(pp.source), who: s.who || pp.who, people: J(pp.people) };
+  return { ...s, text: pp.text || '', source: J(pp.source), who: s.who || pp.who, people: J(pp.people), here: pp.here };
 }
 // the story that ties a building to a set: the named layer's (a story in a topic or a story layer), else the one
 // that names the person or subject, else a person's, else the first
 export function storyFor(b, name, layer){
   const ss = (S.features[b].properties.stories || []).map(storyOf).filter(s => s.text);
-  return (layer && ss.find(s => s.layer === layer))
+  return (layer && ss.find(s => s.layer === layer && s.nm === name)) || (layer && ss.find(s => s.layer === layer))
     || ss.find(s => s.text.includes(name) || s.who === name || (s.source && s.source.title === name))
     || ss.find(s => s.layer === 'people') || ss[0];
 }

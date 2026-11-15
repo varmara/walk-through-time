@@ -1,5 +1,7 @@
 ---
 type: story
+when: "c. 1200"
+made: "1952"
 source: https://en.wikipedia.org/wiki/Statue_of_Robin_Hood
 check: James Woodford | 1952 | Grade II
 at:

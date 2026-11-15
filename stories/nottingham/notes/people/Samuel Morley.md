@@ -1,5 +1,7 @@
 ---
 type: person
+when: "1865"
+made: "1920s"
 kind: industry
 wikipedia: https://en.wikipedia.org/wiki/Samuel_Morley_(MP)
 source:

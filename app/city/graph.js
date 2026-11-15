@@ -490,13 +490,15 @@ function select(id, fromCards){
   $('go').onclick = () => go(`./?focus=${places.join(',')}&name=${encodeURIComponent(n.label)}`);
   const groups = {};
   mine.forEach(l => { const o = G.byId.get(l.s === id ? l.t : l.s); (groups[o.type] = groups[o.type] || []).push([o, l]); });
-  $('links').innerHTML = (n.about ? `<div class="about"><p>${esc(n.about.text)}</p><div class="src">Wikipedia: <a href="${esc(n.about.url)}" target="_blank" rel="noopener">${esc(n.about.title)}</a></div></div>` : '')
+  // (their note's own words are told once, here: not again under the place the note is told at)
+  const said = n.about && n.about.text ? n.about.text.trim() : null;
+  const again = l => !!(said && l.text && l.text.trim().startsWith(said.slice(0, 80)));
+  $('links').innerHTML = (n.about && n.about.text ? `<div class="about"><p>${esc(n.about.text)}</p>${n.about.url ? `<div class="src">${esc(n.about.kind || 'Wikipedia')}: <a href="${esc(n.about.url)}" target="_blank" rel="noopener">${esc(n.about.title)}</a></div>` : ''}</div>` : '')
     + `<h3>Linked to ${mine.length}</h3>` + Object.entries(groups)
     .sort((a, b) => KINDS.findIndex(k => k[0] === a[0]) - KINDS.findIndex(k => k[0] === b[0]))
     .map(([k, xs]) => xs.map(([o, l]) => `<div class="link">
       <button data-id="${esc(o.id)}"><i style="background:var(--k-${kindKey(o.type)})"></i>${esc(o.label)}</button>
-      ${l.text ? `<p>${esc(l.text)}</p>` : ''}
-      ${l.src && l.src.url ? `<div class="src">${l.how === 'mention' ? 'Named in this story · ' : ''}${esc(l.src.kind || 'Source')}: <a href="${esc(l.src.url)}" target="_blank" rel="noopener">${esc(l.src.title)}</a></div>` : ''}
+      ${again(l) ? '' : (l.text ? `<p>${esc(l.text)}</p>` : '') + (l.src && l.src.url ? `<div class="src">${l.how === 'mention' ? 'Named in this story · ' : ''}${esc(l.src.kind || 'Source')}: <a href="${esc(l.src.url)}" target="_blank" rel="noopener">${esc(l.src.title)}</a></div>` : '')}
     </div>`).join('')).join('');
   $('links').scrollTop = 0;
   $('links').querySelectorAll('[data-id]').forEach(b => b.onclick = () => {

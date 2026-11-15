@@ -1,5 +1,6 @@
 ---
 type: story
+when: "c. 1829"
 source: https://en.wikipedia.org/wiki/Listed_buildings_in_Ruddington
 check: Framework Knitters | 1829 | 1840 | museum
 at:

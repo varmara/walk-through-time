@@ -25,4 +25,4 @@ What Nottingham's factories made: Humber's and Raleigh's bicycles, Player's ciga
 - [[Building D6]]
 - [[The Nottingham Blitz, 1941]]
 - [[Ibuprofen]]
-- [[Vera Anderson]]
+- 1941: [[Vera Anderson]]

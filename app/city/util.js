@@ -80,3 +80,13 @@ export function dateText(y, f, per, dt){
   return (f === 'approx' ? 'c. ' : '') + y;
 }
 export const PRECISION = { exact: 'exact year', approx: 'approximate', century: 'only the century is known', area: 'estimate for the area' };
+
+// A story's dates as its card shows them: when it is set (a thread's own date for it first), and when the thing
+// itself was made, where that differs: "c. 1200 · made 1952"
+// (a thread's own date for it comes first when it is neither of the story's: St Nicholas' Church, of 1678, is
+// on the Civil War thread for 1643)
+export function whenText(when, made, thread){
+  const t = thread && ![when, made].map(String).includes(String(thread)) ? String(thread) : '';
+  const w = t || (when ? String(when) : ''), m = made && String(made) !== w ? 'made ' + made : '';
+  return [w, m].filter(Boolean).join(' · ');
+}

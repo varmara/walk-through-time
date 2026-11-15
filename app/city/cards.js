@@ -2,7 +2,7 @@
 // Every card is one layout. A kind of card only says what goes in it (buildingCard, areaCard, pinCard); renderCard
 // draws it into the slots of the sheet in <city>/index.html, in their order there, and hides the empty ones:
 //   image + credit · summary · facts (rows) · Did you know · old pictures · more old pictures · stories · links
-import { $, dateText, eraOf, esc } from './util.js';
+import { $, dateText, eraOf, esc, whenText } from './util.js';
 import { S } from './state.js';
 import { areaOf, byOsm, centreOf, fstate, isB, loadCard, parseRef, pinOf, refOf, routeOf, saveActive, storyOf, tiled } from './data.js';
 import { openSheet, shareOf } from './sheet.js';
@@ -123,9 +123,11 @@ export function showPerson(name){
   const stories = [...(info.text ? [{ text: opening, source: { kind: info.kind || 'Wikipedia', title: info.title, url: info.url, read: info.read } }] : []),
     // (words told at a place, "designed this showroom": under that place's name)
     ...(o && o.story ? [{ text: o.story, source: o.source, sources: o.sources, cites: o.cites, weblinks: o.weblinks,
-      label: o.at && o.at.length ? 'At ' + o.at.map(r => placeTitle(typeof r === 'number' ? r : parseRef(String(r)))).join(' and ') : '' }] : [])];
+      label: o.at && o.at.length ? 'At ' + o.at.map(r => thenTitle(typeof r === 'number' ? r : parseRef(String(r)), o.story)).join(' and ') : '' }] : [])];
   renderCard({ title: name, rows, after, stories, dyk: info.facts || [], links: [], share: { title: name, url: shareOf('person', name) } });
   // the names of buildings whose card files are not here yet: fetched, then the list again
+  const told = ((o && o.at) || []).map(r => typeof r === 'number' ? r : parseRef(String(r))).filter(r => isB(r) && !S.features[r].full);
+  if (told.length) Promise.all(told.map(r => loadCard(r).catch(() => {}))).then(() => { if ($('sTitle').textContent === name && told.every(r => S.features[r].full)) showPerson(name); });
   const missing = refs.filter(r => isB(r) && !S.features[r].full);
   if (missing.length && missing.length <= 40) Promise.all(missing.map(r => loadCard(r).catch(() => {}))).then(() => {
     const ol = document.getElementById('personPlaces');
@@ -138,6 +140,13 @@ export function showPerson(name){
 }
 // a place's name in a list, with no card file needed: its own name, else its address, else the street it is on
 // (S.data.placeNames, from the build), else what the card knows
+// a place as a story's words name it: by an earlier name of the building when the words use one, with today's
+// ("Boots Printing Works, now Capital One")
+function thenTitle(r, words){
+  const now = placeTitle(r), aka = isB(r) && S.features[r].full ? S.features[r].properties.aka || [] : [];
+  const was = aka.find(a => String(words || '').includes(a));
+  return was && was !== now ? `${was}, now ${now}` : now;
+}
 function placeTitle(r){
   const n = (S.data.placeNames || {})[String(r)];
   if (n && (n[0] || n[1])) return n[0] || (/^\d/.test(n[1]) ? n[1] : `A building on ${n[1]}`);
@@ -153,7 +162,9 @@ function placesHtml(refs){
   const title = r => placeTitle(r);
   const counts = new Map(); refs.forEach(r => counts.set(title(r), (counts.get(title(r)) || 0) + 1));
   const tell = r => { const t = title(r), st = (names[String(r)] || [])[2]; return counts.get(t) > 1 && st && !t.includes(st) ? `${t}, ${st}` : t; };
-  if (refs.length <= 12) return `<ol>${refs.map(r => `<li>${item([r], tell(r))}</li>`).join('')}</ol>`;
+  // (a plaque's place: what happened there, after its name)
+  const here = r => { const h = !isB(r) && refOf(r).properties.here; return h ? `<div class="muted here">${esc(h)}</div>` : ''; };
+  if (refs.length <= 12) return `<ol>${refs.map(r => `<li>${item([r], tell(r))}${here(r)}</li>`).join('')}</ol>`;
   const named = [], streets = new Map(), rest = [];
   for (const r of refs) {
     const n = names[String(r)] || [];
@@ -280,10 +291,11 @@ function storyHtml(s, N){
   if (s.who && (s.layer === 'people' || P)) {
     const role = P && ROLE[P.group.key];
     return `<div class="story person"><div class="pname"><a href="#" class="who" data-who="${esc(s.who)}">${esc(s.who)}</a>${role ? `<span class="muted"> · ${esc(role)}</span>` : ''}</div>
-    ${s.text ? prose(s, N, refs) : refs ? `<p class="src">Source${refs}</p>` : ''}${whoLine(s.who, s.own)}
+    ${s.text ? prose(s, N, refs) : refs ? `<p class="src">Source${refs}</p>` : ''}${s.here ? `<p class="here"><b>Here:</b> ${esc(s.here)}</p>` : ''}${whoLine(s.who, s.own)}
     ${s.pin ? `<p class="go"><a href="#" data-ref="${esc(s.pin)}">See the plaque on the map</a></p>` : ''}${seeHtml(J(s.see))}</div>`;
   }
-  return `<div class="story">${s.label ? `<div class="seclbl">${esc(s.label)}</div>` : ''}
+  const wt = whenText(s.when, s.made);
+  return `<div class="story">${s.label ? `<div class="seclbl">${esc(s.label)}</div>` : ''}${wt ? `<div class="swhen">${esc(wt)}</div>` : ''}
     ${s.text ? prose(s, N, refs) : refs ? `<p class="src">Source${refs}</p>` : ''}${s.note ? `<p class="src">${esc(s.note)}</p>` : ''}${aboutHtml(s.who, s.source, N)}
     ${s.pin ? `<p class="go"><a href="#" data-ref="${esc(s.pin)}">See the plaque on the map</a></p>` : ''}${seeHtml(J(s.see))}</div>`;
 }
@@ -335,6 +347,13 @@ function withPeople(stories){
 }
 // one line on who a person was (the first sentence of their article), and their card for more; after their own
 // note's words (own), which say who they were already, only their years and the link
+// who a person was, in a line, for a strip card: the first sentence of their article and their years
+export function whoBrief(who){
+  const p = S.data.people && S.data.people[who];
+  if (!p || !p.text) return '';
+  const m = /^(.{25,}?[a-z0-9)’'"])\.(?=\s|$)/.exec(p.text);
+  return `<p class="pwho">${esc(m ? m[1] + '.' : p.text)}${p.life ? ` (${esc(p.life)})` : ''}</p>`;
+}
 function whoLine(who, own){
   const p = S.data.people && S.data.people[who];
   if (!p || (!p.text && !own)) return '';
@@ -549,7 +568,8 @@ function pinCard(p){
   if (p.op || p.gov) rows.push(['Run by', esc(p.op || p.gov)]);
   if (p.acc) rows.push(['Accreditation', esc(p.acc)]);
   return { title: p.name, rows, stories: withPeople([{ text: p.text, source: J(p.source), place: J(p.place), who: p.who, see: p.see,
-             layer: p.layer, people: J(p.people), sources: J(p.sources), cites: J(p.cites), weblinks: J(p.weblinks), own: p.own }]),
+             layer: p.layer, people: J(p.people), sources: J(p.sources), cites: J(p.cites), weblinks: J(p.weblinks), own: p.own,
+             when: p.when, made: p.made, here: p.here }]),
            dyk: J(p.dyk), coll: J(p.coll),
            links: placeLinks(p, false) };
 }

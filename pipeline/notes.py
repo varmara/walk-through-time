@@ -187,14 +187,26 @@ def read_notes(folder):
 
 SECTIONS = ("Places", "Threads")
 ITEM_PLAQUE = re.compile(r"^plaque:\s*(.+)$")
+# a date as a note's when: or a thread's line gives it: 1952, c. 1200, 1930s, 13th century
+WHEN = r"(?:c\.\s*)?\d{3,4}s?|\d{1,2}(?:st|nd|rd|th) century"
+ITEM_WHEN = re.compile(rf"^({WHEN}):\s+(.+)$")
+
+
+def when(value, name, prop="when"):
+    """A note's when: or made: as written ("c. 1200"), checked to be a date the build can order."""
+    v = str(value).strip()
+    if not re.fullmatch(WHEN, v):
+        raise NoteError(f"{name}: {prop}: {v!r} is not a date: write 1952, c. 1200, 1930s or 13th century")
+    return v
 
 
 def index_layer(name, props, body):
     """An index note (type: index): a layer of the Layers sheet. Its text: the introduction, then `## Group`
     headings, each a tickbox, listing its members one per line:
 
-        - [[Note]]                     a story or event (a Places index: each is in exactly one), or in a topic
+        - [[Note]]                     a story or event (a Places index: each is in exactly one), or in a thread
                                        also a person (a note, or someone on the map by name)
+        - c. 1200: [[Note]]            in a thread: its date on this thread, where it differs from the note's own
         - plaque: Plaque to Albert Ball                                   a plaque, by its title (a topic)
         - [Wollaton Hall](https://www.openstreetmap.org/way/4438894)      a building (a topic)
 
@@ -215,7 +227,9 @@ def index_layer(name, props, body):
             group = line[3:].strip()
             groups.append([f"{L['id']}-{slug(group)}", group])
         elif line.startswith("- "):
-            item = line[2:].strip()
+            item, dated = line[2:].strip(), None
+            if m := ITEM_WHEN.match(item):       # "- c. 1200: [[Statue of Robin Hood]]": its date on this thread
+                dated, item = m[1], m[2].strip()
             if m := WIKILINK.fullmatch(item):
                 member = {"kind": "note", "name": m[1].strip()}
             elif m := MDLINK.fullmatch(item):
@@ -226,7 +240,7 @@ def index_layer(name, props, body):
                 member = {"kind": "plaque", "name": m[1].strip()}
             else:
                 raise NoteError(f"{name}: '{item}' is not a member: [[Note]], plaque: Title, or [Name](OpenStreetMap link)")
-            L["members"].append({**member, "group": group, "line": f"{name}:{n}"})
+            L["members"].append({**member, "group": group, "line": f"{name}:{n}", **({"when": dated} if dated else {})})
         elif group is None and not L["members"]:
             intro.append(line)
         else:
@@ -322,6 +336,9 @@ def load(folder):
                     **({"read": str(props["read"])} if props.get("read") else {}),
                     **({"title": str(props["title"])} if props.get("title") else {}),
                     **({"year": str(props["year"])} if props.get("year") else {}),
+                    # when the story is set (else the first year in its text), and when the thing itself was made
+                    **({"when": when(props["when"], name)} if props.get("when") else {}),
+                    **({"made": when(props["made"], name, "made")} if props.get("made") else {}),
                     # passages copied from a Historic England list entry, which blocks automated requests
                     **({"quote": listed(props.get("quote"))} if props.get("quote") else {}),
                     # other stories to link from this one, as see: in a story file (also [[links]] in its text)

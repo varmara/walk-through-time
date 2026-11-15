@@ -1,5 +1,7 @@
 ---
 type: person
+when: "1847"
+made: "1859"
 kind: public
 source:
   - https://en.wikipedia.org/wiki/Feargus_O%27Connor

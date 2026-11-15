@@ -1,5 +1,6 @@
 ---
 type: story
+when: "c. 1200"
 source:
   - https://en.wikipedia.org/wiki/Wise_Men_of_Gotham
   - https://en.wikipedia.org/wiki/Gotham,_Nottinghamshire

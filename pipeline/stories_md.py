@@ -66,7 +66,8 @@ def load(folder):
     # who each plaque remembers (plaque-people.md)
     f = folder / "plaque-people.md"
     out["PLAQUE_PEOPLE"] = {r["inscription starts"]: {"people": [n.strip() for n in r["people"].split(" & ") if n.strip()],
-                                                      **({"group": r["group"]} if r.get("group") else {})}
+                                                      **({"group": r["group"]} if r.get("group") else {}),
+                                                      **({"here": r["here"]} if r.get("here") else {})}
                             for r in (table(f) if f.exists() else []) if r.get("people")}
     tags = {}
     f = folder / "tags.md"

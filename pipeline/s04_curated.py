@@ -396,7 +396,7 @@ def main(city_id):
                             "source": cited(src),
                             **({"sources": [cited(s) for s in more]} if more else {}),
                             **({"cites": {k: cited(s) for k, s in cites.items()}} if cites else {}),
-                            **{k: e[k] for k in ("links", "weblinks", "note", "type", "who", "unplaced") if e.get(k)},
+                            **{k: e[k] for k in ("links", "weblinks", "note", "type", "who", "unplaced", "when", "made") if e.get(k)},
                             **({"place": {"title": a["title"], "url": a["url"], "kind": a["kind"]}} if e.get("place") else {}),
                             **({"year": list(parse_year(e["year"]))} if e.get("year") and parse_year(e["year"]) else {}),
                             **({"architect": e["architect"]} if e.get("architect") else {}),

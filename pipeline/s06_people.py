@@ -308,6 +308,8 @@ def main(city_id):
         # every plaque is a pin where it hangs, linked both ways to the building it is on (if any)
         ref = person(None, key, subject if len(persons) == 1 else label, story, src, xy=(p["x"], p["y"]),
                      qid=p.get("qid"), who=len(persons) == 1, on=b, title=label)
+        if on_it.get("here"):          # what happened at this place (plaque-people.md): each of a person's plaques its own
+            out.pins[int(ref[1:])]["here"] = on_it["here"]
         if len(named_people) > 1:
             out.pins[int(ref[1:])]["people"] = named_people
             # the plaque is not one of the people: only they are in the layer's groups, under their names

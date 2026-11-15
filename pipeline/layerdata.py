@@ -67,13 +67,23 @@ def year_in(text):
     return min(ys)[1] if ys else None
 
 
+def when_year(w):
+    """The year a written date orders by: "c. 1200" 1200, "1930s" 1930, "13th century" 1200; None for none."""
+    w = str(w or "")
+    if m := re.search(r"(\d{1,2})(?:st|nd|rd|th) century", w):
+        return (int(m[1]) - 1) * 100
+    m = re.search(r"\d{3,4}", w)
+    return int(m[0]) if m else None
+
+
 def in_date_order(meta, stories, pins, dates, about):
     """Each story, people or topic group's items, and each item's places, in date order: the year of what it tells
     (a story's, a plaque's words'), a person's year of birth, a building's year of building. Undated last; ties keep
     their order. The page's numbered cards follow this order."""
-    def ref_year(r, name=None, layer=None):
+    def ref_year(r, name=None, layer=None, story=None):
         if isinstance(r, str) and r.startswith("p"):
-            return year_in(pins[int(r[1:])].get("text"))
+            p = pins[int(r[1:])]
+            return when_year(p.get("when")) if p.get("when") else year_in(p.get("text"))
         if not isinstance(r, int):
             return None
         ss = stories.get(str(r), [])
@@ -81,7 +91,11 @@ def in_date_order(meta, stories, pins, dates, about):
         def text(s):
             return s.get("text") or (pins[int(s["pin"][1:])].get("text") if s.get("pin") else "")
         mine = [s for s in ss if (layer and s.get("layer") == layer) or (name and (s.get("who") == name or name in text(s)))]
+        if story:            # the note that put it here, when its building has another story of the layer too
+            mine.sort(key=lambda s: s.get("nm") != story)
         for s in mine:
+            if s.get("when"):
+                return when_year(s["when"])
             if (y := year_in(text(s))) is not None:
                 return y
         return (dates.get(str(r)) or {}).get("y")
@@ -104,21 +118,25 @@ def in_date_order(meta, stories, pins, dates, about):
                 hint = it[2] if len(it) > 2 else {}
                 person = L["kind"] == "people" and g["key"] != "people-events" or hint.get("person")
                 layer = hint.get("layer") or (L["id"] if L["kind"] == "stories" else None)
-                ys = {r: ref_year(r, name if person or L["kind"] == "people" else None, layer) for r in refs}
+                ys = {r: ref_year(r, name if person or L["kind"] == "people" else None, layer, name) for r in refs}
                 it[1] = sorted(refs, key=lambda r: later(ys[r]))
                 first = min((y for y in ys.values() if y is not None), default=None)
                 if hint.get("building"):
                     first = (dates.get(str(refs[0])) or {}).get("y") if refs else None
-                keyed.append((later(born(name) if person and born(name) is not None else first), it))
+                if hint.get("when"):          # the thread's own date for it
+                    first = when_year(hint["when"])
+                elif person and born(name) is not None:
+                    first = born(name)
+                keyed.append((later(first), it))
             g["items"] = [it for _, it in sorted(keyed, key=lambda k: k[0])]
 
 
-MORE = ("sources", "cites", "weblinks", "links")
+MORE = ("sources", "cites", "weblinks", "links", "when", "made", "nm")
 
 
 def more_of(e):
     """What a note adds to a story (pipeline/notes.py): its other sources, footnotes' pages and links."""
-    return {k: e[k] for k in MORE if e.get(k)}
+    return {**{k: e[k] for k in MORE if e.get(k)}, **({"nm": e["name"]} if e.get("type") in ("story", "event") else {})}
 
 
 class Collector:

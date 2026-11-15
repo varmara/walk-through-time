@@ -287,6 +287,8 @@ def topic_layers(topics, entries, people, out, buildings, bname, story_layers):
                     problems.append(f"{where}: no building {name!r} on the map (write it as way/123 or relation/123)")
                     continue
                 item = [bname(i), [i], {"building": 1}]
+            if m.get("when"):
+                item[2]["when"] = m["when"]
             key = keys.get(m["group"], tid)
             items.setdefault(key, []).append(item)
             for r in item[1]:
