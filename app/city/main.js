@@ -9,7 +9,7 @@ import './cards.js';
 import './places.js';
 import { $, CITY_ID, fetchData, fetchJSON, progress, setPeriods } from './util.js';
 import { S } from './state.js';
-import { areaOf, byOsm, fromIndex, loadCard, parseRef, pinOf, refOf, saveActive, tiled } from './data.js';
+import { areaOf, byOsm, fromIndex, isStorySet, loadCard, parseRef, pinOf, refOf, saveActive, tiled } from './data.js';
 import { drawMap } from './map.js';
 import { stopPlay, updateYear } from './timebar.js';
 import { applyLayers, drawLegend, groundNote, renderLayers } from './panels.js';
@@ -57,7 +57,8 @@ export async function main(){
     const [name, bs] = typeof it[0] === 'number' ? [it[1], [it[0]]] : it;
     if (bs.length > 1) bs.filter(b => typeof b === 'number').forEach(b => (S.entitiesAt[b] = S.entitiesAt[b] || []).some(x => x.name === name) || S.entitiesAt[b].push({ name, bs }));
   })));
-  S.active = new Set([...S.active].filter(k => S.groups.has(k)));
+  S.active = new Set([...S.active].filter(k => S.groups.has(k) && !isStorySet(k)));
+  saveActive();
   renderLayers();
 
   progress(90, 'drawing the map…');
@@ -94,12 +95,15 @@ function mergeMore(m){
 export async function openLink(q, first){
   let ticked = false;
   const lq = q.get('layer'), lyr = lq && S.layers.find(L => L.id === lq);
-  if (lyr) { lyr.groups.filter(g => g.count > 0).forEach(g => S.active.add(g.key)); ticked = true; }
-  const gq = q.get('group');
+  // a place's, a thread's or the People's link opens its cards (as ?group= does); any other layer is ticked
+  const storyLyr = lyr && lyr.groups.some(g => isStorySet(g.key));
+  if (lyr && !storyLyr) { lyr.groups.filter(g => g.count > 0).forEach(g => S.active.add(g.key)); ticked = true; }
+  const gq = q.get('group') || (storyLyr && !q.get('focus') ? lq : null);
   // a group's key, or a story layer's id (the graph's story themes): all its groups
   const keys = gq ? [...new Set(gq.split(',').flatMap(k => S.groups.has(k) ? [k]
     : (S.layers.find(L => L.id === k)?.groups || []).filter(g => g.count > 0).map(g => g.key)))] : [];
-  if (keys.length) { S.active.clear(); keys.forEach(k => S.active.add(k)); ticked = true; }
+  const tick = keys.filter(k => !isStorySet(k));
+  if (tick.length) { S.active.clear(); tick.forEach(k => S.active.add(k)); ticked = true; }
   if (ticked) { saveActive(); renderLayers(); applyLayers(); if (!first) updateYear(); }
   // a group's places as numbered cards, person by person (or story by story) in date order, each place once
   const asked = gq ? gq.split(',') : [], whole = asked.length === 1 && S.layers.find(L => L.id === asked[0]);

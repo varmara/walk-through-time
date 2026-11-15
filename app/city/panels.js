@@ -1,16 +1,18 @@
 // Walk Through Time, city page: The Layers sheet and the Map sheet (base maps, the legend of eras).
-import { $, CITY_ID, ERAS, PIN_LAYERS, SECTIONS, esc, fmt, store } from './util.js';
+import { $, CITY_ID, ERAS, PIN_LAYERS, SECTIONS, STORY_SECTIONS, esc, fmt, store } from './util.js';
 import { S } from './state.js';
-import { hasPins, isArea, kindOf, marksBuildings, parseRef, saveActive } from './data.js';
+import { hasPins, isArea, isStorySet, kindOf, marksBuildings, parseRef, saveActive } from './data.js';
 import { addNls, paintBuildings, setHills, setLand } from './map.js';
 import { curYear, updateYear } from './timebar.js';
 import { openRef } from './cards.js';
 import { clearPlaces, showGroups, showPlaces } from './places.js';
+import { closeSheet } from './sheet.js';
 
 // ================= Layers panel =================
 export function renderLayers(){
+  renderStories();
   const html = [];
-  for (const sec of SECTIONS) {
+  for (const sec of SECTIONS.filter(s => !STORY_SECTIONS.includes(s))) {
     const Ls = S.layers.filter(L => L.section === sec && L.groups.some(g => g.count > 0));
     if (!Ls.length) continue;
     html.push(`<div class="section"><div class="seclbl">${esc(sec)}</div>`);
@@ -72,6 +74,61 @@ export function renderLayers(){
   });
   updateSummary();
 }
+// ================= Stories sheet =================
+// The places (folded by area), the threads and the People's groups: a tap opens one as numbered cards. Its ⓘ
+// says what it is and lists what is in it.
+function storyCount(gs){
+  return new Set(gs.flatMap(g => (g.items || []).flatMap(it => (typeof it[0] === 'number' ? [it[0]] : it[1]).map(r => r + '|' + it[0])))).size;
+}
+export function renderStories(){
+  const html = [], row = (key, title, n, L, g, indent) => `<div class="srow${indent ? ' sub' : ''}">
+      <button class="sopen" data-set="${esc(key)}" data-title="${esc(title)}"><span>${esc(title)}</span><span class="n">${fmt(n)}</span></button>
+      <button class="more" data-sinfo="${esc(key)}" aria-label="About ${esc(title)}" aria-expanded="false">ⓘ</button></div>
+    <div class="linfo" id="sinfo-${esc(key)}" hidden>${infoHtml(L, g, !g || !indent)}</div>`;
+  for (const sec of STORY_SECTIONS) {
+    const Ls = S.layers.filter(L => L.section === sec && L.groups.some(g => g.count > 0 && g.items?.length));
+    if (!Ls.length) continue;
+    html.push(`<div class="section"><div class="seclbl">${esc(sec)}</div>`);
+    let area = null;
+    for (const L of Ls) {
+      if ((L.area || null) !== area) {
+        if (area) html.push('</details>');
+        area = L.area || null;
+        if (area) html.push(`<details class="area"${S.places && Ls.some(x => x.area === area && x.title === S.places.name) ? ' open' : ''}><summary>${esc(area)}<span class="n">${Ls.filter(x => x.area === area).length}</span></summary>`);
+      }
+      const gs = L.groups.filter(g => g.count > 0 && g.items?.length);
+      if (L.kind === 'people') { gs.forEach(g => html.push(row(g.key, g.title, g.items.length, L, g, false))); continue; }
+      html.push(row(L.id, L.title, storyCount(gs), L, null, false));
+      // a place's own parts (Wilford: the river, the village), each its own set
+      if (gs.length > 1) gs.forEach(g => html.push(row(g.key, g.title, storyCount([g]), L, g, true)));
+    }
+    if (area) html.push('</details>');
+    html.push('</div>');
+  }
+  const box = $('stSections');
+  box.innerHTML = html.join('');
+  box.querySelectorAll('[data-set]').forEach(btn => btn.onclick = () => {
+    const k = btn.dataset.set, L = !S.groups.has(k) && S.layers.find(x => x.id === k);
+    closeSheet();
+    showGroups(L ? L.groups.filter(g => g.count > 0).map(g => g.key) : [k], btn.dataset.title);
+  });
+  box.querySelectorAll('[data-sinfo]').forEach(btn => btn.onclick = e => {
+    e.preventDefault(); e.stopPropagation();
+    const el = $('sinfo-' + btn.dataset.sinfo), open = el.hidden;
+    el.hidden = !open; btn.setAttribute('aria-expanded', open);
+  });
+  box.querySelectorAll('[data-cards]').forEach(btn => btn.onclick = e => {
+    e.preventDefault();
+    const k = btn.dataset.cards, L = S.layers.find(x => x.id === k && !S.groups.has(k));
+    closeSheet();
+    showGroups(L ? L.groups.filter(g => g.count > 0).map(g => g.key) : [k], btn.dataset.title);
+  });
+  box.querySelectorAll('[data-b]').forEach(btn => btn.onclick = e => {
+    e.preventDefault();
+    const bs = btn.dataset.b.split(',').map(parseRef);
+    bs.length > 1 ? showPlaces(btn.dataset.name, bs) : openRef(bs[0]);
+  });
+}
 export function infoHtml(L, g, withIntro = true){
   const parts = [];
   if (withIntro && L.intro) parts.push(`<p>${esc(L.intro)}</p>`);
@@ -86,11 +143,8 @@ export function infoHtml(L, g, withIntro = true){
     return `<button class="item" data-b="${bs.join(',')}" data-name="${esc(name)}">${esc(name)}${bs.length > 1 ? `<span class="cnt">${bs.length}</span>` : ''}</button>`;
   }).join('')}</div>`);
   // the places of a story layer's or a topic's group (or of the whole layer), as numbered cards in date order
-  if ((L.kind === 'stories' || L.kind === 'topics') && (g ? g.items?.length : L.groups.some(x => x.items?.length))) {
-    const n = new Set((g ? [g] : L.groups).flatMap(x => (x.items || []).flatMap(it => it[1].map(String)))).size;
-    if (n > 1) parts.push(`<p><button class="textbtn" data-cards="${esc(g ? g.key : L.id)}" data-title="${esc(g && !withIntro ? g.title : L.title)}">Show the ${n} places in date order</button></p>`);
-  }
-  if (L.kind === 'stories') parts.push('<p class="src">Each entry is checked against its Wikipedia article.</p>');
+  // (a place's, a thread's or a group of people's cards open from its row in the Stories sheet)
+
   if (L.kind === 'topics') parts.push('<p class="src">Each story, person and plaque here is told on its own card, with its source.</p>');
   if (withIntro && (L.kind === 'stories' || L.kind === 'people' || L.kind === 'topics'))
     parts.push(`<p class="src"><a href="../data/share/${CITY_ID}/layer-${encodeURIComponent(L.id)}.html">Read “${esc(L.title)}” as a page</a></p>`);
@@ -102,8 +156,9 @@ export function updateSummary(){
     .map(g => g.layer.groups.filter(x => x.count > 0).length === 1 ? g.layer.title : g.title);
   // numbered places on the map (a story's, a topic's, a person's) are not a layer, but they are what is shown: said
   // first, with a way to hide them
-  const places = S.places ? `<span class="placeson">Numbered places on the map: <b>${esc(S.places.name)}</b>
-    <button class="textbtn" id="lPlacesOff">Hide them</button></span>` : '';
+  // a story set open: only its places are shown on the map, the ticked layers wait until it is closed
+  const places = S.places ? `<span class="placeson">Showing only <b>${esc(S.places.name)}</b>${names.length ? ': these layers come back when it is closed' : ''}.
+    <button class="textbtn" id="lPlacesOff">Close it</button></span>` : '';
   $('lSummary').innerHTML = places + (names.length
     ? `<b>${names.length} on:</b> ${esc(names.join(', '))}${[...S.active].some(marksBuildings) ? '<span class="key"><i style="background:var(--marked)"></i>in the layer, no date yet</span>' : ''}`
     : places ? '' : 'No layers on. Tick any to highlight them on the map.');
@@ -115,14 +170,18 @@ export function updateSummary(){
 }
 $('lClear').onclick = () => { if (S.places) clearPlaces(true); S.active.clear(); saveActive(); renderLayers(); applyLayers(); };
 $('bLayers').addEventListener('click', () => updateSummary());       // (the numbered places may have changed since)
+$('bStories').addEventListener('click', () => renderStories());     // (the open set's area unfolds)
 
+S.applyLayers = () => applyLayers();
 export function applyLayers(){
   updateSummary();
   if (!S.map || !S.map.getLayer('b')) return;
   paintBuildings();
-  const pinGroups = [...S.active].filter(hasPins);
-  S.map.setLayoutProperty('routes', 'visibility', S.active.has('routes') ? 'visible' : 'none');
-  const basics = [...S.active].filter(k => kindOf(k) === 'points');
+  // while a story set is open, only its places are shown: the ticked layers wait (S.active is kept)
+  const active = S.places ? new Set() : S.active;
+  const pinGroups = [...active].filter(hasPins);
+  S.map.setLayoutProperty('routes', 'visibility', active.has('routes') ? 'visible' : 'none');
+  const basics = [...active].filter(k => kindOf(k) === 'points');
   S.map.setLayoutProperty('basics', 'visibility', basics.length ? 'visible' : 'none');
   S.map.setFilter('basics', ['in', ['get', 't'], ['literal', basics.length ? basics : ['none']]]);
   S.map.setLayoutProperty('storypins', 'visibility', pinGroups.length ? 'visible' : 'none');
@@ -130,9 +189,9 @@ export function applyLayers(){
   const topics = pinGroups.filter(k => kindOf(k) === 'topics');
   S.map.setFilter('storypins', ['any', ['in', ['get', 'group'], ['literal', pinGroups.length ? pinGroups : ['none']]],
     ...topics.map(k => ['in', ',' + k + ',', ['coalesce', ['get', 'T'], '']])]);
-  S.landTypes = [...S.active].filter(k => kindOf(k) === 'land');
+  S.landTypes = [...active].filter(k => kindOf(k) === 'land');
   setLand(S.landTypes, curYear());
-  const types = [...S.active].filter(isArea);
+  const types = [...active].filter(isArea);
   const vis = types.length ? 'visible' : 'none';
   ['nature-fill', 'nature-line'].forEach(id => {
     S.map.setLayoutProperty(id, 'visibility', vis);

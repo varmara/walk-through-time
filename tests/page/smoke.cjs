@@ -38,17 +38,26 @@ const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (
   await page.evaluate(() => { const y = document.getElementById('year'); y.value = 250; y.dispatchEvent(new Event('input')); });
   check(/^\d+$/.test(await text('#yearOut')) && (await text('#yearOut')) !== '2026', 'the year slider changes the year');
 
+  // the Layers sheet: what is not a story (heritage, nature, visit…), ticked to highlight
   await page.click('#bLayers');
   const boxes = await page.$$('input[data-g]');
   check(boxes.length > 10, `the Layers sheet lists the layers (${boxes.length})`);
-  // the places fold under headings (The city, South of the Trent…): a heading opens to show its places
-  const fold = await page.$('details.area > summary');
-  check(!!fold && !(await page.$eval('details.area', d => d.open)), 'the places fold under headings');
-  if (fold) { await fold.click(); await page.waitForTimeout(200); }
-  const first = await page.$('details.area[open] input[data-g]') || boxes[0];
-  if (first) { await first.check(); await page.waitForTimeout(300); }
+  check(!(await page.$('#lSections .seclbl:text-is("Places"), #lSections .seclbl:text-is("Threads")')), 'places and threads are not in the Layers sheet');
+  if (boxes.length) { await boxes[0].check(); await page.waitForTimeout(300); }
   check(/^1 on/.test(await text('#lSummary')), 'ticking a layer turns it on');
-  const many = await page.$('.item .cnt');
+  await boxes[0].uncheck(); await page.waitForTimeout(200);
+
+  // the Stories sheet: places folded under headings, threads and people, each opening numbered cards
+  await page.click('#bStories'); await page.waitForTimeout(300);
+  const fold = await page.$('#stSections details.area > summary');
+  check(!!fold && !(await page.$eval('#stSections details.area', d => d.open)), 'the places fold under headings');
+  if (fold) { await fold.click(); await page.waitForTimeout(200); }
+  const place = await page.$('#stSections details.area[open] [data-set]');
+  if (place) { await place.click(); await page.waitForTimeout(3000); }
+  check(/^1 of \d+$/.test(await text('#pCount')), "a place's stories open as numbered cards");
+  await page.click('#pClose'); await page.waitForTimeout(300);
+  await page.click('#bStories'); await page.waitForTimeout(300);
+  const many = await page.$('#stSections .linfo .item .cnt');
   if (many) {
     await page.evaluate(el => el.closest('.item').click(), many);
     await page.waitForTimeout(2500);
@@ -68,18 +77,21 @@ const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (
       await open('?person=' + encodeURIComponent(name));
       check((await text('#sTitle')) === name, "a shared person's link opens their card");
     }
-  } else check(false, 'a layer lists a person or story with several places');
+  } else check(false, 'the Stories sheet lists a person with several places');
 
-  // a topic's places as numbered cards, from its button in the Layers sheet
+  // a thread's stories as numbered cards, from the Stories sheet
   await open('');
-  await page.click('#bLayers');
-  const topicBtn = await page.$('#lSections .section:has(.seclbl:text-is("Threads")) [data-cards]');
-  check(!!topicBtn, 'the Layers sheet has threads');
-  if (topicBtn) {
-    await page.evaluate(b => b.click(), topicBtn);
+  await page.click('#bStories'); await page.waitForTimeout(300);
+  const thread = await page.$('#stSections .section:has(.seclbl:text-is("Threads")) [data-set]');
+  check(!!thread, 'the Stories sheet has threads');
+  if (thread) {
+    await thread.click();
     await page.waitForTimeout(3000);
     check(/^1 of \d+$/.test(await text('#pCount')) && (await page.$$('#pCards .pcard')).length > 1, "a thread's places open as numbered cards");
   }
+  // a link to a place opens its cards, not a tickbox
+  await open('?layer=castle');
+  check(/^1 of \d+$/.test(await text('#pCount')), "a link to a place opens its cards");
 
   await page.click('#bMap').catch(() => {});
   await open('');

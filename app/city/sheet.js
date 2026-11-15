@@ -12,9 +12,10 @@ export function openSheet(kind, title){
   // a building's card, or a card that says how to share it (a person's, a pin's: S.share)
   $('sShare').hidden = !(kind === 'card' && (S.share || (S.selectedId != null && S.features[S.selectedId]?.properties.osm)));
   $('sTitle').textContent = title;
-  ['pLayers', 'pMap', 'pCard'].forEach(id => $(id).hidden = true);
-  $({ layers:'pLayers', map:'pMap', card:'pCard' }[kind]).hidden = false;
+  ['pStories', 'pLayers', 'pMap', 'pCard'].forEach(id => $(id).hidden = true);
+  $({ stories:'pStories', layers:'pLayers', map:'pMap', card:'pCard' }[kind]).hidden = false;
   sheet.hidden = false; sheet.scrollTop = 0;
+  $('bStories').setAttribute('aria-expanded', kind === 'stories');
   $('bLayers').setAttribute('aria-expanded', kind === 'layers');
   $('bMap').setAttribute('aria-expanded', kind === 'map');
 }
@@ -41,6 +42,7 @@ $('sShare').onclick = async () => {
 export function closeSheet(){
   sheet.hidden = true; S.sheetKind = null;
   unlight();
+  $('bStories').setAttribute('aria-expanded', false);
   $('bLayers').setAttribute('aria-expanded', false);
   $('bMap').setAttribute('aria-expanded', false);
   if (S.places) { setPlace(S.places.i, false); return; }   // back to the places strip, its building still selected
@@ -48,6 +50,7 @@ export function closeSheet(){
 }
 $('sClose').onclick = closeSheet;
 addEventListener('keydown', e => { if (e.key === 'Escape' && !sheet.hidden && !document.body.classList.contains('graph-open')) closeSheet(); });
+$('bStories').onclick = () => S.sheetKind === 'stories' ? closeSheet() : openSheet('stories', 'Stories');
 $('bLayers').onclick = () => S.sheetKind === 'layers' ? closeSheet() : openSheet('layers', 'Layers');
 $('bMap').onclick = () => S.sheetKind === 'map' ? closeSheet() : openSheet('map', 'Map');
 $('bHome').onclick = () => S.map && S.map.easeTo({ ...S.city.home, duration:900 });

@@ -30,7 +30,7 @@ Two or three plain sentences on the history behind the layer.
 |---|---|
 | `id` | the layer's id, which links use (`?layer=barton`); else made from the file's name |
 | `section` | `Places` (the default: a small area of the map, where each of its stories lives) or `Threads` (a story told across the map, below) |
-| `area` | for a place: the small heading it folds under in the Layers sheet (`The city`, `South of the Trent`, `West`, `North and east`) |
+| `area` | for a place: the small heading it folds under in the Stories sheet (`The city`, `South of the Trent`, `West`, `North and east`) |
 | `order` | its place in its section of the Layers sheet; else after those with one, by name |
 | `kind` | `people` for the People layer and `facts` for "Did you know", whose members are not listed |
 
@@ -153,8 +153,8 @@ Tables in the same folder, each with a Note column saying why:
 
 Every story lives in one **place**: a Places index for a small area of the map (the castle rock, the Lace Market,
 Wilford, Ruddington). A **thread** follows one story across the map, through any places: the castle and the
-Crown, frames and lace, coal and getting about. It is a layer of its own in the Layers sheet's Threads section and
-a theme in the graph. A thread is an index note with `section: Threads`, and may list people, plaques and
+Crown, frames and lace, coal and getting about. It is listed in the Stories sheet's Threads, opening as numbered cards, and is a
+theme in the graph. A thread is an index note with `section: Threads`, and may list people, plaques and
 buildings as well as stories; anything can be on several threads, and a card lists the threads it is on, each
 opening that thread. Stories do not link to the next one in a thread in their text, so a story can join a thread
 anywhere without others changing: the cards keep date order, and the `##` headings are its chapters, by period

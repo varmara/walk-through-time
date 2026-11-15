@@ -131,7 +131,7 @@ def layer_pages(data, city_id, city_name, site, out):
                     [story_text(st, pins, data.get("templates")) for st in p.get("stories", [])])
         pp = pin_by.get(r)
         if pp:
-            return pp.get("name"), None, None, [{"layer": pp.get("layer"), "text": pp.get("text"), "source": pp.get("source")}]
+            return pp.get("name"), None, None, [{k: pp[k] for k in ("layer", "text", "source", "nm", "when", "made") if pp.get(k)}]
         return None, None, None, []
 
     def src_html(s):
@@ -155,15 +155,21 @@ def layer_pages(data, city_id, city_name, site, out):
                 want = hint.get("layer") or ("people" if hint.get("person") or hint.get("plaque") else None) \
                     if L["kind"] == "topics" else L["id"]
                 person = L["kind"] == "people" or hint.get("person")
-                stories, built, first = [], None, None
+                stories, built, first, dated = [], None, None, None
                 for r in refs:
                     pname, pbuilt, pimg, st = place(r)
                     image = image or pimg
                     first = first or pname
                     built = built or pbuilt
-                    for s in st:
+                    # the story this line names, where its place has others of the layer too (the castle, and the
+                    # castle burned in 1831: an entry each, not both under both)
+                    named = [s for s in st if s.get("nm") == name and (not want or s.get("layer") == want)]
+                    for s in named or st:
                         if want and s.get("layer") != want:
                             continue
+                        if named:
+                            dated = dated or " · ".join(filter(None, [hint.get("when") if hint.get("when") not in (s.get("when"), s.get("made")) else None,
+                                                                       s.get("when"), f"made {s['made']}" if s.get("made") and s.get("made") != s.get("when") else None]))
                         if person:       # a person's story names them (or is about their building)
                             last = name.split()[-1].lower()
                             if last not in (s.get("text") or "").lower() and len(refs) > 1:
@@ -172,9 +178,12 @@ def layer_pages(data, city_id, city_name, site, out):
                             stories.append(s)
                 where = ", ".join(dict.fromkeys(filter(None, (place(r)[0] for r in refs[:6]))))
                 more = f" and {len(refs) - 6} more" if len(refs) > 6 else ""
-                link = (f"{mapurl}?layer={urllib.parse.quote(L['id'])}&focus={','.join(ref_key(r) for r in refs)}"
+                link = (f"{mapurl}?focus={','.join(ref_key(r) for r in refs)}"
                         f"&name={urllib.parse.quote(name)}")
-                meta = ([built] if built and not person else []) + ([f"{where}{more}"] if person and where else [])
+                # its date as its card gives it: the story's (a thread's own for it first), else the building's
+                meta = ([dated or built] if (dated or built) and not person else []) + ([f"{where}{more}"] if person and where else [])
+                if dated is None and not person and hint.get("when"):
+                    meta = [hint["when"]]
                 who = data.get("people", {}).get(name) if person else None
                 who = who if who and who.get("text") else None      # (a note's own text only: told below)
                 arts.append(f"<article><h3>{e(name)}</h3>"

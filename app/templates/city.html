@@ -31,6 +31,9 @@
 <div class="top">
   <a class="brand" href="../" title="Walk Through Time: all cities"><img src="../app/logo.svg" alt="Walk Through Time:" width="20" height="20"><b>{{name}}</b></a>
   <div class="fabs">
+    <button class="fab" id="bStories" aria-label="Stories: places, threads and people" aria-expanded="false" aria-controls="sheet">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5C6.5 4 9.5 4 12 6c2.5-2 5.5-2 8-.5V19c-2.5-1.5-5.5-1.5-8 .5-2.5-2-5.5-2-8-.5V5.5Z"/><path d="M12 6v13.5"/></svg>
+    </button>
     <button class="fab" id="bLayers" aria-label="Layers" aria-expanded="false" aria-controls="sheet">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="m3 13 9 5 9-5"/><path d="m3 17.5 9 5 9-5" opacity=".55"/></svg>
       <span class="badge" id="layerCount" hidden>0</span>
@@ -79,6 +82,11 @@
     </button>
     <button class="close" id="sClose" aria-label="Close">✕</button></div>
   <div class="toast" id="toast" role="status" hidden></div>
+
+  <div class="panel" id="pStories" hidden>
+    <p class="note">Tap a place, a thread or a group of people to see its stories as numbered cards, in date order.</p>
+    <div id="stSections" class="panel"></div>
+  </div>
 
   <div class="panel" id="pLayers" hidden>
     <div class="summary"><span id="lSummary">No layers on</span><button class="textbtn" id="lClear">Clear all</button></div>
