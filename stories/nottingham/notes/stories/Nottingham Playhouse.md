@@ -7,4 +7,4 @@ at:
   - https://www.openstreetmap.org/way/36977572
 ---
 
-A modernist theatre designed by Peter Moro, opened in 1963.
+A modernist theatre designed by [[Peter Moro]], opened in 1963.

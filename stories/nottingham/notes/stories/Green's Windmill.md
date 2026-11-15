@@ -7,5 +7,5 @@ at:
   - https://www.openstreetmap.org/way/222030385
 ---
 
-A tower mill built shortly after 1807 by the baker George Green. It burned in 1947, was restored and reopened in
+A tower mill built shortly after 1807 by [[George Green|the baker George Green]]. It burned in 1947, was restored and reopened in
 1986, and is now part of a science centre.

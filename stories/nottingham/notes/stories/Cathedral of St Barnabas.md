@@ -7,4 +7,4 @@ at:
   - https://www.openstreetmap.org/way/125665333
 ---
 
-The Catholic cathedral, designed by Augustus Pugin and built between 1841 and 1844.
+The Catholic cathedral, designed by [[Augustus Pugin]] and built between 1841 and 1844.

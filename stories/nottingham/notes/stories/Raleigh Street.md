@@ -7,5 +7,5 @@ at:
 names: no
 ---
 
-In 1885 a small bicycle workshop opened in Raleigh Street, and it gave the company its name. Frank Bowden took it
+In 1885 a small bicycle workshop opened in Raleigh Street, and it gave the company its name. [[Frank Bowden]] took it
 over in 1888, and by 1897 Raleigh had a purpose-built works of seven and a half acres on Faraday Road.

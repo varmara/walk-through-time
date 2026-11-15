@@ -9,5 +9,5 @@ see:
   - "[[Clifton Grove]]"
 ---
 
-Henry Kirke White is said to have spent much of his time writing poems in the churchyard, sitting under his
+[[Henry Kirke White]] is said to have spent much of his time writing poems in the churchyard, sitting under his
 favourite tree.

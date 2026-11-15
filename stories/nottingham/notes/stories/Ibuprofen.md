@@ -9,5 +9,5 @@ see:
   - "[[Building D10]]"
 ---
 
-Ibuprofen was first made at Boots in Nottingham in December 1961, by Stewart Adams's team. Their later laboratory,
+Ibuprofen was first made at Boots in Nottingham in December 1961, by [[Stewart Adams]]'s team. Their later laboratory,
 on Pennyfoot Street, is now BioCity, and in 2013 a Royal Society of Chemistry blue plaque marked the discovery.

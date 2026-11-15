@@ -7,6 +7,6 @@ at:
 names: no
 ---
 
-Peter Mansfield came to the University of Nottingham in 1964 and developed magnetic resonance imaging here. Just
+[[Peter Mansfield]] came to the University of Nottingham in 1964 and developed magnetic resonance imaging here. Just
 before Christmas 1978 a full-body scanner was installed, and he made the first scan of a live patient. He shared the
 Nobel Prize in 2003 with Paul Lauterbur.

@@ -6,5 +6,5 @@ at:
   - https://www.openstreetmap.org/way/78550420
 ---
 
-A medieval church of which little remains. Thomas Chambers Hine restored it in 1872, and in 1896 a new nave and
+A medieval church of which little remains. [[Thomas Chambers Hine]] restored it in 1872, and in 1896 a new nave and
 chancel were begun, their foundation stone laid by Lady Byron of Thrumpton Hall.

@@ -10,5 +10,5 @@ see:
   - "[[Framework Knitters' Museum]]"
 ---
 
-In 1589 William Lee of Calverton invented the stocking frame, a machine that knitted. Legend has it that Elizabeth I
+In 1589 [[William Lee]] of Calverton invented the stocking frame, a machine that knitted. Legend has it that Elizabeth I
 refused him a patent. The trade grew here, and from 1728 Nottingham was one of its main centres.

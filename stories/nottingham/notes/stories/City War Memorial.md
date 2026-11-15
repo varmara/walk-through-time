@@ -7,5 +7,5 @@ at:
   - https://www.openstreetmap.org/way/96388767
 ---
 
-Designed by the City Engineer Thomas Wallis Gordon, on land beside the Trent given by Sir Jesse Boot, and unveiled
+Designed by the City Engineer Thomas Wallis Gordon, on land beside the Trent given by [[Jesse Boot|Sir Jesse Boot]], and unveiled
 on 11 November 1927. It remembers the men of Nottingham who died in both World Wars.

@@ -9,5 +9,5 @@ see:
   - "[[Adams Building]]"
 ---
 
-John Leavers lived here, at Canning Circus, where a plaque calls him the inventor of the Leavers lace machine, in
+[[John Leavers]] lived here, at Canning Circus, where a plaque calls him the inventor of the Leavers lace machine, in
 1813. He improved John Heathcoat's lace machine, and in 1821 emigrated to Grand-Couronne in Normandy.

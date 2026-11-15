@@ -8,5 +8,5 @@ see:
   - "[[Trent Bridge cricket ground]]"
 ---
 
-The cricketer William Clarke married Mary Chapman, the inn's landlady, and the Trent Bridge cricket ground began in
+The cricketer [[William Clarke]] married Mary Chapman, the inn's landlady, and the Trent Bridge cricket ground began in
 a field behind the pub.

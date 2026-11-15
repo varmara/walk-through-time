@@ -7,5 +7,5 @@ at:
 names: no
 ---
 
-Jeremiah Brandreth, born in Wilford, led the Pentrich rising of 1817 and was known as the Nottingham Captain. He was
+Jeremiah Brandreth, born in Wilford, led the [[The Pentrich rising, 1817|Pentrich rising]] of 1817 and was known as the Nottingham Captain. He was
 hanged for high treason outside Derby Gaol that November, and then beheaded.

@@ -7,7 +7,7 @@ at:
   - https://www.openstreetmap.org/way/67187268
 ---
 
-Designed by Thomas Cecil Howitt and opened in 1929, on the site of the old Exchange at the head of the Old Market
+Designed by [[Thomas Cecil Howitt]] and opened in 1929, on the site of the [[The Exchange|old Exchange]] at the head of the Old Market
 Square.
 
 > [!fact]

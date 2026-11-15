@@ -7,4 +7,4 @@ at:
 ---
 
 The church dates from the late 14th century and is thought to have been founded by Gervase de Wilford in around
-1361. Inside are two memorials to the poet Henry Kirke White, who drew much inspiration from Wilford and Clifton.
+1361. Inside are two memorials to the poet [[Henry Kirke White]], who drew much inspiration from Wilford and Clifton.

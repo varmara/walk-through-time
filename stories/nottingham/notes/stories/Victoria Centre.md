@@ -7,5 +7,5 @@ at:
   - https://www.openstreetmap.org/way/16469518
 ---
 
-A shopping centre opened in 1972 on the site of Nottingham Victoria railway station, whose clock tower still stands
+A shopping centre opened in 1972 on the site of [[Nottingham Victoria station|Nottingham Victoria railway station]], whose clock tower still stands
 beside it.

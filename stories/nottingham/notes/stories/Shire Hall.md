@@ -6,7 +6,7 @@ at:
   - https://www.openstreetmap.org/way/1100953705
 ---
 
-The county courthouse and gaol, rebuilt to a design by James Gandon. It is now the National Justice Museum.
+The county courthouse and gaol, rebuilt to a design by [[James Gandon]]. It is now the National Justice Museum.
 
 > [!fact]
 > source: https://en.wikipedia.org/wiki/National_Justice_Museum

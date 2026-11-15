@@ -9,5 +9,5 @@ see:
   - "[[The stocking frame]]"
 ---
 
-Richard Arkwright's first cotton mill opened in Nottingham in 1768, its machines turned by horses. By 1772 it had
+[[Richard Arkwright]]'s first cotton mill opened in Nottingham in 1768, its machines turned by horses. By 1772 it had
 four storeys and 300 workers.

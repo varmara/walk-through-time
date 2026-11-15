@@ -9,5 +9,5 @@ see:
 ---
 
 Wilford stayed a village until the later 19th century. With woods around it and riverside amenities such as the
-Ferry Inn, it attracted many visitors from Nottingham. The Notts County goalkeeper Albert Iremonger was its landlord
+Ferry Inn, it attracted many visitors from Nottingham. The Notts County goalkeeper [[Albert Iremonger]] was its landlord
 until his death in 1958.

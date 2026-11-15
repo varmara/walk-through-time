@@ -7,7 +7,7 @@ at:
   - https://www.openstreetmap.org/way/16464923
 ---
 
-Opened in 1865 and designed by Charles J. Phipps.
+Opened in 1865 and designed by [[Charles J. Phipps]].
 
 > [!fact]
 > source: https://en.wikipedia.org/wiki/Theatre_Royal,_Nottingham
