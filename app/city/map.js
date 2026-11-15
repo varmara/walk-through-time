@@ -13,15 +13,14 @@ export function isDark(){
 
 // ================= Map =================
 // era colour by year, faded towards the background by how precise the date is (as colourFor)
-export function eraColour(flat){
+export function eraColour(){
   const step = t => ['step', ['get', 'y'], mix(ERAS[0][3], tok('--bg'), t), ...ERAS.slice(1).flatMap(e => [e[0], mix(e[3], tok('--bg'), t)])];
-  // drawn flat, an undated building has no sides to show it against the ground: a shade darker
-  return ['case', ['!', ['has', 'y']], flat ? mix(tok('--unknown'), tok('--ink'), 0.12) : tok('--unknown'),
+  return ['case', ['!', ['has', 'y']], tok('--unknown'),
     ['match', ['coalesce', ['get', 'f'], 'exact'], ...['approx', 'century', 'area'].flatMap(f => [f, step(FADE[f])]), step(0)]];
 }
-export function buildingColour(flat){
+export function buildingColour(){
   const base = ['case', ['boolean', ['feature-state', 'sel'], false], tok('--sel'),
-    ['boolean', ['feature-state', 'hl'], false], tok('--hl'), eraColour(flat)];
+    ['boolean', ['feature-state', 'hl'], false], tok('--hl'), eraColour()];
   if (S.places) return ['case', ['boolean', ['feature-state', 'sel'], false], tok('--sel'),
     ['boolean', ['feature-state', 'hl'], false], tok('--hl'), tok('--ghost')];   // only this person's places stand out
   const keys = [...S.active].filter(marksBuildings);
@@ -32,7 +31,7 @@ export function buildingColour(flat){
   // in a ticked layer: era colour when dated, a strong neutral when not (plain grey would vanish into the faded rest)
   return ['case', ['boolean', ['feature-state', 'sel'], false], tok('--sel'),
     ['boolean', ['feature-state', 'hl'], false], tok('--hl'),
-    inLayer, ['case', ['has', 'y'], eraColour(flat), tok('--marked')], tok('--ghost')];
+    inLayer, ['case', ['has', 'y'], eraColour(), tok('--marked')], tok('--ghost')];
 }
 // the buildings in the ticked layers: feature-state "on" (kept by the map for tiles that load later)
 let marked = new Set();
@@ -49,18 +48,15 @@ function markLayers(){
   for (const i of now) if (!marked.has(i)) S.map.setFeatureState({ ...src, id: i }, { on:true });
   marked = now;
 }
-// the buildings' colours, on both their layers: flat when zoomed out, raised close up
+// the buildings' colours, and which year's are shown (always raised, in 3D, at every zoom)
 export function paintBuildings(){
   if (!S.map || !S.map.getLayer('b')) return;
   markLayers();
   S.map.setPaintProperty('b', 'fill-extrusion-color', buildingColour());
-  if (S.map.getLayer('b-flat')) S.map.setPaintProperty('b-flat', 'fill-color', buildingColour(true));
 }
 export function filterBuildings(f){
-  for (const id of ['b', 'b-flat']) if (S.map.getLayer(id)) S.map.setFilter(id, f);
+  if (S.map.getLayer('b')) S.map.setFilter('b', f);
 }
-// raised (3D) from this zoom; below it, drawn flat: the whole city in 3D is a phone's heaviest work
-export const RAISED_FROM = 11;
 export const pinColour = () => ['match', ['get', 'layer'], ...PIN_LAYERS.flatMap(L => [L, tok('--p-' + L)]), tok('--marked')];
 export const basicColour = () => ['match', ['get', 't'], ...BASICS.flatMap(k => [k, tok('--b-' + k)]), tok('--muted')];
 export const landColour = () => ['match', ['get', 't'], ...LAND.flatMap(t => [t, tok('--l-' + t)]), tok('--muted')];
@@ -117,9 +113,7 @@ export function drawMap(){
 
       if (T) S.map.addSource('b', { type:'vector', tiles:[tileUrl], minzoom:T.minzoom, maxzoom:T.maxzoom });
       else S.map.addSource('b', { type:'geojson', data:{ type:'FeatureCollection', features: S.features } });
-      S.map.addLayer({ id:'b-flat', type:'fill', source:'b', ...(T ? { 'source-layer':'b' } : {}), maxzoom: RAISED_FROM,
-        paint:{ 'fill-color':buildingColour(true), 'fill-opacity':0.95 } });
-      S.map.addLayer({ id:'b', type:'fill-extrusion', source:'b', ...(T ? { 'source-layer':'b' } : {}), minzoom: RAISED_FROM, paint:{
+      S.map.addLayer({ id:'b', type:'fill-extrusion', source:'b', ...(T ? { 'source-layer':'b' } : {}), paint:{
         'fill-extrusion-color':buildingColour(),
         'fill-extrusion-height':['get', 'h'], 'fill-extrusion-base':['coalesce', ['get', 'base'], 0], 'fill-extrusion-opacity':0.95,
         'fill-extrusion-vertical-gradient':true } });
@@ -154,7 +148,7 @@ export function drawMap(){
         const land = S.map.getLayer('land-pt') && ['land-pt', 'land-open', 'land-gone', 'land-line', 'land-under']
           .map(id => near(id, 7)).find(Boolean);
         if (land) return showLand(land.properties);
-        const hit = S.map.queryRenderedFeatures(e.point, { layers:['b', 'b-flat'] })[0];
+        const hit = S.map.queryRenderedFeatures(e.point, { layers:['b'] })[0];
         if (hit) return selectBuilding(hit.id, [e.lngLat.lng, e.lngLat.lat]);
         const area = S.map.getLayer('nature-fill') && S.map.getLayoutProperty('nature-fill', 'visibility') === 'visible'
           && S.map.queryRenderedFeatures(e.point, { layers:['nature-fill'] })[0];
@@ -166,10 +160,8 @@ export function drawMap(){
       // start the credits folded behind their (i) button: on a phone they would cover the map
       document.querySelector('.maplibregl-ctrl-attrib')?.classList.remove('maplibregl-compact-show');
       S.map.on('rotate', turnNeedle); turnNeedle();
-      for (const id of ['b', 'b-flat']) {
-        S.map.on('mouseenter', id, () => S.map.getCanvas().style.cursor = 'pointer');
-        S.map.on('mouseleave', id, () => S.map.getCanvas().style.cursor = '');
-      }
+      S.map.on('mouseenter', 'b', () => S.map.getCanvas().style.cursor = 'pointer');
+      S.map.on('mouseleave', 'b', () => S.map.getCanvas().style.cursor = '');
       resolve();
     });
   });
