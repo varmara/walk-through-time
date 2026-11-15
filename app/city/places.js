@@ -38,7 +38,13 @@ function cardHtml(b, i, name, hint){
     <button class="textbtn" data-open="${b}">Details</button>`;
   const st = storyFor(b, hint?.name || name, hint?.layer), era = p.y != null ? eraOf(p.y) : null;
   // the story's date (what the set is ordered by); the building's own, when the story tells of none
-  const wt = whenText(st?.when, st?.made, hint?.when) || (st && toldIn(st.text));
+  let wt = whenText(st?.when, st?.made, hint?.when) || (st && toldIn(st.text));
+  // the building's own story dated otherwise than the building: both dates (Severn's Building: the article's
+  // c. 1450, the map's 1335; Nottingham Castle: the first castle, 1068, and the mansion standing, 1674–79)
+  const own = st?.nm && st.nm === refName(b) && !hint?.person;
+  const yr = w => +(/(\d{1,2})(?:st|nd|rd|th) century/.exec(w || '')?.[1] - 1) * 100 || +(/\d{3,4}/.exec(w || '') || [NaN])[0];
+  if (own && wt && p.y != null && !hint?.when && Math.abs(yr(st.when) - p.y) >= 10)
+    wt += ' · building ' + dateText(p.y, p.f, p.per, p.dt).replace(/^built (in |about )?/, '').replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase());
   return `<div class="pnum">${i + 1}</div>
     ${heading(b, hint?.person ? hint.name : st?.nm)}
     ${wt ? `<div class="pmeta pwhen">${esc(wt)}</div>`

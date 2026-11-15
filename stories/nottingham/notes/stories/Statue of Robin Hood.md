@@ -2,12 +2,15 @@
 type: story
 when: "c. 1200"
 made: "1952"
-source: https://en.wikipedia.org/wiki/Statue_of_Robin_Hood
-check: James Woodford | 1952 | Grade II
+source:
+  - https://en.wikipedia.org/wiki/Statue_of_Robin_Hood
+  - https://en.wikipedia.org/wiki/Robin_Hood
+check: outlaw | archer | Sherwood Forest | Sheriff of Nottingham | James Woodford | 1952 | Grade II
 at:
   - Statue of Robin Hood, 52.95044, -1.15339
-note: the pin at the statue's point in OpenStreetMap
+note: the pin at the statue's point in OpenStreetMap; neither article says who commissioned it or why it stands at the castle
 ---
 
-James Woodford's statue of the legendary outlaw at Nottingham Castle, unveiled in 1952 and listed Grade II in
-2018.
+Robin Hood is the legendary outlaw of English folklore, a skilled archer said to rob the rich to give to the poor.
+In the stories he lives in Sherwood Forest, and his enemy is the Sheriff of Nottingham. James Woodford's bronze of
+him at Nottingham Castle was unveiled in 1952 and listed Grade II in 2018.
