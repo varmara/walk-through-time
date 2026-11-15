@@ -2,7 +2,7 @@
 import { $, CITY_ID, ERAS, PIN_LAYERS, SECTIONS, esc, fmt, store } from './util.js';
 import { S } from './state.js';
 import { hasPins, isArea, kindOf, marksBuildings, parseRef, saveActive } from './data.js';
-import { addNls, buildingColour, setHills, setLand } from './map.js';
+import { addNls, paintBuildings, setHills, setLand } from './map.js';
 import { curYear, updateYear } from './timebar.js';
 import { openRef } from './cards.js';
 import { showGroups, showPlaces } from './places.js';
@@ -101,7 +101,7 @@ $('lClear').onclick = () => { S.active.clear(); saveActive(); renderLayers(); ap
 export function applyLayers(){
   updateSummary();
   if (!S.map || !S.map.getLayer('b')) return;
-  S.map.setPaintProperty('b', 'fill-extrusion-color', buildingColour());
+  paintBuildings();
   const pinGroups = [...S.active].filter(hasPins);
   S.map.setLayoutProperty('routes', 'visibility', S.active.has('routes') ? 'visible' : 'none');
   const basics = [...S.active].filter(k => kindOf(k) === 'points');

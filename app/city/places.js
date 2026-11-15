@@ -2,7 +2,7 @@
 import { $, dateText, eraOf, esc } from './util.js';
 import { S } from './state.js';
 import { fstate, isB, loadCard, parseRef, refCentre, refOf, storyFor, tiled } from './data.js';
-import { buildingColour } from './map.js';
+import { paintBuildings } from './map.js';
 import { closeSheet } from './sheet.js';
 import { openRef, refName } from './cards.js';
 
@@ -60,7 +60,7 @@ export function showPlaces(name, bs, hints){
   clearPlaces(false);
   S.places = { name, bs, hints, i: 0 };
   bs.filter(isB).forEach(b => fstate(b, { hl:true }));
-  S.map.setPaintProperty('b', 'fill-extrusion-color', buildingColour());
+  paintBuildings();
   S.map.getSource('places').setData({ type:'FeatureCollection', features: bs.map((b, i) =>
     ({ type:'Feature', properties:{ n: i + 1 }, geometry:{ type:'Point', coordinates: refCentre(b) } })) });
   $('pName').textContent = name;
@@ -138,7 +138,7 @@ export function clearPlaces(showTime){
   if (S.places) S.places.bs.filter(isB).forEach(b => fstate(b, { hl:false }));
   if (S.selectedId != null) { fstate(S.selectedId, { sel:false }); S.selectedId = null; }
   S.places = null;
-  if (S.map && S.map.getLayer('b')) S.map.setPaintProperty('b', 'fill-extrusion-color', buildingColour());
+  if (S.map) paintBuildings();
   if (S.map && S.map.getSource('places')) S.map.getSource('places').setData({ type:'FeatureCollection', features:[] });
   Object.keys(S.pins).forEach(k => { S.pins[k].remove(); delete S.pins[k]; });
   $('placesbar').hidden = true;

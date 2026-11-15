@@ -7,7 +7,8 @@
 //   other sites (fonts, base maps, photos): left to the browser
 // Map and ground tiles are kept apart from the rest (TILES, at most MAX_TILES, the oldest dropped first): a few
 // thousand of them in one store made looking up a card's file there slow on a phone.
-// When a page has loaded a newer build, it tells this worker (postMessage {build, v}), which drops older copies.
+// When a page has loaded a newer build, it tells this worker (postMessage {build, v, keep}: keep, every data
+// file's current version, pipeline/s10_tiles.py), which drops copies of any other.
 const KEEP = 'wtt-2', TILES = 'wtt-tiles-1', MAX_TILES = 3000;
 const isTile = url => /\/data\/[^/]+\/(tiles|ground)\//.test(url.pathname);
 let puts = 0;
@@ -59,8 +60,9 @@ async function fresh(req){
 // drop copies from older builds: data files with another ?v= than the build the page has loaded, and the page's
 // scripts and styles from an earlier version of their content (pipeline/pages.py)
 self.addEventListener('message', e => {
-  const { build, v } = e.data || {};
+  const { build, v, keep } = e.data || {};
   if (!build) return;
+  const current = new Set(keep || [String(build)]);        // the data files' versions now (or, older pages, the build)
   e.waitUntil((async () => {
     for (const name of [KEEP, TILES]) {
       const cache = await caches.open(name);
@@ -68,7 +70,7 @@ self.addEventListener('message', e => {
         const u = new URL(req.url), rv = u.searchParams.get('v');
         if (!rv) continue;
         const isData = u.pathname.includes('/data/');
-        if ((isData && rv !== String(build)) || (!isData && v && rv !== String(v))) await cache.delete(req);
+        if ((isData && !current.has(rv)) || (!isData && v && rv !== String(v))) await cache.delete(req);
       }
     }
   })());

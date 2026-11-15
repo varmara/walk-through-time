@@ -18,10 +18,15 @@ import { showGroups, showPlaces } from './places.js';
 
 export async function main(){
   progress(5, 'loading map data…');
+  // the index's second part (what the map draws without: names, people, places' names…), fetched at once,
+  // alongside the first; merged when it comes (pipeline/s10_tiles.py)
+  const moreUrl = `../data/${CITY_ID}-more.json`, moreFirst = fetchJSON(moreUrl).catch(() => null);
   S.city = await fetchJSON(`../cities/${CITY_ID}.json`);
   setPeriods(S.city.periods);
   drawLegend();
   S.data = await fetchData(`../data/${CITY_ID}.json`);
+  S.more = !S.data.versions?.more ? Promise.resolve() : moreFirst.then(m => m && m.build === S.data.build ? m
+    : fetchJSON(`${moreUrl}?v=${S.data.versions.more}`)).then(mergeMore);     // (from another build: this one's)
   keepOnPhone(S.data.build);
   if (graphWanted()) syncGraph();                // a link to the graph (#graph): opened now, the map drawn behind
   progress(70, 'reading buildings…');
@@ -62,9 +67,20 @@ export async function main(){
   if (S.data.built) $('dataNote').textContent = 'Data updated ' + new Date(S.data.built).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' }) + '.';
   applyLayers();
   updateYear();
+  await S.more.catch(() => {});        // a link may name a person, or need the buildings' names
   mapReady();
   await openLink(new URLSearchParams(location.search), true);
   later(prefetchGraph);
+}
+
+// the index's second part, into the first: the named buildings' details (into those already made), people, …
+function mergeMore(m){
+  Object.assign(S.data.index.props, m.props);
+  for (const k of ['people', 'placeNames', 'land', 'near']) if (k in m) S.data[k] = m[k];
+  (S.madeFeatures || []).forEach((f, i) => { if (f && m.props[i]) f.properties = { ...m.props[i], ...f.properties }; });
+  S.inLayers = null;
+  if (S.layers) renderLayers();
+  if (S.map) applyLayers();
 }
 
 // What a link asks the map to show: on opening the page, and from the graph (its "Show on the map" opens the same
@@ -180,7 +196,7 @@ function prefetchGraph(){
   for (const m of ['graphlayout', 'graph']) {
     const l = document.createElement('link'); l.rel = 'modulepreload'; l.href = `../app/city/${m}.js?v=${v}`; document.head.appendChild(l);
   }
-  for (const u of [`../lib/d3.min.js?v=${v}`, `../app/graph.css?v=${v}`, `../data/${CITY_ID}-graph.json?v=${S.data.build}`]) fetch(u).catch(() => {});
+  for (const u of [`../lib/d3.min.js?v=${v}`, `../app/graph.css?v=${v}`, `../data/${CITY_ID}-graph.json?v=${S.data.versions?.graph || S.data.build}`]) fetch(u).catch(() => {});
 }
 
 // ================= Layout =================
@@ -198,5 +214,7 @@ main().catch(e => {
 function keepOnPhone(build){
   if (!('serviceWorker' in navigator) || !build) return;
   navigator.serviceWorker.register('../sw.js').catch(() => {});
-  navigator.serviceWorker.ready.then(reg => reg.active && reg.active.postMessage({ build, v: window.__v })).catch(() => {});
+  // the data files' current versions: the worker drops kept copies of any other
+  const vs = S.data.versions, keep = vs && [build, vs.tiles, vs.ground, vs.graph, vs.more, ...vs.cards, ...vs.osm].filter(Boolean);
+  navigator.serviceWorker.ready.then(reg => reg.active && reg.active.postMessage({ build, v: window.__v, keep })).catch(() => {});
 }

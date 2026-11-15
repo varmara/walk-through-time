@@ -18,6 +18,12 @@ def load(city):
     if not (d / f"{city}.json").exists() or not (d / city / "cards").is_dir():
         return None
     index = json.loads((d / f"{city}.json").read_text())
+    more = d / f"{city}-more.json"           # what the map draws without, fetched alongside (pipeline/s10_tiles.py)
+    if more.exists():
+        m = json.loads(more.read_text())
+        assert m["build"] == index["build"], "the index and its second part come from different builds"
+        index["index"]["props"] = m.pop("props")
+        index.update({k: v for k, v in m.items() if k != "build"})
     cards = {}
     for f in (d / city / "cards").glob("*.json"):
         for k, v in json.loads(f.read_text()).items():

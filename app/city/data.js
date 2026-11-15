@@ -10,7 +10,7 @@ export const FLAGS = { e:'exact', a:'approx', c:'century', r:'area' };
 export function fromIndex(ix){
   if (!ix.dxy) {             // the index has only the few named, listed or layered buildings; the rest is in the card files
     // made when first asked for: a few hundred thousand empty buildings would cost a phone 60 MB at start
-    const made = new Array(ix.n);
+    const made = S.madeFeatures = new Array(ix.n);
     return new Proxy(made, { get(t, k){
       if (typeof k === 'string' && k.charCodeAt(0) >= 48 && k.charCodeAt(0) <= 57) {
         const i = +k;
@@ -37,11 +37,14 @@ export function standingBy(Y){
   return n;
 }
 export const tiled = () => !!S.data.index;
+// a data file's version, from its content (pipeline/s10_tiles.py: versions): kept on the phone until it changes;
+// an older index has only the build's
+export const ver = (kind, n) => { const v = S.data.versions?.[kind]; return (Array.isArray(v) ? v[n] : v) || S.data.build; };
 export const fstate = (id, st) => S.map.setFeatureState(tiled() ? { source:'b', sourceLayer:'b', id } : { source:'b', id }, st);
 export function loadCard(id){       // the card's details, merged into the building's properties
   if (!tiled() || S.features[id].full) return Promise.resolve();
   const n = Math.floor(id / S.data.tiles.chunk);
-  S.cardFiles[n] = S.cardFiles[n] || fetchJSON(`../data/${CITY_ID}/cards/${n}.json?v=${S.data.build}`).catch(e => { delete S.cardFiles[n]; throw e; });
+  S.cardFiles[n] = S.cardFiles[n] || fetchJSON(`../data/${CITY_ID}/cards/${n}.json?v=${ver('cards', n)}`).catch(e => { delete S.cardFiles[n]; throw e; });
   return S.cardFiles[n].then(chunk => {
     for (const [i, extra] of Object.entries(chunk)) if (!S.features[i].full) { Object.assign(S.features[i].properties, extra); S.features[i].full = true; }
     S.features[id].full = true;
@@ -51,7 +54,8 @@ export async function byOsm(osm){
   if (!tiled()) return S.features.findIndex(f => f.properties.osm === osm);
   const parts = S.data.tiles.osmParts;
   if (parts) {                       // one small file by the id's number (pipeline/s10_tiles.py)
-    const part = await fetchJSON(`../data/${CITY_ID}/osm/${+osm.split('/')[1] % parts}.json?v=${S.data.build}`).catch(() => ({}));
+    const n = +osm.split('/')[1] % parts;
+    const part = await fetchJSON(`../data/${CITY_ID}/osm/${n}.json?v=${ver('osm', n)}`).catch(() => ({}));
     return part[osm] ?? -1;
   }
   S.osmIds = S.osmIds || await fetchJSON(`../data/${CITY_ID}/osm.json?v=${S.data.build}`);   // older builds: every id

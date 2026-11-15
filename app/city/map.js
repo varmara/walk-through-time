@@ -1,7 +1,7 @@
 // Walk Through Time, city page: The map: MapLibre layers for buildings (coloured by era), roads, water, parks, areas and pins.
 import { AREA_TYPES, BASICS, CITY_ID, ERAS, FADE, LAND, PIN_LAYERS, mix, store, tok } from './util.js';
 import { S } from './state.js';
-import { marksBuildings } from './data.js';
+import { marksBuildings, ver } from './data.js';
 import { turnNeedle } from './sheet.js';
 import { selectBuilding, showArea, showBasic, showLand, showPin, showRoute } from './cards.js';
 import { drawPins } from './places.js';
@@ -13,24 +13,54 @@ export function isDark(){
 
 // ================= Map =================
 // era colour by year, faded towards the background by how precise the date is (as colourFor)
-export function eraColour(){
+export function eraColour(flat){
   const step = t => ['step', ['get', 'y'], mix(ERAS[0][3], tok('--bg'), t), ...ERAS.slice(1).flatMap(e => [e[0], mix(e[3], tok('--bg'), t)])];
-  return ['case', ['!', ['has', 'y']], tok('--unknown'),
+  // drawn flat, an undated building has no sides to show it against the ground: a shade darker
+  return ['case', ['!', ['has', 'y']], flat ? mix(tok('--unknown'), tok('--ink'), 0.12) : tok('--unknown'),
     ['match', ['coalesce', ['get', 'f'], 'exact'], ...['approx', 'century', 'area'].flatMap(f => [f, step(FADE[f])]), step(0)]];
 }
-export function buildingColour(){
+export function buildingColour(flat){
   const base = ['case', ['boolean', ['feature-state', 'sel'], false], tok('--sel'),
-    ['boolean', ['feature-state', 'hl'], false], tok('--hl'), eraColour()];
+    ['boolean', ['feature-state', 'hl'], false], tok('--hl'), eraColour(flat)];
   if (S.places) return ['case', ['boolean', ['feature-state', 'sel'], false], tok('--sel'),
     ['boolean', ['feature-state', 'hl'], false], tok('--hl'), tok('--ghost')];   // only this person's places stand out
   const keys = [...S.active].filter(marksBuildings);
   if (!keys.length) return base;
-  const inLayer = ['any', ...keys.map(k => ['in', ',' + k + ',', ['coalesce', ['get', 'L'], '']])];
+  // in a ticked layer: marked by markLayers (the layers a building is in are in the index, not in the tiles, so a
+  // story edited does not change the city's tiles)
+  const inLayer = ['boolean', ['feature-state', 'on'], false];
   // in a ticked layer: era colour when dated, a strong neutral when not (plain grey would vanish into the faded rest)
   return ['case', ['boolean', ['feature-state', 'sel'], false], tok('--sel'),
     ['boolean', ['feature-state', 'hl'], false], tok('--hl'),
-    inLayer, ['case', ['has', 'y'], eraColour(), tok('--marked')], tok('--ghost')];
+    inLayer, ['case', ['has', 'y'], eraColour(flat), tok('--marked')], tok('--ghost')];
 }
+// the buildings in the ticked layers: feature-state "on" (kept by the map for tiles that load later)
+let marked = new Set();
+function markLayers(){
+  const keys = [...S.active].filter(marksBuildings), now = new Set();
+  if (keys.length) {
+    // (from the index itself: S.features makes a building only when asked for one)
+    S.inLayers = S.inLayers || (S.data.index ? Object.entries(S.data.index.props).flatMap(([i, p]) => p.L ? [[+i, p.L]] : [])
+      : S.features.flatMap((f, i) => f.properties.L ? [[i, f.properties.L]] : []));
+    for (const [i, L] of S.inLayers) if (keys.some(k => L.includes(',' + k + ','))) now.add(i);
+  }
+  const src = S.data.index ? { source:'b', sourceLayer:'b' } : { source:'b' };
+  for (const i of marked) if (!now.has(i)) S.map.setFeatureState({ ...src, id: i }, { on:false });
+  for (const i of now) if (!marked.has(i)) S.map.setFeatureState({ ...src, id: i }, { on:true });
+  marked = now;
+}
+// the buildings' colours, on both their layers: flat when zoomed out, raised close up
+export function paintBuildings(){
+  if (!S.map || !S.map.getLayer('b')) return;
+  markLayers();
+  S.map.setPaintProperty('b', 'fill-extrusion-color', buildingColour());
+  if (S.map.getLayer('b-flat')) S.map.setPaintProperty('b-flat', 'fill-color', buildingColour(true));
+}
+export function filterBuildings(f){
+  for (const id of ['b', 'b-flat']) if (S.map.getLayer(id)) S.map.setFilter(id, f);
+}
+// raised (3D) from this zoom; below it, drawn flat: the whole city in 3D is a phone's heaviest work
+export const RAISED_FROM = 14.5;
 export const pinColour = () => ['match', ['get', 'layer'], ...PIN_LAYERS.flatMap(L => [L, tok('--p-' + L)]), tok('--marked')];
 export const basicColour = () => ['match', ['get', 't'], ...BASICS.flatMap(k => [k, tok('--b-' + k)]), tok('--muted')];
 export const landColour = () => ['match', ['get', 't'], ...LAND.flatMap(t => [t, tok('--l-' + t)]), tok('--muted')];
@@ -57,7 +87,7 @@ export function drawMap(){
       S.map.addLayer({ id:'osm', type:'raster', source:'osm', layout:{ visibility:'none' }, paint:{ 'raster-opacity':0.75, 'raster-saturation':-0.6 } });
       const key = store.get('mtKey'); if (key) addNls(key);
       // the city's tiles (outlines of buildings, roads, water, parks), or the old single file's GeoJSON
-      const T = S.data.tiles, tileUrl = T && new URL(`../data/${CITY_ID}/tiles/{z}/{x}/{y}.pbf?v=${S.data.build}`, location.href).href
+      const T = S.data.tiles, tileUrl = T && new URL(`../data/${CITY_ID}/tiles/{z}/{x}/{y}.pbf?v=${ver('tiles')}`, location.href).href
         .replace(/^https?:/, window.DecompressionStream ? 'gzt:' : location.protocol).replace('%7Bz%7D', '{z}').replace('%7Bx%7D', '{x}').replace('%7By%7D', '{y}');
       const src = (name, extra = {}) => T ? { source:'city', 'source-layer':name, ...extra } : { source:name, ...extra };
       if (T) S.map.addSource('city', { type:'vector', tiles:[tileUrl], minzoom:T.minzoom, maxzoom:T.maxzoom });
@@ -87,7 +117,9 @@ export function drawMap(){
 
       if (T) S.map.addSource('b', { type:'vector', tiles:[tileUrl], minzoom:T.minzoom, maxzoom:T.maxzoom });
       else S.map.addSource('b', { type:'geojson', data:{ type:'FeatureCollection', features: S.features } });
-      S.map.addLayer({ id:'b', type:'fill-extrusion', source:'b', ...(T ? { 'source-layer':'b' } : {}), paint:{
+      S.map.addLayer({ id:'b-flat', type:'fill', source:'b', ...(T ? { 'source-layer':'b' } : {}), maxzoom: RAISED_FROM,
+        paint:{ 'fill-color':buildingColour(true), 'fill-opacity':0.95 } });
+      S.map.addLayer({ id:'b', type:'fill-extrusion', source:'b', ...(T ? { 'source-layer':'b' } : {}), minzoom: RAISED_FROM, paint:{
         'fill-extrusion-color':buildingColour(),
         'fill-extrusion-height':['get', 'h'], 'fill-extrusion-base':['coalesce', ['get', 'base'], 0], 'fill-extrusion-opacity':0.95,
         'fill-extrusion-vertical-gradient':true } });
@@ -122,7 +154,7 @@ export function drawMap(){
         const land = S.map.getLayer('land-pt') && ['land-pt', 'land-open', 'land-gone', 'land-line', 'land-under']
           .map(id => near(id, 7)).find(Boolean);
         if (land) return showLand(land.properties);
-        const hit = S.map.queryRenderedFeatures(e.point, { layers:['b'] })[0];
+        const hit = S.map.queryRenderedFeatures(e.point, { layers:['b', 'b-flat'] })[0];
         if (hit) return selectBuilding(hit.id, [e.lngLat.lng, e.lngLat.lat]);
         const area = S.map.getLayer('nature-fill') && S.map.getLayoutProperty('nature-fill', 'visibility') === 'visible'
           && S.map.queryRenderedFeatures(e.point, { layers:['nature-fill'] })[0];
@@ -134,8 +166,10 @@ export function drawMap(){
       // start the credits folded behind their (i) button: on a phone they would cover the map
       document.querySelector('.maplibregl-ctrl-attrib')?.classList.remove('maplibregl-compact-show');
       S.map.on('rotate', turnNeedle); turnNeedle();
-      S.map.on('mouseenter', 'b', () => S.map.getCanvas().style.cursor = 'pointer');
-      S.map.on('mouseleave', 'b', () => S.map.getCanvas().style.cursor = '');
+      for (const id of ['b', 'b-flat']) {
+        S.map.on('mouseenter', id, () => S.map.getCanvas().style.cursor = 'pointer');
+        S.map.on('mouseleave', id, () => S.map.getCanvas().style.cursor = '');
+      }
       resolve();
     });
   });
@@ -199,7 +233,7 @@ export function setLand(types, Y){
 function addGround(){
   const G = S.data.ground;
   if (!G) return;
-  const url = new URL(`../data/${CITY_ID}/ground/{z}/{x}/{y}.png?v=${S.data.build}`, location.href).href
+  const url = new URL(`../data/${CITY_ID}/ground/{z}/{x}/{y}.png?v=${ver('ground')}`, location.href).href
     .replace('%7Bz%7D', '{z}').replace('%7Bx%7D', '{x}').replace('%7By%7D', '{y}');
   const dem = { type:'raster-dem', tiles:[url], tileSize:G.tileSize || 256, encoding:G.encoding || 'terrarium',
     minzoom:G.minzoom, maxzoom:G.maxzoom, bounds:G.bounds };

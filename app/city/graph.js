@@ -118,7 +118,7 @@ async function build(){
   try { init(await data); } catch { failed(); }
 }
 // the graph's data, from the same build as the map's (main.js prefetches the same address)
-export const graphUrl = () => `../data/${CITY_ID}-graph.json?v=${S.data?.build || V()}`;
+export const graphUrl = () => `../data/${CITY_ID}-graph.json?v=${S.data?.versions?.graph || S.data?.build || V()}`;
 const graphData = () => fetch(graphUrl()).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
 function failed(){ $('loading').textContent = 'The graph could not be loaded. Check your connection and open it again.'; building = null; }
 
