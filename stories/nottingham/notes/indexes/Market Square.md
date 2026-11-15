@@ -1,6 +1,7 @@
 ---
 type: index
 id: market
+area: The city
 order: 2
 ---
 

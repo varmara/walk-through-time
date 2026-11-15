@@ -1,7 +1,8 @@
 ---
 type: index
 id: meadows
-order: 8
+area: The city
+order: 6
 ---
 
 The low ground between the city and the Trent, with two football grounds facing each other across the river, and a flood.

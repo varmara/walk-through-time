@@ -1,6 +1,7 @@
 ---
 type: index
 id: north
+area: The city
 order: 4
 ---
 

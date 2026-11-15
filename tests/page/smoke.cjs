@@ -41,7 +41,12 @@ const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (
   await page.click('#bLayers');
   const boxes = await page.$$('input[data-g]');
   check(boxes.length > 10, `the Layers sheet lists the layers (${boxes.length})`);
-  if (boxes.length) { await boxes[0].check(); await page.waitForTimeout(300); }
+  // the places fold under headings (The city, South of the Trent…): a heading opens to show its places
+  const fold = await page.$('details.area > summary');
+  check(!!fold && !(await page.$eval('details.area', d => d.open)), 'the places fold under headings');
+  if (fold) { await fold.click(); await page.waitForTimeout(200); }
+  const first = await page.$('details.area[open] input[data-g]') || boxes[0];
+  if (first) { await first.check(); await page.waitForTimeout(300); }
   check(/^1 on/.test(await text('#lSummary')), 'ticking a layer turns it on');
   const many = await page.$('.item .cnt');
   if (many) {

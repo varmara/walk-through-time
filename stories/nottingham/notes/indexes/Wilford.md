@@ -1,7 +1,8 @@
 ---
 type: index
 id: wilford
-order: 6
+area: South of the Trent
+order: 10
 ---
 
 A village on the south bank of the Trent, reached for centuries by ferry and, since the 1870s, by bridge.

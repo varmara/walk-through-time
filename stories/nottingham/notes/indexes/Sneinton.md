@@ -1,6 +1,7 @@
 ---
 type: index
 id: sneinton
+area: The city
 order: 5
 ---
 

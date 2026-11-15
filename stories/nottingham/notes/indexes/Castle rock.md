@@ -1,6 +1,7 @@
 ---
 type: index
 id: castle
+area: The city
 order: 1
 ---
 

@@ -1,6 +1,7 @@
 ---
 type: index
 id: lacemarket
+area: The city
 order: 3
 ---
 

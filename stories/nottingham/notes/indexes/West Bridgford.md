@@ -1,7 +1,8 @@
 ---
 type: index
 id: bridgford
-order: 7
+area: South of the Trent
+order: 11
 ---
 
 South of the river: Test cricket, Nottingham Forest and the county's headquarters.

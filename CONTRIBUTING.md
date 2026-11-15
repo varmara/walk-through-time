@@ -30,6 +30,7 @@ Two or three plain sentences on the history behind the layer.
 |---|---|
 | `id` | the layer's id, which links use (`?layer=barton`); else made from the file's name |
 | `section` | `Places` (the default: a small area of the map, where each of its stories lives) or `Threads` (a story told across the map, below) |
+| `area` | for a place: the small heading it folds under in the Layers sheet (`The city`, `South of the Trent`, `West`, `North and east`) |
 | `order` | its place in its section of the Layers sheet; else after those with one, by name |
 | `kind` | `people` for the People layer and `facts` for "Did you know", whose members are not listed |
 

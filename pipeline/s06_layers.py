@@ -82,6 +82,7 @@ def main(city_id):
                 e["_story"] = out.stories[str(e["b"])][-1]
         groups = L.get("groups") or [[L["id"], L["title"]]]
         meta.append({"id": L["id"], "title": L["title"], "intro": L.get("intro", ""), "section": "Places",
+                     **({"area": L["area"]} if L.get("area") else {}),
                      "kind": "stories",
                      "groups": [{"key": k, "title": t, "count": len({e["b"] for e in es if e["group"] == k}),
                                  "items": grouped([[e["b"], e["name"]] for e in es if e["group"] == k])}

@@ -14,7 +14,17 @@ export function renderLayers(){
     const Ls = S.layers.filter(L => L.section === sec && L.groups.some(g => g.count > 0));
     if (!Ls.length) continue;
     html.push(`<div class="section"><div class="seclbl">${esc(sec)}</div>`);
+    // places fold under small headings (The city, South of the Trent…), each open while one of its layers is on
+    let area = null;
     for (const L of Ls) {
+      if ((L.area || null) !== area) {
+        if (area) html.push('</details>');
+        area = L.area || null;
+        if (area) {
+          const on = Ls.some(x => x.area === area && x.groups.some(g => S.active.has(g.key)));
+          html.push(`<details class="area"${on ? ' open' : ''}><summary>${esc(area)}<span class="n">${Ls.filter(x => x.area === area).length}</span></summary>`);
+        }
+      }
       const gs = L.groups.filter(g => g.count > 0);
       const single = gs.length === 1;
       if (!single) html.push(`<div class="lrow" style="cursor:default;border-bottom:0;padding-bottom:2px"><b>${esc(L.title)}</b>
@@ -33,6 +43,7 @@ export function renderLayers(){
           <div class="linfo" id="info-g-${esc(g.key)}" hidden>${infoHtml(L, single || g.items ? g : null, single)}</div>`);
       }
     }
+    if (area) html.push('</details>');
     html.push('</div>');
   }
   $('lSections').innerHTML = html.join('');
