@@ -104,7 +104,7 @@ const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const smooth = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 export function glide(camera){
   if (reduced()) return S.map.easeTo({ ...camera, duration: 300 });
-  S.map.flyTo({ ...camera, speed: 0.4, curve: 1.9, easing: smooth, maxDuration: 7500, essential: true });
+  S.map.flyTo({ ...camera, speed: 0.44, curve: 1.9, easing: smooth, maxDuration: 6800, essential: true });
 }
 // how close a card takes the map to its place: near enough to pick out the building, with its street round it
 const PLACE_ZOOM = 16;
