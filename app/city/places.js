@@ -69,9 +69,14 @@ export function showPlaces(name, bs, hints){
   $('placesbar').hidden = false; $('timebar').hidden = true;
   $('pCards').scrollLeft = 0;
   setPlace(0, false);
-  const pts = bs.map(refCentre), lons = pts.map(p => p[0]), lats = pts.map(p => p[1]);
-  S.map.fitBounds([[Math.min(...lons), Math.min(...lats)], [Math.max(...lons), Math.max(...lats)]],
-    { padding: { top: 90, left: 40, right: 70, bottom: $('placesbar').offsetHeight + 40 }, maxZoom: 16.5, duration: 900 });
+  // all the places in view first; a card tapped (or swiped to) then goes to its place. Measured once the strip
+  // has its cards: its height is the bottom of the view
+  requestAnimationFrame(() => {
+    if (S.places?.bs !== bs) return;
+    const pts = bs.map(refCentre), lons = pts.map(p => p[0]), lats = pts.map(p => p[1]);
+    S.map.fitBounds([[Math.min(...lons), Math.min(...lats)], [Math.max(...lons), Math.max(...lats)]],
+      { padding: { top: 70, left: 16, right: 60, bottom: $('placesbar').offsetHeight + 24 }, maxZoom: 16, duration: 900 });
+  });
 }
 // a layer's groups (or a whole story layer or topic, by its id) as one set of numbered cards, in the build's date
 // order, item by item, each place once. Returns false when there is nothing to show
@@ -90,6 +95,8 @@ export function showGroups(keys, title){
   showPlaces(title, refs, hints);
   return true;
 }
+// how close a card takes the map to its place: near enough to pick out the building, with its street round it
+const PLACE_ZOOM = 16;
 export function setPlace(i, fly = true){
   if (!S.places) return;
   S.places.i = i;
@@ -100,7 +107,7 @@ export function setPlace(i, fly = true){
   Object.entries(S.pins).forEach(([k, m]) => m.getElement().classList.toggle('on', k === 'p' + (i + 1)));
   $('pCards').querySelectorAll('.pcard').forEach(c => c.classList.toggle('on', +c.dataset.i === i));
   loadAround(i);
-  if (fly) S.map.easeTo({ center: refCentre(S.places.bs[i]), zoom: Math.max(S.map.getZoom(), 16.5), duration: 700,
+  if (fly) S.map.easeTo({ center: refCentre(S.places.bs[i]), zoom: Math.max(S.map.getZoom(), PLACE_ZOOM), duration: 700,
     padding: { bottom: $('placesbar').offsetHeight + 20 } });
 }
 export function goToCard(i){
@@ -116,6 +123,13 @@ $('pCards').addEventListener('scroll', () => {
     cards.forEach((c, i) => { if (Math.abs(c.offsetLeft - 12 - x) < Math.abs(cards[best].offsetLeft - 12 - x)) best = i; });
     if (S.places && best !== S.places.i) setPlace(best);
   }, 120);
+});
+// a tap on a card (not on its Details button): the map goes to its place, the first card's too
+$('pCards').addEventListener('click', e => {
+  const card = e.target.closest('.pcard');
+  if (!card || e.target.closest('button, a') || !S.places) return;
+  if (+card.dataset.i !== S.places.i) goToCard(+card.dataset.i);     // the swipe's end moves the map
+  else setPlace(+card.dataset.i);
 });
 $('pPrev').onclick = () => S.places && goToCard(Math.max(0, S.places.i - 1));
 $('pNext').onclick = () => S.places && goToCard(Math.min(S.places.bs.length - 1, S.places.i + 1));

@@ -170,7 +170,7 @@ a.fab{display:grid;place-items:center;text-decoration:none;color:inherit}
   background:var(--ink);color:var(--paper);padding:8px 14px;border-radius:999px;font-size:14px;box-shadow:var(--shadow-toast)}
 .pcards{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 12px 6px;scrollbar-width:none;overscroll-behavior-x:contain}
 .pcards::-webkit-scrollbar{display:none}
-.pcard{flex:0 0 82%;max-width:360px;scroll-snap-align:start;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:10px 12px;
+.pcard{cursor:pointer;flex:0 0 82%;max-width:360px;scroll-snap-align:start;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:10px 12px;
   box-shadow:var(--shadow-1);display:grid;gap:4px;position:relative;max-height:34vh;overflow-y:auto;box-sizing:border-box}
 .pcard.on{border-color:var(--ink)}
 .pcard h3{margin:0 0 0 30px;font:600 18px/1.2 var(--serif);text-wrap:balance}
