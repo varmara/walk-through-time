@@ -78,6 +78,13 @@ export function drawMap(){
       '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors · Historic England (OGL) · Natural England (OGL) · Wikidata (CC0) · Wikipedia (CC BY-SA)'
       + (S.data.ground ? ' · Ground: ' + S.data.ground.credit + ' (OGL)' : '') }), 'bottom-right');
 
+    // a tile that could not be fetched (no connection, or the page left while it loaded) is fetched again when
+    // it is next in view: not an error of the page's. Anything else is reported as the map would
+    S.map.on('error', e => {
+      const err = e && e.error, tile = e && (e.tile || e.sourceId);
+      if (tile && err && /Failed to fetch|NetworkError|AbortError|Load failed/i.test(String(err.message || err.name || err))) return;
+      console.error(err || e);
+    });
     S.map.on('load', () => {
       S.map.addSource('osm', { type:'raster', tiles:['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize:256, maxzoom:19 });
       S.map.addLayer({ id:'osm', type:'raster', source:'osm', layout:{ visibility:'none' }, paint:{ 'raster-opacity':0.75, 'raster-saturation':-0.6 } });
