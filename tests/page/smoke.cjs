@@ -9,7 +9,8 @@ const CITY = process.argv[3] || 'nottingham';
 const KNOWN = { nottingham: { osm: 'way/120036353', title: 'The Bell Inn', plaque: 'way/122280349' } };   // Newdigate House: an Open Plaques plaque (the council's are off)
 const known = KNOWN[CITY];
 const failures = [];
-const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (!ok) failures.push(what); };
+let step = 'opening';      // (an error is reported with the check before it, to say where it came from)
+const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (!ok) failures.push(what); step = what; };
 
 (async () => {
   const browser = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist'] });
@@ -19,7 +20,7 @@ const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (
   // seconds later: those are expected, so for a while after the connection is back they are not counted
   let backOnline = 0;
   const lateOffline = msg => /Failed to fetch/.test(msg) && Date.now() - backOnline < 20000;
-  page.on('pageerror', e => lateOffline(e.message) || errors.push(e.message));
+  page.on('pageerror', e => lateOffline(e.message) || errors.push(`${e.message} (after "${step}"${e.stack ? ': ' + e.stack.split('\n').slice(1, 3).map(s => s.trim()).join(' ') : ''})`));
   // the page's own failures, not other sites' (fonts, the OpenStreetMap base map)
   page.on('console', m => m.type() === 'error' && !/Failed to load resource|net::ERR_/.test(m.text()) && !lateOffline(m.text()) && errors.push(m.text()));
   // (a request cut off because the test moved on is not a failure)
