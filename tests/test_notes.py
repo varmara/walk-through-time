@@ -119,11 +119,11 @@ class Read(unittest.TestCase):
         self.assertNotIn("at", p)
 
     def test_index_groups(self):
-        idx = ("---\ntype: index\nid: civic\norder: 1\ngroups:\n  - civic-old = Old\n---\nThe council.\n\n## Old\n- [[The castle burned]]\n"
+        idx = ("---\ntype: index\nid: civic\norder: 1\n---\nThe council.\n\n## Old\n- [[The castle burned]]\n"
                "\n## New\n- [[B]]\n")
         b = EVENT.replace("check: 8 October 1831 | Duke of Newcastle\n", "")
         _, (civic, people, facts) = load({"indexes/Civic.md": idx, "events/The castle burned.md": EVENT, "stories/B.md": b})
-        self.assertEqual(civic["groups"], [["civic-old", "Old"], ["civic-new", "New"]])
+        self.assertEqual(civic["groups"], [["civic-old", "Old"], ["civic-new", "New"]])     # id-heading
         self.assertEqual({(e["name"], e["group"]) for e in civic["entries"]}, {("The castle burned", "civic-old"), ("B", "civic-new")})
 
     def test_a_story_in_no_index_or_two(self):

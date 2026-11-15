@@ -2,9 +2,6 @@
 type: index
 id: industrial
 order: 17
-groups:
-  - industrial-textiles = Textiles and the machines
-  - industrial-transport = Coal, canals and railways
 ---
 
 How Nottingham and its coalfield helped make the industrial age: an early railway of wood, the first mill of the

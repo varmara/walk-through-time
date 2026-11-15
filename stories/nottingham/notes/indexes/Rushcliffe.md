@@ -2,13 +2,6 @@
 type: index
 id: rushcliffe
 order: 15
-groups:
-  - ruddington = Ruddington
-  - holme-pierrepont = Holme Pierrepont
-  - civil-war = The Civil War
-  - gotham = Gotham
-  - tollerton = Tollerton
-  - rushcliffe-coal = Coal and power
 ---
 
 The borough south of the Trent: villages of stocking knitters, a Tudor hall and the gravel pits that became a centre

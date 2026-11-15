@@ -199,17 +199,13 @@ def index_layer(name, props, body):
         - [Wollaton Hall](https://www.openstreetmap.org/way/4438894)      a building (a topic)
 
     Properties: id (else from the file's name), section (Stories, the default, or Topics), order (its place in
-    the section), kind (people or facts, for those layers, whose members are not listed), groups (key = Title, to
-    keep a group's key, which links and remembered tickboxes use; else id-title)."""
+    the section), kind (people or facts, for those layers, whose members are not listed). A group's key, which
+    links and remembered tickboxes use, is the id and its heading: wilford-the-village."""
     L = {"id": str(props.get("id") or slug(name)), "title": str(props.get("title") or name), "note": name,
          "section": str(props.get("section") or "Stories"), "order": props.get("order"),
          **({"kind": str(props["kind"])} if props.get("kind") else {}), "entries": [], "members": []}
     if L["section"] not in SECTIONS:
         raise NoteError(f"{name}: section: must be one of {', '.join(SECTIONS)}")
-    keys = {}
-    for g in listed(props.get("groups")):
-        k, _, t = g.partition("=")
-        keys[t.strip()] = k.strip()
     intro, group, groups = [], None, []
     for n, raw in enumerate(body.splitlines(), 1):
         line = raw.strip()
@@ -217,7 +213,7 @@ def index_layer(name, props, body):
             continue
         if line.startswith("## "):
             group = line[3:].strip()
-            groups.append([keys.get(group) or f"{L['id']}-{slug(group)}", group])
+            groups.append([f"{L['id']}-{slug(group)}", group])
         elif line.startswith("- "):
             item = line[2:].strip()
             if m := WIKILINK.fullmatch(item):
@@ -235,9 +231,6 @@ def index_layer(name, props, body):
             intro.append(line)
         else:
             raise NoteError(f"{name}: '{line[:60]}': below the introduction, only ## groups and - members")
-    unknown = set(keys) - {t for _, t in groups}
-    if unknown:
-        raise NoteError(f"{name}: groups: names no ## heading: {', '.join(sorted(unknown))}")
     L["intro"] = " ".join(intro)
     if groups:
         L["groups"] = groups

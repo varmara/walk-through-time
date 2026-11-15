@@ -7,16 +7,14 @@ There are two kinds.
 
 Everything written by hand is a note: one Markdown file in `stories/<city>/notes/`, as in an Obsidian vault,
 which the folder can be opened as. A layer is an **index** note (`notes/indexes/`): its introduction, then its
-stories listed as links, under a `##` heading for each group (each a tickbox of its own):
+stories listed as links, under a `##` heading for each group (each a tickbox of its own, its key the layer's id
+and the heading: `barton-thrumpton`):
 
 ```markdown
 ---
 type: index
 id: barton
 order: 14
-groups:
-  - barton-fabis = Barton in Fabis
-  - thrumpton = Thrumpton
 ---
 Two or three plain sentences on the history behind the layer.
 
@@ -33,7 +31,6 @@ Two or three plain sentences on the history behind the layer.
 | `id` | the layer's id, which links use (`?layer=barton`); else made from the file's name |
 | `section` | `Stories` (the default: a layer of places) or `Topics` (a subject gathered from any layer, below) |
 | `order` | its place in its section of the Layers sheet; else after those with one, by name |
-| `groups` | a group's key, `key = Heading`, only to keep one that links and remembered tickboxes use; a heading not listed gets `id-heading` |
 | `kind` | `people` for the People layer and `facts` for "Did you know", whose members are not listed |
 
 Each story is a note of its own in `notes/stories/` (events in `notes/events/`), listed in exactly one Stories

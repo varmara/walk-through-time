@@ -36,10 +36,6 @@ class Parse(unittest.TestCase):
                           ("story", "The castle burned", "Riots"), ("plaque", "Plaque to Albert Ball", "Riots"),
                           ("building", "way/7", "Riots")])
 
-    def test_kept_keys(self):
-        T = parsed(TOPIC, {"section": "Topics", "id": "war", "groups": ["war-cw = The Civil War"]})
-        self.assertEqual(T["keys"], {"The Civil War": "war-cw", "Riots": "war-riots"})
-
     def test_bad_lines(self):
         for body, want in [("## A\n- place: Shelford\n", "is not a member"),
                            ("## A\n- [x](https://example.org)\n", "OpenStreetMap"),
