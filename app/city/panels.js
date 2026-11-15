@@ -81,7 +81,8 @@ function storyCount(gs){
   return new Set(gs.flatMap(g => (g.items || []).flatMap(it => (typeof it[0] === 'number' ? [it[0]] : it[1]).map(r => r + '|' + it[0])))).size;
 }
 export function renderStories(){
-  const html = [], row = (key, title, n, L, g, indent) => `<div class="srow${indent ? ' sub' : ''}">
+  const html = [], row = (key, title, n, L, g, indent, parts) => `<div class="srow${indent ? ' sub' : ''}">
+      ${parts ? `<button class="fold" data-fold="${esc(key)}" aria-expanded="false" aria-controls="parts-${esc(key)}" aria-label="Show the parts of ${esc(title)}"></button>` : indent ? '' : '<span class="nofold"></span>'}
       <button class="sopen" data-set="${esc(key)}" data-title="${esc(title)}"><span>${esc(title)}</span><span class="n">${fmt(n)}</span></button>
       <button class="more" data-sinfo="${esc(key)}" aria-label="About ${esc(title)}" aria-expanded="false">ⓘ</button></div>
     <div class="linfo" id="sinfo-${esc(key)}" hidden>${infoHtml(L, g, !g || !indent)}</div>`;
@@ -98,9 +99,9 @@ export function renderStories(){
       }
       const gs = L.groups.filter(g => g.count > 0 && g.items?.length);
       if (L.kind === 'people') { gs.forEach(g => html.push(row(g.key, g.title, g.items.length, L, g, false))); continue; }
-      html.push(row(L.id, L.title, storyCount(gs), L, null, false));
-      // a place's own parts (Wilford: the river, the village), each its own set
-      if (gs.length > 1) gs.forEach(g => html.push(row(g.key, g.title, storyCount([g]), L, g, true)));
+      // a thread's chapters (a place's parts: Wilford's river and village), each its own set, folded under it
+      html.push(row(L.id, L.title, storyCount(gs), L, null, false, gs.length > 1));
+      if (gs.length > 1) html.push(`<div class="parts" id="parts-${esc(L.id)}" hidden>${gs.map(g => row(g.key, g.title, storyCount([g]), L, g, true)).join('')}</div>`);
     }
     if (area) html.push('</details>');
     html.push('</div>');
@@ -111,6 +112,10 @@ export function renderStories(){
     const k = btn.dataset.set, L = !S.groups.has(k) && S.layers.find(x => x.id === k);
     closeSheet();
     showGroups(L ? L.groups.filter(g => g.count > 0).map(g => g.key) : [k], btn.dataset.title);
+  });
+  box.querySelectorAll('[data-fold]').forEach(btn => btn.onclick = () => {
+    const el = $('parts-' + btn.dataset.fold), open = el.hidden;
+    el.hidden = !open; btn.setAttribute('aria-expanded', open);
   });
   box.querySelectorAll('[data-sinfo]').forEach(btn => btn.onclick = e => {
     e.preventDefault(); e.stopPropagation();

@@ -245,3 +245,10 @@ details.area>summary .n{margin-left:auto;font-weight:400;color:var(--muted)}
 .srow.sub .sopen{padding-left:16px;font-size:15px}
 .srow .sopen:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 details.area>.srow{margin-left:14px}
+/* a thread's chapters (a place's parts) fold under it */
+.srow .fold{flex:0 0 28px;height:44px;border:0;background:transparent;color:var(--muted);cursor:pointer;padding:0;margin-left:-6px}
+.srow .fold::before{content:'›';display:inline-block;font-size:18px;transition:transform .15s}
+.srow .fold[aria-expanded="true"]::before{transform:rotate(90deg)}
+.parts>.srow{margin-left:22px}
+@media (prefers-reduced-motion:reduce){.srow .fold::before{transition:none}}
+.srow .nofold{flex:0 0 22px}

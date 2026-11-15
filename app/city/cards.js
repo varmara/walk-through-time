@@ -563,7 +563,9 @@ function placeLinks(p, withWeb = true){
   return links;
 }
 function pinCard(p){
-  const rows = [['Layer', esc((S.groups.get(p.group) || {}).title || layerTitle(p.layer))]];
+  const G = S.groups.get(p.group), place = G && G.layer.section === 'Places';
+  const rows = [[place ? 'Place' : 'Layer', place ? `<a href="#" data-topic="${esc(G.key)}">${esc(G.layer.groups.length > 1 ? G.layer.title + ': ' + G.title : G.layer.title)}</a>`
+    : esc((G || {}).title || layerTitle(p.layer))]];
   if (p.artist) rows.push(['Artist', esc(p.artist)]);
   if (p.start) rows.push(['From', esc(dayText(p.start))]);
   const open = openRows(p.oh || p.web ? [{ oh: p.oh, web: p.web }] : [], p.name);
