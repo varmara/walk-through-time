@@ -1,7 +1,7 @@
 ---
 type: index
 id: events
-order: 19
+order: 22
 ---
 
 Events that reached across Nottingham: the start of a civil war, a rising, a night of bombing, a flood and a riot.

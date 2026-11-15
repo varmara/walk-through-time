@@ -1,7 +1,7 @@
 ---
 type: index
 id: industrial
-order: 17
+order: 20
 ---
 
 How Nottingham and its coalfield helped make the industrial age: an early railway of wood, the first mill of the

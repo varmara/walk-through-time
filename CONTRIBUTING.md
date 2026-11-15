@@ -148,7 +148,7 @@ Tables in the same folder, each with a Note column saying why:
 
 ### Topics
 
-The story layers are mostly places (Wilford, Clifton, Rushcliffe). A topic gathers what is told anywhere on the
+The story layers are mostly places (Wilford, Clifton, Ruddington). A topic gathers what is told anywhere on the
 map about one subject, and is a layer of its own in the Layers sheet's Topics section and a theme in the graph. A
 topic is an index note with `section: Topics`, and may list people, plaques and buildings as well as stories;
 anything can be in several topics.

@@ -1,7 +1,7 @@
 ---
 type: index
 id: parks
-order: 18
+order: 21
 ---
 
 The Victorian town's parks and cemeteries on the hills north of the centre, and the statues of an outlaw, an airman

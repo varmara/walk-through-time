@@ -10,3 +10,4 @@ Market, east of the Old Market Square.
 - [[Severn's Building]]
 - [[Victoria Centre]]
 - [[Adams Building]]
+- [[Watson Fothergill's offices]]
