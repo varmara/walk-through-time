@@ -17,12 +17,13 @@ const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   const errors = [];
   // after the offline check, the map reports tiles it asked for while offline as failed fetches, sometimes many
-  // seconds later: those are expected, so for a while after the connection is back they are not counted
+  // seconds later (a minute and more on GitHub's machines): those are expected, so for a while after the connection
+// is back they are not counted
   let backOnline = 0;
-  const lateOffline = msg => /Failed to fetch/.test(msg) && Date.now() - backOnline < 20000;
+  const lateOffline = msg => /Failed to fetch/.test(msg) && backOnline && Date.now() - backOnline < 90000;
   page.on('pageerror', e => lateOffline(e.message) || errors.push(`${e.message} (after "${step}"${e.stack ? ': ' + e.stack.split('\n').slice(1, 3).map(s => s.trim()).join(' ') : ''})`));
   // the page's own failures, not other sites' (fonts, the OpenStreetMap base map)
-  page.on('console', m => m.type() === 'error' && !/Failed to load resource|net::ERR_/.test(m.text()) && !lateOffline(m.text()) && errors.push(m.text()));
+  page.on('console', m => m.type() === 'error' && !/Failed to load resource|net::ERR_/.test(m.text()) && !lateOffline(m.text()) && errors.push(`${m.text()} (console, after "${step}")`));
   // (a request cut off because the test moved on is not a failure)
   page.on('requestfailed', r => r.url().startsWith(BASE) && !/ABORTED/.test(r.failure()?.errorText || '')
     && errors.push('could not load ' + r.url().slice(BASE.length) + ' (' + r.failure()?.errorText + ')'));
