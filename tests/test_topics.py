@@ -1,65 +1,57 @@
-"""Topics (stories/<city>/topics/*.md, pipeline/stories_md.topic and s06_layers.topic_layers) and the date order of
-numbered cards (pipeline/layerdata.in_date_order)."""
-import tempfile
+"""Topics (Topics indexes, notes/indexes/*.md: pipeline/notes.index_layer and topic, s06_layers.topic_layers) and
+the date order of numbered cards (pipeline/layerdata.in_date_order)."""
 import unittest
-from pathlib import Path
 
+from pipeline import notes
 from pipeline.layerdata import Collector, in_date_order, year_in
 from pipeline.s06_layers import topic_layers
-from pipeline.stories_md import topic
 
-ROOT = Path(__file__).resolve().parent.parent
-
-TOPIC = """# Riot and war
-id: war
-
+TOPIC = """
 The intro,
 in two lines.
 
 ## The Civil War
-- story: The storming of Shelford House
-- person: Charles I
-- note: for editors
+- [[The storming of Shelford House]]
+- [[Charles I]]
 
 ## Riots
-- story: culture/The castle burned
+- [[The castle burned]]
 - plaque: Plaque to Albert Ball
-- building: way/7
+- [A building](https://www.openstreetmap.org/way/7)
 """
+KINDS = {"The storming of Shelford House": "event", "The castle burned": "story"}
 
 
-def parsed(text):
-    with tempfile.TemporaryDirectory() as d:
-        f = Path(d) / "war.md"
-        f.write_text(text)
-        return topic(f)
+def parsed(body, props=None):
+    return notes.topic(notes.index_layer("Riot and war", props or {"type": "index", "section": "Topics", "id": "war"}, body), KINDS)
 
 
 class Parse(unittest.TestCase):
-    def test_file(self):
+    def test_index(self):
         T = parsed(TOPIC)
         self.assertEqual((T["id"], T["title"], T["intro"]), ("war", "Riot and war", "The intro, in two lines."))
         self.assertEqual(T["groups"], ["The Civil War", "Riots"])
         self.assertEqual([(m["kind"], m["name"], m["group"]) for m in T["members"]],
                          [("story", "The storming of Shelford House", "The Civil War"), ("person", "Charles I", "The Civil War"),
-                          ("story", "culture/The castle burned", "Riots"), ("plaque", "Plaque to Albert Ball", "Riots"),
+                          ("story", "The castle burned", "Riots"), ("plaque", "Plaque to Albert Ball", "Riots"),
                           ("building", "way/7", "Riots")])
 
-    def test_bad_line(self):
-        with self.assertRaisesRegex(ValueError, "war.md:3: 'place:' is not one of"):
-            parsed("# War\n\n- place: Shelford\n")
+    def test_kept_keys(self):
+        T = parsed(TOPIC, {"section": "Topics", "id": "war", "groups": ["war-cw = The Civil War"]})
+        self.assertEqual(T["keys"], {"The Civil War": "war-cw", "Riots": "war-riots"})
 
-    def test_city_topics_parse(self):
-        for f in (ROOT / "stories").glob("*/topics/*.md"):
-            T = topic(f)
-            self.assertTrue(T["members"], f.name)
-            self.assertEqual(T["id"], f.stem)
+    def test_bad_lines(self):
+        for body, want in [("## A\n- place: Shelford\n", "is not a member"),
+                           ("## A\n- [x](https://example.org)\n", "OpenStreetMap"),
+                           ("## A\n- [[X]]\nWords after the members.\n", "only ## groups")]:
+            with self.subTest(want=want), self.assertRaisesRegex(notes.NoteError, want):
+                parsed(body)
 
 
 class Resolve(unittest.TestCase):
     def setUp(self):
-        self.entries = [{"layer": "rushcliffe", "name": "The storming of Shelford House", "b": 3},
-                        {"layer": "culture", "name": "The castle burned", "b": 4},
+        self.entries = [{"layer": "rushcliffe", "name": "The storming of Shelford House", "note": "The storming of Shelford House", "b": 3},
+                        {"layer": "culture", "name": "The castle burned", "note": "The castle burned", "b": 4},
                         {"layer": "civic", "name": "The castle burned", "b": "p1"}]
         self.people = {"groups": [{"key": "people-public", "items": [["Charles I", ["p0", 5]]]},
                                   {"key": "people-events", "items": [["Moot Hall", ["p2"]]]}]}
@@ -68,7 +60,7 @@ class Resolve(unittest.TestCase):
         self.buildings = [{"osm": f"way/{i}"} for i in range(8)]
 
     def run_(self, text):
-        return topic_layers([parsed(text)], self.entries, self.people, self.out, self.buildings,
+        return topic_layers([text if isinstance(text, dict) else parsed(text)], self.entries, self.people, self.out, self.buildings,
                             lambda i: f"Building {i}", {"rushcliffe", "culture", "civic"})
 
     def test_members(self):
@@ -88,17 +80,22 @@ class Resolve(unittest.TestCase):
         self.assertEqual(self.out.pins[0]["T"], ",war-the-civil-war,war-riots,")
 
     def test_no_groups(self):
-        (L,) = self.run_("# Boots\nid: boots\n\n- person: Charles I\n")
+        (L,) = self.run_(notes.topic(notes.index_layer("Boots", {"section": "Topics"}, "- [[Charles I]]\n"), {}))
         self.assertEqual([g["key"] for g in L["groups"]], ["boots"])
 
     def test_problems_name_the_line(self):
+        members = [("story", "Nowhere"), ("story", "castle burned"), ("person", "Nobody"), ("plaque", "Moot Hall"),
+                   ("building", "way/99")]
+        self.entries.append({"layer": "civic", "name": "castle burned", "b": 8})
+        self.entries.append({"layer": "culture", "name": "castle burned", "b": 9})
+        T = {"id": "war", "title": "War", "groups": [], "members": [{"kind": k, "name": n, "group": None, "line": f"War:{i}"}
+                                                                   for i, (k, n) in enumerate(members, 1)]}
         with self.assertRaises(SystemExit) as e:
-            self.run_("# War\nid: war\n\n- story: Nowhere\n- story: The castle burned\n- person: Nobody\n"
-                      "- plaque: Moot Hall\n- building: way/99\n")
+            self.run_(T)
         msg = str(e.exception)
-        for bit in ("war.md:4: no story", "war.md:5: story 'The castle burned' is in more than one layer",
-                    "war.md:6: no one called 'Nobody'", "war.md:7: no plaque titled 'Moot Hall'",
-                    "war.md:8: no building 'way/99'"):
+        for bit in ("War:1: no story", "War:2: story 'castle burned' is in more than one layer",
+                    "War:3: no one called 'Nobody'", "War:4: no plaque titled 'Moot Hall'",
+                    "War:5: no building 'way/99'"):
             self.assertIn(bit, msg)
 
 

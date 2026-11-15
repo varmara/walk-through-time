@@ -1,6 +1,5 @@
 ---
 type: story
-layer: culture
 source: https://en.wikipedia.org/wiki/Rock_City_(venue)
 check: 1876 | Alexandra Skating Rink | December 1980 | Undertones
 at:

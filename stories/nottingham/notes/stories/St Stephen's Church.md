@@ -1,6 +1,5 @@
 ---
 type: story
-layer: sneinton
 source: https://en.wikipedia.org/wiki/St_Stephen's_Church,_Sneinton
 year: "1837"
 check: Thomas Rickman | 1837 | Bodley

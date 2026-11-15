@@ -38,14 +38,16 @@ class Stories(unittest.TestCase):
     def test_entry_format(self):
         import tempfile
         with tempfile.TemporaryDirectory() as d:
-            (Path(d) / "01-x.md").write_text("# Things\nid: x\n\nIntro\non two lines.\n\n## A place\n- source: en:A\n"
-                                             "- quote: one\n- quote: two\n- names: no\n- check: a | b\n- note: ignored\n\n"
-                                             "The story\ncontinues.\n")
+            (Path(d) / "notes").mkdir()
+            (Path(d) / "notes" / "Things.md").write_text("---\ntype: index\nid: x\n---\nIntro\non two lines.\n\n- [[A place]]\n")
+            (Path(d) / "notes" / "A place.md").write_text(
+                "---\ntype: story\nsource: en:A\nquote:\n  - one\n  - two\nnames: no\ncheck: a | b\nnote: ignored\nat:\n"
+                "  - https://www.openstreetmap.org/way/1\n---\nThe story\ncontinues.\n")
             L = stories_md.load(d)["CURATED"][0]
         self.assertEqual(L["intro"], "Intro on two lines.")
         e = L["entries"][0]
-        self.assertEqual(e, {"name": "A place", "source": "en:A", "quote": ["one", "two"], "names": False,
-                             "facts": ("a", "b"), "story": "The story continues.", "links": [], "weblinks": []})
+        self.assertEqual(e, {"name": "A place", "note": "A place", "source": "en:A", "quote": ["one", "two"], "names": False,
+                             "facts": ("a", "b"), "story": "The story continues.", "type": "story", "at": "osm:way/1"})
 
 
 if __name__ == "__main__":

@@ -1,6 +1,5 @@
 ---
 type: story
-layer: churches
 source: https://en.wikipedia.org/wiki/St_Nicholas'_Church,_Nottingham
 year: "1678"
 check: Civil War | 1678

@@ -1,7 +1,5 @@
 ---
 type: story
-layer: barton
-group: barton-fabis
 source: https://en.wikipedia.org/wiki/Barton_in_Fabis
 check: Barton in the Beans | 1774 | Attenborough | Fairham
 at:

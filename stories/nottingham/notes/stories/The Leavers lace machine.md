@@ -1,14 +1,12 @@
 ---
 type: story
-layer: industrial
-group: industrial-textiles
 source: https://en.wikipedia.org/wiki/John_Leavers
 check: Leavers | 1813 | Canning Circus | Heathcoat | Grand-Couronne | 1821
 at:
   - https://www.openstreetmap.org/way/100199195
 names: no
 see:
-  - lace/Adams Building
+  - "[[Adams Building]]"
 ---
 
 John Leavers lived here, at Canning Circus, where a plaque calls him the inventor of the Leavers lace machine, in

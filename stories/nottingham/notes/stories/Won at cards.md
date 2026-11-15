@@ -1,7 +1,5 @@
 ---
 type: story
-layer: bridgford
-group: west-bridgford
 source: https://en.wikipedia.org/wiki/West_Bridgford
 check: 1523 | game of cards | 1894 | 1972 | Rushcliffe
 at:

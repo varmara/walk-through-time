@@ -1,4 +1,4 @@
-"""Story files' groups and cross-links (stories/<city>/*.md: groups:, - group:, - see:): every group an entry
+"""Story notes' groups and cross-links (indexes' groups, notes' see:): every group an entry
 names is one its layer declares, every declared group is used, and every "see" finds exactly one other story;
 and the build turns a "see" into a link to where that story is (pipeline/s06_layers.py: cross_links)."""
 import unittest
@@ -41,18 +41,6 @@ class Files(unittest.TestCase):
 
 
 class Parse(unittest.TestCase):
-    def test_groups_and_see(self):
-        import tempfile
-        with tempfile.TemporaryDirectory() as d:
-            p = Path(d) / "01-x.md"
-            p.write_text("# X\nid: x\ngroups: x-a = First | x-b = Second\n\nIntro.\n\n## One\n- source: en:One\n"
-                         "- group: x-b\n- see: Two | x/Three\n\nText.\n")
-            L = stories_md.layer(p)
-        self.assertEqual(L["groups"], [["x-a", "First"], ["x-b", "Second"]])
-        self.assertEqual(L["entries"][0]["group"], "x-b")
-        self.assertEqual(L["entries"][0]["see"], ["Two", "x/Three"])
-        self.assertEqual(L["intro"], "Intro.")
-
     def test_links_resolve(self):
         pin, story, third = {"name": "Two"}, {"text": "One's story"}, {"text": "Three's story"}
         es = [{"layer": "x", "name": "One", "b": 12, "see": ["Two", "Nowhere"], "_story": story},

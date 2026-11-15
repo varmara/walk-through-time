@@ -1,7 +1,5 @@
 ---
 type: story
-layer: bridgford
-group: edwalton
 source: https://en.wikipedia.org/wiki/Compton_Acres
 check: 1990s | Poole | 2015
 at:

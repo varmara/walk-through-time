@@ -1,7 +1,5 @@
 ---
 type: story
-layer: barton
-group: barton-fabis
 source: https://en.wikipedia.org/wiki/Listed_buildings_in_Barton_in_Fabis
 check: 14th century | 1877 | 1885
 at:

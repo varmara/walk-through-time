@@ -1,6 +1,5 @@
 ---
 type: story
-layer: inns
 source: https://en.wikipedia.org/wiki/The_Bell_Inn,_Nottingham
 year: c. 1420
 check: oldest | dendrochronological | 1420 | sandstone

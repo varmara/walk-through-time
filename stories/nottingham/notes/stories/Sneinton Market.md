@@ -1,6 +1,5 @@
 ---
 type: story
-layer: sneinton
 source: https://en.wikipedia.org/wiki/Sneinton
 check: 1930s | wholesale fruit and vegetable market
 at:

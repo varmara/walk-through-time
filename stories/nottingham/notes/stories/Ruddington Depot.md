@@ -1,7 +1,5 @@
 ---
 type: story
-layer: rushcliffe
-group: ruddington
 source: https://en.wikipedia.org/wiki/Ruddington_Depot
 check: 1940 | ammunition | 1983 | Rushcliffe Country Park
 at:

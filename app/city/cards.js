@@ -36,7 +36,7 @@ export const layerTitle = id => S.layers.find(L => L.id === id)?.title || id;
 // story: { label, text, source, place, who, pin }: a story layer's entry, a plaque's words, an area's description
 // ================= Footnotes: every source on a card, numbered once in reading order =================
 // cite(source) -> a superscript number; html() -> the Sources list at the foot of the card
-// "2026-11-14" -> "14 November 2026": when a source from another site was read (stories/<city>/*.md: read)
+// "2026-11-14" -> "14 November 2026": when a source from another site was read (a note's read:)
 const readDate = d => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d); return m ? `${+m[3]} ${MONTHS[m[2] - 1]} ${m[1]}` : d; };
 export function notes(){
   const list = [], at = new Map();
@@ -244,7 +244,7 @@ function topicsHtml(keys){
     ? `${esc(L.title)}: ${xs.map(g => `<a href="#" data-topic="${esc(g.key)}">${esc(g.title)}</a>`).join(', ')}`
     : `<a href="#" data-topic="${esc(xs[0].key)}">${esc(L.title)}</a>`}</li>`).join('')}</ul></div>`;
 }
-// "See also": other stories the story file links to (stories/<city>/*.md: see), each opening where it is
+// "See also": other stories a note links to (its see: and [[links]]), each opening where it is
 function seeHtml(see){
   if (!Array.isArray(see) || !see.length) return '';
   return `<p class="see">See also: ${see.map(([name, ref]) => ref === 'who' ? whoLink(name)

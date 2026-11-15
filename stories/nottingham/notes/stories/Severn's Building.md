@@ -1,6 +1,5 @@
 ---
 type: story
-layer: lace
 source: https://en.wikipedia.org/wiki/Severn's_Building
 check: Castle Road
 at:

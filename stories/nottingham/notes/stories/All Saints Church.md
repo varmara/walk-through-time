@@ -1,7 +1,5 @@
 ---
 type: story
-layer: barton
-group: thrumpton
 source: https://en.wikipedia.org/wiki/All_Saints_Church,_Thrumpton
 check: 13th century | 1871 | Street
 at:

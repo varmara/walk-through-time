@@ -1,6 +1,5 @@
 ---
 type: story
-layer: sneinton
 source: https://en.wikipedia.org/wiki/William_Booth
 check: 10 April 1829 | Sneinton | pawnbroker | now a museum
 at:

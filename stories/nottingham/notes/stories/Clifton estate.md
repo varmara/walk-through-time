@@ -1,6 +1,5 @@
 ---
 type: story
-layer: clifton
 source: https://en.wikipedia.org/wiki/Clifton,_Nottingham
 check: 1950 | largest council estate in europe | private ownership
 at:

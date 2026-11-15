@@ -1,7 +1,5 @@
 ---
 type: story
-layer: rushcliffe
-group: tollerton
 source: https://en.wikipedia.org/wiki/Nottingham_(Tollerton)_Airport
 check: 1929 | 1930 | Sefton Brancker | Lancaster | pillboxes
 at:

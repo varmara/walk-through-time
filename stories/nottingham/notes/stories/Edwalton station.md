@@ -1,14 +1,12 @@
 ---
 type: story
-layer: bridgford
-group: edwalton
 source: https://en.wikipedia.org/wiki/Edwalton_railway_station
 check: 1880 | 1941 | Melton Mowbray | Old Dalby | Advanced Passenger Train
 at:
   - Edwalton station, 52.9105, -1.1189
 names: no
 see:
-  - Lady Bay Bridge
+  - "[[Lady Bay Bridge]]"
 ---
 
 The station opened in 1880 on the Midland Railway's direct line from Nottingham to Melton Mowbray, which let its

@@ -1,7 +1,5 @@
 ---
 type: story
-layer: industrial
-group: industrial-transport
 source: https://en.wikipedia.org/wiki/Wollaton_Wagonway
 check: Huntingdon Beaumont | Percival Willoughby | 1604 | Strelley | Wollaton Lane End
 at:

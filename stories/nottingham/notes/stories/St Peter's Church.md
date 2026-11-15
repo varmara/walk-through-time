@@ -1,6 +1,5 @@
 ---
 type: story
-layer: churches
 source: https://en.wikipedia.org/wiki/St_Peter's_Church,_Nottingham
 year: c. 1180
 check: mediaeval | 1180

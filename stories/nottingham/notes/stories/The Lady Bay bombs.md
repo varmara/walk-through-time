@@ -1,7 +1,5 @@
 ---
 type: story
-layer: bridgford
-group: west-bridgford
 source: https://en.wikipedia.org/wiki/Lady_Bay,_Nottinghamshire
 check: 1941 | Luftwaffe | Pinders Ponds | bomb sites
 at:

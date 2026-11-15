@@ -1,6 +1,5 @@
 ---
 type: story
-layer: civic
 source: https://en.wikipedia.org/wiki/Council_House,_Nottingham
 year: "1929"
 check: Howitt | 1929 | Exchange

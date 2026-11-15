@@ -1,7 +1,5 @@
 ---
 type: story
-layer: rushcliffe
-group: gotham
 source:
   - https://en.wikipedia.org/wiki/Wise_Men_of_Gotham
   - https://en.wikipedia.org/wiki/Gotham,_Nottinghamshire

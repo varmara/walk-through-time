@@ -1,6 +1,5 @@
 ---
 type: story
-layer: churches
 name: St Mary's Church
 source: https://en.wikipedia.org/wiki/St_Mary's_Church,_Nottingham
 check: Domesday

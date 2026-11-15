@@ -1,6 +1,5 @@
 ---
 type: story
-layer: culture
 source: https://en.wikipedia.org/wiki/Royal_Concert_Hall,_Nottingham
 year: "1982"
 check: "1982"

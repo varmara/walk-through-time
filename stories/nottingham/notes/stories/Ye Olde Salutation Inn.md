@@ -1,6 +1,5 @@
 ---
 type: story
-layer: inns
 source: https://en.wikipedia.org/wiki/Ye_Olde_Salutation_Inn
 year: c. 1360
 check: oldest | 1360 | caves

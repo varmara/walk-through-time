@@ -1,7 +1,5 @@
 ---
 type: story
-layer: wilford
-group: wilford-village
 source: https://en.wikipedia.org/wiki/Jeremiah_Brandreth
 check: Wilford | 1817 | Nottingham Captain | Derby
 at:

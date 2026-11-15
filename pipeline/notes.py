@@ -38,9 +38,9 @@ from pathlib import Path
 
 import yaml
 
-from .stories_md import architects
+from .stories_md import architects, slug
 
-TYPES = ("person", "event", "story")
+TYPES = ("person", "event", "story", "index")
 OSM = re.compile(r"^https?://(?:www\.)?openstreetmap\.org/(way|node|relation)/(\d+)")
 NHLE = re.compile(r"^https?://historicengland\.org\.uk/listing/the-list/list-entry/(\d+)")
 WIKI = re.compile(r"^https?://([a-z]+)\.(?:m\.)?wikipedia\.org/wiki/([^#?]+)")
@@ -185,14 +185,83 @@ def read_notes(folder):
     return out
 
 
-def load(folder, layers):
-    """Adds the notes' entries to the story layers (person notes to the People layer, fact callouts to the facts
-    layer, events to their `layer`, or an Events layer made for them). Returns
-    {"people": {name: {"wikipedia": title | False, "group"}}, "names": [note names]}.
-    Raises NoteError naming the note for anything it cannot read."""
+SECTIONS = ("Stories", "Topics")
+ITEM_PLAQUE = re.compile(r"^plaque:\s*(.+)$")
+
+
+def index_layer(name, props, body):
+    """An index note (type: index): a layer of the Layers sheet. Its text: the introduction, then `## Group`
+    headings, each a tickbox, listing its members one per line:
+
+        - [[Note]]                     a story or event (a Stories index: each is in exactly one), or in a topic
+                                       also a person (a note, or someone on the map by name)
+        - plaque: Plaque to Albert Ball                                   a plaque, by its title (a topic)
+        - [Wollaton Hall](https://www.openstreetmap.org/way/4438894)      a building (a topic)
+
+    Properties: id (else from the file's name), section (Stories, the default, or Topics), order (its place in
+    the section), kind (people or facts, for those layers, whose members are not listed), groups (key = Title, to
+    keep a group's key, which links and remembered tickboxes use; else id-title)."""
+    L = {"id": str(props.get("id") or slug(name)), "title": str(props.get("title") or name), "note": name,
+         "section": str(props.get("section") or "Stories"), "order": props.get("order"),
+         **({"kind": str(props["kind"])} if props.get("kind") else {}), "entries": [], "members": []}
+    if L["section"] not in SECTIONS:
+        raise NoteError(f"{name}: section: must be one of {', '.join(SECTIONS)}")
+    keys = {}
+    for g in listed(props.get("groups")):
+        k, _, t = g.partition("=")
+        keys[t.strip()] = k.strip()
+    intro, group, groups = [], None, []
+    for n, raw in enumerate(body.splitlines(), 1):
+        line = raw.strip()
+        if not line:
+            continue
+        if line.startswith("## "):
+            group = line[3:].strip()
+            groups.append([keys.get(group) or f"{L['id']}-{slug(group)}", group])
+        elif line.startswith("- "):
+            item = line[2:].strip()
+            if m := WIKILINK.fullmatch(item):
+                member = {"kind": "note", "name": m[1].strip()}
+            elif m := MDLINK.fullmatch(item):
+                if not (o := OSM.match(m[2])):
+                    raise NoteError(f"{name}: '{item}': a member links a note ([[…]]) or a building's OpenStreetMap page")
+                member = {"kind": "building", "name": f"{o[1]}/{o[2]}"}
+            elif m := ITEM_PLAQUE.match(item):
+                member = {"kind": "plaque", "name": m[1].strip()}
+            else:
+                raise NoteError(f"{name}: '{item}' is not a member: [[Note]], plaque: Title, or [Name](OpenStreetMap link)")
+            L["members"].append({**member, "group": group, "line": f"{name}:{n}"})
+        elif group is None and not L["members"]:
+            intro.append(line)
+        else:
+            raise NoteError(f"{name}: '{line[:60]}': below the introduction, only ## groups and - members")
+    unknown = set(keys) - {t for _, t in groups}
+    if unknown:
+        raise NoteError(f"{name}: groups: names no ## heading: {', '.join(sorted(unknown))}")
+    L["intro"] = " ".join(intro)
+    if groups:
+        L["groups"] = groups
+    return L
+
+
+def topic(L, kinds):
+    """A Topics index as s06_layers.topic_layers takes it: its groups' titles and keys, and its members, a [[link]]
+    being a story (a story or event note) or else a person (a person note, or someone on the map by name).
+    kinds: {note name: its type}."""
+    return {"id": L["id"], "title": L["title"], "intro": L["intro"], "order": L["order"],
+            "groups": [t for _, t in L.get("groups", [])], "keys": {t: k for k, t in L.get("groups", [])},
+            "members": [{**m, "kind": ("story" if kinds.get(m["name"]) in ("story", "event") else "person")
+                         if m["kind"] == "note" else m["kind"]} for m in L["members"]]}
+
+
+def load(folder):
+    """The notes under the folder as the build's layers. Returns {"layers": the Stories indexes (with the People
+    and facts layers), each with its notes' entries; "topics": the Topics indexes, for s06_layers.topic_layers;
+    "people": {name: {"wikipedia": title | False, "group"}}; "names": [note names]}. Raises NoteError naming the
+    note for anything it cannot read, and for a story or event no Stories index lists (or two do)."""
     folder = Path(folder)
     if not folder.is_dir():
-        return {"people": {}, "names": []}
+        return {"layers": [], "topics": [], "people": {}, "names": []}
     notes = read_notes(folder)
     problems = []
     # pins first: a note may name a pin another note made
@@ -205,11 +274,39 @@ def load(folder, layers):
                 if pname in pins and pins[pname] != xy:
                     problems.append(f"{name}: the pin {pname!r} is made twice, at different points")
                 pins[pname] = xy
-    by_id = {L.get("id"): L for L in layers}
+    # the indexes: layers, and where each story or event is told (its Stories index and group)
+    kinds = {name: props.get("type") for name, props, _ in notes}
+    indexes = []
+    for name, props, body in notes:
+        if props.get("type") == "index":
+            try:
+                indexes.append(index_layer(name, props, body))
+            except NoteError as e:
+                problems.append(str(e))
+    indexes.sort(key=lambda L: (L["order"] if isinstance(L["order"], int) else 999, L["note"]))
+    home = {}
+    for L in indexes:
+        if L["section"] != "Stories":
+            continue
+        for m in L["members"]:
+            if m["kind"] != "note" or kinds.get(m["name"]) not in ("story", "event"):
+                problems.append(f"{m['line']}: a Stories index lists stories and events: "
+                                f"{m['name']!r} is " + ("no note" if m["name"] not in kinds else f"a {kinds[m['name']]} note"))
+            elif m["name"] in home:
+                problems.append(f"{m['line']}: {m['name']!r} is in {home[m['name']][0]['note']} already: "
+                                f"a story is told in one Stories index (topics may list it too)")
+            else:
+                home[m["name"]] = (L, m["group"])
+    layers = [L for L in indexes if L["section"] == "Stories"]
+    if not any(L.get("kind") == "facts" for L in layers):
+        layers.append({"id": "facts", "kind": "facts", "title": "Did you know", "intro": "", "entries": [], "members": []})
+    topics = [topic(L, kinds) for L in indexes if L["section"] == "Topics"]
     people_layer = next((L for L in layers if L.get("kind") == "people"), None)
     facts_layer = next((L for L in layers if L.get("kind") == "facts"), None)
     info = {}
     for name, props, body in notes:
+        if props.get("type") == "index":
+            continue
         try:
             kind = props.get("type")
             if kind not in TYPES:
@@ -248,16 +345,13 @@ def load(folder, layers):
                               **({"group": str(props["kind"])} if props.get("kind") else {})}
                 target, group = people_layer, props.get("kind")
             elif story:
-                if kind == "story" and not props.get("layer"):
-                    raise NoteError(f"{name}: a story needs layer: (the story layer it is told in)")
-                lid = props.get("layer") or "events"
-                if lid not in by_id:
-                    if props.get("layer"):
-                        raise NoteError(f"{name}: layer: {lid!r} is not a story layer's id")
-                    by_id[lid] = {"id": "events", "title": "Events", "intro": "Events in the city's history, "
-                                  "each at the places where it happened, with the people who took part.", "entries": []}
-                    layers.append(by_id[lid])
-                target, group = by_id[lid], props.get("group")
+                if props.get("layer") or props.get("group"):
+                    raise NoteError(f"{name}: layer: and group: are not used: list the note in an index "
+                                    f"(notes/indexes/), under its group's heading")
+                if name not in home:
+                    raise NoteError(f"{name}: no Stories index lists it: add - [[{name}]] to one (notes/indexes/)")
+                target, g = home[name]
+                group = next((k for k, t in target.get("groups", []) if t == g), None)
             else:
                 target = group = None       # facts only (a note of "Did you know?" callouts)
             base = {k: v for k, v in base.items() if v not in ((), [], {}, None) or k in ("name", "story")}
@@ -297,4 +391,6 @@ def load(folder, layers):
             problems.append(str(e))
     if problems:
         raise NoteError("notes: " + "; ".join(problems))
-    return {"people": info, "names": [n for n, _, _ in notes]}
+    for L in layers:
+        L.pop("members", None)
+    return {"layers": layers, "topics": topics, "people": info, "names": [n for n, _, _ in notes]}

@@ -1,6 +1,5 @@
 ---
 type: story
-layer: lace
 source: https://en.wikipedia.org/wiki/Adams_Building,_Nottingham
 year: "1855"
 check: Thomas Adams | Thomas Chambers Hine | 1855

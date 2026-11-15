@@ -1,6 +1,5 @@
 ---
 type: story
-layer: lace
 source: https://en.wikipedia.org/wiki/Victoria_Centre
 year: "1972"
 check: 1972 | clock tower

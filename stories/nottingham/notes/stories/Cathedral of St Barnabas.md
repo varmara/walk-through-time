@@ -1,6 +1,5 @@
 ---
 type: story
-layer: churches
 source: https://en.wikipedia.org/wiki/Nottingham_Cathedral
 year: "1841..1844"
 check: Pugin | 1841 | 1844

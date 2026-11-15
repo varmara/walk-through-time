@@ -1,7 +1,5 @@
 ---
 type: story
-layer: bridgford
-group: trent-bridge
 source: https://en.wikipedia.org/wiki/City_Ground
 check: 1898 | seventh home | city status | three hundred yards
 at:

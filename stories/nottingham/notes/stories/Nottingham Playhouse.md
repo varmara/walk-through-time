@@ -1,6 +1,5 @@
 ---
 type: story
-layer: culture
 source: https://en.wikipedia.org/wiki/Nottingham_Playhouse
 year: "1963"
 check: Moro | 1963

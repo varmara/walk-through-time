@@ -1,7 +1,5 @@
 ---
 type: story
-layer: science
-group: science-inventions
 source: https://en.wikipedia.org/wiki/Peter_Mansfield
 check: 1964 | 1978 | 2003 | Paul Lauterbur
 at:

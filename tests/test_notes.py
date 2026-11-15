@@ -10,7 +10,6 @@ ROOT = Path(__file__).resolve().parent.parent
 
 EVENT = """---
 type: event
-layer: civic
 source:
   - https://en.wikipedia.org/wiki/1831_reform_riots
   - https://en.wikipedia.org/wiki/Nottingham_Castle
@@ -52,20 +51,22 @@ He lived by the mill.
 """
 
 
-def layers():
-    return [{"id": "civic", "title": "Civic", "entries": []},
-            {"id": "people", "kind": "people", "title": "People", "entries": []},
-            {"id": "facts", "kind": "facts", "title": "Did you know", "entries": []}]
+# the indexes: a Stories index (Civic) listing the event, the People layer; the facts layer is made when none
+INDEXES = {"indexes/Civic.md": "---\ntype: index\nid: civic\norder: 1\n---\nThe council.\n\n- [[The castle burned]]\n",
+           "indexes/People.md": "---\ntype: index\nid: people\nkind: people\norder: 2\n---\nWho lived here.\n"}
 
 
-def load(files, Ls=None):
-    Ls = Ls if Ls is not None else layers()
+def load(files, indexes=True):
     with tempfile.TemporaryDirectory() as d:
-        for name, text in files.items():
+        idx = dict(INDEXES) if indexes else {}
+        if not any(f.endswith("/The castle burned.md") for f in files):       # (the Civic index lists only that)
+            idx["indexes/Civic.md"] = idx["indexes/Civic.md"].replace("- [[The castle burned]]\n", "")
+        for name, text in {**idx, **files}.items():
             p = Path(d) / name
             p.parent.mkdir(parents=True, exist_ok=True)
             p.write_text(text)
-        return notes.load(Path(d), Ls), Ls
+        out = notes.load(Path(d))
+        return out, out["layers"]
 
 
 class Read(unittest.TestCase):
@@ -87,10 +88,12 @@ class Read(unittest.TestCase):
         self.assertEqual([(f["at"], f["source"], f["facts"], f["story"]) for f in facts["entries"]],
                          [("osm:way/16459858", "en:Nottingham Castle", ("1878",), "It reopened in 1878."),
                           ("pin:-1.2165,52.9265", "en:Nottingham Castle", ("1878",), "It reopened in 1878.")])
-        self.assertEqual(info["names"], ["The castle burned"])
+        self.assertEqual(info["names"], ["The castle burned", "Civic", "People"])
+        self.assertEqual([(L["id"], L["intro"]) for L in info["layers"]], [("civic", "The council."), ("people", "Who lived here."),
+                                                                          ("facts", "")])
 
     def test_person_and_a_pin_another_note_made(self):
-        info, (civic, people, facts) = load({"events/E.md": EVENT, "people/William Thompson.md": PERSON})
+        info, (civic, people, facts) = load({"events/The castle burned.md": EVENT, "people/William Thompson.md": PERSON})
         (p,) = people["entries"]
         self.assertEqual((p["name"], p["group"], p["at"], p["where"]), ("William Thompson", "sport", "pin:-1.2165,52.9265", "Lowe's Silk Mill"))
         self.assertEqual((p["source"], p["read"]), ("web:https://map.mappingwomenssuffrage.org.uk/items/show/1", "2026-11-14"))
@@ -115,24 +118,35 @@ class Read(unittest.TestCase):
         self.assertTrue(p["unplaced"])
         self.assertNotIn("at", p)
 
-    def test_events_layer_made_when_none_named(self):
-        _, Ls = load({"events/E.md": EVENT.replace("layer: civic\n", "")})
-        self.assertEqual(Ls[-1]["id"], "events")
-        self.assertEqual(len(Ls[-1]["entries"]), 2)
+    def test_index_groups(self):
+        idx = ("---\ntype: index\nid: civic\norder: 1\ngroups:\n  - civic-old = Old\n---\nThe council.\n\n## Old\n- [[The castle burned]]\n"
+               "\n## New\n- [[B]]\n")
+        b = EVENT.replace("check: 8 October 1831 | Duke of Newcastle\n", "")
+        _, (civic, people, facts) = load({"indexes/Civic.md": idx, "events/The castle burned.md": EVENT, "stories/B.md": b})
+        self.assertEqual(civic["groups"], [["civic-old", "Old"], ["civic-new", "New"]])
+        self.assertEqual({(e["name"], e["group"]) for e in civic["entries"]}, {("The castle burned", "civic-old"), ("B", "civic-new")})
+
+    def test_a_story_in_no_index_or_two(self):
+        with self.assertRaisesRegex(notes.NoteError, r"no Stories index lists it: add - \[\[The castle burned\]\]"):
+            load({"events/The castle burned.md": EVENT, "indexes/Civic.md": "---\ntype: index\n---\n"})
+        with self.assertRaisesRegex(notes.NoteError, "is in Civic already"):
+            load({"events/The castle burned.md": EVENT, "indexes/Other.md": "---\ntype: index\n---\n- [[The castle burned]]\n"})
+        with self.assertRaisesRegex(notes.NoteError, "layer: and group: are not used"):
+            load({"events/The castle burned.md": EVENT.replace("type: event\n", "type: event\nlayer: civic\n")})
 
     def test_problems(self):
         for text, want in [
             ("---\ntype: thing\n---\n", "type: must be one of"),
-            ("---\ntype: event\nlayer: civic\nsource: en:A\n---\nNo places.\n", "no at:"),
-            ("---\ntype: event\nlayer: civic\nat:\n  - https://www.openstreetmap.org/way/1\n---\nNo source.\n", "no source:"),
-            ("---\ntype: event\nlayer: nowhere\nsource: en:A\nat:\n  - Somewhere, 52.9, -1.1\n---\nText.\n", "not a story layer"),
-            ("---\ntype: event\nlayer: civic\nsource: en:A\nat:\n  - The moon\n---\nText.\n", "'The moon' is not"),
-            ("---\ntype: event\nlayer: civic\nsource: en:A\nat:\n  - Pin, 52.9, -1.1\n---\nText.[^x]\n", "[^x] has no line"),
-            ("---\ntype: event\nlayer: civic\nsource: en:A\nat:\n  - Pin, -100.1, 52.9\n---\nText.\n", "latitude, then longitude"),
+            ("---\ntype: event\nsource: en:A\n---\nNo places.\n", "no at:"),
+            ("---\ntype: event\nat:\n  - https://www.openstreetmap.org/way/1\n---\nNo source.\n", "no source:"),
+            ("---\ntype: event\nsource: en:A\nat:\n  - The moon\n---\nText.\n", "'The moon' is not"),
+            ("---\ntype: event\nsource: en:A\nat:\n  - Pin, 52.9, -1.1\n---\nText.[^x]\n", "[^x] has no line"),
+            ("---\ntype: event\nsource: en:A\nat:\n  - Pin, -100.1, 52.9\n---\nText.\n", "latitude, then longitude"),
+            ("---\ntype: index\nsection: Elsewhere\n---\n", "section: must be one of"),
             ("---\ntype: [\n---\n", "not valid YAML"),
         ]:
             with self.subTest(want=want), self.assertRaisesRegex(notes.NoteError, re.escape(want)):
-                load({"N.md": text})
+                load({"events/The castle burned.md": text})
 
     def test_two_notes_of_one_name(self):
         with self.assertRaisesRegex(notes.NoteError, "two notes are called 'A'"):

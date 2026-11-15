@@ -1,7 +1,5 @@
 ---
 type: story
-layer: industrial
-group: industrial-transport
 source: https://en.wikipedia.org/wiki/Nottingham_Canal
 check: 1792 | William Jessop | 1796 | Langley Mill | Castle Wharf | 1937
 at:

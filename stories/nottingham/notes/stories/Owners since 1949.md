@@ -1,7 +1,5 @@
 ---
 type: story
-layer: barton
-group: thrumpton
 source: https://en.wikipedia.org/wiki/Thrumpton_Hall
 check: 1949 | 1994 | Miranda Seymour
 at:

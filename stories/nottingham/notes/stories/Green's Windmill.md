@@ -1,6 +1,5 @@
 ---
 type: story
-layer: sneinton
 source: https://en.wikipedia.org/wiki/Green's_Mill,_Sneinton
 year: c. 1807
 check: 1807 | George Green | 1947 | 1986

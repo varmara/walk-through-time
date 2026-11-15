@@ -1,6 +1,5 @@
 ---
 type: story
-layer: civic
 source: https://en.wikipedia.org/wiki/Broad_Marsh
 check: slum clearance | 25 March 1975 | partially demolished | City of Caves
 at:

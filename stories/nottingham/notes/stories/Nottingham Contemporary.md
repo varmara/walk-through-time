@@ -1,6 +1,5 @@
 ---
 type: story
-layer: culture
 source: https://en.wikipedia.org/wiki/Nottingham_Contemporary
 year: "2009"
 check: Caruso St John | 2009 | lace

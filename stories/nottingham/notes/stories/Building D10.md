@@ -1,7 +1,5 @@
 ---
 type: story
-layer: science
-group: science-inventions
 source: https://en.wikipedia.org/wiki/Boots_Factory_Site
 check: Owen Williams | 1930 | 1932 | Grade I | Wets
 at:

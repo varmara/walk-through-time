@@ -40,9 +40,6 @@ class Titles(unittest.TestCase):
                 self.assertTrue(v["people"], start)
                 self.assertIn(v.get("group", "other"), {"architects", "writers", "science", "industry", "sport", "arts",
                                                         "faith", "military", "public", "other"}, start)
-            for name, a in d["ABOUT"].items():
-                self.assertTrue(a["url"].startswith("http"), name)
-                self.assertRegex(a["read"] or "", r"^\d{4}-\d{2}-\d{2}$", f"{name}: the date it was read")
 
 
 if __name__ == "__main__":

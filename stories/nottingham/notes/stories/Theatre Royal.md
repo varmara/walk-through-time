@@ -1,6 +1,5 @@
 ---
 type: story
-layer: culture
 source: https://en.wikipedia.org/wiki/Theatre_Royal,_Nottingham
 year: "1865"
 check: 1865 | Phipps

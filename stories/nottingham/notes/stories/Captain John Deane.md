@@ -1,7 +1,5 @@
 ---
 type: story
-layer: wilford
-group: wilford-village
 source: https://en.wikipedia.org/wiki/Wilford
 check: John Deane | Russian navy
 at:

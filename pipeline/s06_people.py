@@ -1,7 +1,7 @@
 """The People layer: who designed the buildings, who lived, worked or played in them, and who is remembered on
 their walls.
 
-From the hand-written People entries (stories/<city>/NN-people.md), commemorative plaques (s00_fetch_plaques: each
+From the person notes (stories/<city>/notes/), commemorative plaques (s00_fetch_plaques: each
 a pin where it hangs, linked both ways with the building it is on), well-known residents found in Wikipedia
 (s04_residents) and architects recorded in Wikidata. Each person's card says who they were, from the opening of
 their Wikipedia article.
@@ -188,7 +188,7 @@ def main(city_id):
         elif qid and "qid" not in h:
             h["qid"] = qid
 
-    # ---- hand-written entries (stories/<city>/NN-people.md)
+    # ---- person notes (stories/<city>/notes/)
     L = next((x for x in cur["layers"] if x.get("kind") == "people"), None)
     people = {"id": "people", "title": "People", "section": "People", "kind": "people", "groups": []}
     # person notes (stories/<city>/notes/): the Wikipedia article chosen for them, or none (wikipedia: no)
@@ -417,14 +417,6 @@ def main(city_id):
         if e["layer"] == "facts" and e.get("who"):
             about.setdefault(e["who"], {"title": e["who"]}).setdefault("facts", []).append(
                 {"text": e["story"], "source": e["source"], **({"links": e["links"]} if e.get("links") else {})})
-    # people with no Wikipedia article: a summary written by hand from another site (about.md), cited with the date
-    for n, h in (cur.get("about") or {}).items():
-        if n not in about:
-            from urllib.parse import urlparse
-            host = (urlparse(h["url"]).hostname or "").removeprefix("www.")
-            from .s04_curated import SITES
-            about[n] = {"text": h["text"], "title": n, "url": h["url"], "kind": SITES.get(host, host),
-                        **({"read": h["read"]} if h.get("read") else {})}
     log(f"s06 people: Wikipedia articles for {len(about)} of {len(want)} people")
     missing = sorted({n for ns in arch.values() for n, _ in ns if n not in about and n not in links and person_like(n)})
     if missing:

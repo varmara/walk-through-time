@@ -1,6 +1,5 @@
 ---
 type: story
-layer: culture
 source: https://en.wikipedia.org/wiki/Albert_Hall,_Nottingham
 year: "1909"
 check: Methodist | 1909

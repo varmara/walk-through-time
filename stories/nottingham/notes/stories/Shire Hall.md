@@ -1,6 +1,5 @@
 ---
 type: story
-layer: civic
 source: https://en.wikipedia.org/wiki/Shire_Hall,_Nottingham
 check: Gandon | National Justice Museum
 at:

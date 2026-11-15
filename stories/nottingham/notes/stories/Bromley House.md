@@ -1,6 +1,5 @@
 ---
 type: story
-layer: culture
 source: https://en.wikipedia.org/wiki/Bromley_House_Library
 year: "1752"
 check: 1752 | 1816 | 1821

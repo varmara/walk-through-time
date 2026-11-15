@@ -1,6 +1,5 @@
 ---
 type: story
-layer: churches
 source: https://en.wikipedia.org/wiki/High_Pavement_Chapel
 year: "1876"
 check: 1876 | Stuart Colman | 1690 | 1802 | 1982 | Pitcher

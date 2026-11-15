@@ -1,7 +1,5 @@
 ---
 type: story
-layer: bridgford
-group: trent-bridge
 source: https://en.wikipedia.org/wiki/County_Hall,_Nottinghamshire
 check: Vincent Harris | Second World War | 1954
 architect: Vincent Harris = en:E. Vincent Harris

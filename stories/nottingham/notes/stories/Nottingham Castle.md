@@ -1,14 +1,13 @@
 ---
 type: story
-layer: culture
 source: https://en.wikipedia.org/wiki/Nottingham_Castle
 check: 1831 | 1878
 at:
   - https://www.openstreetmap.org/way/16459858
 see:
-  - The castle burned, 1831
-  - Mortimer's Hole
-  - John Hutchinson
+  - "[[The castle burned, 1831]]"
+  - "[[Mortimer's Hole]]"
+  - "[[John Hutchinson]]"
 ---
 
 The medieval castle was demolished after the Civil War and a ducal mansion built on the rock. Rioters burnt the

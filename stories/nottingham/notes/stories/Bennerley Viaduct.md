@@ -1,7 +1,5 @@
 ---
 type: story
-layer: industrial
-group: industrial-transport
 source: https://en.wikipedia.org/wiki/Bennerley_Viaduct
 year: "1877"
 check: wrought iron | 1877 | 1968 | 2022 | Meldon

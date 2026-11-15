@@ -1,7 +1,5 @@
 ---
 type: story
-layer: bridgford
-group: west-bridgford
 source: https://en.wikipedia.org/wiki/St_Giles_Church,_West_Bridgford
 check: little remains | 1872 | 1896 | Lady Byron
 at:

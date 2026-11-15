@@ -64,7 +64,7 @@ def main(city_id):
     meta = []
     visitor_meta, routes, basics = visitor(city_id, ctx, out)
 
-    # ---- story layers (stories/<city>/NN-*.md); the People layer, from s06_people, where the stories put it
+    # ---- story layers (the Stories indexes, stories/<city>/notes/indexes/); the People layer, from s06_people, where the stories put it
     for L in cur["layers"]:
         if L.get("kind") == "facts":    # 'Did you know' facts go on the cards (s07), not into a layer
             continue
@@ -114,7 +114,7 @@ def main(city_id):
         return t.get("name") or inside.get(i) or names.get(str(i)) or t.get("addr:street") and \
             f"{t.get('addr:housenumber', '')} {t['addr:street']}".strip() or "Unnamed building"
 
-    # ---- topics (stories/<city>/topics/*.md): stories, people, plaques and buildings from any layer, on one subject
+    # ---- topics (the Topics indexes, stories/<city>/notes/indexes/): stories, people, plaques and buildings from any layer, on one subject
     topic_meta = topic_layers(cur.get("topics") or [], cur["entries"], ppl["meta"], out, ctx.buildings, bname,
                               {L["id"] for L in cur["layers"] if L.get("kind") not in ("facts", "people")})
     meta += topic_meta
@@ -193,18 +193,21 @@ def main(city_id):
 
 
 def cross_links(entries, story_layers, persons=()):
-    """A story's "see also" (stories/<city>/*.md: see): each named story, found by its heading, or layer/heading,
+    """A story's "see also" (a note's see: and [[links]]): each named story, found by its note's name, its name, or layer/name,
     becomes [heading, where it is] on the story ("123" a building, "p4" a pin), which the card links to; a person
     (persons: the People layer's and person notes' names) becomes [name, "who"], opening their card."""
     placed = [e for e in entries if e["layer"] in story_layers and "_story" in e]
-    by_name, by_full = {}, {}
+    by_name, by_full, by_note = {}, {}, {}
     for e in placed:
         by_name.setdefault(e["name"].lower(), []).append(e)
         by_full[f"{e['layer']}/{e['name']}".lower()] = e
+        if e.get("note"):
+            by_note.setdefault(e["note"].lower(), e)       # (a note with several places: its first)
     for e in placed:
         see = []
         for name in e.get("see", []):
-            hits = [by_full[name.lower()]] if name.lower() in by_full else by_name.get(name.lower(), [])
+            k = name.lower()
+            hits = [by_note[k]] if k in by_note else [by_full[k]] if k in by_full else by_name.get(k, [])
             hits = [h for h in hits if h is not e]
             if not hits and name in persons:
                 see.append([name, "who"])
@@ -228,11 +231,13 @@ def topic_layers(topics, entries, people, out, buildings, bname, story_layers):
     layer, or that it is a person, a plaque or a building, so a card shows the right story). Each building and
     pin is marked with the topic's groups, so ticking a topic shows them. Raises on a line that finds nothing or
     more than one thing, naming the file and line."""
-    by_name, by_full = {}, {}
+    by_name, by_full, by_note = {}, {}, {}
     for e in entries:
         if e["layer"] in story_layers and e.get("b") is not None:
             by_name.setdefault(e["name"].lower(), []).append(e)
             by_full.setdefault(f"{e['layer']}/{e['name']}".lower(), []).append(e)
+            if e.get("note"):
+                by_note.setdefault(e["note"].lower(), []).append(e)
     persons = {}
     for g in people["groups"]:
         if g["key"] == "people-events":
@@ -249,12 +254,12 @@ def topic_layers(topics, entries, people, out, buildings, bname, story_layers):
     problems, meta = [], []
     for T in topics:
         tid = T["id"]
-        keys = {g: f"{tid}-{slug(g)}" for g in T["groups"]}
+        keys = {g: (T.get("keys") or {}).get(g) or f"{tid}-{slug(g)}" for g in T["groups"]}
         items = {}
         for m in T["members"]:
             kind, name, where = m["kind"], m["name"], m["line"]
             if kind == "story":
-                hits = by_full.get(name.lower()) or by_name.get(name.lower(), [])
+                hits = by_note.get(name.lower()) or by_full.get(name.lower()) or by_name.get(name.lower(), [])
                 if len({e["layer"] for e in hits}) > 1:
                     problems.append(f"{where}: story {name!r} is in more than one layer "
                                     f"({', '.join(sorted({e['layer'] for e in hits}))}): write it as layer/heading")
@@ -300,7 +305,7 @@ def topic_layers(topics, entries, people, out, buildings, bname, story_layers):
                                  "items": items.get(k, [])} for k, t in groups]})
         log(f"s06 topic {tid}: {sum(len(v) for v in items.values())} members")
     if problems:
-        raise SystemExit("Topics (stories/<city>/topics/): fix these lines:\n  " + "\n  ".join(problems))
+        raise SystemExit("Topics (the Topics indexes, stories/<city>/notes/indexes/): fix these lines:\n  " + "\n  ".join(problems))
     return meta
 
 

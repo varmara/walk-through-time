@@ -1,6 +1,5 @@
 ---
 type: story
-layer: culture
 source: https://en.wikipedia.org/wiki/Broadway_Cinema
 check: 1839 | Wesleyan chapel | 1990 | Paul Smith
 at:

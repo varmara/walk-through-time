@@ -1,6 +1,5 @@
 ---
 type: story
-layer: culture
 source: https://en.wikipedia.org/wiki/Malt_Cross
 year: "1877"
 check: 1877 | Edwin Hill | music hall

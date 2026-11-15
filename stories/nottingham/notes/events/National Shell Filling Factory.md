@@ -1,7 +1,5 @@
 ---
 type: event
-layer: science
-group: science-works
 source: https://en.wikipedia.org/wiki/National_Shell_Filling_Factory,_Chilwell
 check: Chetwynd | 1915 | 1 July 1918 | 134 | Chetwynd Barracks
 at:

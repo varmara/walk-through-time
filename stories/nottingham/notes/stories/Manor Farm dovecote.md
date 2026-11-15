@@ -1,7 +1,5 @@
 ---
 type: story
-layer: barton
-group: barton-fabis
 source: https://en.wikipedia.org/wiki/Listed_buildings_in_Barton_in_Fabis
 year: "1677"
 check: 1677 | octagonal

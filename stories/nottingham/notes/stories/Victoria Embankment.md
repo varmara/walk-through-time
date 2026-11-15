@@ -1,6 +1,5 @@
 ---
 type: story
-layer: meadows
 source: https://en.wikipedia.org/wiki/The_Meadows,_Nottingham
 check: 1898 | 1901 | flood defence | Arthur Brown | Memorial Gardens
 at:

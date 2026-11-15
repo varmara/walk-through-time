@@ -1,7 +1,5 @@
 ---
 type: story
-layer: barton
-group: thrumpton
 source: https://en.wikipedia.org/wiki/Thrumpton_Hall
 check: staircase | John Webb | Inigo Jones
 at:

@@ -1,6 +1,5 @@
 ---
 type: story
-layer: civic
 source: https://en.wikipedia.org/wiki/Nottingham_Guildhall
 year: "1888"
 check: "1888"

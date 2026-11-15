@@ -1,7 +1,5 @@
 ---
 type: story
-layer: wilford
-group: wilford-village
 source: https://en.wikipedia.org/wiki/St_Wilfrid's_Church,_Wilford
 check: late 14th century | Gervase de Wilford | 1361 | Henry Kirke White | inspiration
 at:

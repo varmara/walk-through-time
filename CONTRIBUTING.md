@@ -5,27 +5,43 @@ There are two kinds.
 
 ## 1. A story layer (hand-written)
 
-A layer is a file in `stories/<city>/`, named `NN-<id>.md` (`NN` sets the order in the Layers sheet), holding
-its title, settings and introduction:
+Everything written by hand is a note: one Markdown file in `stories/<city>/notes/`, as in an Obsidian vault,
+which the folder can be opened as. A layer is an **index** note (`notes/indexes/`): its introduction, then its
+stories listed as links, under a `##` heading for each group (each a tickbox of its own):
 
 ```markdown
-# Barton in Fabis and Thrumpton
+---
+type: index
 id: barton
-groups: barton-fabis = Barton in Fabis | thrumpton = Thrumpton
-
+order: 14
+groups:
+  - barton-fabis = Barton in Fabis
+  - thrumpton = Thrumpton
+---
 Two or three plain sentences on the history behind the layer.
+
+## Barton in Fabis
+- [[St George's Church]]
+
+## Thrumpton
+- [[Thrumpton Hall]]
+- [[The staircase]]
 ```
 
-`groups:` splits a layer into tickboxes, each `key = Title` (keys unique across all layers). A layer file can
-also say `kind: people` (the People layer) or `kind: facts` (the "Did you know" facts).
+| Property | Meaning |
+|---|---|
+| `id` | the layer's id, which links use (`?layer=barton`); else made from the file's name |
+| `section` | `Stories` (the default: a layer of places) or `Topics` (a subject gathered from any layer, below) |
+| `order` | its place in its section of the Layers sheet; else after those with one, by name |
+| `groups` | a group's key, `key = Heading`, only to keep one that links and remembered tickboxes use; a heading not listed gets `id-heading` |
+| `kind` | `people` for the People layer and `facts` for "Did you know", whose members are not listed |
 
-Its stories are notes, one file each in `stories/<city>/notes/stories/`, which name the layer (see Notes below):
+Each story is a note of its own in `notes/stories/` (events in `notes/events/`), listed in exactly one Stories
+index, which is its layer and group; topics may list it too:
 
 ```markdown
 ---
 type: story
-layer: barton
-group: thrumpton
 source: https://en.wikipedia.org/wiki/Thrumpton_Hall
 check: Babington | priest hole | Pigot | 1617
 at:
@@ -40,7 +56,6 @@ Besides those in Notes below, a story note can give:
 | Property | Meaning |
 |---|---|
 | `name` | the name shown on the map, when the file's name differs (two "St Mary's Church" notes are `St Mary's Church, Clifton` and `St Mary's Church, Nottingham`) |
-| `group` | in a layer with `groups:`, the story's group (its own tickbox) |
 | `year` | when the building standing today was built or opened (`1855`, `c. 1420`, `1841..1844`) |
 | `names: no` | the story's name is not the building's name (an event: "The castle burned, 1831") |
 | `quote` | for a Historic England source: passages copied from the list entry (their site blocks automated reading) |
@@ -69,8 +84,7 @@ name; two notes cannot share one. Properties go at the top, the text below:
 
 ```markdown
 ---
-type: event                    # person, event or story
-layer: civic                   # the story layer it is told in (events: an Events layer if none)
+type: event                    # story, event or person (or index, above)
 source: https://en.wikipedia.org/wiki/1831_reform_riots      # one page, or a list of pages
 check: 8 October 1831 | Duke of Newcastle                    # words the pages must contain between them
 at:                            # its places
@@ -79,7 +93,7 @@ at:                            # its places
   - Bendigo's tomb                                           # a pin another note made
   - from the article                                         # a pin at the source article's point
 see:
-  - Lowe's Silk Mill           # other stories to link from this one
+  - "[[Lowe's Silk Mill]]"     # other stories to link from this one
 ---
 When the Lords threw out the Bill, a crowd burned the castle of the
 [[Henry Pelham-Clinton, 4th Duke of Newcastle|Duke of Newcastle]].[^castle]
@@ -138,33 +152,35 @@ Tables in the same folder, each with a Note column saying why:
 ### Topics
 
 The story layers are mostly places (Wilford, Clifton, Rushcliffe). A topic gathers what is told anywhere on the
-map about one subject, and is a layer of its own in the Layers sheet's Topics section and a theme in the graph.
-Each topic is one file, `stories/<city>/topics/<id>.md`; the story layers stay as they are, and anything can be
-in several topics.
+map about one subject, and is a layer of its own in the Layers sheet's Topics section and a theme in the graph. A
+topic is an index note with `section: Topics`, and may list people, plaques and buildings as well as stories;
+anything can be in several topics.
 
 ```markdown
-# Riot, rebellion and war
+---
+type: index
+section: Topics
 id: war
-
+---
 Nottingham in times of conflict: the castle and the Civil War, the risings and riots of the 19th century, and the
 two World Wars at home.
 
 ## The Civil War
-- story: The storming of Shelford House      (a story, by its name, or layer/name: culture/Nottingham Castle)
-- person: Charles I                          (someone in the People layer, by name: all their places)
-- plaque: The Chilwell Explosion, 1st July 1918   (a plaque, by its title on the map)
-- building: way/4438894                      (a building, by its OpenStreetMap id)
+- [[The storming of Shelford House]]                         a story or event
+- [[Charles I]]                                              a person: a note, or someone on the map by name
+- plaque: The Chilwell Explosion, 1st July 1918              a plaque, by its title on the map
+- [Wollaton Hall](https://www.openstreetmap.org/way/4438894) a building
 ```
 
-`##` headings are optional: each is a tickbox of its own. A topic tells nothing new: each card shows the story,
-plaque or person as its own layer tells it, with its source. The build stops on a line that finds nothing or more
-than one thing (a renamed heading, a plaque two places share), naming the file and line.
+A topic tells nothing new: each card shows the story, plaque or person as its own layer tells it, with its
+source. The build stops on a line that finds nothing or more than one thing (a plaque two places share), naming
+the note and line.
 
 ### Date order
 
 Every set of numbered cards runs in date order: a layer's groups, a topic, a person's places. A story is dated by
 the first year in its text, a plaque by the first year in its words (not when it was put up), a person by the
-year they were born, a building by the year it was built; the undated come last, in the file's order.
+year they were born, a building by the year it was built; the undated come last, in the index's order.
 
 ## 2. A rule layer (from an open dataset)
 

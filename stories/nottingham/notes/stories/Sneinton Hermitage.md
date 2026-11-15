@@ -1,6 +1,5 @@
 ---
 type: story
-layer: caves
 source: https://en.wikipedia.org/wiki/Sneinton
 check: Hermitage | cave dwellings | what little remains
 at:

@@ -1,6 +1,5 @@
 ---
 type: story
-layer: meadows
 source: https://en.wikipedia.org/wiki/Meadow_Lane
 check: 3 September 1910 | closest
 at:

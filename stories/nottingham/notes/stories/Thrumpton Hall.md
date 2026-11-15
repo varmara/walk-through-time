@@ -1,7 +1,5 @@
 ---
 type: story
-layer: barton
-group: thrumpton
 source: https://en.wikipedia.org/wiki/Thrumpton_Hall
 check: Babington | priest hole | Pigot | 1617
 at:

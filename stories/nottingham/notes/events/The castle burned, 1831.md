@@ -1,14 +1,13 @@
 ---
 type: event
-layer: civic
 source: https://en.wikipedia.org/wiki/1831_reform_riots
 check: 8 October 1831 | Duke of Newcastle | hanged | burnt shell
 at:
   - https://www.openstreetmap.org/way/16459858
 names: no
 see:
-  - Lowe's Silk Mill
-  - culture/Nottingham Castle
+  - "[[Lowe's Silk Mill]]"
+  - "[[Nottingham Castle]]"
 ---
 
 When the House of Lords threw out the Second Reform Bill on 8 October 1831, rioting broke out in Nottingham

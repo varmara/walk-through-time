@@ -1,7 +1,5 @@
 ---
 type: story
-layer: science
-group: science-inventions
 source: https://en.wikipedia.org/wiki/Raleigh_Bicycle_Company
 check: Raleigh Street | 1885 | Frank Bowden | 1888 | 1897 | Faraday Road
 at:

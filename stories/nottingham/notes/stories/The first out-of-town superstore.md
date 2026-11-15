@@ -1,7 +1,5 @@
 ---
 type: story
-layer: bridgford
-group: west-bridgford
 source: https://en.wikipedia.org/wiki/West_Bridgford
 check: 1964 | out-of-town superstore | 1966 | Asda | 1999
 at:

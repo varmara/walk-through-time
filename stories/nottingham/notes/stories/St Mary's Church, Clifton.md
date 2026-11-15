@@ -1,6 +1,5 @@
 ---
 type: story
-layer: clifton
 name: St Mary's Church
 source: https://en.wikipedia.org/wiki/St_Mary's_Church,_Clifton
 check: medieval | Cottingham | 1846 | Bodley

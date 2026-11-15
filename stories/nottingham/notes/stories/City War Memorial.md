@@ -1,6 +1,5 @@
 ---
 type: story
-layer: meadows
 source: https://en.wikipedia.org/wiki/City_War_Memorial,_Nottingham
 year: "1927"
 check: Thomas Wallis Gordon | Jesse Boot | 11 November 1927
