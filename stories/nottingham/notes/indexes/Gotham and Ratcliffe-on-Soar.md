@@ -1,7 +1,7 @@
 ---
 type: index
 id: gotham
-order: 18
+order: 14
 ---
 
 The south-west corner, towards the Soar: the village of the Wise Men, and the power station that ended coal power in Britain.

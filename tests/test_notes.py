@@ -51,7 +51,7 @@ He lived by the mill.
 """
 
 
-# the indexes: a Stories index (Civic) listing the event, the People layer; the facts layer is made when none
+# the indexes: a Places index (Civic) listing the event, the People layer; the facts layer is made when none
 INDEXES = {"indexes/Civic.md": "---\ntype: index\nid: civic\norder: 1\n---\nThe council.\n\n- [[The castle burned]]\n",
            "indexes/People.md": "---\ntype: index\nid: people\nkind: people\norder: 2\n---\nWho lived here.\n"}
 
@@ -127,7 +127,7 @@ class Read(unittest.TestCase):
         self.assertEqual({(e["name"], e["group"]) for e in civic["entries"]}, {("The castle burned", "civic-old"), ("B", "civic-new")})
 
     def test_a_story_in_no_index_or_two(self):
-        with self.assertRaisesRegex(notes.NoteError, r"no Stories index lists it: add - \[\[The castle burned\]\]"):
+        with self.assertRaisesRegex(notes.NoteError, r"no Places index lists it: add - \[\[The castle burned\]\]"):
             load({"events/The castle burned.md": EVENT, "indexes/Civic.md": "---\ntype: index\n---\n"})
         with self.assertRaisesRegex(notes.NoteError, "is in Civic already"):
             load({"events/The castle burned.md": EVENT, "indexes/Other.md": "---\ntype: index\n---\n- [[The castle burned]]\n"})

@@ -1,7 +1,7 @@
 ---
 type: index
 id: ruddington
-order: 15
+order: 11
 ---
 
 A village of framework knitters south of the city, the Second World War ammunition depot beyond it, the site of Flawford's lost church, whose name the village church took, and a Victorian banker's hall.

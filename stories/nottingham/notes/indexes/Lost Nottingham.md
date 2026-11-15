@@ -1,6 +1,7 @@
 ---
 type: index
-section: Topics
+section: Threads
+order: 12
 id: lost
 ---
 

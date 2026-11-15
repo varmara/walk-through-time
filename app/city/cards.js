@@ -287,14 +287,14 @@ function storyHtml(s, N){
     ${s.text ? prose(s, N, refs) : refs ? `<p class="src">Source${refs}</p>` : ''}${s.note ? `<p class="src">${esc(s.note)}</p>` : ''}${aboutHtml(s.who, s.source, N)}
     ${s.pin ? `<p class="go"><a href="#" data-ref="${esc(s.pin)}">See the plaque on the map</a></p>` : ''}${seeHtml(J(s.see))}</div>`;
 }
-// the topics a place is in (its layer groups of the Topics section: ",war-1831,coal,"), each opening its places
+// the topics a place is in (its layer groups of the Threads section: ",war-1831,coal,"), each opening its places
 function topicsHtml(keys){
   const gs = String(keys || '').split(',').map(k => S.groups.get(k)).filter(g => g && g.layer.kind === 'topics');
   if (!gs.length) return '';
   // one line per topic (their titles have commas of their own), its groups after it
   const by = new Map();
   for (const g of gs) by.set(g.layer, [...(by.get(g.layer) || []), g]);
-  return `<div class="see"><p>In the topics:</p><ul class="topics">${[...by].map(([L, xs]) => `<li>${L.groups.length > 1
+  return `<div class="see"><p>On these threads:</p><ul class="topics">${[...by].map(([L, xs]) => `<li>${L.groups.length > 1
     ? `${esc(L.title)}: ${xs.map(g => `<a href="#" data-topic="${esc(g.key)}">${esc(g.title)}</a>`).join(', ')}`
     : `<a href="#" data-topic="${esc(xs[0].key)}">${esc(L.title)}</a>`}</li>`).join('')}</ul></div>`;
 }

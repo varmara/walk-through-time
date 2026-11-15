@@ -1,7 +1,7 @@
 ---
 type: index
 id: facts
-order: 12
+order: 17
 kind: facts
 ---
 

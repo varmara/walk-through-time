@@ -185,7 +185,7 @@ def read_notes(folder):
     return out
 
 
-SECTIONS = ("Stories", "Topics")
+SECTIONS = ("Places", "Threads")
 ITEM_PLAQUE = re.compile(r"^plaque:\s*(.+)$")
 
 
@@ -193,7 +193,7 @@ def index_layer(name, props, body):
     """An index note (type: index): a layer of the Layers sheet. Its text: the introduction, then `## Group`
     headings, each a tickbox, listing its members one per line:
 
-        - [[Note]]                     a story or event (a Stories index: each is in exactly one), or in a topic
+        - [[Note]]                     a story or event (a Places index: each is in exactly one), or in a topic
                                        also a person (a note, or someone on the map by name)
         - plaque: Plaque to Albert Ball                                   a plaque, by its title (a topic)
         - [Wollaton Hall](https://www.openstreetmap.org/way/4438894)      a building (a topic)
@@ -202,7 +202,7 @@ def index_layer(name, props, body):
     the section), kind (people or facts, for those layers, whose members are not listed). A group's key, which
     links and remembered tickboxes use, is the id and its heading: wilford-the-village."""
     L = {"id": str(props.get("id") or slug(name)), "title": str(props.get("title") or name), "note": name,
-         "section": str(props.get("section") or "Stories"), "order": props.get("order"),
+         "section": str(props.get("section") or "Places"), "order": props.get("order"),
          **({"kind": str(props["kind"])} if props.get("kind") else {}), "entries": [], "members": []}
     if L["section"] not in SECTIONS:
         raise NoteError(f"{name}: section: must be one of {', '.join(SECTIONS)}")
@@ -238,7 +238,7 @@ def index_layer(name, props, body):
 
 
 def topic(L, kinds):
-    """A Topics index as s06_layers.topic_layers takes it: its groups' titles and keys, and its members, a [[link]]
+    """A Threads index as s06_layers.topic_layers takes it: its groups' titles and keys, and its members, a [[link]]
     being a story (a story or event note) or else a person (a person note, or someone on the map by name).
     kinds: {note name: its type}."""
     return {"id": L["id"], "title": L["title"], "intro": L["intro"], "order": L["order"],
@@ -248,10 +248,10 @@ def topic(L, kinds):
 
 
 def load(folder):
-    """The notes under the folder as the build's layers. Returns {"layers": the Stories indexes (with the People
-    and facts layers), each with its notes' entries; "topics": the Topics indexes, for s06_layers.topic_layers;
+    """The notes under the folder as the build's layers. Returns {"layers": the Places indexes (with the People
+    and facts layers), each with its notes' entries; "topics": the Threads indexes, for s06_layers.topic_layers;
     "people": {name: {"wikipedia": title | False, "group"}}; "names": [note names]}. Raises NoteError naming the
-    note for anything it cannot read, and for a story or event no Stories index lists (or two do)."""
+    note for anything it cannot read, and for a story or event no Places index lists (or two do)."""
     folder = Path(folder)
     if not folder.is_dir():
         return {"layers": [], "topics": [], "people": {}, "names": []}
@@ -267,7 +267,7 @@ def load(folder):
                 if pname in pins and pins[pname] != xy:
                     problems.append(f"{name}: the pin {pname!r} is made twice, at different points")
                 pins[pname] = xy
-    # the indexes: layers, and where each story or event is told (its Stories index and group)
+    # the indexes: layers, and where each story or event is told (its Places index and group)
     kinds = {name: props.get("type") for name, props, _ in notes}
     indexes = []
     for name, props, body in notes:
@@ -279,21 +279,21 @@ def load(folder):
     indexes.sort(key=lambda L: (L["order"] if isinstance(L["order"], int) else 999, L["note"]))
     home = {}
     for L in indexes:
-        if L["section"] != "Stories":
+        if L["section"] != "Places":
             continue
         for m in L["members"]:
             if m["kind"] != "note" or kinds.get(m["name"]) not in ("story", "event"):
-                problems.append(f"{m['line']}: a Stories index lists stories and events: "
+                problems.append(f"{m['line']}: a Places index lists stories and events: "
                                 f"{m['name']!r} is " + ("no note" if m["name"] not in kinds else f"a {kinds[m['name']]} note"))
             elif m["name"] in home:
                 problems.append(f"{m['line']}: {m['name']!r} is in {home[m['name']][0]['note']} already: "
-                                f"a story is told in one Stories index (topics may list it too)")
+                                f"a story is told in one Places index (threads may list it too)")
             else:
                 home[m["name"]] = (L, m["group"])
-    layers = [L for L in indexes if L["section"] == "Stories"]
+    layers = [L for L in indexes if L["section"] == "Places"]
     if not any(L.get("kind") == "facts" for L in layers):
         layers.append({"id": "facts", "kind": "facts", "title": "Did you know", "intro": "", "entries": [], "members": []})
-    topics = [topic(L, kinds) for L in indexes if L["section"] == "Topics"]
+    topics = [topic(L, kinds) for L in indexes if L["section"] == "Threads"]
     people_layer = next((L for L in layers if L.get("kind") == "people"), None)
     facts_layer = next((L for L in layers if L.get("kind") == "facts"), None)
     info = {}
@@ -342,7 +342,7 @@ def load(folder):
                     raise NoteError(f"{name}: layer: and group: are not used: list the note in an index "
                                     f"(notes/indexes/), under its group's heading")
                 if name not in home:
-                    raise NoteError(f"{name}: no Stories index lists it: add - [[{name}]] to one (notes/indexes/)")
+                    raise NoteError(f"{name}: no Places index lists it: add - [[{name}]] to one (notes/indexes/)")
                 target, g = home[name]
                 group = next((k for k, t in target.get("groups", []) if t == g), None)
             else:

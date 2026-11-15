@@ -29,12 +29,12 @@ Two or three plain sentences on the history behind the layer.
 | Property | Meaning |
 |---|---|
 | `id` | the layer's id, which links use (`?layer=barton`); else made from the file's name |
-| `section` | `Stories` (the default: a layer of places) or `Topics` (a subject gathered from any layer, below) |
+| `section` | `Places` (the default: a small area of the map, where each of its stories lives) or `Threads` (a story told across the map, below) |
 | `order` | its place in its section of the Layers sheet; else after those with one, by name |
 | `kind` | `people` for the People layer and `facts` for "Did you know", whose members are not listed |
 
-Each story is a note of its own in `notes/stories/` (events in `notes/events/`), listed in exactly one Stories
-index, which is its layer and group; topics may list it too:
+Each story is a note of its own in `notes/stories/` (events in `notes/events/`), listed in exactly one Places
+index, which is its layer and group; threads may list it too:
 
 ```markdown
 ---
@@ -146,21 +146,25 @@ Tables in the same folder, each with a Note column saying why:
 | `old-lines.md` | the years a disused railway or lost canal opened and closed, by its name in OpenStreetMap, with the source checked; these come before Wikidata's and OpenStreetMap's own dates |
 | `architects-to-find.md` | architects on the map with no article or page found yet, and where to look; for editors, not read by the build |
 
-### Topics
+### Places and threads
 
-The story layers are mostly places (Wilford, Clifton, Ruddington). A topic gathers what is told anywhere on the
-map about one subject, and is a layer of its own in the Layers sheet's Topics section and a theme in the graph. A
-topic is an index note with `section: Topics`, and may list people, plaques and buildings as well as stories;
-anything can be in several topics.
+Every story lives in one **place**: a Places index for a small area of the map (the castle rock, the Lace Market,
+Wilford, Ruddington). A **thread** follows one story across the map, through any places: the castle and the
+Crown, frames and lace, coal and getting about. It is a layer of its own in the Layers sheet's Threads section and
+a theme in the graph. A thread is an index note with `section: Threads`, and may list people, plaques and
+buildings as well as stories; anything can be on several threads, and a card lists the threads it is on, each
+opening that thread. Stories do not link to the next one in a thread in their text, so a story can join a thread
+anywhere without others changing: the cards keep date order, and the `##` headings are its chapters, by period
+or by strand (The Civil War, The dukes' mansion).
 
 ```markdown
 ---
 type: index
-section: Topics
-id: war
+section: Threads
+id: civilwar
 ---
-Nottingham in times of conflict: the castle and the Civil War, the risings and riots of the 19th century, and the
-two World Wars at home.
+Nottingham in the Civil War: where the King raised his standard, the castle held for Parliament, and a Royalist
+house stormed and burned.
 
 ## The Civil War
 - [[The storming of Shelford House]]                         a story or event
@@ -169,13 +173,13 @@ two World Wars at home.
 - [Wollaton Hall](https://www.openstreetmap.org/way/4438894) a building
 ```
 
-A topic tells nothing new: each card shows the story, plaque or person as its own layer tells it, with its
+A thread tells nothing new: each card shows the story, plaque or person as its own layer tells it, with its
 source. The build stops on a line that finds nothing or more than one thing (a plaque two places share), naming
 the note and line.
 
 ### Date order
 
-Every set of numbered cards runs in date order: a layer's groups, a topic, a person's places. A story is dated by
+Every set of numbered cards runs in date order: a place's groups, a thread, a person's places. A story is dated by
 the first year in its text, a plaque by the first year in its words (not when it was put up), a person by the
 year they were born, a building by the year it was built; the undated come last, in the index's order.
 

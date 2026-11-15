@@ -1,6 +1,7 @@
 ---
 type: index
-section: Topics
+section: Threads
+order: 15
 id: women
 ---
 

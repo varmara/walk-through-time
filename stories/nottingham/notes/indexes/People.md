@@ -1,7 +1,7 @@
 ---
 type: index
 id: people
-order: 13
+order: 18
 kind: people
 ---
 

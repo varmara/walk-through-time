@@ -1,4 +1,4 @@
-"""Topics (Topics indexes, notes/indexes/*.md: pipeline/notes.index_layer and topic, s06_layers.topic_layers) and
+"""Topics (Threads indexes, notes/indexes/*.md: pipeline/notes.index_layer and topic, s06_layers.topic_layers) and
 the date order of numbered cards (pipeline/layerdata.in_date_order)."""
 import unittest
 
@@ -23,7 +23,7 @@ KINDS = {"The storming of Shelford House": "event", "The castle burned": "story"
 
 
 def parsed(body, props=None):
-    return notes.topic(notes.index_layer("Riot and war", props or {"type": "index", "section": "Topics", "id": "war"}, body), KINDS)
+    return notes.topic(notes.index_layer("Riot and war", props or {"type": "index", "section": "Threads", "id": "war"}, body), KINDS)
 
 
 class Parse(unittest.TestCase):
@@ -61,7 +61,7 @@ class Resolve(unittest.TestCase):
 
     def test_members(self):
         (L,) = self.run_(TOPIC)
-        self.assertEqual((L["section"], L["kind"]), ("Topics", "topics"))
+        self.assertEqual((L["section"], L["kind"]), ("Threads", "topics"))
         g1, g2 = L["groups"]
         self.assertEqual(g1["key"], "war-the-civil-war")
         self.assertEqual(g1["items"], [["The storming of Shelford House", [3], {"layer": "rushcliffe"}],
@@ -76,7 +76,7 @@ class Resolve(unittest.TestCase):
         self.assertEqual(self.out.pins[0]["T"], ",war-the-civil-war,war-riots,")
 
     def test_no_groups(self):
-        (L,) = self.run_(notes.topic(notes.index_layer("Boots", {"section": "Topics"}, "- [[Charles I]]\n"), {}))
+        (L,) = self.run_(notes.topic(notes.index_layer("Boots", {"section": "Threads"}, "- [[Charles I]]\n"), {}))
         self.assertEqual([g["key"] for g in L["groups"]], ["boots"])
 
     def test_problems_name_the_line(self):

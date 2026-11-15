@@ -68,12 +68,12 @@ const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (
   // a topic's places as numbered cards, from its button in the Layers sheet
   await open('');
   await page.click('#bLayers');
-  const topicBtn = await page.$('#lSections .section:has(.seclbl:text-is("Topics")) [data-cards]');
-  check(!!topicBtn, 'the Layers sheet has topics');
+  const topicBtn = await page.$('#lSections .section:has(.seclbl:text-is("Threads")) [data-cards]');
+  check(!!topicBtn, 'the Layers sheet has threads');
   if (topicBtn) {
     await page.evaluate(b => b.click(), topicBtn);
     await page.waitForTimeout(3000);
-    check(/^1 of \d+$/.test(await text('#pCount')) && (await page.$$('#pCards .pcard')).length > 1, "a topic's places open as numbered cards");
+    check(/^1 of \d+$/.test(await text('#pCount')) && (await page.$$('#pCards .pcard')).length > 1, "a thread's places open as numbered cards");
   }
 
   await page.click('#bMap').catch(() => {});

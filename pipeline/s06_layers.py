@@ -64,7 +64,7 @@ def main(city_id):
     meta = []
     visitor_meta, routes, basics = visitor(city_id, ctx, out)
 
-    # ---- story layers (the Stories indexes, stories/<city>/notes/indexes/); the People layer, from s06_people, where the stories put it
+    # ---- story layers (the Places indexes, stories/<city>/notes/indexes/); the People layer, from s06_people, where the stories put it
     for L in cur["layers"]:
         if L.get("kind") == "facts":    # 'Did you know' facts go on the cards (s07), not into a layer
             continue
@@ -81,7 +81,7 @@ def main(city_id):
                 out.add(e["b"], e["group"], L["id"], e["story"], e["source"], e.get("place"), more=more_of(e))
                 e["_story"] = out.stories[str(e["b"])][-1]
         groups = L.get("groups") or [[L["id"], L["title"]]]
-        meta.append({"id": L["id"], "title": L["title"], "intro": L.get("intro", ""), "section": "Stories",
+        meta.append({"id": L["id"], "title": L["title"], "intro": L.get("intro", ""), "section": "Places",
                      "kind": "stories",
                      "groups": [{"key": k, "title": t, "count": len({e["b"] for e in es if e["group"] == k}),
                                  "items": grouped([[e["b"], e["name"]] for e in es if e["group"] == k])}
@@ -114,7 +114,7 @@ def main(city_id):
         return t.get("name") or inside.get(i) or names.get(str(i)) or t.get("addr:street") and \
             f"{t.get('addr:housenumber', '')} {t['addr:street']}".strip() or "Unnamed building"
 
-    # ---- topics (the Topics indexes, stories/<city>/notes/indexes/): stories, people, plaques and buildings from any layer, on one subject
+    # ---- topics (the Threads indexes, stories/<city>/notes/indexes/): stories, people, plaques and buildings from any layer, on one subject
     topic_meta = topic_layers(cur.get("topics") or [], cur["entries"], ppl["meta"], out, ctx.buildings, bname,
                               {L["id"] for L in cur["layers"] if L.get("kind") not in ("facts", "people")})
     meta += topic_meta
@@ -226,7 +226,7 @@ def cross_links(entries, story_layers, persons=()):
 
 
 def topic_layers(topics, entries, people, out, buildings, bname, story_layers):
-    """The Topics section's layers: each topic's members found where the map has them (stories by heading, people
+    """The Threads section's layers: each topic's members found where the map has them (stories by heading, people
     by name, plaques by title, buildings by OpenStreetMap id), as items [name, [places], hint] (hint: the story's
     layer, or that it is a person, a plaque or a building, so a card shows the right story). Each building and
     pin is marked with the topic's groups, so ticking a topic shows them. Raises on a line that finds nothing or
@@ -300,12 +300,12 @@ def topic_layers(topics, entries, people, out, buildings, bname, story_layers):
         groups = [[keys[g], g] for g in T["groups"]] or [[tid, T["title"]]]
         if tid in items and T["groups"]:
             groups.insert(0, [tid, "Other"])
-        meta.append({"id": tid, "title": T["title"], "intro": T.get("intro", ""), "section": "Topics", "kind": "topics",
+        meta.append({"id": tid, "title": T["title"], "intro": T.get("intro", ""), "section": "Threads", "kind": "topics",
                      "groups": [{"key": k, "title": t, "count": len({r for it in items.get(k, []) for r in it[1]}),
                                  "items": items.get(k, [])} for k, t in groups]})
         log(f"s06 topic {tid}: {sum(len(v) for v in items.values())} members")
     if problems:
-        raise SystemExit("Topics (the Topics indexes, stories/<city>/notes/indexes/): fix these lines:\n  " + "\n  ".join(problems))
+        raise SystemExit("Threads (the Threads indexes, stories/<city>/notes/indexes/): fix these lines:\n  " + "\n  ".join(problems))
     return meta
 
 

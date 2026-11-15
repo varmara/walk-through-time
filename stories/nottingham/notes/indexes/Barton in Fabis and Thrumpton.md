@@ -1,7 +1,7 @@
 ---
 type: index
 id: barton
-order: 14
+order: 10
 ---
 
 Two villages on the south bank of the Trent, upstream from Clifton: Barton, once Barton in the Beans, and Thrumpton,

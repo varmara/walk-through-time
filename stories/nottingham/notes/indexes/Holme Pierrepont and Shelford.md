@@ -1,7 +1,7 @@
 ---
 type: index
 id: holme
-order: 16
+order: 12
 ---
 
 The flat land along the Trent east of the city: the Pierreponts' Tudor hall, the gravel pits that became a centre for watersports, and Shelford, where a Royalist garrison was stormed in the Civil War.
