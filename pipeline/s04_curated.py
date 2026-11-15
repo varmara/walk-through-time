@@ -210,6 +210,49 @@ def people_group(labels):
     return None
 
 
+# a sentence's end: a full stop after a small letter, a digit or a closing bracket or quote, before a capital
+# ("c. 1450" and "D. H. Lawrence" do not end one)
+SENTENCE_END = re.compile(r"(?<=[a-z0-9)\u2019'\"\]])\.(?:\[\^[\w-]+\])?(?=\s+[A-Z\u201c\"(\[])")
+
+
+def footnoted(story, facts, pages, cites):
+    """A story resting on several pages, its sentences each footnoted to the page(s) that hold the check words in
+    it: [^s1] after the sentence, s1 the page. A sentence with no check word in it, or one the writer footnoted
+    already, is left as it is. Returns (the story, its new footnotes {key: page})."""
+    if len(pages) < 2:
+        return story, {}
+    new, out = {}, []
+    for para in story.split("\n\n"):
+        parts, start = [], 0
+        for m in [*SENTENCE_END.finditer(para), None]:
+            end = m.end() if m else len(para)
+            s = para[start:end]
+            words = [f for f in facts if f.lower() in s.lower()]
+            if words and not re.search(r"\[\^[\w-]+\]\s*$", s.rstrip()):
+                # the pages holding all its words; else each page holding any of them
+                hold = [p for p in pages if all(w.lower() in p["text"] for w in words)] \
+                    or [p for p in pages if any(w.lower() in p["text"] for w in words)]
+                for p in hold:
+                    k = next((k for k, c in {**cites, **new}.items() if c["url"] == p["url"]), None)
+                    if k is None:
+                        k = f"s{len(new) + 1}"
+                        new[k] = p
+                    s = s.rstrip() + f"[^{k}]" + s[len(s.rstrip()):]
+            parts.append(s)
+            start = end
+        out.append("".join(parts))
+    return "\n\n".join(out), new
+
+
+def date_page(date, pages):
+    """The first page that gives a story's date: "c. 1450" by 1450, "11th century" as it is written."""
+    d = str(date or "")
+    want = d.lower() if "century" in d else (re.search(r"\d{3,4}", d) or [None])[0]
+    if not want:
+        return None
+    return next((p for p in pages if want.lower() in p["text"]), None)
+
+
 def norm(s):
     return " ".join(str(s or "").lower().replace("’", "'").split())
 
@@ -390,12 +433,25 @@ def main(city_id):
 
             def cited(s):
                 return {"title": s["title"], "url": s["url"], "kind": s["kind"], **({"read": s["read"]} if s.get("read") else {})}
+            # each sentence footnoted to the page that holds its check words, and each date to the page giving it
+            pages = [p for p in [src, *more] if p]
+            checked = [p for p in pages if p.get("kind") != "web" and not p.get("read")]
+            story, auto = footnoted(e["story"], list(e.get("facts", ())), checked, cites)
+            dated = {}
+            for k in ("when", "made"):
+                if e.get(k):
+                    p = date_page(e[k], checked + list(cites.values())) or (pages[0] if pages and not checked else None)
+                    if p:
+                        dated[k + "Src"] = cited(p)
+                    else:
+                        log(f"    {L['id']} / {e['name']}: its {k}: {e[k]} is in none of its pages: shown without a source")
             entries.append({"layer": L["id"], "group": group, "b": b, "name": e["name"],
                             **({"pin": list(a["coords"])} if b is None and not e.get("unplaced") else {}),
-                            "story": e["story"], "how": how,
+                            "story": story, "how": how,
                             "source": cited(src),
                             **({"sources": [cited(s) for s in more]} if more else {}),
-                            **({"cites": {k: cited(s) for k, s in cites.items()}} if cites else {}),
+                            **({"cites": {k: cited(s) for k, s in {**cites, **auto}.items()}} if cites or auto else {}),
+                            **dated,
                             **{k: e[k] for k in ("links", "weblinks", "note", "type", "who", "unplaced", "when", "made") if e.get(k)},
                             **({"place": {"title": a["title"], "url": a["url"], "kind": a["kind"]}} if e.get("place") else {}),
                             **({"year": list(parse_year(e["year"]))} if e.get("year") and parse_year(e["year"]) else {}),

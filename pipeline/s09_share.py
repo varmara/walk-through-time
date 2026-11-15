@@ -13,6 +13,7 @@ Writes data/share/<city>/<type>-<id>.html (the folder is rebuilt each time, so r
 a shared link keeps working, as the page is keyed by OpenStreetMap id).
 """
 import html
+import re
 import json
 import shutil
 import urllib.parse
@@ -112,6 +113,11 @@ def ref_key(r):
     return f"b{r}" if isinstance(r, int) else r
 
 
+def unmarked(text):
+    """A story's words without its footnote marks ([^s1]): the page gives each story's source below it."""
+    return re.sub(r"\[\^[\w-]+\]", "", str(text or ""))
+
+
 def layer_pages(data, city_id, city_name, site, out):
     e = lambda s: html.escape(str(s), quote=False)  # noqa: E731
     feats, pins = data["buildings"]["features"], data.get("pins", {}).get("features", [])
@@ -190,7 +196,7 @@ def layer_pages(data, city_id, city_name, site, out):
                             + (f'<p class="meta">{e(" · ".join(meta))}</p>' if meta else "")
                             + (f'<p><i>{e(who["text"])}</i></p><p class="src">Wikipedia: <a href="{html.escape(who["url"])}">'
                                f'{e(who["title"])}</a></p>' if who else "")
-                            + "".join(f"<p>{e(s['text'])}</p>{src_html(s.get('source'))}" for s in stories[:4])
+                            + "".join(f"<p>{e(unmarked(s['text']))}</p>{src_html(s.get('source'))}" for s in stories[:4])
                             + f'<p class="go"><a href="{html.escape(link)}">Show on the map</a></p></article>')
                 n += 1
             if arts:

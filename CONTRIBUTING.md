@@ -113,6 +113,9 @@ When the Lords threw out the Bill, a crowd burned the castle of the
   list entry also gives `quote:`, the passages copied from it, which the check words are found in instead.
 - **Footnotes** (`[^name]`) let one paragraph or fact rest on its own page, checked for its own words, or
   `— read: 2026-11-14` for another site's.
+- **Footnotes the build adds.** A story with several sources gets a footnote after each sentence, to the page
+  that holds the check words in that sentence; and its `when:` and `made:` dates are footnoted to the page that
+  gives them (the build log lists a date that none of its pages gives: it is shown without a source).
 - **Links.** `[[Note]]` or `[[Note|words shown]]` links another note, or a person on the map by the name the
   People layer gives them (who need not have a note yet). On the person's card, the story is listed under "In
   these stories and events"; in the graph, the person is linked to its places. A link to a story is its "see

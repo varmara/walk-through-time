@@ -1,7 +1,7 @@
 ---
 type: story
 when: "1678"
-source: https://en.wikipedia.org/wiki/St_Nicholas'_Church,_Nottingham
+source: https://en.wikipedia.org/wiki/St_Nicholas_Church,_Nottingham
 year: "1678"
 check: Royalists | Hutchinson | 1643 | 1671 | 1678
 at:

@@ -286,7 +286,13 @@ function prose(s, N, tail = ''){
   }).join('');
 }
 function storyHtml(s, N){
-  const refs = N.cite(kinded(s.source)) + N.cite(kinded(s.place)) + (J(s.sources) || []).map(x => N.cite(kinded(x))).join('');
+  // its date first, footnoted to the page that gives it; its sentences' own footnotes; then any of its sources
+  // no sentence is footnoted to, at its end
+  const wt = whenText(s.when, s.made), ws = J(s.whenSrc), ms = J(s.madeSrc);
+  const dateLine = wt ? `<div class="swhen">${s.when ? esc(s.when) + N.cite(kinded(ws)) : ''}${s.made && String(s.made) !== String(s.when)
+    ? `${s.when ? ' · ' : ''}made ${esc(s.made)}${N.cite(kinded(ms))}` : ''}</div>` : '';
+  const cs = J(s.cites) || {}, inText = new Set([...String(s.text || '').matchAll(/\[\^([\w-]+)\]/g)].map(m => cs[m[1]]?.url).filter(Boolean));
+  const refs = [s.source, s.place, ...(J(s.sources) || [])].filter(x => x && !inText.has(x.url)).map(x => N.cite(kinded(x))).join('');
   const P = s.who && people().get(s.who);
   if (s.who && (s.layer === 'people' || P)) {
     const role = P && ROLE[P.group.key];
@@ -294,8 +300,7 @@ function storyHtml(s, N){
     ${s.text ? prose(s, N, refs) : refs ? `<p class="src">Source${refs}</p>` : ''}${s.here ? `<p class="here"><b>Here:</b> ${esc(s.here)}</p>` : ''}${whoLine(s.who, s.own)}
     ${s.pin ? `<p class="go"><a href="#" data-ref="${esc(s.pin)}">See the plaque on the map</a></p>` : ''}${seeHtml(J(s.see))}</div>`;
   }
-  const wt = whenText(s.when, s.made);
-  return `<div class="story">${s.label ? `<div class="seclbl">${esc(s.label)}</div>` : ''}${wt ? `<div class="swhen">${esc(wt)}</div>` : ''}
+  return `<div class="story">${s.label ? `<div class="seclbl">${esc(s.label)}</div>` : ''}${dateLine}
     ${s.text ? prose(s, N, refs) : refs ? `<p class="src">Source${refs}</p>` : ''}${s.note ? `<p class="src">${esc(s.note)}</p>` : ''}${aboutHtml(s.who, s.source, N)}
     ${s.pin ? `<p class="go"><a href="#" data-ref="${esc(s.pin)}">See the plaque on the map</a></p>` : ''}${seeHtml(J(s.see))}</div>`;
 }
@@ -569,7 +574,7 @@ function pinCard(p){
   if (p.acc) rows.push(['Accreditation', esc(p.acc)]);
   return { title: p.name, rows, stories: withPeople([{ text: p.text, source: J(p.source), place: J(p.place), who: p.who, see: p.see,
              layer: p.layer, people: J(p.people), sources: J(p.sources), cites: J(p.cites), weblinks: J(p.weblinks), own: p.own,
-             when: p.when, made: p.made, here: p.here }]),
+             when: p.when, made: p.made, here: p.here, whenSrc: J(p.whenSrc), madeSrc: J(p.madeSrc) }]),
            dyk: J(p.dyk), coll: J(p.coll),
            links: placeLinks(p, false) };
 }
