@@ -5,7 +5,7 @@ import { hasPins, isArea, kindOf, marksBuildings, parseRef, saveActive } from '.
 import { addNls, paintBuildings, setHills, setLand } from './map.js';
 import { curYear, updateYear } from './timebar.js';
 import { openRef } from './cards.js';
-import { showGroups, showPlaces } from './places.js';
+import { clearPlaces, showGroups, showPlaces } from './places.js';
 
 // ================= Layers panel =================
 export function renderLayers(){
@@ -89,14 +89,21 @@ export function infoHtml(L, g, withIntro = true){
 export function updateSummary(){
   const names = [...S.active].map(k => S.groups.get(k)).filter(Boolean)
     .map(g => g.layer.groups.filter(x => x.count > 0).length === 1 ? g.layer.title : g.title);
-  $('lSummary').innerHTML = names.length
+  // numbered places on the map (a story's, a topic's, a person's) are not a layer, but they are what is shown: said
+  // first, with a way to hide them
+  const places = S.places ? `<span class="placeson">Numbered places on the map: <b>${esc(S.places.name)}</b>
+    <button class="textbtn" id="lPlacesOff">Hide them</button></span>` : '';
+  $('lSummary').innerHTML = places + (names.length
     ? `<b>${names.length} on:</b> ${esc(names.join(', '))}${[...S.active].some(marksBuildings) ? '<span class="key"><i style="background:var(--marked)"></i>in the layer, no date yet</span>' : ''}`
-    : 'No layers on. Tick any to highlight them on the map.';
-  $('lClear').hidden = !names.length;
+    : places ? '' : 'No layers on. Tick any to highlight them on the map.');
+  const off = $('lPlacesOff');
+  if (off) off.onclick = () => { clearPlaces(true); updateSummary(); };
+  $('lClear').hidden = !names.length && !S.places;
   $('layerCount').hidden = !names.length;
   $('layerCount').textContent = names.length;
 }
-$('lClear').onclick = () => { S.active.clear(); saveActive(); renderLayers(); applyLayers(); };
+$('lClear').onclick = () => { if (S.places) clearPlaces(true); S.active.clear(); saveActive(); renderLayers(); applyLayers(); };
+$('bLayers').addEventListener('click', () => updateSummary());       // (the numbered places may have changed since)
 
 export function applyLayers(){
   updateSummary();

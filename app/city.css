@@ -220,3 +220,5 @@ div.see > p{margin:0}
 .person-places ul.named li{margin:3px 0}
 .person-places p.street{margin:6px 0;font:15px/1.5 var(--sans)}
 .person-places p.street b{font-weight:600;margin-right:4px}
+.summary .placeson{display:block;margin-bottom:4px}
+.summary .placeson .textbtn{margin-left:4px}

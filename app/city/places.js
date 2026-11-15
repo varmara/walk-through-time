@@ -108,6 +108,8 @@ export function glide(camera){
 }
 // how close a card takes the map to its place: near enough to pick out the building, with its street round it
 const PLACE_ZOOM = 16;
+const FLY_AFTER = 350;       // ms of the cards left still before the map flies
+let flyWait;
 export function setPlace(i, fly = true){
   if (!S.places) return;
   S.places.i = i;
@@ -118,8 +120,11 @@ export function setPlace(i, fly = true){
   Object.entries(S.pins).forEach(([k, m]) => m.getElement().classList.toggle('on', k === 'p' + (i + 1)));
   $('pCards').querySelectorAll('.pcard').forEach(c => c.classList.toggle('on', +c.dataset.i === i));
   loadAround(i);
-  if (fly) glide({ center: refCentre(S.places.bs[i]), zoom: Math.max(S.map.getZoom(), PLACE_ZOOM),
-    padding: { bottom: $('placesbar').offsetHeight + 20 } });
+  // the flight starts once the cards are left still: swiping back and forth would otherwise start a new flight
+  // from wherever the last one had got to, low and short, never rising
+  clearTimeout(flyWait);
+  if (fly) flyWait = setTimeout(() => S.places && S.places.i === i && glide({ center: refCentre(S.places.bs[i]),
+    zoom: Math.max(S.map.getZoom(), PLACE_ZOOM), padding: { bottom: $('placesbar').offsetHeight + 20 } }), FLY_AFTER);
 }
 export function goToCard(i){
   const card = $('pCards').querySelector(`[data-i="${i}"]`);
