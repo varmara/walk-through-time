@@ -4,7 +4,7 @@ id: science
 order: 16
 ---
 
-Where Nottingham invented, made and mined: from the stocking frame to the bicycle, the medicines of Boots, the
+Where Nottingham invented, made and mined: from the stocking frame to the bicycle and cigarettes, the medicines of Boots, the
 scanner that sees inside the body, and the water, coal and shells the city depended on.
 
 ## Inventions and discoveries
@@ -20,3 +20,8 @@ scanner that sees inside the body, and the water, coal and shells the city depen
 - [[Thomas Hawksley]]
 - [[Gedling Colliery]]
 - [[National Shell Filling Factory]]
+
+## Bicycles and tobacco
+- [[Raleigh's Faraday Road works]]
+- [[The Humber works]]
+- [[Player's bonded warehouses]]

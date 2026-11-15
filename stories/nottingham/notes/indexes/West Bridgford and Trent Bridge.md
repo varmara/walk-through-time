@@ -13,6 +13,8 @@ South of the river: Test cricket, Nottingham Forest and the county's headquarter
 - [[The Trent Bridge Inn]]
 - [[A fort at the bridge]]
 - [[The first Test, 1899]]
+- [[Bodyline, 1932–33]]
+- [[Forest's European Cups, 1979 and 1980]]
 
 ## West Bridgford and Lady Bay
 - [[St Giles' Church]]

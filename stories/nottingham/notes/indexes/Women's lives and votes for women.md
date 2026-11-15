@@ -14,8 +14,11 @@ Nottingham women who campaigned for the vote, ran schools, businesses and librar
 - [[Nellie Crocker]]
 
 ## Work, learning and care
+- [[Lucy Hutchinson]]
 - [[Cassandra Willoughby]]
+- [[Mary Howitt]]
 - [[Ann Morley]]
+- [[Florence Boot]]
 - [[Ruth Bryan]]
 - [[Frances Bush]]
 - [[Louisa Clarke]]

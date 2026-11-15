@@ -8,7 +8,10 @@ The poets, novelists, painters and photographers who lived, worked or were born 
 
 
 ## Writers
+- [[Lucy Hutchinson]]
 - [[Ruth Bryan]]
+- [[Mary Howitt]]
+- [[William Howitt]]
 - [[Lord Byron]]
 - [[Henry Kirke White]]
 - [[Clifton Grove]]
@@ -17,6 +20,7 @@ The poets, novelists, painters and photographers who lived, worked or were born 
 - [[J. M. Barrie]]
 - [[Arthur Mee]]
 - [[D. H. Lawrence]]
+- [[University College]]
 - [[Graham Greene]]
 - [[Alan Sillitoe]]
 - [[Gilbert Wakefield]]

@@ -14,6 +14,7 @@ merchants' warehouses, and the frame-breakers who fought the machines.
 - [[Framework Knitters' Museum]]
 - [[The first Luddites]]
 - [[Lowe's Silk Mill]]
+- [[Samuel Morley]]
 - plaque: Plaque to George Henry Hurt
 
 ## Lace
