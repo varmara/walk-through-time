@@ -27,7 +27,7 @@ Coal and how it was carried: the pits, a wagonway, the canal and the railways, t
 - [[Victoria Centre]]
 - [[The Meadows rebuilt]]
 
-## Buses, aircraft and power
+## Buses, air and power
 - [[T. H. Barton]]
 - [[Tollerton airfield]]
 - [[Wilford Power Station]]

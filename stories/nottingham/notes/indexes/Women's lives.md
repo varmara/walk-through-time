@@ -14,7 +14,7 @@ Nottingham women who campaigned for the vote, ran schools, businesses and librar
 - [[Helen Watts]]
 - [[Nellie Crocker]]
 
-## Work, learning and care
+## Work and care
 - [[Lucy Hutchinson]]
 - [[Cassandra Willoughby]]
 - [[Mary Howitt]]

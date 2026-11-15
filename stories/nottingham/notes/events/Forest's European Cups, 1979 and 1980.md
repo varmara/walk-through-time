@@ -1,5 +1,6 @@
 ---
 type: event
+name: "Forest's European Cups"
 source:
   - https://en.wikipedia.org/wiki/1979_European_Cup_final
   - https://en.wikipedia.org/wiki/1980_European_Cup_final

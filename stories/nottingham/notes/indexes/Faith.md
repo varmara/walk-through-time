@@ -23,7 +23,7 @@ movements here.
 - [[Cathedral of St Barnabas]]
 - [[St Giles' Church]]
 
-## Chapels and preachers
+## Chapels
 - [[John Wesley]]
 - plaque: Hockley Methodist Chapel
 - plaque: Wesley Place Methodist Chapel

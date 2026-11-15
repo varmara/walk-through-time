@@ -30,7 +30,7 @@ Cricket at Trent Bridge, football on both banks of the Trent, prize-fighters, sk
 - [[Forest's European Cups, 1979 and 1980]]
 - [[Statue of Brian Clough]]
 
-## Boxing, skating and the water
+## Other sports
 - [[William Thompson]]
 - [[National Watersports Centre]]
 - [[Torvill and Dean]]

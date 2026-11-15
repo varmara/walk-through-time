@@ -6,7 +6,7 @@ order: 6
 
 A village on the south bank of the Trent, reached for centuries by ferry and, since the 1870s, by bridge.
 
-## The river and its bridges
+## The river
 - [[Wilford Toll Bridge]]
 - [[Wilford Suspension Bridge]]
 - [[Ferry Inn]]

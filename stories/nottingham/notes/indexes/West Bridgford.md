@@ -16,14 +16,14 @@ South of the river: Test cricket, Nottingham Forest and the county's headquarter
 - [[Bodyline, 1932–33]]
 - [[Forest's European Cups, 1979 and 1980]]
 
-## West Bridgford and Lady Bay
+## Bridgford & Lady Bay
 - [[St Giles' Church]]
 - [[Won at cards]]
 - [[The first out-of-town superstore]]
 - [[Lady Bay Bridge]]
 - [[The Lady Bay bombs]]
 
-## Edwalton and Compton Acres
+## Edwalton
 - [[Edwalton station]]
 - [[Church of the Holy Rood]]
 - [[Compton Acres]]

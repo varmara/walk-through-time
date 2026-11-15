@@ -1,5 +1,6 @@
 ---
 type: story
+name: "Raleigh's works"
 source: https://en.wikipedia.org/wiki/Sir_Frank_Bowden,_1st_Baronet
 check: Raleigh Street | 1887 | Faraday Road | seven and a half acres
 at:

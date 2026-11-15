@@ -1,5 +1,6 @@
 ---
 type: event
+name: "The King's standard, 1642"
 source: https://en.wikipedia.org/wiki/Charles_I_Raising_His_Standard
 check: 1642 | Nottingham Castle | Civil War
 at:

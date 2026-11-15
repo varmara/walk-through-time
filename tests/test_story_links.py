@@ -34,7 +34,9 @@ class Files(unittest.TestCase):
                     for name in e.get("see", []):
                         if name in people:
                             continue
-                        hits = [by_full[name.lower()]] if name.lower() in by_full else by_name.get(name.lower(), [])
+                        by_note = [x for L2 in layers for x in L2["entries"] if (x.get("note") or "").lower() == name.lower()]   # (a note shown under a shorter name:)
+                        hits = by_note or ([by_full[name.lower()]] if name.lower() in by_full else by_name.get(name.lower(), []))
+                        hits = list({id(h): h for h in hits}.values())
                         self.assertEqual(len([h for h in hits if h is not e]), 1,
                                          f"{where}: see {name!r} must find exactly one other story (layer/heading if two share it)")
                 self.assertEqual(set(keys) - used, set(), f"{folder.name} / {L['id']}: groups no story uses")

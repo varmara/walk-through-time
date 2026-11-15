@@ -13,7 +13,7 @@ The town that grew in the 19th century: cemeteries and parks on the hills to the
 - [[Church Cemetery]]
 - [[Forest Recreation Ground]]
 
-## Buildings and their architects
+## Buildings
 - [[Adams Building]]
 - [[Watson Fothergill's offices]]
 - [[The Black Boy Hotel]]
