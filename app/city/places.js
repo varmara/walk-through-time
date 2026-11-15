@@ -96,14 +96,15 @@ export function showGroups(keys, title){
   showPlaces(title, refs, hints);
   return true;
 }
-// From place to place as Google Earth flew: up and out, across, and down again, slower the further it goes, easing
+// From place to place as Google Earth flew: up and out (curve: higher is further out), across, and down again,
+// slower the further it goes (speed: lower is slower), easing
 // in and out (MapLibre's flyTo follows van Wijk and Nuij's "smooth and efficient zooming and panning", the same
 // kind of flight). With reduced motion asked for, a short ease instead.
 const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const smooth = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 export function glide(camera){
   if (reduced()) return S.map.easeTo({ ...camera, duration: 300 });
-  S.map.flyTo({ ...camera, speed: 0.5, curve: 1.5, easing: smooth, maxDuration: 6000, essential: true });
+  S.map.flyTo({ ...camera, speed: 0.4, curve: 1.9, easing: smooth, maxDuration: 7500, essential: true });
 }
 // how close a card takes the map to its place: near enough to pick out the building, with its street round it
 const PLACE_ZOOM = 16;
