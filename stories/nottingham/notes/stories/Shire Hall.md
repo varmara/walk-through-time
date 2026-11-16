@@ -4,7 +4,7 @@ check: 1375 | 1449 | Gandon | 1876 | 1864 | Richard Thomas Parker | 1991 | 1995
 source: https://en.wikipedia.org/wiki/National_Justice_Museum
 when: "1375"
 at:
-  - https://www.openstreetmap.org/way/1100953705
+  - https://www.openstreetmap.org/way/265885272
 ---
 
 Courts sat on this spot from at least 1375, and prisoners were held here from at least 1449. The hall was rebuilt to

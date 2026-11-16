@@ -3,7 +3,7 @@ type: story
 source: https://en.wikipedia.org/wiki/Humber_cycles
 check: Thomas Humber | Beeston | 1878 | Coventry
 at:
-  - The Humber works, 52.9275, -1.2048
+  - https://www.openstreetmap.org/way/210529494
 names: no
 see:
   - "[[Raleigh's Faraday Road works]]"
