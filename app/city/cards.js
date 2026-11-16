@@ -485,6 +485,9 @@ function buildingCard(p, id){
   const stories = withPeople((p.stories || []).map(storyOf)
     .filter(s => !(s.tpl && archNames.has(s.who)))         // "Designed by …": the Architect row says it already
     .map(s => ({ ...s, label: s.layer === 'people' && s.pin ? 'Plaque' : layerTitle(s.layer) })))
+    // a story told in two places (Trent Bridge: West Bridgford and the Meadows) once, under both
+    .reduce((out, s) => { const d = s.nm && out.find(o => o.nm === s.nm && o.text === s.text);
+      if (d) d.label = [d.label, s.label].filter(Boolean).join(' · '); else out.push(s); return out; }, [])
     // two stories of one layer in a row (two museums in the castle): its title once
     .map((s, i, all) => i && !s.who && all[i - 1].label === s.label && !all[i - 1].who ? { ...s, label: '' } : s);
   const after = (S.entitiesAt[id] || []).filter(m => !people().has(m.name)).map(m =>

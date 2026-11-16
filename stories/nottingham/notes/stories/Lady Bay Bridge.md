@@ -1,12 +1,13 @@
 ---
 type: story
-source: https://en.wikipedia.org/wiki/Lady_Bay,_Nottinghamshire
-check: Midland Railway | Melton Mowbray | 1969 | 1979
+when: "1878"
+source: https://en.wikipedia.org/wiki/Lady_Bay_Bridge
+check: 1878 | Midland Railway | Melton Mowbray | 1968 | 1979
 at:
   - https://www.openstreetmap.org/way/5205093
 see:
   - "[[Edwalton station]]"
 ---
 
-The Midland Railway built this bridge for its direct line to Melton Mowbray and London. The line closed in 1969, and
-in 1979 the bridge was turned over to road traffic.
+Built in 1878 to carry the Midland Railway's direct line from Nottingham to Melton Mowbray across the Trent. When
+the line was abandoned in 1968 the crossing was turned into a road bridge, finished in 1979.

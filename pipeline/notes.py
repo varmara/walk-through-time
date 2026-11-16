@@ -204,7 +204,7 @@ def index_layer(name, props, body):
     """An index note (type: index): a layer of the Layers sheet. Its text: the introduction, then `## Group`
     headings, each a tickbox, listing its members one per line:
 
-        - [[Note]]                     a story or event (a Places index: each is in exactly one), or in a thread
+        - [[Note]]                     a story or event (each is in at least one Places index), or in a thread
                                        also a person (a note, or someone on the map by name)
         - c. 1200: [[Note]]            in a thread: its date on this thread, where it differs from the note's own
         - plaque: Plaque to Albert Ball                                   a plaque, by its title (a topic)
@@ -301,11 +301,10 @@ def load(folder):
             if m["kind"] != "note" or kinds.get(m["name"]) not in ("story", "event"):
                 problems.append(f"{m['line']}: a Places index lists stories and events: "
                                 f"{m['name']!r} is " + ("no note" if m["name"] not in kinds else f"a {kinds[m['name']]} note"))
-            elif m["name"] in home:
-                problems.append(f"{m['line']}: {m['name']!r} is in {home[m['name']][0]['note']} already: "
-                                f"a story is told in one Places index (threads may list it too)")
-            else:
-                home[m["name"]] = (L, m["group"])
+            elif any(H is L and g == m["group"] for H, g in home.get(m["name"], [])):
+                problems.append(f"{m['line']}: {m['name']!r} is listed twice here")
+            else:            # (a story can be in several places: Trent Bridge in West Bridgford and the Meadows)
+                home.setdefault(m["name"], []).append((L, m["group"]))
     layers = [L for L in indexes if L["section"] == "Places"]
     if not any(L.get("kind") == "facts" for L in layers):
         layers.append({"id": "facts", "kind": "facts", "title": "Did you know", "intro": "", "entries": [], "members": []})
@@ -362,23 +361,24 @@ def load(folder):
                                     f"(notes/indexes/), under its group's heading")
                 if name not in home:
                     raise NoteError(f"{name}: no Places index lists it: add - [[{name}]] to one (notes/indexes/)")
-                target, g = home[name]
-                group = next((k for k, t in target.get("groups", []) if t == g), None)
+                homes = [(T, next((k for k, t in T.get("groups", []) if t == g), None)) for T, g in home[name]]
+                target, group = homes[0]
             else:
                 target = group = None       # facts only (a note of "Did you know?" callouts)
             base = {k: v for k, v in base.items() if v not in ((), [], {}, None) or k in ("name", "story")}
             if story:
                 if not places and kind != "person":
                     raise NoteError(f"{name}: no at: (its places)")
-                for at, where in places or [(None, None)]:
-                    e = {**base, **({"group": str(group)} if group else {})}
-                    if at:
-                        e["at"] = at
-                    else:
-                        e["unplaced"] = True        # a person's own text, on their card only
-                    if where:
-                        e["where"] = where
-                    target["entries"].append(e)
+                for T, grp in (homes if kind != "person" else [(target, group)]):
+                    for at, where in places or [(None, None)]:
+                        e = {**base, **({"group": str(grp)} if grp else {})}
+                        if at:
+                            e["at"] = at
+                        else:
+                            e["unplaced"] = True        # a person's own text, on their card only
+                        if where:
+                            e["where"] = where
+                        T["entries"].append(e)
             for f in facts:
                 if facts_layer is None:
                     raise NoteError(f"{name}: a fact callout, but there is no facts layer (kind: facts)")

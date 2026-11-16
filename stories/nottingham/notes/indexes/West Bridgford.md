@@ -8,6 +8,7 @@ order: 11
 South of the river: Test cricket, Nottingham Forest and the county's headquarters.
 
 ## Trent Bridge
+- [[Trent Bridge]]
 - [[Trent Bridge cricket ground]]
 - [[County Hall]]
 - [[City Ground]]
@@ -22,6 +23,7 @@ South of the river: Test cricket, Nottingham Forest and the county's headquarter
 - [[Won at cards]]
 - [[The first out-of-town superstore]]
 - [[Lady Bay Bridge]]
+- [[The 1947 flood]]
 - [[The Lady Bay bombs]]
 
 ## Edwalton

@@ -261,6 +261,10 @@ def topic_layers(topics, entries, people, out, buildings, bname, story_layers):
             kind, name, where = m["kind"], m["name"], m["line"]
             if kind == "story":
                 hits = by_note.get(name.lower()) or by_full.get(name.lower()) or by_name.get(name.lower(), [])
+                # one note told in several places (Trent Bridge: West Bridgford and the Meadows) is one story: the
+                # thread takes it from its first place
+                if len({e.get("note") for e in hits}) == 1 and hits[0].get("note"):
+                    hits = [e for e in hits if e["layer"] == hits[0]["layer"]]
                 if len({e["layer"] for e in hits}) > 1:
                     problems.append(f"{where}: story {name!r} is in more than one layer "
                                     f"({', '.join(sorted({e['layer'] for e in hits}))}): write it as layer/heading")

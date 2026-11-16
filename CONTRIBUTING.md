@@ -34,8 +34,8 @@ Two or three plain sentences on the history behind the layer.
 | `order` | its place in its section of the Layers sheet; else after those with one, by name |
 | `kind` | `people` for the People layer and `facts` for "Did you know", whose members are not listed |
 
-Each story is a note of its own in `notes/stories/` (events in `notes/events/`), listed in exactly one Places
-index, which is its layer and group; threads may list it too:
+Each story is a note of its own in `notes/stories/` (events in `notes/events/`), listed in at least one Places
+index (Trent Bridge is in both West Bridgford and the Meadows); threads may list it too:
 
 ```markdown
 ---
@@ -154,7 +154,7 @@ Tables in the same folder, each with a Note column saying why:
 
 ### Places and threads
 
-Every story lives in one **place**: a Places index for a small area of the map (the castle rock, the Lace Market,
+Every story lives in at least one **place**: a Places index for a small area of the map (the castle rock, the Lace Market,
 Wilford, Ruddington). A **thread** follows one story across the map, through any places: the castle and the
 Crown, frames and lace, coal and getting about. It is listed in the Stories sheet's Threads, opening as numbered cards, and is a
 theme in the graph. A thread is an index note with `section: Threads`, and may list people, plaques and

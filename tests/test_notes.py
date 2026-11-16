@@ -126,11 +126,17 @@ class Read(unittest.TestCase):
         self.assertEqual(civic["groups"], [["civic-old", "Old"], ["civic-new", "New"]])     # id-heading
         self.assertEqual({(e["name"], e["group"]) for e in civic["entries"]}, {("The castle burned", "civic-old"), ("B", "civic-new")})
 
-    def test_a_story_in_no_index_or_two(self):
+    def test_a_story_in_two_places(self):
+        """A story listed in two Places indexes is told in both (Trent Bridge: West Bridgford and the Meadows)."""
+        _, (other, civic, people, facts) = load({"events/The castle burned.md": EVENT,
+                                                 "indexes/Civic.md": "---\ntype: index\norder: 2\n---\n- [[The castle burned]]\n",
+                                                 "indexes/Other.md": "---\ntype: index\norder: 1\n---\n- [[The castle burned]]\n"})
+        self.assertEqual([e["name"] for e in civic["entries"]], [e["name"] for e in other["entries"]])
+        self.assertTrue(civic["entries"])
+
+    def test_a_story_in_no_index(self):
         with self.assertRaisesRegex(notes.NoteError, r"no Places index lists it: add - \[\[The castle burned\]\]"):
             load({"events/The castle burned.md": EVENT, "indexes/Civic.md": "---\ntype: index\n---\n"})
-        with self.assertRaisesRegex(notes.NoteError, "is in Civic already"):
-            load({"events/The castle burned.md": EVENT, "indexes/Other.md": "---\ntype: index\n---\n- [[The castle burned]]\n"})
         with self.assertRaisesRegex(notes.NoteError, "layer: and group: are not used"):
             load({"events/The castle burned.md": EVENT.replace("type: event\n", "type: event\nlayer: civic\n")})
 
