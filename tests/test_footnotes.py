@@ -59,3 +59,9 @@ def test_a_date_only_a_hand_read_page_gives_takes_its_footnote():
     story = "Domesday names it. Before 1280 Gervase obtained it, and a charter of 1280 confirmed it.[^wood] Later more."
     assert noted_page("1280", story, {"wood": wood}) is wood
     assert noted_page("1300", story, {"wood": wood}) is None
+
+
+def test_a_hyphenated_century_is_found():
+    from pipeline.s04_curated import date_page
+    page = {"text": "a 6th-century anglo-saxon burial ground"}
+    assert date_page("6th century", [page]) is page

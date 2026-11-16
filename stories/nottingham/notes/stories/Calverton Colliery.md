@@ -2,7 +2,7 @@
 type: story
 when: "1952"
 source: https://en.wikipedia.org/wiki/Calverton,_Nottinghamshire
-check: 24 September | 1952 | 1,304 | 5,658 | 19 November 1993 | RJB Mining | 1999
+check: 24 September | 1952 | 1,304 | 5,658 | 1993 | RJB Mining | 1999
 at:
   - Calverton village, 53.037, -1.084
 names: no

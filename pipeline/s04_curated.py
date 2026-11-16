@@ -253,6 +253,7 @@ def date_page(date, pages):
     wants = {want.lower()}
     if m := re.match(r"(\d{1,2})(st|nd|rd|th) century", want.lower()):
         wants.add(f"{ORDINALS[int(m[1])]} century")    # "15th century" is also "fifteenth century"
+        wants |= {f"{m[1]}{m[2]}-century", f"{ORDINALS[int(m[1])]}-century"}     # and "a 6th-century burial ground"
         # and "the 12th and 14th century", "the 12th or 13th centuries", "12th–14th century"
         joined = re.compile(rf"\b{m[1]}{m[2]}(?: (?:and|or|to) | ?[–-] ?)\d{{1,2}}(?:st|nd|rd|th) centur")
         return next((p for p in pages if any(w in p["text"] for w in wants) or joined.search(p["text"])), None)
