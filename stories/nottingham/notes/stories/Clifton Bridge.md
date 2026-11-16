@@ -1,5 +1,6 @@
 ---
 type: story
+when: "1958"
 source: https://en.wikipedia.org/wiki/Clifton_Bridge_(Nottingham)
 check: 1958 | pre-stressed | Trent Bridge | 1972
 at:
@@ -9,5 +10,5 @@ see:
   - "[[Wilford Toll Bridge]]"
 ---
 
-Opened in 1958 to take traffic off Trent Bridge, it was then the longest pre-stressed concrete bridge in the
-country. A second bridge beside it, opened in 1972, made the crossing a dual carriageway.
+In 1958 a bridge opened here to take traffic off Trent Bridge. It was then the longest pre-stressed concrete bridge in
+the country, and a second bridge beside it, opened in 1972, made the crossing a dual carriageway.

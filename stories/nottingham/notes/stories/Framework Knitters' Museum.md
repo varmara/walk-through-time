@@ -11,5 +11,6 @@ see:
   - "[[The lost church of Flawford]]"
 ---
 
-Ruddington's framework knitters worked at hand frames in workshops behind their cottages. Workshops of about 1840
-and workers' cottages of about 1829, all listed, now make up the Framework Knitters' Museum.
+In about 1829 cottages were built for Ruddington's framework knitters, who worked at hand frames in workshops behind
+them; the workshops date from about 1840. All are listed, and together they now make up the Framework Knitters'
+Museum.

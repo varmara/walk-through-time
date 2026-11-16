@@ -1,7 +1,7 @@
 ---
 type: story
+when: "1873"
 source: https://en.wikipedia.org/wiki/Bestwood_Country_Park
-year: "1873"
 check: 1873 | vertical steam engine | Bestwood Coal and Iron Company | 1967
 at:
   - https://www.openstreetmap.org/way/181053828
@@ -10,5 +10,5 @@ see:
   - "[[Cotgrave Colliery]]"
 ---
 
-The winding engine house of Bestwood Colliery, worked by the Bestwood Coal and Iron Company, keeps its vertical
-steam engine of 1873, which lowered the miners and wound up the coal. The pit closed in 1967.
+The Bestwood Coal and Iron Company's colliery here wound up its coal and lowered its miners with a vertical steam
+engine of 1873. The pit closed in 1967, but the winding engine house and its engine survive.
