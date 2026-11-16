@@ -56,7 +56,7 @@ Besides those in Notes below, a story note can give:
 | `name` | the name shown on the map, when the file's name differs (two "St Mary's Church" notes are `St Mary's Church, Clifton` and `St Mary's Church, Nottingham`) |
 | `year` | when the building standing today was built or opened (`1855`, `c. 1420`, `1841..1844`) |
 | `when` | when the story is set (`1952`, `c. 1200`, `1930s`, `13th century`): what its card is dated and ordered by, where the first year in its text is not it (Rock City tells of 1876 first, and is a story of `1980`) |
-| `made` | for a statue or memorial: when it was put up, shown beside `when` (Robin Hood: `when: c. 1200`, `made: 1952`) |
+| `made` | for a statue or memorial: when it was put up, shown beside `when` (Robin Hood: `when: 13th century`, `made: 1952`) |
 | `names: no` | the story's name is not the building's name (an event: "The castle burned, 1831") |
 | `quote` | for a Historic England source: passages copied from the list entry (their site blocks automated reading) |
 | `architect` | who designed the building, when Wikidata does not say: their article (`en:Thomas Rickman`), or the name as the story writes it and the article (`Vincent Harris = en:E. Vincent Harris`), separated by `\|` |

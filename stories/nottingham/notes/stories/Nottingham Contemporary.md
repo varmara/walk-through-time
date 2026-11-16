@@ -1,10 +1,11 @@
 ---
 type: story
+check: Garners Hill | Saxon fort | railway | 14 November 2009 | Caruso St John | lace
 source: https://en.wikipedia.org/wiki/Nottingham_Contemporary
-year: "2009"
-check: Caruso St John | 2009 | lace
 at:
   - https://www.openstreetmap.org/way/110666108
 ---
 
-An art centre designed by Caruso St John and opened in 2009, its walls patterned with lace.
+Garners Hill, said to be the oldest site in Nottingham, once held cave dwellings, a Saxon fort and a medieval town
+hall, until the Victorians cleared it for a railway line. On 14 November 2009 an art centre designed by Caruso St John
+opened here, its walls embossed with a Nottingham lace pattern.
