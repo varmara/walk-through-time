@@ -16,6 +16,7 @@ Nottingham women who campaigned for the vote, ran schools, businesses and librar
 
 ## Work and care
 - [[Lucy Hutchinson]]
+- [[George Wells Almshouses]]
 - [[Cassandra Willoughby]]
 - [[Mary Howitt]]
 - [[Ann Morley]]

@@ -26,5 +26,6 @@ The town that grew in the 19th century: cemeteries and parks on the hills to the
 ## Public buildings
 - [[University College]]
 - [[Guildhall]]
+- [[Clifton village school]]
 - [[A city, 1897]]
 - [[Nottingham Victoria station]]

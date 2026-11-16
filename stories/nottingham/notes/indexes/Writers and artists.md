@@ -16,6 +16,7 @@ The poets, novelists, painters and photographers who lived, worked or were born 
 - [[Lord Byron]]
 - [[Henry Kirke White]]
 - [[Clifton Grove]]
+- [[The legend of Clifton Grove]]
 - [[The poet in the churchyard]]
 - [[Philip James Bailey]]
 - [[J. M. Barrie]]

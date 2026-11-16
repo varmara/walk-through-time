@@ -7,6 +7,7 @@ id: trent
 
 Crossing and taming the river: a fort at the bridge, the medieval bridge and its iron successor, the bridges to Wilford and Clifton, the embankment, a flood and the watersports centre.
 
+- [[Bronze Age finds, 1937]]
 - [[A fort at the bridge]]
 - [[Trent Bridge]]
 - [[Marriott Ogle Tarbotton]]

@@ -9,6 +9,8 @@ The halls of the families who owned the land round Nottingham, and the villages 
 
 - [[Holme Pierrepont Hall]]
 - [[Clifton Hall]]
+- [[Clifton Grove]]
+- [[Clifton dovecote]]
 - [[Won at cards]]
 - [Wollaton Hall](https://www.openstreetmap.org/way/4438894)
 - [[Cassandra Willoughby]]
