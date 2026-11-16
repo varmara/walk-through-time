@@ -1,5 +1,5 @@
 // Walk Through Time, city page: The Layers sheet and the Map sheet (base maps, the legend of eras).
-import { $, CITY_ID, ERAS, PIN_LAYERS, SECTIONS, STORY_SECTIONS, esc, fmt, store } from './util.js';
+import { $, CITY_ID, ERAS, PIN_LAYERS, SECTIONS, STORY_LABELS, STORY_SECTIONS, esc, fmt, store } from './util.js';
 import { S } from './state.js';
 import { hasPins, isArea, isStorySet, kindOf, marksBuildings, parseRef, saveActive } from './data.js';
 import { addNls, paintBuildings, setHills, setLand } from './map.js';
@@ -89,7 +89,7 @@ export function renderStories(){
   for (const sec of STORY_SECTIONS) {
     const Ls = S.layers.filter(L => L.section === sec && L.groups.some(g => g.count > 0 && g.items?.length));
     if (!Ls.length) continue;
-    html.push(`<div class="section"><div class="seclbl">${esc(sec)}</div>`);
+    html.push(`<div class="section"><div class="seclbl">${esc(STORY_LABELS[sec] || sec)}</div>`);
     let area = null;
     for (const L of Ls) {
       if ((L.area || null) !== area) {

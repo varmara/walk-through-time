@@ -78,8 +78,9 @@ def when_year(w):
 
 def in_date_order(meta, stories, pins, dates, about):
     """Each story, people or topic group's items, and each item's places, in date order: the year of what it tells
-    (a story's, a plaque's words'), a person's year of birth, a building's year of building. Undated last; ties keep
-    their order. The page's numbered cards follow this order."""
+    (a story's, a plaque's words'), a person's year of birth, a building's year of building; an undated item stays
+    after the one listed before it, and ties keep their order. A thread with "sort: as listed" keeps the order it is
+    written in. The page's numbered cards follow this order."""
     def ref_year(r, name=None, layer=None, story=None):
         if isinstance(r, str) and r.startswith("p"):
             p = pins[int(r[1:])]
@@ -128,7 +129,16 @@ def in_date_order(meta, stories, pins, dates, about):
                 elif person and born(name) is not None:
                     first = born(name)
                 keyed.append((later(first), it))
-            g["items"] = [it for _, it in sorted(keyed, key=lambda k: k[0])]
+            # by date, an undated item staying after the one listed before it; or, for a thread that says
+            # "sort: as listed", in the order written
+            if not L.get("asListed"):
+                prev, ordered = (False, float("-inf")), []
+                for k, it in keyed:
+                    if k[0]:
+                        k = prev
+                    prev = k
+                    ordered.append((k, it))
+                g["items"] = [it for _, it in sorted(ordered, key=lambda k: k[0])]
 
 
 MORE = ("sources", "cites", "weblinks", "links", "when", "made", "nm", "whenSrc", "madeSrc")

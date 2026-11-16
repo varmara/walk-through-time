@@ -204,9 +204,9 @@ def index_layer(name, props, body):
     """An index note (type: index): a layer of the Layers sheet. Its text: the introduction, then `## Group`
     headings, each a tickbox, listing its members one per line:
 
-        - [[Note]]                     a story or event (each is in at least one Places index), or in a thread
-                                       also a person (a note, or someone on the map by name)
-        - c. 1200: [[Note]]            in a thread: its date on this thread, where it differs from the note's own
+        - [[Note]]                     a story or event (each is in at least one Places index, where it lives), or
+                                       a person (a note, or someone on the map by name)
+        - c. 1200: [[Note]]            its date on this thread or place, where it differs from the note's own
         - plaque: Plaque to Albert Ball                                   a plaque, by its title (a topic)
         - [Wollaton Hall](https://www.openstreetmap.org/way/4438894)      a building (a topic)
 
@@ -217,6 +217,9 @@ def index_layer(name, props, body):
     L = {"id": str(props.get("id") or slug(name)), "title": str(props.get("title") or name), "note": name,
          "section": str(props.get("section") or "Places"), "order": props.get("order"),
          **({"area": str(props["area"])} if props.get("area") else {}),
+         # "sort: as listed": its stories in the order written, not by date (Wilford: the Roman ford, found in 1900,
+         # tells of the earliest times, and comes first)
+         **({"asListed": True} if str(props.get("sort") or "").strip().lower() == "as listed" else {}),
          **({"kind": str(props["kind"])} if props.get("kind") else {}), "entries": [], "members": []}
     if L["section"] not in SECTIONS:
         raise NoteError(f"{name}: section: must be one of {', '.join(SECTIONS)}")
@@ -258,6 +261,7 @@ def topic(L, kinds):
     being a story (a story or event note) or else a person (a person note, or someone on the map by name).
     kinds: {note name: its type}."""
     return {"id": L["id"], "title": L["title"], "intro": L["intro"], "order": L["order"],
+            **({"asListed": True} if L.get("asListed") else {}),
             "groups": [t for _, t in L.get("groups", [])], "keys": {t: k for k, t in L.get("groups", [])},
             "members": [{**m, "kind": ("story" if kinds.get(m["name"]) in ("story", "event") else "person")
                          if m["kind"] == "note" else m["kind"]} for m in L["members"]]}
@@ -298,9 +302,10 @@ def load(folder):
         if L["section"] != "Places":
             continue
         for m in L["members"]:
+            # a place is told as a thread: its stories and events live here; its people, plaques and buildings are
+            # found where the map has them, as a thread's are
             if m["kind"] != "note" or kinds.get(m["name"]) not in ("story", "event"):
-                problems.append(f"{m['line']}: a Places index lists stories and events: "
-                                f"{m['name']!r} is " + ("no note" if m["name"] not in kinds else f"a {kinds[m['name']]} note"))
+                continue
             elif any(H is L and g == m["group"] for H, g in home.get(m["name"], [])):
                 problems.append(f"{m['line']}: {m['name']!r} is listed twice here")
             else:            # (a story can be in several places: Trent Bridge in West Bridgford and the Meadows)
@@ -309,6 +314,9 @@ def load(folder):
     if not any(L.get("kind") == "facts" for L in layers):
         layers.append({"id": "facts", "kind": "facts", "title": "Did you know", "intro": "", "entries": [], "members": []})
     topics = [topic(L, kinds) for L in indexes if L["section"] == "Threads"]
+    # each place, told as a thread of its stories, people, plaques and buildings (s06_layers puts its members in
+    # the place's layer)
+    topics += [{**topic(L, kinds), "place": True} for L in layers if L.get("kind") not in ("people", "facts")]
     people_layer = next((L for L in layers if L.get("kind") == "people"), None)
     facts_layer = next((L for L in layers if L.get("kind") == "facts"), None)
     info = {}

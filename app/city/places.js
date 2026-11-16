@@ -23,7 +23,7 @@ function toldIn(text){
 function told(b, name, hint){
   if (!isB(b)) {
     const pp = refOf(b).properties;
-    return { nm: pp.nm, when: pp.when, made: pp.made, text: pp.text, here: pp.here, source: parseJ(pp.source),
+    return { nm: pp.nm, when: pp.when, made: pp.made, text: pp.text, here: pp.here, source: parseJ(pp.source), layer: pp.layer,
       who: pp.who && !pp.own ? pp.who : null, at: refName(b) };
   }
   const f = S.features[b], p = f.properties, st = storyFor(b, hint?.name || name, hint?.layer);
@@ -57,6 +57,9 @@ function cardHtml(card, n, P){
   if (first.own && wt && first.y != null && !hint?.when && Math.abs(yr(first.when) - first.y) >= 10)
     wt += ' · building ' + dateText(first.y, first.f, first.per, first.dt).replace(/^built (in |about )?/, '').replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase());
   if (!wt && first.y != null) wt = dateText(first.y, first.f, first.per, first.dt);
+  // a person's card is dated by the thread, or by their own story; another story of their place is not theirs (Albert
+  // Iremonger at the Ferry Inn, whose story begins in the 17th century)
+  if (hint?.person && !hint.when && first.layer !== 'people' && !first.who) wt = '';
   const at = [...new Set(ts.map(x => x.at).filter(a => a && a !== title))];
   const meta = [wt, at.length ? (/^(Plaque|Statue|Memorial)\b/.test(at[0]) ? '' : 'At ') + at.join(', ') : ''].filter(Boolean);
   const who = S.data.people?.[hint?.person ? name : ts.find(x => x.who)?.who];

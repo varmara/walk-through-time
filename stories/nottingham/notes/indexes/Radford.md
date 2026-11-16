@@ -3,6 +3,7 @@ type: index
 id: radford
 area: West
 order: 30
+sort: as listed
 ---
 
 West of the centre: where Raleigh's bicycles began, and where Player's stored its tobacco.

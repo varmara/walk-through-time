@@ -44,7 +44,7 @@ const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (
   await page.click('#bLayers');
   const boxes = await page.$$('input[data-g]');
   check(boxes.length > 10, `the Layers sheet lists the layers (${boxes.length})`);
-  check(!(await page.$('#lSections .seclbl:text-is("Places"), #lSections .seclbl:text-is("Threads")')), 'places and threads are not in the Layers sheet');
+  check(!(await page.$('#lSections .seclbl:text-is("Places"), #lSections .seclbl:text-is("Threads")')), 'places and themes are not in the Layers sheet');
   if (boxes.length) { await boxes[0].check(); await page.waitForTimeout(300); }
   check(/^1 on/.test(await text('#lSummary')), 'ticking a layer turns it on');
   await boxes[0].uncheck(); await page.waitForTimeout(200);
@@ -84,7 +84,7 @@ const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (
   // a thread's stories as numbered cards, from the Stories sheet
   await open('');
   await page.click('#bStories'); await page.waitForTimeout(300);
-  const thread = await page.$('#stSections .section:has(.seclbl:text-is("Threads")) [data-set]');
+  const thread = await page.$('#stSections .section:has(.seclbl:text-is("Themes")) [data-set]');
   check(!!thread, 'the Stories sheet has threads');
   if (thread) {
     await thread.click();

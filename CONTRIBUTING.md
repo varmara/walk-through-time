@@ -29,9 +29,10 @@ Two or three plain sentences on the history behind the layer.
 | Property | Meaning |
 |---|---|
 | `id` | the layer's id, which links use (`?layer=barton`); else made from the file's name |
-| `section` | `Places` (the default: a small area of the map, where each of its stories lives) or `Threads` (a story told across the map, below) |
+| `section` | `Places` (the default: a small area of the map, where each of its stories lives, told as a thread of where it is) or `Threads` (a story told across the map, below) |
 | `area` | for a place: the small heading it folds under in the Stories sheet (`The city`, `South of the Trent`, `West`, `North and east`) |
 | `order` | its place in its section of the Layers sheet; else after those with one, by name |
+| `sort` | `as listed`: a place's stories in the order written, not by date (Wilford's Roman ford, found in 1900, tells of the earliest times and comes first) |
 | `kind` | `people` for the People layer and `facts` for "Did you know", whose members are not listed |
 
 Each story is a note of its own in `notes/stories/` (events in `notes/events/`), listed in at least one Places
@@ -155,10 +156,13 @@ Tables in the same folder, each with a Note column saying why:
 ### Places and threads
 
 Every story lives in at least one **place**: a Places index for a small area of the map (the castle rock, the Lace Market,
-Wilford, Ruddington). A **thread** follows one story across the map, through any places: the castle and the
-Crown, frames and lace, coal and getting about. It is listed in the Stories sheet's Threads, opening as numbered cards, and is a
-theme in the graph. A thread is an index note with `section: Threads`, and may list people, plaques and
-buildings as well as stories; anything can be on several threads, and a card lists the threads it is on, each
+Wilford, Ruddington). A place is told as a thread of where it is: listed in the Stories sheet under "Around the map",
+folded by its `area`, it may list the people, plaques and buildings that belong there as well as its stories, and its
+lines may carry thread dates (`- 1970: [[Paul Smith]]`). Its stories and events live there (the first place that
+lists one is its home); its people, plaques and buildings are found where the map has them. A **thread** of a theme
+follows one story across the map, through any places: the castle and the Crown, frames and lace, coal and getting
+about. It is listed under "Themes", opening as numbered cards, and is a theme in the graph. A thread is an index note
+with `section: Threads`, and may list people, plaques and buildings as well as stories; anything can be on several threads, and a card lists the threads it is on, each
 opening that thread. Stories do not link to the next one in a thread in their text, so a story can join a thread
 anywhere without others changing: the cards keep date order, and the `##` headings are its chapters, by period
 or by strand (The Civil War, The dukes' mansion).
@@ -187,8 +191,10 @@ the note and line.
 
 Every set of numbered cards runs in date order, and each card shows its date: a place's groups, a thread, a
 person's places. A story is dated by its `when:`, else the first year in its text; a plaque by the first year in
-its words (not when it was put up); a person by the year they were born; a building by the year it was built; the
-undated come last, in the index's order.
+its words (not when it was put up); a person by the year they were born; a building by the year it was built; an
+undated item stays after the one listed before it. An index with `sort: as listed` keeps the order it is written in
+instead: every place does, so that each reads from its beginning (Wilford's Roman ford, found in 1900, tells of the
+earliest times and comes first).
 
 A thread can date a line itself, where the story or person comes into it at another time: the date, a colon, then
 the member.

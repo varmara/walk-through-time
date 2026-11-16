@@ -1,5 +1,5 @@
 """Story notes' groups and cross-links (indexes' groups, notes' see:): every group an entry
-names is one its layer declares, every declared group is used, and every "see" finds exactly one other story;
+names is one its layer declares, every declared group is used (by a story, or by a place's people), and every "see" finds exactly one other story;
 and the build turns a "see" into a link to where that story is (pipeline/s06_layers.py: cross_links)."""
 import unittest
 from pathlib import Path
@@ -23,9 +23,12 @@ class Files(unittest.TestCase):
                 for e in L["entries"]:
                     by_name.setdefault(e["name"].lower(), []).append(e)
                     by_full[f"{L['id']}/{e['name']}".lower()] = e
+            # a place's thread may give a chapter to its people alone (Wilford's sportsmen)
+            members = {T["id"]: {T["keys"].get(m["group"]) for m in T["members"] if m["group"]}
+                       for T in loaded["TOPICS"] if T.get("place")}
             for L in layers:
                 keys = [k for k, _ in L.get("groups", [])]
-                used = set()
+                used = set(members.get(L["id"], ()))
                 for e in L["entries"]:
                     where = f"{folder.name} / {L['id']} / {e['name']}"
                     if keys:

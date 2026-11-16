@@ -3,23 +3,27 @@ type: index
 id: market
 area: The city
 order: 2
+sort: as listed
 ---
 
 The Old Market Square, where the two medieval towns met, and the streets around it: the town's Exchange and the Council House that replaced it, old inns, a library, theatres and halls.
 
+## The market
 - [[Old Market Square]]
-- [[The Bell Inn]]
 - [[St Peter's Church]]
-- [[Bromley House]]
+- [[Goose Fair]]
+- [[The Bell Inn]]
+- [[Malt Cross]]
 - [[The Exchange]]
 - [[A city, 1897]]
-- [[Goose Fair]]
-- [[Theatre Royal]]
-- [[Malt Cross]]
-- [[The Black Boy Hotel]]
-- [[Albert Hall]]
 - [[Council House]]
+- [[Statue of Brian Clough]]
+
+## Houses, hotels and halls
+- [[Bromley House]]
+- [[Theatre Royal]]
+- [[The Black Boy Hotel]]
+- [[Royal Concert Hall]]
+- [[Albert Hall]]
 - [[Nottingham Playhouse]]
 - [[Rock City]]
-- [[Royal Concert Hall]]
-- [[Statue of Brian Clough]]

@@ -496,7 +496,7 @@ def main(city_id):
         log(f"    dropped {d['layer']} / {d['name']}: {d['why']}")
     meta = []
     for L in layers:
-        m = {k: L[k] for k in ("id", "title", "intro", "kind", "groups", "area") if k in L}
+        m = {k: L[k] for k in ("id", "title", "intro", "kind", "groups", "area", "asListed") if k in L}
         if L.get("kind") == "people":
             used = {e["group"] for e in entries if e["layer"] == L["id"]}
             m["groups"] = [["people-" + k, t] for k, t, _ in PEOPLE_GROUPS if "people-" + k in used]

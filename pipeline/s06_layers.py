@@ -83,6 +83,7 @@ def main(city_id):
         groups = L.get("groups") or [[L["id"], L["title"]]]
         meta.append({"id": L["id"], "title": L["title"], "intro": L.get("intro", ""), "section": "Places",
                      **({"area": L["area"]} if L.get("area") else {}),
+                     **({"asListed": True} if L.get("asListed") else {}),
                      "kind": "stories",
                      "groups": [{"key": k, "title": t, "count": len({e["b"] for e in es if e["group"] == k}),
                                  "items": grouped([[e["b"], e["name"]] for e in es if e["group"] == k])}
@@ -118,7 +119,16 @@ def main(city_id):
     # ---- topics (the Threads indexes, stories/<city>/notes/indexes/): stories, people, plaques and buildings from any layer, on one subject
     topic_meta = topic_layers(cur.get("topics") or [], cur["entries"], ppl["meta"], out, ctx.buildings, bname,
                               {L["id"] for L in cur["layers"] if L.get("kind") not in ("facts", "people")})
-    meta += topic_meta
+    # a place's members, as its thread lists them (its stories, and the people, plaques and buildings that belong
+    # there), in its own layer: a place is a thread of where it is
+    by_id = {m["id"]: m for m in meta}
+    for T in topic_meta:
+        if T.get("place") and T["id"] in by_id:
+            P = by_id[T["id"]]
+            P["groups"] = [{**g, "count": g["count"]} for g in T["groups"] if g["items"] or len(T["groups"]) == 1]
+            if T.get("asListed"):
+                P["asListed"] = True
+    meta += [T for T in topic_meta if not T.get("place")]
 
     for L in LAYERS:
         if L.get("settings") and not sources(settings, L["settings"]):
@@ -264,7 +274,9 @@ def topic_layers(topics, entries, people, out, buildings, bname, story_layers):
                 # one note told in several places (Trent Bridge: West Bridgford and the Meadows) is one story: the
                 # thread takes it from its first place
                 if len({e.get("note") for e in hits}) == 1 and hits[0].get("note"):
-                    hits = [e for e in hits if e["layer"] == hits[0]["layer"]]
+                    # (a place's thread takes it from that place, where it is told there too)
+                    at = tid if T.get("place") and any(e["layer"] == tid for e in hits) else hits[0]["layer"]
+                    hits = [e for e in hits if e["layer"] == at]
                 if len({e["layer"] for e in hits}) > 1:
                     problems.append(f"{where}: story {name!r} is in more than one layer "
                                     f"({', '.join(sorted({e['layer'] for e in hits}))}): write it as layer/heading")
@@ -308,6 +320,7 @@ def topic_layers(topics, entries, people, out, buildings, bname, story_layers):
         if tid in items and T["groups"]:
             groups.insert(0, [tid, "Other"])
         meta.append({"id": tid, "title": T["title"], "intro": T.get("intro", ""), "section": "Threads", "kind": "topics",
+                     **({"asListed": True} if T.get("asListed") else {}), **({"place": True} if T.get("place") else {}),
                      "groups": [{"key": k, "title": t, "count": len({r for it in items.get(k, []) for r in it[1]}),
                                  "items": items.get(k, [])} for k, t in groups]})
         log(f"s06 topic {tid}: {sum(len(v) for v in items.values())} members")
