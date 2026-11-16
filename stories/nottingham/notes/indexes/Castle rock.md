@@ -15,6 +15,8 @@ The sandstone rock at the west end of the old town: the castle, the passages and
 - [[Ye Olde Salutation Inn]]
 - [[Severn's Building]]
 - [[Charles I raised his standard, 1642]]
+- [[Hutchinson's garrison]]
 - [[St Nicholas' Church]]
+- [[Royalist raids on Nottingham]]
 - [[The castle burned, 1831]]
 - [[Statue of Captain Albert Ball]]

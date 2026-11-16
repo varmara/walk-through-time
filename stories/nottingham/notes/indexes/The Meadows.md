@@ -12,6 +12,8 @@ The low ground between the city and the Trent, with two football grounds facing 
 - [[The oldest professional club]]
 - [[Lady Bay Bridge]]
 - [[Victoria Embankment]]
+- [[Statue of Robert Juckes Clifton]]
+- [[Statue of Queen Victoria]]
 - [[Wilford Suspension Bridge]]
 - [[Meadow Lane]]
 - [[City War Memorial]]
