@@ -22,6 +22,8 @@ movements here.
 - [[St Stephen's Church]]
 - [[Cathedral of St Barnabas]]
 - [[St Giles' Church]]
+- [[The Byron vault]]
+- [[Mary Potter]]
 
 ## Chapels
 - [[John Wesley]]

@@ -28,6 +28,9 @@ Cricket at Trent Bridge, football on both banks of the Trent, prize-fighters, sk
 - [[Albert Iremonger]]
 - [[Brian Clough]]
 - [[Forest's European Cups, 1979 and 1980]]
+- [[The oldest professional club]]
+- [[Forest's first FA Cup, 1898]]
+- 1978: [[Viv Anderson]]
 - [[Statue of Brian Clough]]
 
 ## Other sports

@@ -33,3 +33,4 @@ Nottingham women who campaigned for the vote, ran schools, businesses and librar
 - [[Vera Anderson]]
 - [[Mary Kendrick]]
 - [[Laura Knight]]
+- [[Mary Potter]]

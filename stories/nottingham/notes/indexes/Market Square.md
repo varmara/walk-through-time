@@ -12,6 +12,7 @@ The Old Market Square, where the two medieval towns met, and the streets around 
 - [[St Peter's Church]]
 - [[Bromley House]]
 - [[The Exchange]]
+- [[A city, 1897]]
 - [[Goose Fair]]
 - [[Theatre Royal]]
 - [[Malt Cross]]

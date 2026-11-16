@@ -14,6 +14,7 @@ Kings and the castle on the rock: a favourite seized in 1330, Charles I's call t
 ## The Civil War
 - 1642: [[Charles I]]
 - [[Charles I raised his standard, 1642]]
+- 1642: [[Henry Ireton]]
 - 1643: [[John Hutchinson]]
 - 1643: [[Lucy Hutchinson]]
 - 1643: [[St Nicholas' Church]]

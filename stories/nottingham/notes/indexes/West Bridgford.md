@@ -12,6 +12,7 @@ South of the river: Test cricket, Nottingham Forest and the county's headquarter
 - [[Trent Bridge cricket ground]]
 - [[County Hall]]
 - [[City Ground]]
+- [[Forest's first FA Cup, 1898]]
 - [[The Trent Bridge Inn]]
 - [[A fort at the bridge]]
 - [[The first Test, 1899]]

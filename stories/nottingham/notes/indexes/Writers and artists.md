@@ -24,6 +24,8 @@ The poets, novelists, painters and photographers who lived, worked or were born 
 - [[University College]]
 - [[Graham Greene]]
 - [[Alan Sillitoe]]
+- [[Saturday Night and Sunday Morning]]
+- [[The Byron vault]]
 - [[Gilbert Wakefield]]
 
 ## Artists

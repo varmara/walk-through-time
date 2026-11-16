@@ -23,4 +23,5 @@ Nottingham's scientists, engineers, doctors and nurses: clean water and sewers, 
 - [[Sarah Gray]]
 - [[Margaret Glen-Bott]]
 - [[Louisa May Long]]
+- [[Mary Potter]]
 - [[Ibuprofen]]

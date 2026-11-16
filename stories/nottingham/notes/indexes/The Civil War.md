@@ -9,6 +9,7 @@ Nottingham in the Civil War: where the King raised his standard, the castle held
 
 - 1642: [[Charles I]]
 - [[Charles I raised his standard, 1642]]
+- 1642: [[Henry Ireton]]
 - 1643: [[John Hutchinson]]
 - 1643: [[Lucy Hutchinson]]
 - 1643: [[St Nicholas' Church]]

@@ -5,7 +5,7 @@ area: The city
 order: 4
 ---
 
-The hills north of the old town, built over in the 19th century: parks and cemeteries, a cathedral, a college, a railway station, and the streets of St Ann's.
+The hills north of the old town, built over in the 19th century: parks and cemeteries, a cathedral, a college, a railway station, the streets of St Ann's.
 
 - [[The Leavers lace machine]]
 - [[General Cemetery]]
