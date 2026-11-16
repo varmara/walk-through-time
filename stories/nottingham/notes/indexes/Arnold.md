@@ -6,7 +6,13 @@ order: 40
 sort: as listed
 ---
 
-Where the Luddites first broke knitting frames, and where the water engineer Thomas Hawksley was born.
+A Domesday village and its church, a cotton mill and its house, a painter and a water engineer born here, the first Luddites, a brewery and a market.
 
+- [[Ernehale]]
+- [[St Mary's, Arnold]]
+- [[Arnot Hill House]]
+- [[Richard Parkes Bonington]]
 - [[Thomas Hawksley]]
 - [[The first Luddites]]
+- [[Home Brewery]]
+- [[Arnold Market]]

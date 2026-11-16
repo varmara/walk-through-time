@@ -16,8 +16,8 @@ export const KINDS = [
 // Groups   off: the kinds (colours) switched off
 // Display  fade: Obsidian's text fade threshold;  size: node size;  lines: link thickness
 // Forces   centre, repel, link, distance (Obsidian's four), group (ours)
-export const DEFAULTS = { fold: true, orphans: true, off: [], fade: 0, size: 1, lines: 1,
-  centre: 0.5, repel: 10, link: 1, distance: 30, group: 0.5 };
+export const DEFAULTS = { fold: true, orphans: true, off: [], fade: 0, size: 1, lines: 1.1,
+  centre: 0.5, repel: 10, link: 0.84, distance: 30, group: 0.23 };
 // the settings that change where points go: when they are all as here, the build's layout is the page's
 export const LAYOUT_KEYS = ['fold', 'orphans', 'centre', 'repel', 'link', 'distance', 'group', 'size'];
 export const isDefaultLayout = (P, off) => !off.size && LAYOUT_KEYS.every(k => P[k] === DEFAULTS[k]);
