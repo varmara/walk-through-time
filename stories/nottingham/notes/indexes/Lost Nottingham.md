@@ -27,3 +27,6 @@ Maid Marian Way, or burned and closed. Their pins mark where they stood.
 - [[Gedling station]]
 - [[St Ann's Well]]
 - [[New Town]]
+- [[Hall, manor and green]]
+- [[The old Manor House]]
+- [[Sneinton Hermitage]]

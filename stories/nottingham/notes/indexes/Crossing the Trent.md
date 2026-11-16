@@ -5,7 +5,7 @@ order: 10
 id: trent
 ---
 
-Crossing and taming the river: a fort at the bridge, the medieval bridge and its iron successor, the bridges to Wilford and Clifton, the embankment, a flood and the watersports centre.
+Crossing and taming the river: a Roman ford, the ferries, a fort at the bridge, the medieval bridge and its iron successor, the bridges to Wilford and Clifton, the embankment, a flood and the watersports centre.
 
 - [[Bronze Age finds, 1937]]
 - [[A fort at the bridge]]
@@ -18,3 +18,7 @@ Crossing and taming the river: a fort at the bridge, the medieval bridge and its
 - [[Clifton Bridge]]
 - [[Lady Bay Bridge]]
 - [[National Watersports Centre]]
+- [[The Roman ford]]
+- [[Addensburgh]]
+- [[Barton in the Beans]]
+- [[Ferry Inn]]

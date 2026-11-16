@@ -35,6 +35,7 @@ movements here.
 - [[William Booth]]
 - [[John Clifford]]
 - [[Albert Hall]]
+- [[William Booth's birthplace]]
 
 ## Village churches
 - [[St Mary's, Arnold]]
@@ -52,3 +53,7 @@ movements here.
 - [[St Laurence's, Long Eaton]]
 - [[St Helen's, Stapleford]]
 - [[St Paul's, Carlton-in-the-Willows]]
+- [[Stapleford Cross]]
+- [[Calvretone]]
+- [[Christ Church, Chilwell]]
+- [[St Peter's Church, Ruddington]]

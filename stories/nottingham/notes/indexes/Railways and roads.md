@@ -32,6 +32,7 @@ How people got about: the railways and their stations, a bridge turned over to c
 - [[The trams come back, 2004]]
 - [[Trams to Wilford, 2015]]
 - [[Sherwood tram depot]]
+- [[Compton Acres]]
 
 ## Canals and a tunnel
 - [[The Nottingham Canal]]

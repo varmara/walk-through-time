@@ -31,6 +31,8 @@ The poets, novelists, painters and photographers who lived, worked or were born 
 - [[Festus at Old Basford]]
 - [[The Wise Men of Gotham]]
 - [[Goat home to Gotham City]]
+- [[D. H. Lawrence's birthplace]]
+- [[The Lawrences on Garden Road]]
 
 ## Artists
 - [[Richard Parkes Bonington]]

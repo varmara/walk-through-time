@@ -18,6 +18,9 @@ Nottingham's scientists, engineers, doctors and nurses: clean water and sewers, 
 - [[Edward Joseph Lowe]]
 - [[Mary Kendrick]]
 - [[The MRI scanner]]
+- [[Green's Windmill]]
+- [[Bromley House]]
+- [[Trent Building]]
 
 ## Medicine
 - [[Sarah Gray]]

@@ -20,6 +20,7 @@ Soldiers and sailors who lived here, and the two World Wars at home: the munitio
 - 1914: [[Louisa May Long]]
 - 1921: [[Statue of Captain Albert Ball]]
 - [[City War Memorial]]
+- [[The Chilwell explosion memorial]]
 
 ## The Second World War
 - 1940: [[Ruddington Depot]]

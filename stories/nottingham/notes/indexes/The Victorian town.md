@@ -20,6 +20,8 @@ The town that grew in the 19th century: cemeteries and parks on the hills to the
 - [[The Black Boy Hotel]]
 - [[Theatre Royal]]
 - [[Royal Concert Hall]]
+- [[Malt Cross]]
+- [[Tower House]]
 
 ## Villages become suburbs
 - [[Village to suburb]]
@@ -30,6 +32,7 @@ The town that grew in the 19th century: cemeteries and parks on the hills to the
 - [[Mapperley Hall and the Wrights]]
 - [[New Town]]
 - [[A railway suburb]]
+- [[Who lived in the Park]]
 
 ## Public buildings
 - [[University College]]
