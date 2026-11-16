@@ -20,6 +20,8 @@ How people got about: the railways and their stations, a bridge turned over to c
 - [[Gotham's gypsum]]
 - [[Gedling station]]
 - [[East Midlands Parkway]]
+- [[Long Eaton and the railway]]
+- [[No station for fifty years]]
 
 ## Buses and aircraft
 - [[T. H. Barton]]

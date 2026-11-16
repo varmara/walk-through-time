@@ -43,3 +43,6 @@ What Nottingham made: Humber's and Raleigh's bicycles and Brough's motorcycles, 
 ## Engines and bricks
 - [[Mapperley bricks]]
 - [[Rolls-Royce at Hucknall]]
+- [[Stanton ironworks]]
+- [[Standhill brickworks]]
+- [[Morley's pottery]]

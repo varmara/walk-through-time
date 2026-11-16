@@ -12,6 +12,7 @@ The town that grew in the 19th century: cemeteries and parks on the hills to the
 - [[The Arboretum]]
 - [[Church Cemetery]]
 - [[Forest Recreation Ground]]
+- [[St Ann's Allotments]]
 
 ## Buildings
 - [[Adams Building]]
@@ -27,6 +28,8 @@ The town that grew in the 19th century: cemeteries and parks on the hills to the
 - [[Samuel Hall's Sherwood]]
 - [[Radford grows]]
 - [[Mapperley Hall and the Wrights]]
+- [[New Town]]
+- [[A railway suburb]]
 
 ## Public buildings
 - [[University College]]

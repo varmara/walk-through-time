@@ -16,11 +16,12 @@ export const KINDS = [
 // Groups   off: the kinds (colours) switched off
 // Display  fade: Obsidian's text fade threshold;  size: node size;  lines: link thickness
 // Forces   centre, repel, link, distance (Obsidian's four), group (ours)
-export const DEFAULTS = { fold: true, orphans: true, off: [], fade: 0, size: 1, lines: 1.1,
+export const DEFAULTS = { fold: true, orphans: true, off: ['architects', 'place'], fade: 0, size: 1, lines: 1.1,
   centre: 0.5, repel: 10, link: 0.84, distance: 30, group: 0.23 };
 // the settings that change where points go: when they are all as here, the build's layout is the page's
 export const LAYOUT_KEYS = ['fold', 'orphans', 'centre', 'repel', 'link', 'distance', 'group', 'size'];
-export const isDefaultLayout = (P, off) => !off.size && LAYOUT_KEYS.every(k => P[k] === DEFAULTS[k]);
+export const isDefaultLayout = (P, off) => off.size === DEFAULTS.off.length && DEFAULTS.off.every(k => off.has(k))
+  && LAYOUT_KEYS.every(k => P[k] === DEFAULTS[k]);
 
 // links, each point's links and neighbours, and the owner of a place with only one link
 export function prepare(G){
@@ -88,7 +89,7 @@ export function forces(sim, P, spots){
 // The build's layout: the default settings, run until it settles. Returns {id: [x, y]} for the points shown.
 export function settle(d3, data){
   const G = prepare({ nodes: data.nodes.map(n => ({ ...n })), links: data.links });
-  const P = { ...DEFAULTS }, off = new Set();
+  const P = { ...DEFAULTS }, off = new Set(DEFAULTS.off);
   let seed = 1;
   const random = () => ((seed = (seed * 1664525 + 1013904223) % 4294967296) / 4294967296);
   const { ns, ls } = visible(G, P, off, null, null, random);

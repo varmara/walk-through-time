@@ -25,3 +25,5 @@ Maid Marian Way, or burned and closed. Their pins mark where they stood.
 - [[Bulwell Hall]]
 - [[Forty Bridges]]
 - [[Gedling station]]
+- [[St Ann's Well]]
+- [[New Town]]

@@ -1,6 +1,6 @@
 // Walk Through Time, city page: Places: a thread, a place or a person with several buildings, as numbered pins and
 // cards that swipe sideways one at a time, or the same cards one under another as a page.
-import { $, dateText, esc, whenText } from './util.js';
+import { $, dateText, esc, flightPace, whenText } from './util.js';
 import { S } from './state.js';
 import { fstate, isB, loadCard, parseRef, refCentre, refOf, storyFor, tiled } from './data.js';
 import { paintBuildings } from './map.js';
@@ -195,11 +195,13 @@ const smooth = t => t < 0.5 ? Math.pow(2, EASE - 1) * Math.pow(t, EASE) : 1 - Ma
 // jumped: Women's lives, from Mary Howitt's house in the town to Frances Bush's plaque 8 km away)
 export const flightMs = (km, dz = 0) => Math.round(Math.min(3600, 1200 + 650 * Math.log2(1 + km) + 120 * Math.abs(dz)));
 export function glide(camera){
+  const pace = flightPace();
+  if (!pace) return S.map.jumpTo(camera);
   if (reduced()) return S.map.easeTo({ ...camera, duration: 300 });
   const to = camera.center && maplibregl.LngLat.convert(camera.center);
   const km = to ? S.map.getCenter().distanceTo(to) / 1000 : 0;
   const dz = camera.zoom != null ? camera.zoom - S.map.getZoom() : 0;
-  S.map.flyTo({ ...camera, curve: 1.9, easing: smooth, duration: flightMs(km, dz), essential: true });
+  S.map.flyTo({ ...camera, curve: 1.9, easing: smooth, duration: Math.round(flightMs(km, dz) * pace), essential: true });
 }
 // how close a card takes the map to its place: near enough to pick out the building, with its street round it
 const PLACE_ZOOM = 16;

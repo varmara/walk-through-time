@@ -2,7 +2,7 @@
 // Every card is one layout. A kind of card only says what goes in it (buildingCard, areaCard, pinCard); renderCard
 // draws it into the slots of the sheet in <city>/index.html, in their order there, and hides the empty ones:
 //   image + credit · summary · facts (rows) · Did you know · old pictures · more old pictures · stories · links
-import { $, dateText, eraOf, esc, whenText } from './util.js';
+import { $, dateText, eraOf, esc, flightPace, whenText } from './util.js';
 import { S } from './state.js';
 import { areaOf, byOsm, centreOf, fstate, isB, loadCard, parseRef, pinOf, refOf, routeOf, saveActive, storyOf, tiled } from './data.js';
 import { openSheet, shareOf } from './sheet.js';
@@ -380,7 +380,7 @@ export function selectBuilding(id, at){
   if (S.selectedId != null) fstate(S.selectedId, { sel:false });
   S.selectedId = id;
   fstate(id, { sel:true });
-  const go = c => c && S.map.easeTo({ center:c, zoom:Math.max(S.map.getZoom(), 16.5), duration:700,
+  const go = c => c && S.map.easeTo({ center:c, zoom:Math.max(S.map.getZoom(), 16.5), duration:Math.round(700 * flightPace()),
     padding: innerWidth >= 760 ? { right: 400 } : { bottom: innerHeight * 0.45 } });
   if (S.features[id].full || !tiled()) { if (at || centreOf(id)) go(at || centreOf(id)); return showCard(id); }
   // the card first, then the glide: moving the map (with hills, especially) loads tiles and keeps a phone busy,
@@ -669,6 +669,6 @@ export function openRef(r){
   const f = refOf(r), bb = f.bb, key = r[0] === 'r' ? 'routes' : f.properties.t;
   if (!S.active.has(key)) { S.active.add(key); saveActive(); renderLayers(); applyLayers(); }
   S.map.fitBounds([[bb[0], bb[1]], [bb[2], bb[3]]],
-    { padding: innerWidth >= 760 ? { top: 60, bottom: 60, left: 60, right: 420 } : { top: 80, left: 30, right: 70, bottom: innerHeight * 0.45 }, maxZoom: 17, duration: 800 });
+    { padding: innerWidth >= 760 ? { top: 60, bottom: 60, left: 60, right: 420 } : { top: 80, left: 30, right: 70, bottom: innerHeight * 0.45 }, maxZoom: 17, duration: Math.round(800 * flightPace()) });
   r[0] === 'r' ? renderCard(routeCard(f.properties)) : r[0] === 'l' ? renderCard(landCard(f.properties)) : showArea(f.properties);
 }

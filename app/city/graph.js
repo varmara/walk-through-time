@@ -158,7 +158,7 @@ function wire(){
   $('back').onclick = e => { e.preventDefault(); hooks.back?.(); };
   $('gear').onclick = () => { const open = $('settings').hidden; $('settings').hidden = !open; $('gear').setAttribute('aria-expanded', open); };
   $('sClose').onclick = () => { $('settings').hidden = true; $('gear').setAttribute('aria-expanded', 'false'); };
-  $('sReset').onclick = () => { Object.assign(P, DEFAULTS); off.clear(); saveP(); panel(); draw(); };
+  $('sReset').onclick = () => { Object.assign(P, DEFAULTS); off.clear(); DEFAULTS.off.forEach(k => off.add(k)); saveP(); panel(); draw(); };
   $('more').onclick = e => { e.stopPropagation(); drawer($('sheet').classList.contains('peek')); };
   $('grab').onclick = () => drawer($('sheet').classList.contains('peek'));
   $('shead').onclick = e => { if (e.target.closest('button')) return; if ($('sheet').classList.contains('peek')) drawer(true); };

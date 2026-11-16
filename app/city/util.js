@@ -24,6 +24,10 @@ export const LAND = ['brook', 'pond', 'wood', 'rail', 'canal', 'oldsite', 'cemet
 export const BASICS = ['toilets', 'water', 'benches'];                   // points drawn close up (--b-<key>)
 
 export const $ = id => document.getElementById(id);
+// How the map flies from place to place (Map options): off jumps straight there; slow and fast stretch or shorten
+// every flight by these factors
+export const FLIGHT = { off: 0, slow: 1.6, normal: 1, fast: 0.55 };
+export const flightPace = () => { const k = store.get('flight'); return k in FLIGHT ? FLIGHT[k] : 1; };
 export const store = { get(k){ try { return localStorage.getItem(k); } catch { return null; } },
                 set(k,v){ try { localStorage.setItem(k,v); } catch {} } };
 export const say = t => { $('status').textContent = t || ''; };

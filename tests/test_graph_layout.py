@@ -26,9 +26,9 @@ class Layout(unittest.TestCase):
             f.write_text(json.dumps({"nodes": nodes, "links": links}))
             subprocess.run(["node", str(ROOT / "pipeline" / "graph_layout.mjs"), str(f)], check=True, capture_output=True)
             out = {n["id"]: n for n in json.loads(f.read_text())["nodes"]}
-        for i in ("t:inns", "x", "b1"):
-            self.assertIsInstance(out[i]["x"], (int, float))
-        self.assertNotIn("x", out["b2"])           # folded into its architect: placed when spread out
+        self.assertIsInstance(out["t:inns"]["x"], (int, float))
+        for i in ("x", "b1", "b2"):                # architects and places are off by default: placed when turned on
+            self.assertNotIn("x", out[i])
         self.assertEqual(len(links), 3)
 
 

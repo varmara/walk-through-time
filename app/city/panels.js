@@ -231,6 +231,11 @@ export function groundNote(){
     + `at true scale: from ${G.range[0]} to ${G.range[1]} m above sea level. Railway cuttings, the canal and filled-in land changed it over time.`;
 }
 document.querySelectorAll('[data-base]').forEach(btn => btn.onclick = () => setBase(btn.dataset.base));
+// how the map flies between places: kept in this browser
+const showFlight = () => { const k = store.get('flight') || 'normal';
+  document.querySelectorAll('[data-flight]').forEach(b => b.setAttribute('aria-pressed', b.dataset.flight === k)); };
+document.querySelectorAll('[data-flight]').forEach(b => b.onclick = () => { store.set('flight', b.dataset.flight); showFlight(); });
+showFlight();
 export function setBase(kind){
   document.querySelectorAll('[data-base]').forEach(b => b.setAttribute('aria-pressed', b.dataset.base === kind));
   $('keyRow').hidden = !(kind === 'nls' && !store.get('mtKey'));

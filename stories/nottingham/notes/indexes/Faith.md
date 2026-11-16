@@ -24,6 +24,7 @@ movements here.
 - [[St Giles' Church]]
 - [[The Byron vault]]
 - [[Mary Potter]]
+- [[St Ann's Church]]
 
 ## Chapels
 - [[John Wesley]]
@@ -48,3 +49,6 @@ movements here.
 - [[St Mary's, Bulwell]]
 - [[St Leodegarius, Basford]]
 - [[St Jude's, Mapperley]]
+- [[St Laurence's, Long Eaton]]
+- [[St Helen's, Stapleford]]
+- [[St Paul's, Carlton-in-the-Willows]]

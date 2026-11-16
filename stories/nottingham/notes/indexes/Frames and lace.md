@@ -29,3 +29,5 @@ How the stocking frame and the lace machine made Nottingham's trade: the invento
 - [[Frances Bush]]
 - plaque: Site of Swiss Mills
 - [[Nottingham Contemporary]]
+- [[Long Eaton lace]]
+- [[Harrington Mill]]

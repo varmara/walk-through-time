@@ -6,7 +6,7 @@ order: 4
 sort: as listed
 ---
 
-The hills north of the old town, built over in the 19th century: parks and cemeteries, a cathedral, a college, a railway station, the streets of St Ann's.
+The hills north of the old town, built over in the 19th century: parks and cemeteries, a cathedral, a college and a railway station.
 
 - [[Forest Recreation Ground]]
 - [[The Leavers lace machine]]
@@ -23,5 +23,4 @@ The hills north of the old town, built over in the 19th century: parks and cemet
 - [[Guildhall]]
 - [[Nottingham Victoria station]]
 - 1919: [[George Brough]]
-- [[The St Ann's riots, 1958]]
 - [[Victoria Centre]]
