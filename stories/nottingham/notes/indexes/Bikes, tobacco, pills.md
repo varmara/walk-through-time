@@ -24,6 +24,7 @@ What Nottingham made: Humber's and Raleigh's bicycles and Brough's motorcycles, 
 ## Boots
 - [[Jesse Boot]]
 - [[Florence Boot]]
+- [[The Dorothy Boot Homes, 1908]]
 - [[Building D10]]
 - [[Building D6]]
 - [[The Nottingham Blitz, 1941]]

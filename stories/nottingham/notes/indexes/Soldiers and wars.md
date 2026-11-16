@@ -11,6 +11,7 @@ Soldiers and sailors who lived here, and the two World Wars at home: the munitio
 - [[Marshal Tallard]]
 - [[John Borlase Warren]]
 - [[Captain John Deane]]
+- [[The Dorothy Boot Homes, 1908]]
 
 ## The First World War
 - [[National Shell Filling Factory]]
@@ -26,3 +27,4 @@ Soldiers and sailors who lived here, and the two World Wars at home: the munitio
 - [[The Lady Bay bombs]]
 - [[The Nottingham Blitz, 1941]]
 - 1941: [[Vera Anderson]]
+- [[War graves at St Wilfrid's]]

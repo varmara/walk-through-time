@@ -20,6 +20,9 @@ The town that grew in the 19th century: cemeteries and parks on the hills to the
 - [[Theatre Royal]]
 - [[Royal Concert Hall]]
 
+## Villages become suburbs
+- [[Village to suburb]]
+
 ## Public buildings
 - [[University College]]
 - [[Guildhall]]

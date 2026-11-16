@@ -23,6 +23,8 @@ Cricket at Trent Bridge, football on both banks of the Trent, prize-fighters, sk
 - plaque: Notts County Football Club
 - [[City Ground]]
 - [[Meadow Lane]]
+- [[Harry Cursham]]
+- [[James Iremonger]]
 - [[Tinsley Lindley]]
 - [[Herbert Kilpin]]
 - [[Albert Iremonger]]
