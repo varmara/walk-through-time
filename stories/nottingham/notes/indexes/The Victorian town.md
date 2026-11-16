@@ -18,6 +18,7 @@ The town that grew in the 19th century: cemeteries and parks on the hills to the
 - [[Watson Fothergill's offices]]
 - [[The Black Boy Hotel]]
 - [[Theatre Royal]]
+- [[Royal Concert Hall]]
 
 ## Public buildings
 - [[University College]]

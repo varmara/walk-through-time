@@ -17,6 +17,6 @@ The halls of the families who owned the land round Nottingham, and the villages 
 - [[An estate village]]
 - [[The Byrons of Thrumpton]]
 - [[The storming of Shelford House]]
-- [[Nottingham Castle]]
+- 1670s: [[Nottingham Castle]]
 - plaque: Chilwell Hall
 - [[Wilford House]]

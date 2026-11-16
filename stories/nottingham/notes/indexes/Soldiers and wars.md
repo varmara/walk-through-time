@@ -21,7 +21,7 @@ Soldiers and sailors who lived here, and the two World Wars at home: the munitio
 - [[City War Memorial]]
 
 ## The Second World War
-- [[Ruddington Depot]]
+- 1940: [[Ruddington Depot]]
 - [[Tollerton airfield]]
 - [[The Lady Bay bombs]]
 - [[The Nottingham Blitz, 1941]]

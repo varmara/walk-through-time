@@ -20,7 +20,7 @@ How the stocking frame and the lace machine made Nottingham's trade: the invento
 - [[The Leavers lace machine]]
 - [[Thomas Adams]]
 - [[Adams Building]]
-- [[High Pavement Chapel]]
+- 1982: [[High Pavement Chapel]]
 - [[Frances Bush]]
 - plaque: Site of Swiss Mills
 - [[Nottingham Contemporary]]
