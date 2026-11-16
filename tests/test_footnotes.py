@@ -43,3 +43,11 @@ def test_a_century_in_words_is_found():
     page = {"text": "mentioned as early as the fifteenth century"}
     assert date_page("15th century", [page]) is page
     assert date_page("16th century", [page]) is None
+
+
+def test_a_century_joined_to_another_is_found():
+    from pipeline.s04_curated import date_page
+    page = {"text": "the tower was built in stages between the 12th and 14th century"}
+    assert date_page("12th century", [page]) is page
+    assert date_page("13th century", [page]) is None      # (a century between them is not given)
+    assert date_page("13th century", [{"text": "built in the 13th–14th centuries"}])
