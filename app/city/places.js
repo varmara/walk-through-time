@@ -186,14 +186,17 @@ const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 // easing in and out: the higher EASE, the slower the takeoff and landing (3 is the classic cubic; 2.7, a tenth quicker)
 const EASE = 2.7;
 const smooth = t => t < 0.5 ? Math.pow(2, EASE - 1) * Math.pow(t, EASE) : 1 - Math.pow(-2 * t + 2, EASE) / 2;
-// Its length is set by the distance, a little longer the further it goes: a flight left to MapLibre's own pace
-// that would take longer than its limit is not flown but jumped (Women's lives, from Mary Howitt's house in the
-// town to Frances Bush's plaque 8 km away)
+// Its length is set by how far it goes, and its speed grows with the distance: a hop along the street takes about
+// a second and a half, across town about two and a half, and a flight to the edge of the map no more than about
+// three and a half (a flight left to MapLibre's own pace that would take longer than its limit is not flown but
+// jumped: Women's lives, from Mary Howitt's house in the town to Frances Bush's plaque 8 km away)
+export const flightMs = (km, dz = 0) => Math.round(Math.min(3600, 1200 + 650 * Math.log2(1 + km) + 120 * Math.abs(dz)));
 export function glide(camera){
   if (reduced()) return S.map.easeTo({ ...camera, duration: 300 });
   const to = camera.center && maplibregl.LngLat.convert(camera.center);
   const km = to ? S.map.getCenter().distanceTo(to) / 1000 : 0;
-  S.map.flyTo({ ...camera, curve: 1.9, easing: smooth, duration: Math.min(6500, 1600 + 1400 * Math.log2(1 + km)), essential: true });
+  const dz = camera.zoom != null ? camera.zoom - S.map.getZoom() : 0;
+  S.map.flyTo({ ...camera, curve: 1.9, easing: smooth, duration: flightMs(km, dz), essential: true });
 }
 // how close a card takes the map to its place: near enough to pick out the building, with its street round it
 const PLACE_ZOOM = 16;
