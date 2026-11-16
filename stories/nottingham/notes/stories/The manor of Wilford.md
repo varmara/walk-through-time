@@ -4,12 +4,12 @@ when: "1280"
 source: https://en.wikipedia.org/wiki/Wilford
 check: Willesforde | Domesday | fishery | 23 sokemen
 at:
-  - https://www.openstreetmap.org/way/29386231
+  - Wilford village
 names: no
 see:
   - "[[Clifton Hall]]"
   - "[[The old Manor House]]"
-note: "on St Wilfrid's Church; the manor was the Cliftons' land, their seat Clifton Hall. Facts from Thoroton and Throsby (1790, public domain), A. C. Wood's notes, White's 1853 directory and the Imperial Gazetteer (no notices: facts only)"
+note: "on the village's pin: the manor was the whole parish, with no house of its own here; was the Cliftons' land, their seat Clifton Hall. Facts from Thoroton and Throsby (1790, public domain), A. C. Wood's notes, White's 1853 directory and the Imperial Gazetteer (no notices: facts only)"
 ---
 
 Before the Conquest the manor of Wilford belonged to Gode the Countess.[^throsby] In Domesday Book the settlement is

@@ -3,7 +3,7 @@ type: event
 source: https://en.wikipedia.org/wiki/Pentrich_rising
 check: 1817 | South Wingfield | Nottingham | Giltbrook | Dragoons | Brandreth | Oliver
 at:
-  - The Nottingham Captain
+  - Wilford village
   - Giltbrook, 53.0065, -1.283
 names: no
 see:
