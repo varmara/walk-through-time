@@ -14,7 +14,8 @@ A village on the south bank of the Trent, reached for centuries by ferry and, si
 - [[Ferry Inn]]
 
 ## The village
-- [[Willesforde]]
+- [[The manor of Wilford]]
+- [[The old Manor House]]
 - [[St Wilfrid's Church]]
 - [[The churchyard gazebo]]
 - [[The poet in the churchyard]]
