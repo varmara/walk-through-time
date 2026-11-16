@@ -12,6 +12,11 @@ The pits that dug Nottinghamshire's coal, the wagonway, canal and railway that c
 - [[Bestwood winding engine]]
 - [[Gedling Colliery]]
 - [[Cotgrave Colliery]]
+- [[Wollaton Colliery]]
+- [[Hucknall's pits]]
+- [[Calverton Colliery]]
+- [[Coal and iron at Bestwood]]
+- [[Bennerley Ironworks]]
 
 ## Carrying the coal
 - [[Wollaton Wagonway]]
@@ -22,3 +27,4 @@ The pits that dug Nottinghamshire's coal, the wagonway, canal and railway that c
 ## Power stations
 - [[Wilford Power Station]]
 - [[Ratcliffe-on-Soar Power Station]]
+- [[The power station that was not built]]

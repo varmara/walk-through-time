@@ -6,6 +6,8 @@ check: 1960 | Central Electricity Generating Board | 2,000 MW | Public Inquiry |
 at:
   - National Watersports Centre
 names: no
+see:
+  - "[[Ratcliffe-on-Soar Power Station]]"
 ---
 
 In 1960 the Central Electricity Generating Board proposed a 2,000 MW power station at Holme Pierrepont, with coal by

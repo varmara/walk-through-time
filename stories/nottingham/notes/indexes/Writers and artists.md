@@ -28,6 +28,9 @@ The poets, novelists, painters and photographers who lived, worked or were born 
 - [[Saturday Night and Sunday Morning]]
 - [[The Byron vault]]
 - [[Gilbert Wakefield]]
+- [[Festus at Old Basford]]
+- [[The Wise Men of Gotham]]
+- [[Goat home to Gotham City]]
 
 ## Artists
 - [[Richard Parkes Bonington]]

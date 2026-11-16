@@ -15,6 +15,11 @@ How the stocking frame and the lace machine made Nottingham's trade: the invento
 - [[Lowe's Silk Mill]]
 - plaque: Plaque to George Henry Hurt
 - [[Samuel Morley]]
+- [[Walker Gate]]
+- [[Arnot Hill House]]
+- [[The Leen cotton mills]]
+- [[The bleachers of Basford]]
+- [[Gloves and bleach]]
 
 ## Lace
 - [[The Leavers lace machine]]

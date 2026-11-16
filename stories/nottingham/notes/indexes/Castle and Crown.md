@@ -10,6 +10,8 @@ Kings and the castle on the rock: a favourite seized in 1330, Charles I's call t
 ## The medieval castle
 - [[Statue of Robin Hood]]
 - [[Mortimer's Hole]]
+- [[The castle's deer park]]
+- [[A royal hunting park]]
 
 ## The Civil War
 - 1642: [[Charles I]]
@@ -18,6 +20,8 @@ Kings and the castle on the rock: a favourite seized in 1330, Charles I's call t
 - 1643: [[John Hutchinson]]
 - 1643: [[Lucy Hutchinson]]
 - 1643: [[St Nicholas' Church]]
+- [[Hutchinson's garrison]]
+- [[Royalist raids on Nottingham]]
 
 ## The dukes' mansion
 - 1670s: [[Nottingham Castle]]

@@ -6,6 +6,8 @@ check: Arnot Hill | 1792 | John Hawksley | 1791 | 60 horsepower | Thomas Hawksle
 at:
   - https://www.openstreetmap.org/way/200941630
 names: no
+see:
+  - "[[Arkwright's first mill]]"
 ---
 
 The mill owner John Hawksley built a large cotton mill here, working before the end of 1791 with a 60-horsepower

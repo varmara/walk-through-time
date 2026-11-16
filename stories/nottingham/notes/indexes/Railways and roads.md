@@ -16,11 +16,24 @@ How people got about: the railways and their stations, a bridge turned over to c
 - [[Lady Bay Bridge]]
 - [[Victoria Centre]]
 - [[The Meadows rebuilt]]
+- [[Forty Bridges]]
+- [[Gotham's gypsum]]
+- [[Gedling station]]
+- [[East Midlands Parkway]]
 
 ## Buses and aircraft
 - [[T. H. Barton]]
 - [[Tollerton airfield]]
+- [[Rolls-Royce at Hucknall]]
 
 ## Trams
 - [[The trams come back, 2004]]
 - [[Trams to Wilford, 2015]]
+- [[Sherwood tram depot]]
+
+## Canals and a tunnel
+- [[The Nottingham Canal]]
+- [[Fellows Morton & Clayton]]
+- [[The Trent Navigation warehouse]]
+- [[The marina on the sidings]]
+- [[The Park Tunnel]]

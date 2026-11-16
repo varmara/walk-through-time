@@ -9,6 +9,7 @@ at:
   - Statue of Robert Juckes Clifton, 52.9381, -1.15394
 names: no
 see:
+  - "[[Sir Robert Clifton's colliery]]"
   - "[[Wilford Toll Bridge]]"
 note: the pin at the statue's point in OpenStreetMap, by the end of the toll bridge
 ---

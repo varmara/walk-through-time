@@ -11,4 +11,4 @@ note: "facts only (no notice)"
 ---
 
 Henry Ashwell, a Basford bleacher, built Woodthorpe Grange in 1874. The council bought the house and grounds in 1921
-for £15,000, Jesse Boot giving £5,000 of it, and the park opened in 1922.
+for £15,000, [[Jesse Boot]] giving £5,000 of it, and the park opened in 1922.

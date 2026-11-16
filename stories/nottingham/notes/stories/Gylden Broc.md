@@ -5,6 +5,8 @@ check: Gylden Broc | golden | IKEA | 2008
 at:
   - Giltbrook
 names: no
+see:
+  - "[[Forty Bridges]]"
 ---
 
 Giltbrook's name is thought to come from the Old English Gylden Broc, the golden brook, after the stream that runs

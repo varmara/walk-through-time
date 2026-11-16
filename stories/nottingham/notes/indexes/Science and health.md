@@ -25,3 +25,5 @@ Nottingham's scientists, engineers, doctors and nurses: clean water and sewers, 
 - [[Louisa May Long]]
 - [[Mary Potter]]
 - [[Ibuprofen]]
+- [[Coppice Hospital]]
+- [[Mapperley Hospital]]

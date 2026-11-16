@@ -12,7 +12,7 @@ The halls of the families who owned the land round Nottingham, and the villages 
 - [[Clifton Grove]]
 - [[Clifton dovecote]]
 - [[Won at cards]]
-- [Wollaton Hall](https://www.openstreetmap.org/way/4438894)
+- [[Wollaton Hall]]
 - [[Cassandra Willoughby]]
 - [[Thrumpton Hall]]
 - [[The staircase]]
@@ -22,3 +22,10 @@ The halls of the families who owned the land round Nottingham, and the villages 
 - 1670s: [[Nottingham Castle]]
 - plaque: Chilwell Hall
 - [[Wilford House]]
+- [[The Pierreponts]]
+- [[Bestwood Lodge]]
+- [[Papplewick Hall]]
+- [[Bulwell Hall]]
+- [[Mapperley Hall and the Wrights]]
+- [[Tollerton Hall]]
+- [[Hine's Park]]

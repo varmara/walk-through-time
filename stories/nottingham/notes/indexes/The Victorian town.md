@@ -22,6 +22,11 @@ The town that grew in the 19th century: cemeteries and parks on the hills to the
 
 ## Villages become suburbs
 - [[Village to suburb]]
+- [[Park Terrace]]
+- [[Hine's Park]]
+- [[Samuel Hall's Sherwood]]
+- [[Radford grows]]
+- [[Mapperley Hall and the Wrights]]
 
 ## Public buildings
 - [[University College]]

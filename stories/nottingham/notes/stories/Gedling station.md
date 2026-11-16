@@ -7,6 +7,8 @@ at:
   - https://www.openstreetmap.org/way/492128001
 names: no
 note: "the youth centre's outline, which OpenStreetMap marks as a station building"
+see:
+  - "[[Gedling Colliery]]"
 ---
 
 Gedling's railway station closed on 4 April 1960, though coal trains ran to the colliery for decades more. Its building

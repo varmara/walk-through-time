@@ -8,4 +8,4 @@ at:
 ---
 
 Storms in 1843 damaged the old church of St Mary beyond repair, and a new one was built on its site in 1849–50 to the
-designs of Henry Isaac Stevens. It is listed Grade II.
+designs of [[Henry Isaac Stevens]]. It is listed Grade II.

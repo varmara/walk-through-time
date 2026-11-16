@@ -34,3 +34,17 @@ movements here.
 - [[William Booth]]
 - [[John Clifford]]
 - [[Albert Hall]]
+
+## Village churches
+- [[St Mary's, Arnold]]
+- [[St Peter's, Tollerton]]
+- [[St Lawrence's, Gotham]]
+- [[St Leonard's, Wollaton]]
+- [[Shelford's church and priory]]
+- [[All Hallows Church, Gedling]]
+- [[All Saints' Church, Cotgrave]]
+- [[St Edmund's, Holme Pierrepont]]
+- [[St Peter's, Radford]]
+- [[St Mary's, Bulwell]]
+- [[St Leodegarius, Basford]]
+- [[St Jude's, Mapperley]]

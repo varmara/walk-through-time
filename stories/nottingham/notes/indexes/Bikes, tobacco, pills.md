@@ -30,6 +30,16 @@ What Nottingham made: Humber's and Raleigh's bicycles and Brough's motorcycles, 
 - [[The Nottingham Blitz, 1941]]
 - [[Ibuprofen]]
 - 1941: [[Vera Anderson]]
+- [[Boots on Goose Gate]]
 
 ## Clothes
 - 1970: [[Paul Smith]]
+
+## Beer, sauce and soap
+- [[Home Brewery]]
+- [[Shipstones' Star Brewery]]
+- [[HP Sauce and soap]]
+
+## Engines and bricks
+- [[Mapperley bricks]]
+- [[Rolls-Royce at Hucknall]]
