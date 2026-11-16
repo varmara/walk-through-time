@@ -250,7 +250,15 @@ def date_page(date, pages):
     want = d.lower() if "century" in d else (re.search(r"\d{3,4}", d) or [None])[0]
     if not want:
         return None
-    return next((p for p in pages if want.lower() in p["text"]), None)
+    wants = {want.lower()}
+    if m := re.match(r"(\d{1,2})(?:st|nd|rd|th) century", want.lower()):
+        wants.add(f"{ORDINALS[int(m[1])]} century")    # "15th century" is also "fifteenth century"
+    return next((p for p in pages if any(w in p["text"] for w in wants)), None)
+
+
+ORDINALS = dict(enumerate("zeroth first second third fourth fifth sixth seventh eighth ninth tenth eleventh twelfth "
+                          "thirteenth fourteenth fifteenth sixteenth seventeenth eighteenth nineteenth twentieth "
+                          "twenty-first".split()))
 
 
 def norm(s):

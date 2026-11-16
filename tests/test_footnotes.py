@@ -36,3 +36,10 @@ class Footnotes(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_a_century_in_words_is_found():
+    from pipeline.s04_curated import date_page
+    page = {"text": "mentioned as early as the fifteenth century"}
+    assert date_page("15th century", [page]) is page
+    assert date_page("16th century", [page]) is None
