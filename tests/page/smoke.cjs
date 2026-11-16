@@ -56,7 +56,7 @@ const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (
   if (fold) { await fold.click(); await page.waitForTimeout(200); }
   const place = await page.$('#stSections details.area[open] [data-set]');
   if (place) { await place.click(); await page.waitForTimeout(3000); }
-  check(/^1 of \d+$/.test(await text('#pCount')), "a place's stories open as numbered cards");
+  check(/^\d+ stor(y|ies)$/.test(await text('#pCount')), "a place's stories open on their opening card");
   await page.click('#pClose'); await page.waitForTimeout(300);
   await page.click('#bStories'); await page.waitForTimeout(300);
   const many = await page.$('#stSections .linfo .item .cnt');
@@ -89,11 +89,20 @@ const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (
   if (thread) {
     await thread.click();
     await page.waitForTimeout(3000);
-    check(/^1 of \d+$/.test(await text('#pCount')) && (await page.$$('#pCards .pcard')).length > 1, "a thread's places open as numbered cards");
+    const n = +(/^(\d+) stor/.exec(await text('#pCount')) || [])[1];
+    check(n > 0 && (await page.$$('#pCards .pcard')).length === n + 1, "a thread opens on its opening card, then a card for each story");
+    await page.click('#pNext'); await page.waitForTimeout(800);
+    check(await text('#pCount') === `1 of ${n}`, "the next card is its first story, numbered");
+    // the same cards as a page: one under another, each with its way back to the map
+    await page.click('#pPage'); await page.waitForTimeout(500);
+    check(await page.$eval('#placesbar', el => el.classList.contains('page')) && (await page.$$('#pCards .pmap')).length > 0, 'the thread shows as a page');
+    const back = await page.$('#pCards .pcard[data-i="2"] [data-map]');
+    if (back) { await back.click(); await page.waitForTimeout(800); }
+    check(!(await page.$eval('#placesbar', el => el.classList.contains('page'))) && await text('#pCount') === `2 of ${n}`, '"Show on the map" goes back to its card');
   }
   // a link to a place opens its cards, not a tickbox
   await open('?layer=castle');
-  check(/^1 of \d+$/.test(await text('#pCount')), "a link to a place opens its cards");
+  check(/^\d+ stor(y|ies)$/.test(await text('#pCount')), "a link to a place opens its cards");
 
   await page.click('#bMap').catch(() => {});
   await open('');

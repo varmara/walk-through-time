@@ -168,9 +168,9 @@ a.fab{display:grid;place-items:center;text-decoration:none;color:inherit}
 .close.share svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 24px);z-index:50;
   background:var(--ink);color:var(--paper);padding:8px 14px;border-radius:999px;font-size:14px;box-shadow:var(--shadow-toast)}
-.pcards{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 12px 6px;scrollbar-width:none;overscroll-behavior-x:contain}
+.pcards{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 12px 6px;scroll-padding:0 12px;scrollbar-width:none;overscroll-behavior-x:contain}
 .pcards::-webkit-scrollbar{display:none}
-.pcard{cursor:pointer;flex:0 0 82%;max-width:360px;scroll-snap-align:start;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:10px 12px;
+.pcard{cursor:pointer;flex:0 0 100%;scroll-snap-align:start;scroll-snap-stop:always;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:10px 12px;
   box-shadow:var(--shadow-1);display:grid;gap:4px;position:relative;max-height:34vh;overflow-y:auto;box-sizing:border-box}
 .pcard.on{border-color:var(--ink)}
 .pcard h3{margin:0 0 0 30px;font:600 18px/1.2 var(--serif);text-wrap:balance}
@@ -183,7 +183,28 @@ a.fab{display:grid;place-items:center;text-decoration:none;color:inherit}
 .pin.on{background:var(--ink);color:var(--paper);transform:scale(1.25)}
 .pin.cluster{width:34px;height:34px;background:var(--paper);color:var(--ink);border:3px solid var(--hl);font-size:13px}
 .allplaces{display:block;margin:4px 0 0}
-@media (min-width:760px){ .placesbar{left:16px;right:auto;width:420px;bottom:16px} .phead{margin:0} .pcards{padding:2px 0 6px} }
+@media (min-width:760px){ .placesbar{left:16px;right:auto;width:420px;bottom:16px} .phead{margin:0} .pcards{padding:2px 0 6px;scroll-padding:0} }
+/* one story at a time: the card fills the strip; pins too close to tell apart show the stories' numbers in them */
+.pin.cluster.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.pin.cluster.wide{width:auto;min-width:34px;padding:0 7px;border-radius:17px}
+.pcard .pabout{font:14px/1.45 var(--serif)}
+.pcard .psrc{font:12px/1.4 var(--sans);color:var(--muted)}
+.pcard .psrc a{color:inherit}
+.pcard .pbtns{display:flex;gap:16px;flex-wrap:wrap}
+.pcard .pmap{display:none}
+.pintro h3.ptitle{margin-left:0;font-size:20px}
+.pview{display:grid;place-items:center}
+.pview svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.pview[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-radius:8px}
+/* the set as a page: the same cards, one under another, filling the screen above the bar's head */
+.placesbar.page{top:calc(env(safe-area-inset-top,0px) + 10px);grid-template-rows:auto minmax(0,1fr)}
+.placesbar.page .pcount{visibility:hidden}
+.placesbar.page .pcards{display:block;overflow-x:hidden;overflow-y:auto;scroll-snap-type:none;margin:0 10px;padding:0;
+  background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-1)}
+.placesbar.page .pcard{max-height:none;overflow:visible;border:0;border-bottom:1px solid var(--line);border-radius:0;box-shadow:none;padding:16px;cursor:auto}
+.placesbar.page .pcard.on{border-color:var(--line)}
+.placesbar.page .pmap{display:inline}
+@media (min-width:760px){ .placesbar.page{top:16px} .placesbar.page .pcards{margin:0} }
 #needle{transition:transform .1s linear}
 .find{width:100%;box-sizing:border-box;font:14px var(--sans);padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--ink)}
 .summary{flex-wrap:wrap}

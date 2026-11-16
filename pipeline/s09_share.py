@@ -84,7 +84,7 @@ h1{font:italic 500 36px/1.1 var(--serif);margin:0 0 12px;letter-spacing:-.01em} 
 h2{font:600 15px/1.3 var(--sans);color:var(--muted);margin:36px 0 0}
 article{border-top:1px solid var(--line);padding:18px 0}
 article h3{margin:0 0 4px;font:600 22px/1.25 var(--serif)} .meta{font:14px/1.4 var(--sans);color:var(--muted);margin:0 0 8px}
-article p{margin:6px 0} .src{font:13px/1.4 var(--sans);color:var(--muted)}
+article p{margin:6px 0} .src{font:13px/1.4 var(--sans);color:var(--muted)} .here{font:14px/1.45 var(--sans);color:var(--muted)}
 .go{font:500 15px/1.4 var(--sans);margin-top:10px} ul.layers{padding:0;list-style:none}
 ul.layers li{border-top:1px solid var(--line);padding:14px 0} ul.layers b{font:600 20px/1.3 var(--serif)}
 ul.layers .n{font:14px var(--sans);color:var(--muted)}
@@ -137,7 +137,7 @@ def layer_pages(data, city_id, city_name, site, out):
                     [story_text(st, pins, data.get("templates")) for st in p.get("stories", [])])
         pp = pin_by.get(r)
         if pp:
-            return pp.get("name"), None, None, [{k: pp[k] for k in ("layer", "text", "source", "nm", "when", "made") if pp.get(k)}]
+            return pp.get("name"), None, None, [{k: pp[k] for k in ("layer", "text", "source", "nm", "when", "made", "here") if pp.get(k)}]
         return None, None, None, []
 
     def src_html(s):
@@ -187,7 +187,9 @@ def layer_pages(data, city_id, city_name, site, out):
                 link = (f"{mapurl}?focus={','.join(ref_key(r) for r in refs)}"
                         f"&name={urllib.parse.quote(name)}")
                 # its date as its card gives it: the story's (a thread's own for it first), else the building's
-                meta = ([dated or built] if (dated or built) and not person else []) + ([f"{where}{more}"] if person and where else [])
+                # (a person's: the thread's date for them, and where they are, as their card gives them)
+                meta = ([dated or built] if (dated or built) and not person else []) \
+                    + ([hint["when"]] if person and hint.get("when") else []) + ([f"{where}{more}"] if person and where else [])
                 if dated is None and not person and hint.get("when"):
                     meta = [hint["when"]]
                 who = data.get("people", {}).get(name) if person else None
@@ -196,7 +198,9 @@ def layer_pages(data, city_id, city_name, site, out):
                             + (f'<p class="meta">{e(" · ".join(meta))}</p>' if meta else "")
                             + (f'<p><i>{e(who["text"])}</i></p><p class="src">Wikipedia: <a href="{html.escape(who["url"])}">'
                                f'{e(who["title"])}</a></p>' if who else "")
-                            + "".join(f"<p>{e(unmarked(s['text']))}</p>{src_html(s.get('source'))}" for s in stories[:4])
+                            + "".join(f"<p>{e(unmarked(s['text']))}</p>"
+                                      + (f'<p class="here">{e(s["here"])}</p>' if s.get("here") else "")
+                                      + src_html(s.get("source")) for s in stories[:4])
                             + f'<p class="go"><a href="{html.escape(link)}">Show on the map</a></p></article>')
                 n += 1
             if arts:

@@ -136,7 +136,9 @@ export function drawMap(){
         'circle-radius':['interpolate', ['linear'], ['zoom'], 15, 3.5, 19, 8], 'circle-color':basicColour(),
         'circle-stroke-color':tok('--on-strong'), 'circle-stroke-width':1.5, 'circle-pitch-alignment':'map' } });
       S.map.addSource('places', { type:'geojson', data:{ type:'FeatureCollection', features:[] },
-        cluster:true, clusterRadius:44, clusterMaxZoom:18 });
+        cluster:true, clusterRadius:44, clusterMaxZoom:18,
+        // a joined pin shows the stories' numbers in it, first to last
+        clusterProperties:{ lo:['min', ['get', 'n']], hi:['max', ['get', 'n']] } });
       // invisible layer: keeps the clustered source loaded so the HTML pins can read it
       S.map.addLayer({ id:'places-probe', type:'circle', source:'places', paint:{ 'circle-radius':1, 'circle-opacity':0 } });
       S.map.on('moveend', drawPins); S.map.on('sourcedata', e => { if (e.sourceId === 'places' && e.isSourceLoaded) drawPins(); });
