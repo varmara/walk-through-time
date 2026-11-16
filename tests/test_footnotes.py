@@ -51,3 +51,11 @@ def test_a_century_joined_to_another_is_found():
     assert date_page("12th century", [page]) is page
     assert date_page("13th century", [page]) is None      # (a century between them is not given)
     assert date_page("13th century", [{"text": "built in the 13th–14th centuries"}])
+
+
+def test_a_date_only_a_hand_read_page_gives_takes_its_footnote():
+    from pipeline.s04_curated import noted_page
+    wood = {"title": "Notes", "url": "https://example.org/wood", "read": "2026-11-16"}
+    story = "Domesday names it. Before 1280 Gervase obtained it, and a charter of 1280 confirmed it.[^wood] Later more."
+    assert noted_page("1280", story, {"wood": wood}) is wood
+    assert noted_page("1300", story, {"wood": wood}) is None

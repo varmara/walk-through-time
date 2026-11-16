@@ -264,6 +264,26 @@ ORDINALS = dict(enumerate("zeroth first second third fourth fifth sixth seventh 
                           "twenty-first".split()))
 
 
+def noted_page(date, story, cites):
+    """The source of a date that only a page read by hand gives: the footnote of the story's sentence that has it
+    (the manor of Wilford's 1280, in a sentence footnoted to A. C. Wood's notes)."""
+    d = str(date or "")
+    want = d.lower() if "century" in d else (re.search(r"\d{3,4}", d) or [None])[0]
+    if not want:
+        return None
+    for para in str(story or "").split("\n\n"):
+        start = 0
+        for m in [*SENTENCE_END.finditer(para), None]:
+            end = m.end() if m else len(para)
+            s = para[start:end]
+            start = end
+            if want in s.lower():
+                k = re.search(r"\[\^([\w-]+)\]\s*$", s.rstrip())
+                if k and k[1] in cites:
+                    return cites[k[1]]
+    return None
+
+
 def norm(s):
     return " ".join(str(s or "").lower().replace("’", "'").split())
 
@@ -451,7 +471,8 @@ def main(city_id):
             dated = {}
             for k in ("when", "made"):
                 if e.get(k):
-                    p = date_page(e[k], checked + list(cites.values())) or (pages[0] if pages and not checked else None)
+                    p = date_page(e[k], checked + list(cites.values())) or noted_page(e[k], e["story"], cites) \
+                        or (pages[0] if pages and not checked else None)
                     if p:
                         dated[k + "Src"] = cited(p)
                     else:
