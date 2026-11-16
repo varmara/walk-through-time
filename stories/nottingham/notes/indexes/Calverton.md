@@ -6,6 +6,8 @@ order: 41
 sort: as listed
 ---
 
-The village of William Lee, who invented the stocking frame.
+The village of William Lee, who invented the stocking frame, and of the colliery that grew it fourfold.
 
+- [[Calvretone]]
 - [[The stocking frame]]
+- [[Calverton Colliery]]

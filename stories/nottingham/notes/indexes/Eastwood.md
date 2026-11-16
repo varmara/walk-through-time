@@ -6,6 +6,8 @@ order: 36
 sort: as listed
 ---
 
-The inn where coal owners proposed the railway that became the Midland Counties.
+The mining town where coal owners planned a railway in an inn, and where D. H. Lawrence was born.
 
 - [[The railway that began in a pub]]
+- [[D. H. Lawrence's birthplace]]
+- [[The Lawrences on Garden Road]]

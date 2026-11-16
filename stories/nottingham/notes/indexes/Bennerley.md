@@ -6,6 +6,7 @@ order: 37
 sort: as listed
 ---
 
-An iron viaduct across the Erewash valley, light enough for ground undermined by coal workings.
+The ironworks and the iron viaduct of the Erewash valley, on ground undermined by coal workings.
 
+- [[Bennerley Ironworks]]
 - [[Bennerley Viaduct]]

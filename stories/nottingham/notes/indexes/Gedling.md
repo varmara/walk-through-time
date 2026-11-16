@@ -6,6 +6,7 @@ order: 42
 sort: as listed
 ---
 
-A colliery that became a country park.
+A village church with a famous spire, and a colliery that became a country park.
 
+- [[All Hallows Church, Gedling]]
 - [[Gedling Colliery]]

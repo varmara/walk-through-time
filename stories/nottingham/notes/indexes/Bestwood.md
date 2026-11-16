@@ -6,6 +6,9 @@ order: 43
 sort: as listed
 ---
 
-The winding engine house of Bestwood Colliery.
+A royal hunting park, the Dukes of St Albans' lodge, and the colliery and ironworks that made a village.
 
+- [[A royal hunting park]]
+- [[Bestwood Lodge]]
 - [[Bestwood winding engine]]
+- [[Coal and iron at Bestwood]]

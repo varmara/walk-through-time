@@ -6,6 +6,10 @@ order: 34
 sort: as listed
 ---
 
-The National Shell Filling Factory of the First World War.
+A hamlet on the Ashby road that grew into a suburb, and the shell factory of the First World War.
 
+- [[Roman Chilwell]]
+- [[The Cadland]]
+- [[Christ Church, Chilwell]]
+- [[Hall, manor and green]]
 - [[National Shell Filling Factory]]
