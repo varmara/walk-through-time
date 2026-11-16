@@ -7,26 +7,28 @@ order: 10
 
 A village on the south bank of the Trent, reached for centuries by ferry and, since the 1870s, by bridge.
 
-## The river
-- [[Wilford Toll Bridge]]
-- [[Wilford Suspension Bridge]]
+## Crossing the river
 - [[The Roman ford]]
 - [[Ferry Inn]]
+- [[Wilford Toll Bridge]]
+- [[Wilford Suspension Bridge]]
+- [[Trams to Wilford, 2015]]
 
-## The village
+## The manor and the church
 - [[The manor of Wilford]]
 - [[The old Manor House]]
 - [[St Wilfrid's Church]]
 - [[The churchyard gazebo]]
-- [[The poet in the churchyard]]
-- [[Wilford House]]
-- [[The Nottingham Captain]]
-- [[Captain John Deane]]
-- [[The Dorothy Boot Homes, 1908]]
-- [[Village to suburb]]
 - [[War graves at St Wilfrid's]]
-- [[Trams to Wilford, 2015]]
 
-## Coal and power
+## People of Wilford
+- [[Captain John Deane]]
+- [[Wilford House]]
+- [[The poet in the churchyard]]
+- [[The Nottingham Captain]]
+- [[The Dorothy Boot Homes, 1908]]
+
+## Coal, power and the suburb
 - [[Sir Robert Clifton's colliery]]
+- [[Village to suburb]]
 - [[Wilford Power Station]]

@@ -1,6 +1,6 @@
 ---
 type: story
-when: "19th century"
+when: "17th century"
 source:
   - https://en.wikipedia.org/wiki/Wilford
   - https://en.wikipedia.org/wiki/Listed_buildings_in_Nottingham_(Clifton_North_ward)
