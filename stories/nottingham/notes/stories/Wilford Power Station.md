@@ -1,5 +1,6 @@
 ---
 type: story
+when: "1925"
 source: https://en.wikipedia.org/wiki/Wilford_Power_Station
 check: 1925 | 1981 | Riverside Retail Park
 at:
@@ -9,5 +10,5 @@ see:
   - "[[Ratcliffe-on-Soar Power Station]]"
 ---
 
-A coal-fired power station on the north bank of the Trent, opened in 1925. It closed in 1981 and was soon
-demolished; the Riverside Retail Park stands on its site.
+In 1925 a coal-fired power station opened on the north bank of the Trent. It closed in 1981 and was soon demolished,
+and the Riverside Retail Park stands on its site.

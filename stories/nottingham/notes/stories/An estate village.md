@@ -1,5 +1,6 @@
 ---
 type: story
+when: "1745"
 source: https://en.wikipedia.org/wiki/Thrumpton
 check: Emerton | 1745
 at:
@@ -7,4 +8,4 @@ at:
 names: no
 ---
 
-Many of Thrumpton's gabled brick houses were built for the estate by John Emerton of Thrumpton Hall, up to 1745.
+Up to 1745, John Emerton of Thrumpton Hall built many of the village's gabled brick houses for the estate.
