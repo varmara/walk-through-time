@@ -11,4 +11,4 @@ note: "a pin near the new station"
 
 Ilkeston once had three stations. The Town station closed to passengers in 1947, the North in 1964 and the Junction in
 January 1967, leaving the town without a station for fifty years. After a long campaign a new Ilkeston station was
-approved in 2013 and, delayed by flood works and great crested newts, opened on 2 April 2017.
+approved in 2013 and, delayed by flood works and great crested newts, opened on 2 April 2017. The pin is approximate.

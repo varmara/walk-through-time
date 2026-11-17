@@ -13,4 +13,4 @@ note: a pin on Haydn Road; the article gives no number for the works
 
 George Brough was born in Basford on 21 April 1890 and set up his Brough Superior works on Haydn Road in 1919. H. D.
 Teague of The Motor Cycle called the machines the "Rolls-Royce of Motorcycles". T. E. Lawrence owned eight and died
-of injuries from a crash on the seventh. War work ended production in 1940.
+of injuries from a crash on the seventh. War work ended production in 1940. The pin is approximate.

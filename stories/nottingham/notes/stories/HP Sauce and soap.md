@@ -10,4 +10,4 @@ names: no
 
 Basford made things for the kitchen and the bathroom. The grocer F. G. Garton started a pickle and sauce factory near
 his home on Sandon Street and registered the name HP Sauce in 1895. Gerard Brothers opened a soap works in the 1890s;
-Cussons took it over in 1955, and it closed in 2005.
+Cussons took it over in 1955, and it closed in 2005. The pin is approximate.

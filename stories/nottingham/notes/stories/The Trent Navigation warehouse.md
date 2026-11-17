@@ -11,4 +11,4 @@ note: "a pin at Castle Wharf; which outline is the warehouse is not confirmed. F
 ---
 
 The Trent Navigation Company put up this warehouse at Castle Wharf in about 1919. It later became British Waterways'
-offices, was converted as part of the Castle Wharf scheme in 1996, and in 2022 was given permission for 95 flats.
+offices, was converted as part of the Castle Wharf scheme in 1996, and in 2022 was given permission for 95 flats. Which building it was is not certain.

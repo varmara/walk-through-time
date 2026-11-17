@@ -13,4 +13,4 @@ The airfield opened in 1916, and from 1927 Rolls-Royce used it to test its engin
 P-51 Mustang fitted with a Rolls-Royce Merlin flew from here, and in December 1940 a German prisoner, Franz von Werra,
 tried to escape by posing as a Dutch pilot and taking a Hurricane. In the early 1950s the works built the "Flying
 Bedstead", a test rig for vertical take-off, whose first free flight was on 3 August 1954. The flight test centre
-closed in 1971.
+closed in 1971. The pin is approximate.

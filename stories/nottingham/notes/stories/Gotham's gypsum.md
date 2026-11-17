@@ -9,4 +9,4 @@ names: no
 ---
 
 Gypsum was dug from Gotham Hill and made into plaster. A branch line about two miles long, opened in March 1899, ran
-west from the Great Central main line to the works; it closed in the early 1960s and is now a footpath.
+west from the Great Central main line to the works; it closed in the early 1960s and is now a footpath. The pin is approximate.

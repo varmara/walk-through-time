@@ -10,4 +10,4 @@ note: "a pin on Beck Street"
 ---
 
 The building of St Ann's may have begun in about 1750, when Charles Morley, who had been sheriff, made brown
-earthenware in a small factory on Beck Street; his brown beer jugs sold well.
+earthenware in a small factory on Beck Street; his brown beer jugs sold well. The pin is approximate.

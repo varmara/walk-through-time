@@ -16,4 +16,4 @@ across the town. On 23 August Chartists from Hucknall, Bulwell, Arnold, Basford 
 Mapperley Hills; the 2nd Dragoon Guards were sent, and when the crowd, sitting on the grass to eat, would not
 disperse, Colonel Rolleston had about four hundred arrested. As they were marched into the town, a crowd
 stoned the soldiers and police. About fifty went for trial, some getting hard labour. Afterwards the town's workers turned instead
-against the Corn Laws and the price of bread.
+against the Corn Laws and the price of bread. The pin is approximate.

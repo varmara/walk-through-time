@@ -11,4 +11,4 @@ see:
 note: a pin on the river by the church; the article says only "in the Trent at Wilford"
 ---
 
-In 1900 the remains of a paved Roman ford, edged with oak posts, were found in the Trent at Wilford.
+In 1900 the remains of a paved Roman ford, edged with oak posts, were found in the Trent at Wilford. The pin is approximate.

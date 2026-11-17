@@ -15,6 +15,6 @@ Complete Suffrage Union, a more middle-class rival to the Chartists' own associa
 men.[^sturge] He lost, and the
 Conservative John Walter was elected on 4 August 1842; Walter was unseated on petition the next year, and the Liberal
 Thomas Gisborne won the seat in April 1843. Five years later Nottingham elected the Chartist leader [[Feargus
-O'Connor]].
+O'Connor]]. Where the poll was held is not known.
 
 [^sturge]: https://nottingham.ac.uk/manuscriptsandspecialcollections/learning/biographies/josephsturge(1793-1859).aspx — title: Joseph Sturge (1793–1859; philanthropist and reformer) (University of Nottingham Manuscripts and Special Collections) — read: 2026-11-16

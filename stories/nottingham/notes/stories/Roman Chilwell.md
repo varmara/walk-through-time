@@ -10,4 +10,4 @@ note: "a pin on High Road; the finds' places are not given"
 ---
 
 Roman buildings, pottery and coins have been found in Chilwell. It began as a hamlet on the road from Nottingham to
-Ashby-de-la-Zouch, and is in the Domesday Book of 1086.
+Ashby-de-la-Zouch, and is in the Domesday Book of 1086. The pin is approximate.

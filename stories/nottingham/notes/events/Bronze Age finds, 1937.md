@@ -13,4 +13,4 @@ note: "a pin by the river at the foot of the Grove; the source gives no closer p
 ---
 
 In 1937 finds from a Bronze Age settlement built on piles, from between 1000 and 500 BC, were made near the foot of
-Clifton Grove. The source gives no closer place, so the pin on the map marks only roughly where they were found.
+Clifton Grove. The pin is approximate.

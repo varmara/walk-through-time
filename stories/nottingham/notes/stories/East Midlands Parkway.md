@@ -12,4 +12,4 @@ note: "a pin at the station"
 ---
 
 East Midlands Parkway station opened early in 2008 on the Midland Main Line beside Ratcliffe-on-Soar, and is the nearest
-main-line station to Gotham.
+main-line station to Gotham. The pin is approximate.

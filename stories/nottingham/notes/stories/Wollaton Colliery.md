@@ -12,4 +12,4 @@ see:
 ---
 
 Coal has always mattered in Wollaton, from the wagonway onwards. Wollaton Colliery closed in 1965, and houses now
-cover its ground and that of the old canal: the Torvill and Dean estate.
+cover its ground and that of the old canal: the Torvill and Dean estate. The pin is approximate.

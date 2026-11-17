@@ -9,4 +9,4 @@ names: no
 note: "a pin to the north of the old village; the article gives no closer place"
 ---
 
-A 6th-century Anglo-Saxon burial ground has been excavated at Mill Hill, to the north of the old village.
+A 6th-century Anglo-Saxon burial ground has been excavated at Mill Hill, to the north of the old village. The pin is approximate.
