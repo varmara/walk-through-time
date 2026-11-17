@@ -134,6 +134,7 @@ def main(city_id):
     shutil.rmtree(root, ignore_errors=True)
     (root / "cards").mkdir(parents=True)
     (root / "osm").mkdir()
+    (root / "sets").mkdir()
 
     tmp = Path(tempfile.mkdtemp())
     # the ground (s09_ground): its tiles, and how much taller a building on a slope is drawn so its uphill side
@@ -201,6 +202,18 @@ def main(city_id):
         shutil.copytree(ground["tiles"], root / "ground")
     for n, chunk in cards.items():
         (root / "cards" / f"{n}.json").write_text(json.dumps(chunk, separators=(",", ":"), ensure_ascii=False))
+    # each thread's and place's own cards, in one small file (sets/<id>.json): opening it fetches that alone, not
+    # the dozens of card files its buildings are spread over
+    sets = {}
+    for L in pkg.get("layers", []):
+        if L.get("section") not in ("Threads", "Places") or not L.get("id"):
+            continue
+        ids = sorted({r for g in L.get("groups", []) for it in g.get("items", [])
+                      for r in ([it[0]] if isinstance(it[0], int) else it[1]) if isinstance(r, int)})
+        if ids:
+            f = root / "sets" / f"{L['id']}.json"
+            f.write_text(json.dumps({i: cards[i // CHUNK][i] for i in ids}, separators=(",", ":"), ensure_ascii=False))
+            sets[L["id"]] = f
     slim = {k: v for k, v in pkg.items() if k not in ("buildings", "roads", "water", "parks", "nature", "routes", "basics", "land")}
     # the land's named places (s06_land): what their card and the Layers sheet need; the shapes are in the tiles
     slim["land"] = land.get("entries", [])
@@ -225,7 +238,7 @@ def main(city_id):
     versions = {"tiles": version(sorted(tiles.rglob("*.pbf"))), "ground": version(sorted((root / "ground").rglob("*.png"))),
                 "cards": [version([root / "cards" / f"{n}.json"]) for n in range(max(cards) + 1 if cards else 0)],
                 "osm": [version([root / "osm" / f"{n}.json"]) for n in range(OSM_PARTS)],
-                "graph": version([graph])}
+                "graph": version([graph]), "sets": {k: version([f]) for k, f in sets.items()}}
     build = time.strftime("%Y%m%d%H%M%S", time.gmtime())
     ix = index(props)
     # what the map does not need to draw (the named buildings' names and layers, people, places' names, the land's

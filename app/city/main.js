@@ -219,6 +219,7 @@ function keepOnPhone(build){
   if (!('serviceWorker' in navigator) || !build) return;
   navigator.serviceWorker.register('../sw.js').catch(() => {});
   // the data files' current versions: the worker drops kept copies of any other
-  const vs = S.data.versions, keep = vs && [build, vs.tiles, vs.ground, vs.graph, vs.more, ...vs.cards, ...vs.osm].filter(Boolean);
+  const vs = S.data.versions, keep = vs && [build, vs.tiles, vs.ground, vs.graph, vs.more, ...vs.cards, ...vs.osm,
+    ...Object.values(vs.sets || {})].filter(Boolean);
   navigator.serviceWorker.ready.then(reg => reg.active && reg.active.postMessage({ build, v: window.__v, keep })).catch(() => {});
 }

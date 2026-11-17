@@ -2,7 +2,7 @@
 // cards that swipe sideways one at a time, or the same cards one under another as a page.
 import { $, dateText, esc, flightPace, whenText } from './util.js';
 import { S } from './state.js';
-import { fstate, isB, loadCard, parseRef, refCentre, refOf, storyFor, tiled } from './data.js';
+import { fstate, isB, loadCard, loadSet, parseRef, refCentre, refOf, storyFor, tiled } from './data.js';
 import { paintBuildings } from './map.js';
 import { closeSheet } from './sheet.js';
 import { openRef, refName } from './cards.js';
@@ -90,7 +90,7 @@ function fillCard(k){
 // the cards round the one in view, loaded first (a big set, as a group from the graph, has places in dozens of
 // card files: they come as you swipe, not all before the strip shows); in the page view, all of them
 function loadAround(k){
-  const P = S.places; if (!P) return;
+  const P = S.places; if (!P || P.set) return;      // a thread's own file on its way: its cards come with it
   const lo = P.page ? 0 : Math.max(0, k - 3), hi = P.page ? P.cards.length : Math.min(P.cards.length, k + 9);
   for (let j = lo; j < hi; j++) {
     const c = P.cards[j]; if (c.intro) { fillCard(j); continue; }
@@ -103,17 +103,20 @@ function loadAround(k){
 // a set of places as cards: one card for each story (hints: for each place, the name and story layer of what put it
 // in the set; places of the same story, as a person's two plaques, share its card), after an opening card with the
 // set's title and introduction when it has one (a thread, a place)
-export function showPlaces(name, bs, hints, intro){
+export function showPlaces(name, bs, hints, intro, set){
   // the stories' words are in the card files. A small set (a person, a story: one or two files) waits for them,
   // showing the bar meanwhile; a big set, or one whose places' whereabouts need the files, shows at once
   // (the single data file, with no card files: every building is complete already)
   const need = tiled() ? bs.filter(isB).filter(b => !S.features[b].full) : [];
   const placed = bs.every(b => refCentre(b));
-  if (need.length && (need.length <= 12 || !placed)) {
+  // a thread or place with its own file (set) opens at once, its cards filled when the file comes; it waits only
+  // if its places' whereabouts are in that file
+  if (need.length && (set ? !placed : need.length <= 12 || !placed)) {
     $('pName').textContent = name; $('pCount').textContent = '';
     $('pCards').innerHTML = `<p class="pwait">Finding ${bs.length} ${bs.length === 1 ? 'place' : 'places'}…</p>`;
     $('placesbar').hidden = false; $('timebar').hidden = true;
-    return Promise.all(need.map(b => loadCard(b).catch(() => {}))).then(() => showPlaces(name, bs, hints, intro));
+    return (set ? set.catch(() => {}) : Promise.all(need.map(b => loadCard(b).catch(() => {}))))
+      .then(() => showPlaces(name, bs, hints, intro, set && need.some(b => !S.features[b].full) ? null : set));
   }
   closeSheet();
   clearPlaces(false);
@@ -123,7 +126,9 @@ export function showPlaces(name, bs, hints, intro){
     if (h && last && !last.intro && last.hint?.name === h.name) last.refs.push(b);
     else cards.push({ refs: [b], hint: h });
   });
-  const P = S.places = { name, intro, bs, cards, i: 0, page: false };
+  const P = S.places = { name, intro, bs, cards, i: 0, page: false, set: need.length && set ? set : null };
+  if (P.set) P.set.catch(() => {}).then(() => { if (S.places !== P) return; P.set = null;
+    P.cards.forEach((c, k) => fillCard(k)); loadAround(P.i); });
   bs.filter(isB).forEach(b => fstate(b, { hl:true }));
   if (S.applyLayers) S.applyLayers(); else paintBuildings();
   // every place of a story carries the story's number
@@ -164,7 +169,9 @@ export function showGroups(keys, title){
   if (!refs.length) return false;
   const Ls = [...new Set(keys.map(k => S.groups.get(k)?.layer).filter(Boolean))];
   const whole = Ls.length === 1 && Ls[0].groups.filter(g => g.count > 0).every(g => keys.includes(g.key));
-  showPlaces(title, refs, hints, whole ? (Ls[0].intro || '') : undefined);
+  // a thread or place (one layer) has its own small file with its cards
+  const set = Ls.length === 1 ? loadSet(Ls[0].id) : null;
+  showPlaces(title, refs, hints, whole ? (Ls[0].intro || '') : undefined, set);
   return true;
 }
 // the set as a page, as the thread's share page tells it, scrolled through on the map's screen; each story's

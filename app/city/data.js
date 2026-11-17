@@ -49,6 +49,15 @@ export function loadCard(id){       // the card's details, merged into the build
     for (const [i, extra] of Object.entries(chunk)) if (!S.features[i].full) { Object.assign(S.features[i].properties, extra); S.features[i].full = true; }
     S.features[id].full = true;
   });
+}
+// a thread's or place's own cards, in one small file (pipeline/s10_tiles.py): null when the build has none
+export function loadSet(id){
+  const v = S.data.versions?.sets?.[id];
+  if (!tiled() || !v) return null;
+  S.setFiles = S.setFiles || {};
+  return S.setFiles[id] = S.setFiles[id] || fetchJSON(`../data/${CITY_ID}/sets/${id}.json?v=${v}`).then(recs => {
+    for (const [i, extra] of Object.entries(recs)) if (!S.features[i].full) { Object.assign(S.features[i].properties, extra); S.features[i].full = true; }
+  }).catch(e => { delete S.setFiles[id]; throw e; });
 }           // for links that name an OpenStreetMap id
 export async function byOsm(osm){
   if (!tiled()) return S.features.findIndex(f => f.properties.osm === osm);
