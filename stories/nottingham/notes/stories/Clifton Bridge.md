@@ -3,7 +3,9 @@ type: story
 when: "1958"
 source: https://en.wikipedia.org/wiki/Clifton_Bridge_(Nottingham)
 check: 1958 | pre-stressed | Trent Bridge | 1972
+note: "on both decks: the first, of 1958, and the second, of 1972"
 at:
+  - https://www.openstreetmap.org/way/388985552
   - https://www.openstreetmap.org/way/388985551
 see:
   - "[[Trent Bridge]]"
