@@ -5,7 +5,7 @@ source: https://www.transportnottingham.com/wp-content/uploads/2024/08/7A.-Clift
 title: "7A. Clifton Village Appendix (transportnottingham.com)"
 read: 2026-11-16
 at:
-  - Bronze Age finds, 52.916, -1.188
+  - Bronze Age finds, 52.9133, -1.1890
 names: no
 see:
   - "[[Clifton Grove]]"
