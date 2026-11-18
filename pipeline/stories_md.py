@@ -3,7 +3,7 @@
 Stories, events, people and the layers' indexes are notes, one Markdown file each in notes/, as in an Obsidian
 vault (read by pipeline/notes.py, which says how to write them). Corrections and links to the open data are
 tables, one file each beside notes/ (names.md, titles.md, wikipedia.md, plaques.md, plaque-people.md, tags.md,
-collections.md, credits.md, architects.md); each has a Note column for why. See stories/<city>/README.md.
+photo-articles.md, collections.md, credits.md, architects.md); each has a Note column for why. See stories/<city>/README.md.
 """
 import re
 from pathlib import Path
@@ -74,6 +74,8 @@ def load(folder):
     for r in (table(f) if f.exists() else []):
         tags.setdefault(r["outline"], {})[r["tag"]] = None if r["value"] == "(remove)" else r["value"]
     out["TAG_FIXES"] = tags
+    f = folder / "photo-articles.md"       # buildings whose card photo is the lead photo of an article they are not linked to
+    out["PHOTO_ARTICLES"] = {r["outline"]: r["wikipedia article"] for r in (table(f) if f.exists() else [])}
     colls = []
     f = folder / "collections.md"
     for r in (table(f) if f.exists() else []):

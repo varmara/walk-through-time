@@ -77,6 +77,8 @@ def main(city_id):
     cur = load(city_id, "curated")
     sums = load(city_id, "summaries") if work(city_id, "summaries").exists() else {}
     photos = load(city_id, "photos") if work(city_id, "photos").exists() else {}
+    leads = load(city_id, "pageimages") if work(city_id, "pageimages").exists() else {}     # s06_summaries
+    gained = []         # buildings whose photo is the lead photo of a Wikipedia article: nothing else had one
     dyk, pin_dyk = {}, {}
     for e in cur["entries"]:
         if e["layer"] != "facts":
@@ -161,6 +163,10 @@ def main(city_id):
             article = "https://en.wikipedia.org/wiki/" + osm_article(t).replace(" ", "_")
         nm = names.get(k, {})
         name = nm.get("name")
+        # the article's lead photo comes last: Wikidata's image, then a geotagged Commons photo, are tried first
+        lead = None if info.get("image") or (photos.get(k) or {}).get("photo") else (leads.get(k) or {}).get("photo")
+        if lead:
+            gained.append((k, name or nm.get("full") or (best.get("Name") or "").title() or f"outline {b['osm']}", leads[k]["article"], lead["file"]))
         p = {
             "name": name, "today": nm.get("today"), "aka": nm.get("aka"), "where": nm.get("where"), "full": nm.get("full"),
             "y": d.get("y"), "f": d.get("f"), "src": d.get("src"), "alts": d.get("alts"),
@@ -169,8 +175,9 @@ def main(city_id):
             "kind": t.get("building") if t.get("building") != "yes" else None,
             "grade": best.get("Grade"), "listEntry": best.get("ListEntry"), "listName": best.get("Name"),
             "listUrl": best.get("hyperlink"), "qid": info.get("qid") or (t.get("wikidata") if t.get("wikidata") not in people_tags else None),
-            "image": info.get("image") or ((photos.get(k) or {}).get("photo") and commons(photos[k]["photo"]["file"])),
-            "credit": None if info.get("image") else (photos.get(k) or {}).get("photo"),
+            "image": info.get("image") or ((photos.get(k) or {}).get("photo") and commons(photos[k]["photo"]["file"]))
+                     or (lead and commons(lead["file"])),
+            "credit": None if info.get("image") else (photos.get(k) or {}).get("photo") or lead,
             "archive": (photos.get(k) or {}).get("archive"), "dyk": dyk.get(k), "article": article, "architects": architects(k, info),
             "cat": info.get("commonscat"),
             "L": ("," + ",".join(lay["member"][k]) + ",") if k in lay["member"] else None,
@@ -257,6 +264,9 @@ def main(city_id):
         f"| no date, area estimate from Council Tax | {estimated:,} | {pct(estimated)} |",
         "", "## Layers", "", "| Section | Layer | Group | Count |", "|---|---|---|---:|",
         *[f"| {L['section']} | {L['title']} | {g['title']} | {g['count']:,} |" for L in lay["meta"] for g in L["groups"]],
+        "", "## Photos taken from a Wikipedia article's lead photo", "",
+        "Buildings with no Wikidata image and no geotagged Commons photo (s06_summaries, s07_package).", "",
+        *([f"- {n} ({k}): {art}, {f}" for k, n, art, f in gained] or ["None."]),
         "", "## Stories dropped by the checks", "",
         *([f"- **{d['layer']} / {d['name']}**: {d['why']}" for d in cur["dropped"]] or ["None."]),
         "", "## Plaques named from their first words", "",
@@ -266,4 +276,5 @@ def main(city_id):
         *[f"- {e['layer']} / {e['name']}: {e['how']}" for e in cur["entries"]],
     ]
     Path(f"data/{city_id}-report.md").write_text("\n".join(rows) + "\n")
+    log(f"s07 lead photos from Wikipedia: {len(gained)} buildings gained a photo" + "".join(f"\n    {n} ({k}): {art}, {f}" for k, n, art, f in gained))
     log(f"s07 packaged ({n} buildings, {stats['dated']} dated, {stats['stories']} stories)")

@@ -508,4 +508,4 @@ def main(city_id):
                                   ("WIKIPEDIA", {}), ("PLAQUES", {}), ("PLAQUE_PEOPLE", {}), ("TOPICS", []),
                                   ("NOTES", {}),
                                   ("COLLECTIONS", []), ("NAMES", {}),
-                                  ("TITLES", {}), ("CREDITS", {}), ("ARCHITECTS", {}))}})
+                                  ("TITLES", {}), ("CREDITS", {}), ("ARCHITECTS", {}), ("PHOTO_ARTICLES", {}))}})

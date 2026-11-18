@@ -7,6 +7,13 @@ Two kinds, and the card says which:
     Wikidata). Nothing is added that the data does not say.
 
 Writes work/<city>/summaries.json: {building index: {"text", "src": {title, url, kind}}}.
+
+It also asks Wikipedia for each article's lead photo (prop=pageimages, free files only), for buildings that have no
+image on Wikidata: work/<city>/pageimages.json, {building index: {"photo": {file, year, author, licence}, "article"}}.
+s07_package uses it last, after Wikidata's image and a geotagged Commons photo (s06_photos). A building with no
+article of its own can be given one for its photo in stories/<city>/photo-articles.md. A lead photo is used only
+when it is a photograph (JPEG, not a crest, logo or map) and, if Commons gives it a position, was taken within
+MAX_PHOTO_M metres of the building.
 """
 import re
 import urllib.parse
@@ -14,11 +21,15 @@ import urllib.parse
 from .common import load, log, save
 from .web import http
 from .names import marker, tidy_listing
+from .geo import centroid, metres
 from .s05_dates import info_for, osm_article
+from .s06_photos import metadata
 
 WIKI = "https://en.wikipedia.org/w/api.php"
+COMMONS = "https://commons.wikimedia.org/w/api.php"
 SENTENCES = 3
 MAX_CHARS = 480
+MAX_PHOTO_M = 300
 
 # What a building is used as, from OpenStreetMap tags (on the outline or on a named point inside it).
 AMENITY = {
@@ -181,6 +192,88 @@ def extracts(titles):
     return got
 
 
+def lead_images(titles):
+    """{title: file name} for Wikipedia titles: each article's lead photo, free files only (PageImages' own default,
+    asked for here so it stays so), 50 titles to a request. An article with no free lead image is left out."""
+    got, titles = {}, list(dict.fromkeys(titles))
+    for i in range(0, len(titles), 50):
+        chunk = titles[i:i + 50]
+        try:
+            r = http(WIKI, params={"action": "query", "prop": "pageimages", "piprop": "name", "pilicense": "free",
+                                   "pilimit": "50", "redirects": "1", "format": "json", "titles": "|".join(chunk)})
+        except Exception as e:  # noqa: BLE001
+            log(f"    Wikipedia lead images failed for {len(chunk)} titles: {e}")
+            continue
+        q = r.get("query", {})
+        back = {}
+        for n in q.get("normalized", []) + q.get("redirects", []):
+            back[n["to"]] = back.get(n["from"], n["from"])
+        for pg in q.get("pages", {}).values():
+            if pg.get("pageimage"):
+                got[back.get(pg["title"], pg["title"])] = pg["pageimage"].replace("_", " ")
+                got[pg["title"]] = pg["pageimage"].replace("_", " ")
+    return got
+
+
+def geotags(files):
+    """{file name: (lon, lat)} for those Commons files that have a position."""
+    out = {}
+    for i in range(0, len(files), 50):
+        try:
+            r = http(COMMONS, params={"action": "query", "prop": "coordinates", "colimit": "50", "format": "json",
+                                      "formatversion": "2", "titles": "|".join("File:" + f for f in files[i:i + 50])})
+        except Exception as e:  # noqa: BLE001
+            log(f"    Commons positions failed: {e}")
+            continue
+        for pg in r.get("query", {}).get("pages", []):
+            if pg.get("coordinates"):
+                out[pg["title"][5:]] = (pg["coordinates"][0]["lon"], pg["coordinates"][0]["lat"])
+    return out
+
+
+def why_not(file, facts, xy, building_xy):
+    """None when the file may be a building's photo; else why not. `facts` is Commons' record of it (file, licence,
+    author, year) or None, `xy` its position or None."""
+    if not file.lower().endswith((".jpg", ".jpeg")):
+        return "not a photograph (a crest, logo, map or drawing)"
+    if not facts or not facts.get("licence"):
+        return "no licence on Commons"
+    if xy and building_xy and metres(building_xy, xy) > MAX_PHOTO_M:
+        return f"taken {metres(building_xy, xy):.0f} m away"
+    return None
+
+
+def lead_photos(city_id, buildings, titles, wd, listing):
+    """Lead photos for buildings with no Wikidata image: their article's, or the one stories/<city>/photo-articles.md
+    names. Saves work/<city>/pageimages.json."""
+    ask = {}
+    for i, t in titles.items():
+        if not (info_for(buildings[i], i, wd, listing) or {}).get("image"):
+            ask[i] = t
+    by_osm = {b["osm"]: i for i, b in enumerate(buildings)}
+    for osm, article in (load(city_id, "curated").get("photo_articles") or {}).items():
+        if osm not in by_osm:
+            log(f"    photo-articles.md: {osm} is not a building outline")
+        elif not (info_for(buildings[by_osm[osm]], by_osm[osm], wd, listing) or {}).get("image"):
+            ask[by_osm[osm]] = article
+    leads = lead_images(ask.values())
+    files = sorted({leads[t] for t in ask.values() if t in leads})
+    facts = {m["file"]: m for m in metadata(["File:" + f for f in files]).values()}
+    xy = geotags(files)
+    out = {}
+    for i, t in ask.items():
+        f = leads.get(t)
+        if not f:
+            continue
+        no = why_not(f, facts.get(f), xy.get(f), centroid(buildings[i]["rings"][0]))
+        if no:
+            log(f"    lead photo of {t} not used for building {i}: {f} is {no}")
+            continue
+        out[str(i)] = {"photo": facts[f], "article": t}
+    save(city_id, "pageimages", out)
+    log(f"s06 lead photos: {len(out)} of {len(ask)} articles give a usable free lead photo (for buildings with no Wikidata image)")
+
+
 def main(city_id):
     buildings = load(city_id, "buildings")
     wd, listing, dates = load(city_id, "wikidata"), load(city_id, "listing"), load(city_id, "dates")
@@ -231,4 +324,5 @@ def main(city_id):
             out[k] = {"text": text, "src": {"title": " · ".join(srcs), "kind": "Written from the map's data"}}
             n_data += 1
     save(city_id, "summaries", out)
+    lead_photos(city_id, buildings, titles, wd, listing)
     log(f"s06 summaries: {n_wiki} from Wikipedia ({len(titles)} buildings have an article), {n_data} written from the data")

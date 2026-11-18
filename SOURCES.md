@@ -60,7 +60,10 @@ Before a site other than Wikipedia is used, look for its copyright notice or ter
 ## Photos
 
 - Photos come only from **Wikimedia Commons**, as freely licensed files, shown with their author and licence and linked
-  to the file's page: the building's Wikidata photo, or else a geotagged Commons photo whose title names the building.
+  to the file's page: the building's Wikidata photo, or else a geotagged Commons photo whose title names the building,
+  or else the lead photo of its Wikipedia article (free files only, a JPEG, within 300 m of the building where Commons
+  gives a position). The report lists the buildings that got a photo this way; `photo-articles.md` names an article
+  for a few buildings that are not linked to theirs.
 - Old pictures in collections that are not openly licensed are **linked, not copied** (`collections.md`).
 - No photos of public figures are taken from the web or put into the map.
 

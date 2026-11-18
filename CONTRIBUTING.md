@@ -146,6 +146,7 @@ Tables in the same folder, each with a Note column saying why:
 | `names.md` | names chosen by hand, by OpenStreetMap outline |
 | `titles.md` | titles "what it was · what it is" chosen by hand |
 | `tags.md` | corrections to OpenStreetMap tags (`(remove)` drops one); fix them in OpenStreetMap too |
+| `photo-articles.md` | a Wikipedia article whose lead photo is a building's photo, for a building not linked to it (by OpenStreetMap outline); used only when Wikidata and Commons have none |
 | `wikipedia.md` | the Wikipedia article for a plaque's person, when the plaque's name is not the article's |
 | `plaques.md` | a label, group or type for a plaque, by the start of its inscription or its subject |
 | `collections.md` | collections of old pictures that are linked, not copied (not openly licensed) |
