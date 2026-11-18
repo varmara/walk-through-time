@@ -304,9 +304,12 @@ function storyHtml(s, N){
     ${s.text ? prose(s, N, refs) : refs ? `<p class="src">Source${refs}</p>` : ''}${s.note ? `<p class="src">${esc(s.note)}</p>` : ''}${aboutHtml(s.who, s.source, N)}
     ${s.pin ? `<p class="go"><a href="#" data-ref="${esc(s.pin)}">See the plaque on the map</a></p>` : ''}${seeHtml(J(s.see))}</div>`;
 }
-// the topics a place is in (its layer groups of the Threads section: ",war-1831,coal,"), each opening its places
+// the threads a story is in, places (Wilford: The village and its big house) and themes alike (",war-1831,coal,"),
+// places first, each opening its cards
+const isThread = L => L.kind === 'topics' || L.section === 'Places';
 function topicsHtml(keys){
-  const gs = String(keys || '').split(',').map(k => S.groups.get(k)).filter(g => g && g.layer.kind === 'topics');
+  const gs = [...new Set(String(keys || '').split(','))].map(k => S.groups.get(k)).filter(g => g && isThread(g.layer))
+    .sort((x, y) => (y.layer.section === 'Places') - (x.layer.section === 'Places'));
   if (!gs.length) return '';
   // one line per topic (their titles have commas of their own), its groups after it
   const by = new Map();
@@ -544,7 +547,7 @@ function areaCard(p){
 // ================= Plaques and other pins =================
 export function showPin(p){
   const xy = S.data.pins?.features[p.i]?.geometry.coordinates;
-  renderCard({ ...pinCard(p), topics: p.T, share: xy && { title: p.name, url: shareOf('pin', `${xy[1].toFixed(5)},${xy[0].toFixed(5)}`) } });
+  renderCard({ ...pinCard(p), topics: (p.group ? ',' + p.group : '') + (p.T || ''), share: xy && { title: p.name, url: shareOf('pin', `${xy[1].toFixed(5)},${xy[0].toFixed(5)}`) } });
   plaqueOn(p.on == null || p.on === '' ? null : +p.on);
 }
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -566,9 +569,9 @@ function placeLinks(p, withWeb = true){
   return links;
 }
 function pinCard(p){
-  const G = S.groups.get(p.group), place = G && G.layer.section === 'Places';
-  const rows = [[place ? 'Place' : 'Layer', place ? `<a href="#" data-topic="${esc(G.key)}">${esc(G.layer.groups.length > 1 ? G.layer.title + ': ' + G.title : G.layer.title)}</a>`
-    : esc((G || {}).title || layerTitle(p.layer))]];
+  // (a story's place is one of its threads, listed with the others under the card)
+  const G = S.groups.get(p.group), place = G && isThread(G.layer);
+  const rows = place ? [] : [['Layer', esc((G || {}).title || layerTitle(p.layer))]];
   if (p.artist) rows.push(['Artist', esc(p.artist)]);
   if (p.start) rows.push(['From', esc(dayText(p.start))]);
   const open = openRows(p.oh || p.web ? [{ oh: p.oh, web: p.web }] : [], p.name);

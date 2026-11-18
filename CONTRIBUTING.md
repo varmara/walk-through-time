@@ -171,7 +171,8 @@ or by strand (The Civil War, The dukes' mansion).
 
 A thread of several chapters opens each chapter with an introduction card of its own, so the chapters do not mix:
 write it as prose under the `##` heading, before the chapter's first member. Every chapter of such a thread needs
-one (a test checks), even a chapter of one story; a thread of a single chapter needs none. Say only what the cards
+one (a test checks), even a chapter of one story; a thread of a single chapter needs none. A place's chapters may have
+introductions too, written the same way; they are not required, but if one chapter of a place has one, write them for all. Say only what the cards
 below it tell: it frames them, and adds no facts of its own.
 
 ```markdown

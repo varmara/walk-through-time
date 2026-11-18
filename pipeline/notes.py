@@ -250,7 +250,7 @@ def index_layer(name, props, body):
             L["members"].append({**member, "group": group, "line": f"{name}:{n}", **({"when": dated} if dated else {})})
         elif group is None and not L["members"]:
             intro.append(line)
-        elif group is not None and L["section"] == "Threads" and not any(m["group"] == group for m in L["members"]):
+        elif group is not None and L["section"] in ("Threads", "Places") and not any(m["group"] == group for m in L["members"]):
             gintro[group].append(line)       # a chapter's own introduction: its text before its first member
         else:
             raise NoteError(f"{name}: '{line[:60]}': below the introduction, only ## groups and - members")

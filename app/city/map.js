@@ -138,7 +138,9 @@ export function drawMap(){
       S.map.addSource('places', { type:'geojson', data:{ type:'FeatureCollection', features:[] },
         cluster:true, clusterRadius:44, clusterMaxZoom:18,
         // a joined pin shows the stories' numbers in it, first to last
-        clusterProperties:{ lo:['min', ['get', 'n']], hi:['max', ['get', 'n']] } });
+        clusterProperties:{ lo:['min', ['get', 'n']], hi:['max', ['get', 'n']],
+          // (the numbers in the joined pin, as "3,20,")
+          ns:[['concat', ['accumulated'], ['get', 'ns']], ['concat', ['to-string', ['get', 'n']], ',']] } });
       // invisible layer: keeps the clustered source loaded so the HTML pins can read it
       S.map.addLayer({ id:'places-probe', type:'circle', source:'places', paint:{ 'circle-radius':1, 'circle-opacity':0 } });
       S.map.on('moveend', drawPins); S.map.on('sourcedata', e => { if (e.sourceId === 'places' && e.isSourceLoaded) drawPins(); });

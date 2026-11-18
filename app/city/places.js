@@ -190,7 +190,7 @@ export function showGroups(keys, title){
   const set = Ls.length === 1 ? loadSet(Ls[0].id) : null;
   // a thread of several chapters, shown whole: a card for each chapter, whose stories keep to it. One chapter alone
   // opens with its own introduction
-  const several = whole && Ls[0].kind === 'topics' && chaps.length > 1 && chaps.every(c => c.text);
+  const several = whole && (Ls[0].kind === 'topics' || Ls[0].section === 'Places') && chaps.length > 1 && chaps.every(c => c.text);
   const alone = keys.length === 1 && chaps.length === 1 && chaps[0].text ? chaps[0].text : undefined;
   showPlaces(title, refs, hints, whole ? (Ls[0].intro || '') : alone, set, several ? chaps : undefined);
   return true;
@@ -297,8 +297,11 @@ export function clearPlaces(showTime){
   $('placesbar').hidden = true;
   if (showTime) $('timebar').hidden = false;
 }
+// numbers as a list, a run of consecutive ones as a range: [1, 2, 3, 7, 9, 10] -> "1–3, 7, 9–10"
+export const runs = ns => ns.reduce((o, n) => { const l = o[o.length - 1]; if (l && n === l[1] + 1) l[1] = n; else o.push([n, n]); return o; }, [])
+  .map(([a, b]) => a === b ? String(a) : `${a}–${b}`).join(', ');
 // the pins carry their stories' numbers; pins too close to tell apart join as one, showing the numbers in it
-// ("4–5"), which opens out when tapped
+// ("4–5, 9"), which opens out when tapped; it is lit only when one of its own stories is the open card
 export function drawPins(){
   if (!S.map || !S.map.getSource('places')) return;
   const seen = new Set(), drawn = [], P = S.places, cur = P && !P.cards[P.i]?.intro ? numOf(P, P.i) : null;
@@ -315,7 +318,8 @@ export function drawPins(){
     }
     if (seen.has(key)) continue;
     seen.add(key);
-    const label = cl ? (pr.lo === pr.hi ? String(pr.lo) : `${pr.lo}–${pr.hi}`) : String(pr.n);
+    const nums = cl ? [...new Set(String(pr.ns || '').split(',').filter(Boolean).map(Number))].sort((a, b) => a - b) : [pr.n];
+    const label = cl ? (nums.length ? runs(nums) : pr.lo === pr.hi ? String(pr.lo) : `${pr.lo}, ${pr.hi}`) : String(pr.n);
     if (!S.pins[key]) {
       const el = document.createElement('button');
       el.className = cl ? 'pin cluster' : 'pin';
@@ -330,7 +334,7 @@ export function drawPins(){
       S.pins[key] = new maplibregl.Marker({ element: el }).setLngLat(f.geometry.coordinates).addTo(S.map);
     }
     const el = S.pins[key].getElement();
-    el.classList.toggle('on', cur != null && (cl ? pr.lo <= cur && cur <= pr.hi : pr.n === cur));
+    el.classList.toggle('on', cur != null && (cl ? (nums.length ? nums.includes(cur) : pr.lo <= cur && cur <= pr.hi) : pr.n === cur));
     if (cl) el.classList.toggle('wide', label.length > 2);
   }
   Object.keys(S.pins).forEach(k => { if (!seen.has(k)) { S.pins[k].remove(); delete S.pins[k]; } });
