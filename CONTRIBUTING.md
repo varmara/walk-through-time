@@ -112,6 +112,7 @@ When the Lords threw out the Bill, a crowd burned the castle of the
   word is missing. Another site's page is written from by hand: give `read:` (the date it was read) and keep
   facts and links only; the build does not read it. Historic England blocks the build, so a note resting on a
   list entry also gives `quote:`, the passages copied from it, which the check words are found in instead.
+  Which sites may be used, and how: [SOURCES.md](SOURCES.md).
 - **Footnotes** (`[^name]`) let one paragraph or fact rest on its own page, checked for its own words, or
   `— read: 2026-11-14` for another site's.
 - **Footnotes the build adds.** A story with several sources gets a footnote after each sentence, to the page
@@ -204,6 +205,64 @@ the member.
 - 1643: [[St Nicholas' Church]]       pulled down in the siege (its own story is dated by the rebuilding, 1678)
 - 1952: [[Statue of Robin Hood]]      on the On a plinth thread, by when it was put up; its card shows both dates
 ```
+
+### A checklist for a new story
+
+The mistakes that have dropped stories or stopped the build, and how to avoid them. Which sources may be used, and
+how, is in [SOURCES.md](SOURCES.md).
+
+**Sources and words**
+
+- [ ] **Check words are copied from the page, not remembered.** The build looks for each word exactly as the article
+  writes it. "19 November 1993" failed where the article gave only "1993". A sentence that a summary of the page
+  showed, but the article's text did not hold, dropped the Gotham story. Prefer short, distinctive words: years,
+  names, figures (`1852 | Star Brewery | Greenall`).
+- [ ] **Every sentence rests on a source.** Trim anything the pages do not say, however likely it seems: a cause, a
+  "famous", an extra date. A sentence from another page gets its own footnote.
+- [ ] **Our own words**, in British English. Retell; never copy a sentence.
+- [ ] **A non-Wikipedia page** has `title:` and `read:` (or a footnote with them), and a `note:` saying how it may be
+  used ("facts only (no notice)", "CC BY 4.0").
+
+**Dates**
+
+- [ ] **`when:` must be found in a page.** The build matches `1850`, `c. 1750` (as 1750), `1930s`, `13th century` (also
+  "thirteenth century", "13th-century", "12th and 13th century"). A date that sits in a footnoted sentence is found
+  through that footnote. Otherwise the build log lists it and the card shows it without a source.
+- [ ] **Undated is allowed**: leave `when:` out rather than guess. In a thread, an undated story stays after the one
+  listed before it.
+
+**Places**
+
+- [ ] **Inside the map.** Check the point against the city's boundary (`bbox` in `cities/<city>.json`): a church just over the
+  edge was left out.
+- [ ] **On the right side of the river.** A pin on the Trent's other bank puts the story in the wrong village; check
+  pins near the river against the map.
+- [ ] **A building's own outline** where OpenStreetMap has one (`https://www.openstreetmap.org/way/…`), else a pin,
+  with a `note:` saying why. A building of several parts (the two decks of Clifton Bridge) lists every part, the one the
+  story starts with first.
+- [ ] **Reuse a pin by its name.** A pin is made once, by name and point; another note gives just the name. Making the
+  same pin twice at different points stops the build ("the pin … is made twice, at different points").
+- [ ] **Approximate?** Say so on the card, briefly: "The pin is approximate." (SOURCES.md, Places).
+
+**Names and links**
+
+- [ ] **The note's name is new.** Two notes cannot share one, and that includes indexes: a place called "Castle
+  Marina" and a story called "Castle Marina" clash.
+- [ ] **`[[links]]` find something**: another note, or a person by the name the People layer gives them. The build stops
+  on a link that finds nothing.
+
+**Placing it**
+
+- [ ] **A Places index lists it.** The first place that lists a story is its home, and the build stops on a story no
+  place lists.
+- [ ] **A thread lists it where it belongs** for the telling, not wherever it could fit. If a story a thread lists is
+  dropped, the build fails, so fix the story rather than unlisting it.
+- [ ] **In a place, the order is the story's order** (`sort: as listed`), from its beginning; in a theme, the date order
+  decides, and a line can carry its own date (`- 1964: [[…]]`).
+- [ ] **The introduction still fits** once stories are added or moved: update the index's first paragraph.
+
+**Before you push**: run the checks in [Checking your layer](#checking-your-layer), then watch the "Build and publish"
+run and read its log for `dropped`, `none of its pages` and `fix these`.
 
 ## 2. A rule layer (from an open dataset)
 

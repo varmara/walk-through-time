@@ -99,7 +99,7 @@ lib/                      MapLibre GL JS (BSD-3-Clause), d3 (ISC)
 ### Layers
 
 Story layers are hand-written, and every entry is checked against its sources: Wikipedia articles or Historic England
-list entries. The People layer combines hand-written entries, every commemorative plaque in the area, and every
+list entries. Which sources may be used, and how: [SOURCES.md](SOURCES.md). The People layer combines hand-written entries, every commemorative plaque in the area, and every
 architect recorded in Wikidata, sorted by type of person. Rule layers are
 built from open data: listed buildings by grade, buildings on scheduled monuments, and pubs. Nature areas are drawn on
 the ground by type. On the page, layers are ticked in one sheet behind the Layers button, in any combination. See [CONTRIBUTING.md](CONTRIBUTING.md)
