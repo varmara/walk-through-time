@@ -297,11 +297,9 @@ export function clearPlaces(showTime){
   $('placesbar').hidden = true;
   if (showTime) $('timebar').hidden = false;
 }
-// numbers as a list, a run of consecutive ones as a range: [1, 2, 3, 7, 9, 10] -> "1–3, 7, 9–10"
-export const runs = ns => ns.reduce((o, n) => { const l = o[o.length - 1]; if (l && n === l[1] + 1) l[1] = n; else o.push([n, n]); return o; }, [])
-  .map(([a, b]) => a === b ? String(a) : `${a}–${b}`).join(', ');
-// the pins carry their stories' numbers; pins too close to tell apart join as one, showing the numbers in it
-// ("4–5, 9"), which opens out when tapped; it is lit only when one of its own stories is the open card
+// the pins carry their stories' numbers. Pins too close to tell apart join as one, which shows one number (the open
+// card's, if it is one of them, else the first) and a dot with how many more it holds; tapped, it goes on to the next
+// of its own stories when one is open, else lists them to choose from
 export function drawPins(){
   if (!S.map || !S.map.getSource('places')) return;
   const seen = new Set(), drawn = [], P = S.places, cur = P && !P.cards[P.i]?.intro ? numOf(P, P.i) : null;
@@ -309,7 +307,7 @@ export function drawPins(){
     const pr = f.properties, cl = pr.cluster;
     // (a joined pin can come once from each map tile it lies across, under another id and a little apart: the
     // first is drawn)
-    let key = cl ? 'c' + pr.cluster_id : `p${pr.k}-${pr.j}`;
+    const key = cl ? 'c' + pr.cluster_id : `p${pr.k}-${pr.j}`;
     if (cl) {
       const at = S.map.project(f.geometry.coordinates);
       const twin = drawn.find(d => d.lo === pr.lo && d.hi === pr.hi && Math.hypot(d.x - at.x, d.y - at.y) < 80);
@@ -319,23 +317,38 @@ export function drawPins(){
     if (seen.has(key)) continue;
     seen.add(key);
     const nums = cl ? [...new Set(String(pr.ns || '').split(',').filter(Boolean).map(Number))].sort((a, b) => a - b) : [pr.n];
-    const label = cl ? (nums.length ? runs(nums) : pr.lo === pr.hi ? String(pr.lo) : `${pr.lo}, ${pr.hi}`) : String(pr.n);
+    if (!nums.length) nums.push(pr.lo);
+    const mine = cur != null && nums.includes(cur), shown = mine ? cur : nums[0], more = nums.length - 1;
     if (!S.pins[key]) {
       const el = document.createElement('button');
-      el.className = cl ? 'pin cluster' : 'pin';
-      el.textContent = label;
-      el.setAttribute('aria-label', cl ? `Stories ${label} here: zoom in` : `Story ${pr.n}`);
-      el.onclick = e => {
-        e.stopPropagation();
-        if (cl) S.map.getSource('places').getClusterExpansionZoom(pr.cluster_id)
-          .then(z => S.map.easeTo({ center: f.geometry.coordinates, zoom: z + 0.3 }));
-        else goToCard(pr.k);
-      };
       S.pins[key] = new maplibregl.Marker({ element: el }).setLngLat(f.geometry.coordinates).addTo(S.map);
     }
     const el = S.pins[key].getElement();
-    el.classList.toggle('on', cur != null && (cl ? (nums.length ? nums.includes(cur) : pr.lo <= cur && cur <= pr.hi) : pr.n === cur));
-    if (cl) el.classList.toggle('wide', label.length > 2);
+    // (set only when it changes: the pins are redrawn as the map moves)
+    const cls = 'pin' + (more ? ' joined' : '') + (mine ? ' on' : ''), html = `${shown}${more ? `<span class="more">+${more}</span>` : ''}`;
+    if (el.className !== cls) el.className = cls;
+    if (el.innerHTML !== html) el.innerHTML = html;
+    el.setAttribute('aria-label', more ? `Stories ${nums.join(', ')} here` : `Story ${shown}`);
+    el.onclick = e => {
+      e.stopPropagation();
+      const now = S.places && !S.places.cards[S.places.i]?.intro ? numOf(S.places, S.places.i) : null;
+      if (!more) return goToCard(cardOf(nums[0]));
+      if (nums.includes(now)) return goToCard(cardOf(nums[(nums.indexOf(now) + 1) % nums.length]));
+      pinMenu(f.geometry.coordinates, nums);
+    };
   }
   Object.keys(S.pins).forEach(k => { if (!seen.has(k)) { S.pins[k].remove(); delete S.pins[k]; } });
+}
+// the card of a story's number
+const cardOf = n => S.places.cards.findIndex(c => !c.intro && c.n === n);
+// a joined pin's stories, to choose from
+let menu = null;
+function pinMenu(xy, nums){
+  menu?.remove();
+  const P = S.places, box = document.createElement('div');
+  box.className = 'pinmenu';
+  box.innerHTML = nums.map(n => { const c = P.cards[cardOf(n)];
+    return `<button data-n="${n}"><b>${n}</b> ${esc(c?.hint?.name || (c ? refName(c.refs[0]) : ''))}</button>`; }).join('');
+  box.onclick = e => { const b = e.target.closest('[data-n]'); if (!b) return; menu?.remove(); menu = null; goToCard(cardOf(+b.dataset.n)); };
+  menu = new maplibregl.Popup({ closeButton: false, offset: 18, maxWidth: '260px' }).setLngLat(xy).setDOMContent(box).addTo(S.map);
 }
