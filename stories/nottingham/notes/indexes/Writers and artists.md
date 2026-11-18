@@ -9,6 +9,7 @@ The poets, novelists, painters and photographers who lived, worked or were born 
 
 
 ## Writers
+Poets and novelists who lived in, wrote of or were born in the county, from Lucy Hutchinson to Alan Sillitoe, by way of Byron and D. H. Lawrence.
 - [[Lucy Hutchinson]]
 - [[Ruth Bryan]]
 - [[Mary Howitt]]
@@ -35,6 +36,7 @@ The poets, novelists, painters and photographers who lived, worked or were born 
 - [[The Lawrences on Garden Road]]
 
 ## Artists
+Artists who were born or worked here, and an art centre.
 - [[Richard Parkes Bonington]]
 - [[Henry Dawson]]
 - [[Samuel Bourne]]

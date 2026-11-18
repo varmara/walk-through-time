@@ -169,6 +169,17 @@ opening that thread. Stories do not link to the next one in a thread in their te
 anywhere without others changing: the cards keep date order, and the `##` headings are its chapters, by period
 or by strand (The Civil War, The dukes' mansion).
 
+A thread of several chapters opens each chapter with an introduction card of its own, so the chapters do not mix:
+write it as prose under the `##` heading, before the chapter's first member. Every chapter of such a thread needs
+one (a test checks), even a chapter of one story; a thread of a single chapter needs none. Say only what the cards
+below it tell: it frames them, and adds no facts of its own.
+
+```markdown
+## The Civil War
+In August 1642 Charles I raised his standard outside the castle. Parliament then held it …
+- [[Charles I raised his standard, 1642]]
+```
+
 ```markdown
 ---
 type: index

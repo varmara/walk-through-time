@@ -202,7 +202,8 @@ def when(value, name, prop="when"):
 
 def index_layer(name, props, body):
     """An index note (type: index): a layer of the Layers sheet. Its text: the introduction, then `## Group`
-    headings, each a tickbox, listing its members one per line:
+    headings, each a tickbox, listing its members one per line (in a thread, a chapter may open with a few lines of
+    its own introduction, before its first member):
 
         - [[Note]]                     a story or event (each is in at least one Places index, where it lives), or
                                        a person (a note, or someone on the map by name)
@@ -223,7 +224,7 @@ def index_layer(name, props, body):
          **({"kind": str(props["kind"])} if props.get("kind") else {}), "entries": [], "members": []}
     if L["section"] not in SECTIONS:
         raise NoteError(f"{name}: section: must be one of {', '.join(SECTIONS)}")
-    intro, group, groups = [], None, []
+    intro, group, groups, gintro = [], None, [], {}
     for n, raw in enumerate(body.splitlines(), 1):
         line = raw.strip()
         if not line:
@@ -231,6 +232,7 @@ def index_layer(name, props, body):
         if line.startswith("## "):
             group = line[3:].strip()
             groups.append([f"{L['id']}-{slug(group)}", group])
+            gintro[group] = []
         elif line.startswith("- "):
             item, dated = line[2:].strip(), None
             if m := ITEM_WHEN.match(item):       # "- c. 1200: [[Statue of Robin Hood]]": its date on this thread
@@ -248,11 +250,15 @@ def index_layer(name, props, body):
             L["members"].append({**member, "group": group, "line": f"{name}:{n}", **({"when": dated} if dated else {})})
         elif group is None and not L["members"]:
             intro.append(line)
+        elif group is not None and L["section"] == "Threads" and not any(m["group"] == group for m in L["members"]):
+            gintro[group].append(line)       # a chapter's own introduction: its text before its first member
         else:
             raise NoteError(f"{name}: '{line[:60]}': below the introduction, only ## groups and - members")
     L["intro"] = " ".join(intro)
     if groups:
         L["groups"] = groups
+        if any(gintro.values()):
+            L["groupIntros"] = {g: " ".join(t) for g, t in gintro.items() if t}
     return L
 
 
@@ -263,6 +269,7 @@ def topic(L, kinds):
     return {"id": L["id"], "title": L["title"], "intro": L["intro"], "order": L["order"],
             **({"asListed": True} if L.get("asListed") else {}),
             "groups": [t for _, t in L.get("groups", [])], "keys": {t: k for k, t in L.get("groups", [])},
+            **({"intros": L["groupIntros"]} if L.get("groupIntros") else {}),
             "members": [{**m, "kind": ("story" if kinds.get(m["name"]) in ("story", "event") else "person")
                          if m["kind"] == "note" else m["kind"]} for m in L["members"]]}
 

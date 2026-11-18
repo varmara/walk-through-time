@@ -8,6 +8,7 @@ id: victorian
 The town that grew in the 19th century: cemeteries and parks on the hills to the north, a college, theatres and halls, and the architects whose buildings line its streets.
 
 ## Parks and cemeteries
+The Victorians laid out public green space: cemeteries, an arboretum and grounds for recreation and sport.
 - [[General Cemetery]]
 - [[The Arboretum]]
 - [[Church Cemetery]]
@@ -15,6 +16,7 @@ The town that grew in the 19th century: cemeteries and parks on the hills to the
 - [[St Ann's Allotments]]
 
 ## Buildings
+Buildings of a town grown rich on lace: a warehouse, offices, a hotel, theatres, a music hall and a house.
 - [[Adams Building]]
 - [[Watson Fothergill's offices]]
 - [[The Black Boy Hotel]]
@@ -24,6 +26,7 @@ The town that grew in the 19th century: cemeteries and parks on the hills to the
 - [[Tower House]]
 
 ## Villages become suburbs
+Villages and open fields became suburbs, from the villas of the Park to the railway suburb of Carlton and new housing on the old Clay Fields.
 - [[Village to suburb]]
 - [[Park Terrace]]
 - [[Hine's Park]]
@@ -35,6 +38,7 @@ The town that grew in the 19th century: cemeteries and parks on the hills to the
 - [[Who lived in the Park]]
 
 ## Public buildings
+The civic buildings of a town that became a city in 1897: a college, a guildhall, a village school and a railway station.
 - [[University College]]
 - [[Guildhall]]
 - [[Clifton village school]]

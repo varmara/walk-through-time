@@ -147,3 +147,28 @@ class DateOrder(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ChapterIntros(unittest.TestCase):
+    def test_a_chapter_takes_the_prose_before_its_first_member(self):
+        L = notes.index_layer("T", {"type": "index", "section": "Threads", "id": "t"},
+                              "Intro.\n\n## One\nAbout one,\nin two lines.\n- [[A]]\n\n## Two\n- [[B]]\n")
+        self.assertEqual(L["groupIntros"], {"One": "About one, in two lines."})
+        self.assertEqual(notes.topic(L, {})["intros"], {"One": "About one, in two lines."})
+
+    def test_prose_among_the_members_is_still_an_error(self):
+        with self.assertRaises(notes.NoteError):
+            notes.index_layer("T", {"type": "index", "section": "Threads", "id": "t"}, "## One\n- [[A]]\nstray prose\n")
+
+    def test_every_chapter_of_a_thread_of_several_has_an_introduction(self):
+        import glob
+        missing = []
+        for f in glob.glob("stories/*/notes/indexes/*.md"):
+            text = open(f, encoding="utf-8").read()
+            if "section: Threads" not in text:
+                continue
+            body = text.split("---", 2)[2] if text.startswith("---") else text
+            L = notes.index_layer(f, {"section": "Threads", "id": "x"}, body)
+            if len(L.get("groups", [])) > 1:
+                missing += [f"{f}: {g}" for _, g in L["groups"] if g not in L.get("groupIntros", {})]
+        self.assertEqual(missing, [], "chapters without an introduction")

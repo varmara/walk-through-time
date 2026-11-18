@@ -20,3 +20,5 @@ The sandstone rock at the west end of the old town: the castle, the passages and
 - [[Royalist raids on Nottingham]]
 - [[The castle burned, 1831]]
 - [[Statue of Captain Albert Ball]]
+- [[Nottingham Castle Museum]]
+- [[True Brit at the castle]]

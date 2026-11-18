@@ -10,6 +10,7 @@ movements here.
 
 
 ## Churches
+The old and new churches of the city and its near neighbours, from the three mediaeval parish churches to Pugin's Catholic cathedral.
 - [[St Mary's Church, Nottingham]]
 - [[St Peter's Church]]
 - [[Church of the Holy Rood]]
@@ -27,6 +28,7 @@ movements here.
 - [[St Ann's Church]]
 
 ## Chapels
+Nonconformists, Methodists and the Salvation Army built chapels and halls of their own, and some of those buildings have since found other uses.
 - [[John Wesley]]
 - plaque: Hockley Methodist Chapel
 - plaque: Wesley Place Methodist Chapel
@@ -38,6 +40,7 @@ movements here.
 - [[William Booth's birthplace]]
 
 ## Village churches
+Each village round the city has its own church, many going back to the 12th and 13th centuries.
 - [[St Mary's, Arnold]]
 - [[St Peter's, Tollerton]]
 - [[St Lawrence's, Gotham]]

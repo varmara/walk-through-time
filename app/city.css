@@ -193,6 +193,7 @@ a.fab{display:grid;place-items:center;text-decoration:none;color:inherit}
 .pcard .pbtns{display:flex;gap:16px;flex-wrap:wrap}
 .pcard .pmap{display:none}
 .pintro h3.ptitle{margin-left:0;font-size:20px}
+.pintro .pchap{margin:0 0 4px;text-transform:uppercase;letter-spacing:.04em;font-size:11px}
 .pview{display:grid;place-items:center}
 .pview svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
 .pview[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-radius:8px}

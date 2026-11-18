@@ -9,12 +9,14 @@ Nottingham women who campaigned for the vote, ran schools, businesses and librar
 
 
 ## Votes for women
+The women who campaigned for the vote in Nottingham, as suffragists and as suffragettes.
 - [[Helena Dowson]]
 - [[Kate Watson Wallis]]
 - [[Helen Watts]]
 - [[Nellie Crocker]]
 
 ## Work and care
+Women who wrote, taught, nursed, built and ran things, from the 17th century to the 20th.
 - [[Lucy Hutchinson]]
 - [[George Wells Almshouses]]
 - [[Cassandra Willoughby]]

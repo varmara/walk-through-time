@@ -205,6 +205,8 @@ def layer_pages(data, city_id, city_name, site, out):
                 n += 1
             if arts:
                 head = f"<h2>{e(g['title'])}</h2>" if len(L["groups"]) > 1 else ""
+                if head and g.get("intro"):
+                    head += f'<p class="intro">{e(g["intro"])}</p>'      # (a thread's chapter: its own introduction)
                 sections.append(head + "".join(arts))
         if not n:
             continue

@@ -322,7 +322,9 @@ def topic_layers(topics, entries, people, out, buildings, bname, story_layers):
         meta.append({"id": tid, "title": T["title"], "intro": T.get("intro", ""), "section": "Threads", "kind": "topics",
                      **({"asListed": True} if T.get("asListed") else {}), **({"place": True} if T.get("place") else {}),
                      "groups": [{"key": k, "title": t, "count": len({r for it in items.get(k, []) for r in it[1]}),
-                                 "items": items.get(k, [])} for k, t in groups]})
+                                 "items": items.get(k, []),
+                                 **({"intro": T["intros"][t]} if t in (T.get("intros") or {}) else {})}
+                                for k, t in groups]})
         log(f"s06 topic {tid}: {sum(len(v) for v in items.values())} members")
     if problems:
         raise SystemExit("Threads (the Threads indexes, stories/<city>/notes/indexes/): fix these lines:\n  " + "\n  ".join(problems))
