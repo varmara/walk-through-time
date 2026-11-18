@@ -264,6 +264,8 @@ const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 export function goToCard(k, smooth = true){
   const card = $('pCards').querySelector(`[data-i="${k}"]`);
   if (!card) return;
+  // (the card already open: no scroll to wait for, so the map goes back to it now)
+  if (S.places && S.places.i === k && !S.places.page) return setPlace(k);
   const first = $('pCards').querySelector('.pcard');
   $('pCards').scrollTo({ left: card.offsetLeft - first.offsetLeft, behavior: smooth && !still() ? 'smooth' : 'auto' });
   if (!smooth) setPlace(k);
@@ -298,8 +300,8 @@ export function clearPlaces(showTime){
   if (showTime) $('timebar').hidden = false;
 }
 // the pins carry their stories' numbers. Pins too close to tell apart join as one, which shows one number (the open
-// card's, if it is one of them, else the first) and a dot with how many more it holds; tapped, it goes on to the next
-// of its own stories when one is open, else lists them to choose from
+// card's, if it is one of them, else the first) and a dot with how many more it holds; tapped, it lists them to
+// choose from, the open one marked
 export function drawPins(){
   if (!S.map || !S.map.getSource('places')) return;
   const seen = new Set(), drawn = [], P = S.places, cur = P && !P.cards[P.i]?.intro ? numOf(P, P.i) : null;
@@ -332,9 +334,7 @@ export function drawPins(){
     el.setAttribute('aria-label', more ? `Stories ${nums.join(', ')} here` : `Story ${shown}`);
     el.onclick = e => {
       e.stopPropagation();
-      const now = S.places && !S.places.cards[S.places.i]?.intro ? numOf(S.places, S.places.i) : null;
       if (!more) return goToCard(cardOf(nums[0]));
-      if (nums.includes(now)) return goToCard(cardOf(nums[(nums.indexOf(now) + 1) % nums.length]));
       pinMenu(f.geometry.coordinates, nums);
     };
   }
@@ -346,10 +346,10 @@ const cardOf = n => S.places.cards.findIndex(c => !c.intro && c.n === n);
 let menu = null;
 function pinMenu(xy, nums){
   menu?.remove();
-  const P = S.places, box = document.createElement('div');
+  const P = S.places, box = document.createElement('div'), now = !P.cards[P.i]?.intro ? numOf(P, P.i) : null;
   box.className = 'pinmenu';
   box.innerHTML = nums.map(n => { const c = P.cards[cardOf(n)];
-    return `<button data-n="${n}"><b>${n}</b> ${esc(c?.hint?.name || (c ? refName(c.refs[0]) : ''))}</button>`; }).join('');
+    return `<button data-n="${n}"${n === now ? ' class="on" aria-current="true"' : ''}><b>${n}</b> ${esc(c?.hint?.name || (c ? refName(c.refs[0]) : ''))}</button>`; }).join('');
   box.onclick = e => { const b = e.target.closest('[data-n]'); if (!b) return; menu?.remove(); menu = null; goToCard(cardOf(+b.dataset.n)); };
   menu = new maplibregl.Popup({ closeButton: false, offset: 18, maxWidth: '260px' }).setLngLat(xy).setDOMContent(box).addTo(S.map);
 }

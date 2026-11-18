@@ -190,6 +190,8 @@ a.fab{display:grid;place-items:center;text-decoration:none;color:inherit}
 .pinmenu button{all:unset;cursor:pointer;padding:6px 4px;border-radius:6px}
 .pinmenu button:hover,.pinmenu button:focus-visible{background:var(--hl-soft, rgba(0,0,0,.06))}
 .pinmenu b{display:inline-block;min-width:20px}
+.pinmenu button.on{font-weight:600}
+.pinmenu button.on b{color:var(--hl)}
 .pcard .pabout{font:14px/1.45 var(--serif)}
 .pcard .psrc{font:12px/1.4 var(--sans);color:var(--muted)}
 .pcard .psrc a{color:inherit}
