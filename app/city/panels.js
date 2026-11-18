@@ -1,7 +1,7 @@
 // Walk Through Time, city page: The Layers sheet and the Map sheet (base maps, the legend of eras).
 import { $, CITY_ID, ERAS, PIN_LAYERS, SECTIONS, STORY_LABELS, STORY_SECTIONS, esc, fmt, store } from './util.js';
 import { S } from './state.js';
-import { hasPins, isArea, isStorySet, kindOf, marksBuildings, parseRef, saveActive } from './data.js';
+import { hasPins, isArea, isStorySet, isThread, kindOf, marksBuildings, parseRef, saveActive } from './data.js';
 import { addNls, paintBuildings, setHills, setLand } from './map.js';
 import { curYear, updateYear } from './timebar.js';
 import { openRef } from './cards.js';
@@ -150,7 +150,7 @@ export function infoHtml(L, g, withIntro = true){
   // the places of a story layer's or a topic's group (or of the whole layer), as numbered cards in date order
   // (a place's, a thread's or a group of people's cards open from its row in the Stories sheet)
 
-  if (L.kind === 'topics') parts.push('<p class="src">Each story, person and plaque here is told on its own card, with its source.</p>');
+  if (isThread(L)) parts.push('<p class="src">Each story, person and plaque here is told on its own card, with its source.</p>');
   if (withIntro && (L.kind === 'stories' || L.kind === 'people' || L.kind === 'topics'))
     parts.push(`<p class="src"><a href="../data/share/${CITY_ID}/layer-${encodeURIComponent(L.id)}.html">Read “${esc(L.title)}” as a page</a></p>`);
   else if (L.source) parts.push(`<p class="src">Source: <a href="${esc(L.source.url)}" target="_blank" rel="noopener">${esc(L.source.title)}</a></p>`);

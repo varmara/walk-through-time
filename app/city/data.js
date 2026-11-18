@@ -84,6 +84,8 @@ try { S.active = new Set(JSON.parse(store.get('layers:' + CITY_ID) || '[]')); } 
 export const saveActive = () => store.set('layers:' + CITY_ID, JSON.stringify([...S.active]));
 export const isArea = key => S.groups.get(key)?.layer.kind === 'areas';
 export const kindOf = key => S.groups.get(key)?.layer.kind;
+// a thread: a place (a thread with an area, whose stories live there) or a theme; both open and show the same way
+export const isThread = L => !!L && (L.kind === 'topics' || L.kind === 'stories');
 // a group of a place, a thread or the People: opened as numbered cards, not ticked
 export const isStorySet = key => ['stories', 'topics', 'people', 'facts'].includes(kindOf(key));
 // a ticked group marks buildings (the rest stay pale) when its layer has buildings in it

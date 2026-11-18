@@ -2,7 +2,7 @@
 // cards that swipe sideways one at a time, or the same cards one under another as a page.
 import { $, dateText, esc, flightPace, whenText } from './util.js';
 import { S } from './state.js';
-import { fstate, isB, loadCard, loadSet, parseRef, refCentre, refOf, storyFor, tiled } from './data.js';
+import { fstate, isB, isThread, loadCard, loadSet, parseRef, refCentre, refOf, storyFor, tiled } from './data.js';
 import { paintBuildings } from './map.js';
 import { closeSheet } from './sheet.js';
 import { openRef, refName } from './cards.js';
@@ -190,7 +190,7 @@ export function showGroups(keys, title){
   const set = Ls.length === 1 ? loadSet(Ls[0].id) : null;
   // a thread of several chapters, shown whole: a card for each chapter, whose stories keep to it. One chapter alone
   // opens with its own introduction
-  const several = whole && (Ls[0].kind === 'topics' || Ls[0].section === 'Places') && chaps.length > 1 && chaps.every(c => c.text);
+  const several = whole && isThread(Ls[0]) && chaps.length > 1 && chaps.every(c => c.text);
   const alone = keys.length === 1 && chaps.length === 1 && chaps[0].text ? chaps[0].text : undefined;
   showPlaces(title, refs, hints, whole ? (Ls[0].intro || '') : alone, set, several ? chaps : undefined);
   return true;

@@ -4,7 +4,7 @@
 //   image + credit · summary · facts (rows) · Did you know · old pictures · more old pictures · stories · links
 import { $, dateText, eraOf, esc, flightPace, whenText } from './util.js';
 import { S } from './state.js';
-import { areaOf, byOsm, centreOf, fstate, isB, loadCard, parseRef, pinOf, refOf, routeOf, saveActive, storyOf, tiled } from './data.js';
+import { areaOf, byOsm, centreOf, fstate, isB, isThread, loadCard, parseRef, pinOf, refOf, routeOf, saveActive, storyOf, tiled } from './data.js';
 import { openSheet, shareOf } from './sheet.js';
 import { applyLayers, renderLayers } from './panels.js';
 import { showGroups, showPlaces } from './places.js';
@@ -306,7 +306,6 @@ function storyHtml(s, N){
 }
 // the threads a story is in, places (Wilford: The village and its big house) and themes alike (",war-1831,coal,"),
 // places first, each opening its cards
-const isThread = L => L.kind === 'topics' || L.section === 'Places';
 function topicsHtml(keys){
   const gs = [...new Set(String(keys || '').split(','))].map(k => S.groups.get(k)).filter(g => g && isThread(g.layer))
     .sort((x, y) => (y.layer.section === 'Places') - (x.layer.section === 'Places'));

@@ -29,8 +29,7 @@ Two or three plain sentences on the history behind the layer.
 | Property | Meaning |
 |---|---|
 | `id` | the layer's id, which links use (`?layer=barton`); else made from the file's name |
-| `section` | `Places` (the default: a small area of the map, where each of its stories lives, told as a thread of where it is) or `Threads` (a story told across the map, below) |
-| `area` | for a place: the small heading it folds under in the Stories sheet (`The city`, `South of the Trent`, `West`, `North and east`) |
+| `area` | makes the thread a place: a small area of the map, where each of its stories lives, folded under this heading in "Around the map" (`The city`, `South of the Trent`, `West`, `North and east`). Without it, the thread is a theme |
 | `order` | its place in its section of the Layers sheet; else after those with one, by name |
 | `sort` | `as listed`: a place's stories in the order written, not by date (Wilford's Roman ford, found in 1900, tells of the earliest times and comes first) |
 | `kind` | `people` for the People layer and `facts` for "Did you know", whose members are not listed |
@@ -163,16 +162,16 @@ folded by its `area`, it may list the people, plaques and buildings that belong 
 lines may carry thread dates (`- 1970: [[Paul Smith]]`). Its stories and events live there (the first place that
 lists one is its home); its people, plaques and buildings are found where the map has them. A **thread** of a theme
 follows one story across the map, through any places: the castle and the Crown, frames and lace, coal and getting
-about. It is listed under "Themes", opening as numbered cards, and is a theme in the graph. A thread is an index note
-with `section: Threads`, and may list people, plaques and buildings as well as stories; anything can be on several threads, and a card lists the threads it is on, each
+about. It is listed under "Themes", opening as numbered cards, and is a theme in the graph. Every index note is a thread: one with an
+`area:` is a place (listed under "Around the map", usually with `sort: as listed`), one without is a theme; a thread may list people, plaques and buildings as well as stories; anything can be on several threads, and a card lists the threads it is on, each
 opening that thread. Stories do not link to the next one in a thread in their text, so a story can join a thread
 anywhere without others changing: the cards keep date order, and the `##` headings are its chapters, by period
 or by strand (The Civil War, The dukes' mansion).
 
 A thread of several chapters opens each chapter with an introduction card of its own, so the chapters do not mix:
 write it as prose under the `##` heading, before the chapter's first member. Every chapter of such a thread needs
-one (a test checks), even a chapter of one story; a thread of a single chapter needs none. A place's chapters may have
-introductions too, written the same way; they are not required, but if one chapter of a place has one, write them for all. Say only what the cards
+one (a test checks), even a chapter of one story; a thread of a single chapter needs none. This holds for places and themes
+alike. Say only what the cards
 below it tell: it frames them, and adds no facts of its own.
 
 ```markdown
@@ -184,7 +183,6 @@ In August 1642 Charles I raised his standard outside the castle. Parliament then
 ```markdown
 ---
 type: index
-section: Threads
 id: civilwar
 ---
 Nottingham in the Civil War: where the King raised his standard, the castle held for Parliament, and a Royalist

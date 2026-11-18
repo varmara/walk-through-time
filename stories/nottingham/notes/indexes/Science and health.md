@@ -1,6 +1,5 @@
 ---
 type: index
-section: Threads
 order: 11
 id: science
 ---

@@ -1,6 +1,5 @@
 ---
 type: index
-section: Threads
 order: 7
 id: transport
 ---

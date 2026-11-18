@@ -23,7 +23,7 @@ KINDS = {"The storming of Shelford House": "event", "The castle burned": "story"
 
 
 def parsed(body, props=None):
-    return notes.topic(notes.index_layer("Riot and war", props or {"type": "index", "section": "Threads", "id": "war"}, body), KINDS)
+    return notes.topic(notes.index_layer("Riot and war", props or {"type": "index", "id": "war"}, body), KINDS)
 
 
 class Parse(unittest.TestCase):
@@ -81,7 +81,7 @@ class Resolve(unittest.TestCase):
         self.assertEqual(self.out.pins[0]["T"], ",war-the-civil-war,war-riots,")
 
     def test_no_groups(self):
-        (L,) = self.run_(notes.topic(notes.index_layer("Boots", {"section": "Threads"}, "- [[Charles I]]\n"), {}))
+        (L,) = self.run_(notes.topic(notes.index_layer("Boots", {}, "- [[Charles I]]\n"), {}))
         self.assertEqual([g["key"] for g in L["groups"]], ["boots"])
 
     def test_problems_name_the_line(self):
@@ -151,24 +151,30 @@ if __name__ == "__main__":
 
 class ChapterIntros(unittest.TestCase):
     def test_a_chapter_takes_the_prose_before_its_first_member(self):
-        L = notes.index_layer("T", {"type": "index", "section": "Threads", "id": "t"},
+        L = notes.index_layer("T", {"type": "index", "id": "t"},
                               "Intro.\n\n## One\nAbout one,\nin two lines.\n- [[A]]\n\n## Two\n- [[B]]\n")
         self.assertEqual(L["groupIntros"], {"One": "About one, in two lines."})
         self.assertEqual(notes.topic(L, {})["intros"], {"One": "About one, in two lines."})
 
     def test_prose_among_the_members_is_still_an_error(self):
         with self.assertRaises(notes.NoteError):
-            notes.index_layer("T", {"type": "index", "section": "Threads", "id": "t"}, "## One\n- [[A]]\nstray prose\n")
+            notes.index_layer("T", {"type": "index", "id": "t"}, "## One\n- [[A]]\nstray prose\n")
 
     def test_every_chapter_of_a_thread_of_several_has_an_introduction(self):
+        # (places and themes alike)
         import glob
         missing = []
-        for f in glob.glob("stories/*/notes/indexes/*.md"):
-            text = open(f, encoding="utf-8").read()
-            if "section: Threads" not in text:
-                continue
-            body = text.split("---", 2)[2] if text.startswith("---") else text
-            L = notes.index_layer(f, {"section": "Threads", "id": "x"}, body)
-            if len(L.get("groups", [])) > 1:
-                missing += [f"{f}: {g}" for _, g in L["groups"] if g not in L.get("groupIntros", {})]
+        for folder in glob.glob("stories/*/notes"):
+            for name, props, body in notes.read_notes(folder):
+                if props.get("type") != "index":
+                    continue
+                L = notes.index_layer(name, props, body)
+                if len(L.get("groups", [])) > 1:
+                    missing += [f"{name}: {g}" for _, g in L["groups"] if g not in L.get("groupIntros", {})]
         self.assertEqual(missing, [], "chapters without an introduction")
+
+    def test_a_place_is_a_thread_with_an_area(self):
+        self.assertEqual(notes.index_layer("W", {"area": "South of the Trent"}, "- [[A]]\n")["section"], "Places")
+        self.assertEqual(notes.index_layer("T", {}, "- [[A]]\n")["section"], "Threads")
+        with self.assertRaises(notes.NoteError):
+            notes.index_layer("T", {"section": "Threads"}, "- [[A]]\n")

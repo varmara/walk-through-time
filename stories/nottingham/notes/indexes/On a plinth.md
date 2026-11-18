@@ -1,6 +1,5 @@
 ---
 type: index
-section: Threads
 order: 13
 id: plinths
 ---

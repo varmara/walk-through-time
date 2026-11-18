@@ -1,6 +1,5 @@
 ---
 type: index
-section: Threads
 order: 9
 id: victorian
 ---

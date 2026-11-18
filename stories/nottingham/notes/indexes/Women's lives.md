@@ -1,6 +1,5 @@
 ---
 type: index
-section: Threads
 order: 17
 id: women
 ---

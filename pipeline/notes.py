@@ -211,19 +211,23 @@ def index_layer(name, props, body):
         - plaque: Plaque to Albert Ball                                   a plaque, by its title (a topic)
         - [Wollaton Hall](https://www.openstreetmap.org/way/4438894)      a building (a topic)
 
-    Properties: id (else from the file's name), section (Places, the default, or Threads), area (for a place: the
-    heading it folds under in the Layers sheet, "The city", "South of the Trent"), order (its place in
+    Every index is a thread. A place is a thread with an area: (the heading it folds under in "Around the map", "The
+    city", "South of the Trent"): its stories and events live there (their pins and their place on a building's
+    card), and with sort: as listed its cards keep the order written; a thread without an area is a theme.
+    Properties: id (else from the file's name), area, sort, order (its place in
     the section), kind (people or facts, for those layers, whose members are not listed). A group's key, which
     links and remembered tickboxes use, is the id and its heading: wilford-the-village."""
     L = {"id": str(props.get("id") or slug(name)), "title": str(props.get("title") or name), "note": name,
-         "section": str(props.get("section") or "Places"), "order": props.get("order"),
+         # (the Stories sheet's section follows: a place, or the People and Did you know layers, or a theme)
+         "section": "Places" if props.get("area") or props.get("kind") in ("people", "facts") else "Threads",
+         "order": props.get("order"),
          **({"area": str(props["area"])} if props.get("area") else {}),
          # "sort: as listed": its stories in the order written, not by date (Wilford: the Roman ford, found in 1900,
          # tells of the earliest times, and comes first)
          **({"asListed": True} if str(props.get("sort") or "").strip().lower() == "as listed" else {}),
          **({"kind": str(props["kind"])} if props.get("kind") else {}), "entries": [], "members": []}
-    if L["section"] not in SECTIONS:
-        raise NoteError(f"{name}: section: must be one of {', '.join(SECTIONS)}")
+    if props.get("section") is not None:
+        raise NoteError(f"{name}: section: is no longer used: a place is a thread with an area:, a theme one without")
     intro, group, groups, gintro = [], None, [], {}
     for n, raw in enumerate(body.splitlines(), 1):
         line = raw.strip()

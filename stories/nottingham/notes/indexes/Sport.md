@@ -1,6 +1,5 @@
 ---
 type: index
-section: Threads
 order: 19
 id: sport
 ---

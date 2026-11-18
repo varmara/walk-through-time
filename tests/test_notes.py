@@ -52,8 +52,8 @@ He lived by the mill.
 
 
 # the indexes: a Places index (Civic) listing the event, the People layer; the facts layer is made when none
-INDEXES = {"indexes/Civic.md": "---\ntype: index\nid: civic\norder: 1\n---\nThe council.\n\n- [[The castle burned]]\n",
-           "indexes/People.md": "---\ntype: index\nid: people\nkind: people\norder: 2\n---\nWho lived here.\n"}
+INDEXES = {"indexes/Civic.md": "---\ntype: index\narea: The city\nid: civic\norder: 1\n---\nThe council.\n\n- [[The castle burned]]\n",
+           "indexes/People.md": "---\ntype: index\narea: The city\nid: people\nkind: people\norder: 2\n---\nWho lived here.\n"}
 
 
 def load(files, indexes=True):
@@ -119,7 +119,7 @@ class Read(unittest.TestCase):
         self.assertNotIn("at", p)
 
     def test_index_groups(self):
-        idx = ("---\ntype: index\nid: civic\norder: 1\n---\nThe council.\n\n## Old\n- [[The castle burned]]\n"
+        idx = ("---\ntype: index\narea: The city\nid: civic\norder: 1\n---\nThe council.\n\n## Old\n- [[The castle burned]]\n"
                "\n## New\n- [[B]]\n")
         b = EVENT.replace("check: 8 October 1831 | Duke of Newcastle\n", "")
         _, (civic, people, facts) = load({"indexes/Civic.md": idx, "events/The castle burned.md": EVENT, "stories/B.md": b})
@@ -129,14 +129,14 @@ class Read(unittest.TestCase):
     def test_a_story_in_two_places(self):
         """A story listed in two Places indexes is told in both (Trent Bridge: West Bridgford and the Meadows)."""
         _, (other, civic, people, facts) = load({"events/The castle burned.md": EVENT,
-                                                 "indexes/Civic.md": "---\ntype: index\norder: 2\n---\n- [[The castle burned]]\n",
-                                                 "indexes/Other.md": "---\ntype: index\norder: 1\n---\n- [[The castle burned]]\n"})
+                                                 "indexes/Civic.md": "---\ntype: index\narea: The city\norder: 2\n---\n- [[The castle burned]]\n",
+                                                 "indexes/Other.md": "---\ntype: index\narea: The city\norder: 1\n---\n- [[The castle burned]]\n"})
         self.assertEqual([e["name"] for e in civic["entries"]], [e["name"] for e in other["entries"]])
         self.assertTrue(civic["entries"])
 
     def test_a_story_in_no_index(self):
         with self.assertRaisesRegex(notes.NoteError, r"no Places index lists it: add - \[\[The castle burned\]\]"):
-            load({"events/The castle burned.md": EVENT, "indexes/Civic.md": "---\ntype: index\n---\n"})
+            load({"events/The castle burned.md": EVENT, "indexes/Civic.md": "---\ntype: index\narea: The city\n---\n"})
         with self.assertRaisesRegex(notes.NoteError, "layer: and group: are not used"):
             load({"events/The castle burned.md": EVENT.replace("type: event\n", "type: event\nlayer: civic\n")})
 
@@ -148,7 +148,7 @@ class Read(unittest.TestCase):
             ("---\ntype: event\nsource: en:A\nat:\n  - The moon\n---\nText.\n", "'The moon' is not"),
             ("---\ntype: event\nsource: en:A\nat:\n  - Pin, 52.9, -1.1\n---\nText.[^x]\n", "[^x] has no line"),
             ("---\ntype: event\nsource: en:A\nat:\n  - Pin, -100.1, 52.9\n---\nText.\n", "latitude, then longitude"),
-            ("---\ntype: index\nsection: Elsewhere\n---\n", "section: must be one of"),
+            ("---\ntype: index\nsection: Elsewhere\n---\n", "section: is no longer used"),
             ("---\ntype: [\n---\n", "not valid YAML"),
         ]:
             with self.subTest(want=want), self.assertRaisesRegex(notes.NoteError, re.escape(want)):

@@ -1,6 +1,5 @@
 ---
 type: index
-section: Threads
 order: 3
 id: frames
 ---

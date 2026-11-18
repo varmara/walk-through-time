@@ -1,6 +1,5 @@
 ---
 type: index
-section: Threads
 order: 0
 id: names
 sort: as listed

@@ -54,7 +54,7 @@ class Stories(unittest.TestCase):
         import tempfile
         with tempfile.TemporaryDirectory() as d:
             (Path(d) / "notes").mkdir()
-            (Path(d) / "notes" / "Things.md").write_text("---\ntype: index\nid: x\n---\nIntro\non two lines.\n\n- [[A place]]\n")
+            (Path(d) / "notes" / "Things.md").write_text("---\ntype: index\narea: The city\nid: x\n---\nIntro\non two lines.\n\n- [[A place]]\n")
             (Path(d) / "notes" / "A place.md").write_text(
                 "---\ntype: story\nsource: en:A\nquote:\n  - one\n  - two\nnames: no\ncheck: a | b\nnote: ignored\nat:\n"
                 "  - https://www.openstreetmap.org/way/1\n---\nThe story\ncontinues.\n")

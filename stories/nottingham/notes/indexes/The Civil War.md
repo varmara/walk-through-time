@@ -1,6 +1,5 @@
 ---
 type: index
-section: Threads
 order: 2
 id: civilwar
 ---
