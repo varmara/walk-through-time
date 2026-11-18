@@ -355,5 +355,5 @@ function pinMenu(xy, nums){
   const at = S.map.project(xy), top = at.y, w = S.map.getContainer().clientWidth;
   const anchor = at.x < w / 3 ? 'bottom-left' : at.x > w * 2 / 3 ? 'bottom-right' : 'bottom';   // (and stays on the screen)
   box.style.maxHeight = Math.max(110, top - 80) + 'px';
-  menu = new maplibregl.Popup({ closeButton: false, offset: 18, maxWidth: '260px', anchor }).setLngLat(xy).setDOMContent(box).addTo(S.map);
+  menu = new maplibregl.Popup({ closeButton: false, offset: 18, maxWidth: '260px', anchor, className: 'pinpop' }).setLngLat(xy).setDOMContent(box).addTo(S.map);
 }
