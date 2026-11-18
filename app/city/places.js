@@ -65,10 +65,14 @@ function cardHtml(card, n, P){
   if (!wt && first.y != null) wt = dateText(first.y, first.f, first.per, first.dt);
   // a person's card is dated by the thread, or by their own story; another story of their place is not theirs (Albert
   // Iremonger at the Ferry Inn, whose story begins in the 17th century)
-  if (hint?.person && !hint.when && first.layer !== 'people' && !first.who) wt = '';
+  // A person's card, unless the thread dates it, is dated by their life (1785–1806), as the thread orders them by
+  // their birth: not by a year borrowed from their place's story, its building or their text
+  const who = S.data.people?.[hint?.person ? name : ts.find(x => x.who)?.who];
+  const life = hint?.person && !hint.when && who?.life;
+  if (life) wt = who.life;
+  else if (hint?.person && !hint.when && first.layer !== 'people' && !first.who) wt = '';
   const at = [...new Set(ts.map(x => x.at).filter(a => a && a !== title))];
   const meta = [wt, at.length ? (/^(Plaque|Statue|Memorial)\b/.test(at[0]) ? '' : 'At ') + at.join(', ') : ''].filter(Boolean);
-  const who = S.data.people?.[hint?.person ? name : ts.find(x => x.who)?.who];
   const seen = new Set(), parts = [];
   ts.forEach((x, j) => {
     if (!x.text || seen.has(x.text)) return; seen.add(x.text);
@@ -77,7 +81,7 @@ function cardHtml(card, n, P){
   });
   return `<div class="pnum">${n}</div><h3>${esc(title)}</h3>
     ${meta.length ? `<div class="pmeta pwhen">${esc(meta.join(' · '))}</div>` : ''}
-    ${who?.text ? `<p class="pabout"><i>${esc(who.text)}</i>${who.life ? ` (${esc(who.life)})` : ''}</p>${src({ kind: 'Wikipedia', url: who.url, title: who.title })}` : ''}
+    ${who?.text ? `<p class="pabout"><i>${esc(who.text)}</i>${who.life && !life ? ` (${esc(who.life)})` : ''}</p>${src({ kind: 'Wikipedia', url: who.url, title: who.title })}` : ''}
     ${parts.join('')}
     <div class="pbtns">${refs.length === 1 ? `<button class="textbtn" data-open="${refs[0]}">Details</button>` : ''}<button class="textbtn pmap" data-map>Show on the map</button></div>`;
 }
