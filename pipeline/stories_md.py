@@ -80,7 +80,8 @@ def load(folder):
     f = folder / "collections.md"
     for r in (table(f) if f.exists() else []):
         c = {"title": r["title"], "url": r["url"]}
-        for col, key in (("areas", "areas"), ("names", "names"), ("layers", "layers"), ("people", "who")):
+        for col, key in (("areas", "areas"), ("names", "names"), ("layers", "layers"), ("people", "who"),
+                         ("not layers", "notLayers")):
             vals = [v.strip() for v in r.get(col, "").split(";") if v.strip()]
             if vals:
                 c[key] = vals

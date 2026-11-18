@@ -66,6 +66,22 @@ def visitor_place(t, name=None):
         (t.get("tourism") in ("hotel", "guest_house") or t.get("amenity") in ("bar", "restaurant"))
 
 
+def in_layer(layer_keys, layer):
+    """True when a building's or pin's layer keys (",group,group-x,") include the layer."""
+    return ("," + layer + "-") in (layer_keys or "") or ("," + layer + ",") in (layer_keys or "")
+
+
+def collection_fits(c, name, layer_keys, whos, areas):
+    """Whether a collection of old pictures (stories/<city>/collections.md) is linked from a building or pin: it is in
+    one of the collection's conservation areas, in one of its layers, has one of its names (lower case `name`), or is
+    about one of its people; but never when it is in one of the layers the collection is not for (a district beside
+    the area, such as Hockley beside the Lace Market, whose pins and buildings fall inside the area's outline)."""
+    if any(in_layer(layer_keys, L) for L in c.get("notLayers", [])):
+        return False
+    return bool(any(x in name for x in c.get("names", [])) or areas & set(c.get("areas", []))
+                or any(in_layer(layer_keys, L) for L in c.get("layers", [])) or set(whos) & set(c.get("who", [])))
+
+
 def main(city_id):
     buildings = load(city_id, "buildings")
     base = load(city_id, "base")
@@ -107,13 +123,7 @@ def main(city_id):
         n = (name or "").lower()
         areas = {a for a, rs, (x0, y0, x1, y1) in cons
                  if xy and x0 <= xy[0] <= x1 and y0 <= xy[1] <= y1 and any(point_in_ring(xy[0], xy[1], r) for r in rs)}
-        out = []
-        for c in colls:
-            if (any(x in n for x in c.get("names", [])) or areas & set(c.get("areas", []))
-                    or any(("," + L + "-") in (layer_keys or "") or ("," + L + ",") in (layer_keys or "")
-                           for L in c.get("layers", []))
-                    or set(whos) & set(c.get("who", []))):
-                out.append({"title": c["title"], "url": c["url"]})
+        out = [{"title": c["title"], "url": c["url"]} for c in colls if collection_fits(c, n, layer_keys, whos, areas)]
         return out or None
 
     # opening hours and websites: the building's own, then the places inside it
