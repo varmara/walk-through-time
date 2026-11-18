@@ -243,6 +243,16 @@ def why_not(file, facts, xy, building_xy):
     return None
 
 
+def same_name(title, name):
+    """An article and a pin of the same name: "Black Boy Hotel", "The Black Boy Hotel"; "Edwalton railway station",
+    "Edwalton station"."""
+    def norm(s):
+        s = re.sub(r"\s*\(.*?\)", "", s.lower())
+        s = re.sub(r"^the ", "", s).replace(" railway ", " ")
+        return re.sub(r"[^a-z0-9]+", " ", s).strip()
+    return norm(title) == norm(name)
+
+
 def lead_photos(city_id, buildings, titles, wd, listing):
     """Lead photos for buildings with no Wikidata image: their article's, or the one stories/<city>/photo-articles.md
     names. Saves work/<city>/pageimages.json."""
@@ -257,13 +267,16 @@ def lead_photos(city_id, buildings, titles, wd, listing):
         elif not (info_for(buildings[by_osm[osm]], by_osm[osm], wd, listing) or {}).get("image"):
             ask[by_osm[osm]] = article
     # a story's pin (not a building: Papplewick Pumping Station, beyond the map's buildings) told from a Wikipedia
-    # article: that article's lead photo, under the same checks, by the pin ("p<index>")
+    # article about it, the article named as the pin is: that article's lead photo, by the pin ("p<index>"), under the
+    # same checks, and taken within 300 m of the pin (with no outline to go by, a photo with no position is not used:
+    # a portrait, a drawing or a view of the town is not of the place)
     pins = load(city_id, "layers").get("pins", []) if work(city_id, "layers").exists() else []
     pin_ask = {}
     for k, pn in enumerate(pins):
         url = (pn.get("source") or {}).get("url", "") if isinstance(pn.get("source"), dict) else ""
-        if pn.get("layer") != "people" and "en.wikipedia.org/wiki/" in url:
-            pin_ask[f"p{k}"] = urllib.parse.unquote(url.split("/wiki/", 1)[1]).replace("_", " ")
+        title = urllib.parse.unquote(url.split("/wiki/", 1)[1]).replace("_", " ") if "en.wikipedia.org/wiki/" in url else ""
+        if pn.get("layer") != "people" and title and same_name(title, pn.get("name") or ""):
+            pin_ask[f"p{k}"] = title
     leads = lead_images([*ask.values(), *pin_ask.values()])
     files = sorted({leads[t] for t in [*ask.values(), *pin_ask.values()] if t in leads})
     facts = {m["file"]: m for m in metadata(["File:" + f for f in files]).values()}
@@ -283,13 +296,13 @@ def lead_photos(city_id, buildings, titles, wd, listing):
         if not f:
             continue
         pn = pins[int(k[1:])]
-        no = why_not(f, facts.get(f), xy.get(f), (pn["x"], pn["y"]))
+        no = why_not(f, facts.get(f), xy.get(f), (pn["x"], pn["y"])) or (None if xy.get(f) else "without a position on Commons")
         if no:
             log(f"    lead photo of {t} not used for pin {pn['name']}: {f} is {no}")
             continue
         out[k] = {"photo": facts[f], "article": t}
     save(city_id, "pageimages", out)
-    log(f"s06 lead photos: {len(out)} of {len(ask)} articles give a usable free lead photo (for buildings with no Wikidata image)")
+    log(f"s06 lead photos: {len(out)} of {len(ask) + len(pin_ask)} articles give a usable free lead photo (for buildings with no Wikidata image, and story pins)")
 
 
 def main(city_id):

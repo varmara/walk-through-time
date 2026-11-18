@@ -39,10 +39,16 @@ class LeadPhotos(unittest.TestCase):
              mock.patch.object(S, "work", return_value=mock.Mock(exists=lambda: True)), \
              mock.patch.object(S, "lead_images", side_effect=lambda ts: {t: "P.jpg" for t in ts}), \
              mock.patch.object(S, "metadata", return_value={"x": {**self.OK, "file": "P.jpg"}}), \
-             mock.patch.object(S, "geotags", return_value={}), \
+             mock.patch.object(S, "geotags", return_value={"P.jpg": (-1.1305, 53.0637)}), \
              mock.patch.object(S, "save", side_effect=lambda c, n, d: saved.update(d)):
             S.lead_photos("x", [], {}, {}, {})
         self.assertEqual(saved, {"p0": {"photo": {**self.OK, "file": "P.jpg"}, "article": "Papplewick Pumping Station"}})
+
+    def test_only_an_article_named_as_the_pin(self):
+        from pipeline.s06_summaries import same_name
+        self.assertTrue(same_name("Black Boy Hotel", "The Black Boy Hotel"))
+        self.assertTrue(same_name("Edwalton railway station", "Edwalton station"))
+        self.assertFalse(same_name("Nottingham Goose Fair", "Forest Recreation Ground"))
 
 
 if __name__ == "__main__":
