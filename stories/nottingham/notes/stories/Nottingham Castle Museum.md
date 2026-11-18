@@ -3,6 +3,7 @@ type: story
 when: "1878"
 source: https://en.wikipedia.org/wiki/Nottingham_Castle
 check: 1875 | Thomas Chambers Hine | 1878 | Prince of Wales | first municipal art gallery | 2018 | £30 million | 21 June 2021 | Nottingham Castle Trust | November 2022
+names: no
 at:
   - https://www.openstreetmap.org/way/16459858
 ---

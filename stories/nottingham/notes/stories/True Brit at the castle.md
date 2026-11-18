@@ -3,6 +3,7 @@ type: story
 when: "1995"
 source: https://en.wikipedia.org/wiki/Paul_Smith_(fashion_designer)
 check: 1995 | Design Museum | True Brit | 25 years | Glasgow | Nottingham Castle
+names: no
 at:
   - https://www.openstreetmap.org/way/16459858
 ---
