@@ -351,5 +351,9 @@ function pinMenu(xy, nums){
   box.innerHTML = nums.map(n => { const c = P.cards[cardOf(n)];
     return `<button data-n="${n}"${n === now ? ' class="on" aria-current="true"' : ''}><b>${n}</b> ${esc(c?.hint?.name || (c ? refName(c.refs[0]) : ''))}</button>`; }).join('');
   box.onclick = e => { const b = e.target.closest('[data-n]'); if (!b) return; menu?.remove(); menu = null; goToCard(cardOf(+b.dataset.n)); };
-  menu = new maplibregl.Popup({ closeButton: false, offset: 18, maxWidth: '260px' }).setLngLat(xy).setDOMContent(box).addTo(S.map);
+  // (it opens upwards, over the map: below the pin the cards would cover it; it scrolls when long)
+  const at = S.map.project(xy), top = at.y, w = S.map.getContainer().clientWidth;
+  const anchor = at.x < w / 3 ? 'bottom-left' : at.x > w * 2 / 3 ? 'bottom-right' : 'bottom';   // (and stays on the screen)
+  box.style.maxHeight = Math.max(110, top - 80) + 'px';
+  menu = new maplibregl.Popup({ closeButton: false, offset: 18, maxWidth: '260px', anchor }).setLngLat(xy).setDOMContent(box).addTo(S.map);
 }
