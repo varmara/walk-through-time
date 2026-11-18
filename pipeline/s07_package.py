@@ -230,6 +230,9 @@ def main(city_id):
         pp = f["properties"]
         if (d := pin_dyk.get(tuple(round(c, 6) for c in f["geometry"]["coordinates"]))):
             pp["dyk"] = d
+        if (lead := (leads.get(f"p{pp['i']}") or {}).get("photo")):      # its article's lead photo (s06_summaries)
+            pp["image"], pp["credit"] = commons(lead["file"]), lead
+            gained.append((f"p{pp['i']}", pp.get("name"), leads[f"p{pp['i']}"]["article"], lead["file"]))
         c = collections_for(pp.get("name"), f",{pp.get('group', '')},", [pp["who"]] if pp.get("who") else [],
                             f["geometry"]["coordinates"])
         if c:
@@ -286,5 +289,5 @@ def main(city_id):
         *[f"- {e['layer']} / {e['name']}: {e['how']}" for e in cur["entries"]],
     ]
     Path(f"data/{city_id}-report.md").write_text("\n".join(rows) + "\n")
-    log(f"s07 lead photos from Wikipedia: {len(gained)} buildings gained a photo" + "".join(f"\n    {n} ({k}): {art}, {f}" for k, n, art, f in gained))
+    log(f"s07 lead photos from Wikipedia: {len(gained)} buildings and pins gained a photo" + "".join(f"\n    {n} ({k}): {art}, {f}" for k, n, art, f in gained))
     log(f"s07 packaged ({n} buildings, {stats['dated']} dated, {stats['stories']} stories)")

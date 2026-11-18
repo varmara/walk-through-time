@@ -579,7 +579,11 @@ function pinCard(p){
   if (WHEELCHAIR[p.wc]) rows.push(['Access', esc(WHEELCHAIR[p.wc])]);
   if (p.op || p.gov) rows.push(['Run by', esc(p.op || p.gov)]);
   if (p.acc) rows.push(['Accreditation', esc(p.acc)]);
-  return { title: p.name, rows, stories: withPeople([{ text: p.text, source: J(p.source), place: J(p.place), who: p.who, see: p.see,
+  // (a story's pin told from a Wikipedia article: its lead photo, as a building's)
+  const cr = J(p.credit), file = p.image && decodeURIComponent(p.image.split('/Special:FilePath/')[1] || '').replace(/_/g, ' ');
+  const image = p.image && { src: p.image.replace(/^http:/, 'https:') + '?width=640', alt: p.name || '', file,
+    credit: `Photo${cr && credit(cr) ? ': ' + credit(cr) : ''} · <a href="${esc(filePage(file))}" target="_blank" rel="noopener">Wikimedia Commons</a>` };
+  return { title: p.name, image, rows, stories: withPeople([{ text: p.text, source: J(p.source), place: J(p.place), who: p.who, see: p.see,
              layer: p.layer, people: J(p.people), sources: J(p.sources), cites: J(p.cites), weblinks: J(p.weblinks), own: p.own,
              when: p.when, made: p.made, here: p.here, whenSrc: J(p.whenSrc), madeSrc: J(p.madeSrc) }]),
            dyk: J(p.dyk), coll: J(p.coll),

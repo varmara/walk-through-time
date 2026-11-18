@@ -18,7 +18,7 @@ MAX_PHOTO_M metres of the building.
 import re
 import urllib.parse
 
-from .common import load, log, save
+from .common import load, log, save, work
 from .web import http
 from .names import marker, tidy_listing
 from .geo import centroid, metres
@@ -256,8 +256,16 @@ def lead_photos(city_id, buildings, titles, wd, listing):
             log(f"    photo-articles.md: {osm} is not a building outline")
         elif not (info_for(buildings[by_osm[osm]], by_osm[osm], wd, listing) or {}).get("image"):
             ask[by_osm[osm]] = article
-    leads = lead_images(ask.values())
-    files = sorted({leads[t] for t in ask.values() if t in leads})
+    # a story's pin (not a building: Papplewick Pumping Station, beyond the map's buildings) told from a Wikipedia
+    # article: that article's lead photo, under the same checks, by the pin ("p<index>")
+    pins = load(city_id, "layers").get("pins", []) if work(city_id, "layers").exists() else []
+    pin_ask = {}
+    for k, pn in enumerate(pins):
+        url = (pn.get("source") or {}).get("url", "") if isinstance(pn.get("source"), dict) else ""
+        if pn.get("layer") != "people" and "en.wikipedia.org/wiki/" in url:
+            pin_ask[f"p{k}"] = urllib.parse.unquote(url.split("/wiki/", 1)[1]).replace("_", " ")
+    leads = lead_images([*ask.values(), *pin_ask.values()])
+    files = sorted({leads[t] for t in [*ask.values(), *pin_ask.values()] if t in leads})
     facts = {m["file"]: m for m in metadata(["File:" + f for f in files]).values()}
     xy = geotags(files)
     out = {}
@@ -270,6 +278,16 @@ def lead_photos(city_id, buildings, titles, wd, listing):
             log(f"    lead photo of {t} not used for building {i}: {f} is {no}")
             continue
         out[str(i)] = {"photo": facts[f], "article": t}
+    for k, t in pin_ask.items():
+        f = leads.get(t)
+        if not f:
+            continue
+        pn = pins[int(k[1:])]
+        no = why_not(f, facts.get(f), xy.get(f), (pn["x"], pn["y"]))
+        if no:
+            log(f"    lead photo of {t} not used for pin {pn['name']}: {f} is {no}")
+            continue
+        out[k] = {"photo": facts[f], "article": t}
     save(city_id, "pageimages", out)
     log(f"s06 lead photos: {len(out)} of {len(ask)} articles give a usable free lead photo (for buildings with no Wikidata image)")
 

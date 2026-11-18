@@ -27,6 +27,23 @@ class LeadPhotos(unittest.TestCase):
         self.assertEqual(got.get("way/100083900"), "Rock City (venue)")
         self.assertTrue(all(k.startswith(("way/", "relation/")) for k in got))
 
+    def test_a_story_pin_told_from_wikipedia_gets_its_lead_photo(self):
+        from unittest import mock
+        from pipeline import s06_summaries as S
+        saved = {}
+        layers = {"pins": [{"x": -1.1304, "y": 53.0636, "name": "Papplewick Pumping Station", "layer": "papplewick",
+                            "source": {"url": "https://en.wikipedia.org/wiki/Papplewick_Pumping_Station"}},
+                           {"x": -1.15, "y": 52.95, "name": "Plaque", "layer": "people",
+                            "source": {"url": "https://en.wikipedia.org/wiki/Someone"}}]}
+        with mock.patch.object(S, "load", side_effect=lambda c, n: layers if n == "layers" else {}), \
+             mock.patch.object(S, "work", return_value=mock.Mock(exists=lambda: True)), \
+             mock.patch.object(S, "lead_images", side_effect=lambda ts: {t: "P.jpg" for t in ts}), \
+             mock.patch.object(S, "metadata", return_value={"x": {**self.OK, "file": "P.jpg"}}), \
+             mock.patch.object(S, "geotags", return_value={}), \
+             mock.patch.object(S, "save", side_effect=lambda c, n, d: saved.update(d)):
+            S.lead_photos("x", [], {}, {}, {})
+        self.assertEqual(saved, {"p0": {"photo": {**self.OK, "file": "P.jpg"}, "article": "Papplewick Pumping Station"}})
+
 
 if __name__ == "__main__":
     unittest.main()
