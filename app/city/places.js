@@ -325,8 +325,9 @@ export function drawPins(){
     }
     const el = S.pins[key].getElement();
     // (set only when it changes: the pins are redrawn as the map moves)
-    const cls = 'pin' + (more ? ' joined' : '') + (mine ? ' on' : ''), html = `${shown}${more ? `<span class="more">+${more}</span>` : ''}`;
-    if (el.className !== cls) el.className = cls;
+    // (classes toggled, not set: the map's own classes on the marker place it)
+    const html = `${shown}${more ? `<span class="more">+${more}</span>` : ''}`;
+    el.classList.add('pin'); el.classList.toggle('joined', !!more); el.classList.toggle('on', mine);
     if (el.innerHTML !== html) el.innerHTML = html;
     el.setAttribute('aria-label', more ? `Stories ${nums.join(', ')} here` : `Story ${shown}`);
     el.onclick = e => {
