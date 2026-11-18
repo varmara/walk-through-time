@@ -1,5 +1,6 @@
 ---
 type: person
+when: "1807"
 source:
   - https://en.wikipedia.org/wiki/Thomas_Adams_(manufacturer_and_philanthropist)
   - https://en.wikipedia.org/wiki/Adams_Building,_Nottingham

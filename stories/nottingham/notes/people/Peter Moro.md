@@ -1,5 +1,6 @@
 ---
 type: person
+when: "1911"
 source:
   - https://en.wikipedia.org/wiki/Peter_Moro
   - https://en.wikipedia.org/wiki/Nottingham_Playhouse

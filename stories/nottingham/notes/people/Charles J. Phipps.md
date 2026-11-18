@@ -1,5 +1,6 @@
 ---
 type: person
+when: "1835"
 source:
   - https://en.wikipedia.org/wiki/C._J._Phipps
   - https://en.wikipedia.org/wiki/Theatre_Royal,_Nottingham

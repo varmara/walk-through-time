@@ -1,5 +1,6 @@
 ---
 type: person
+when: "1812"
 source:
   - https://en.wikipedia.org/wiki/Augustus_Pugin
   - https://en.wikipedia.org/wiki/Nottingham_Cathedral

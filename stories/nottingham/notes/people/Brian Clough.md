@@ -1,5 +1,6 @@
 ---
 type: person
+when: "1935"
 source:
   - https://en.wikipedia.org/wiki/Brian_Clough
   - https://en.wikipedia.org/wiki/City_Ground

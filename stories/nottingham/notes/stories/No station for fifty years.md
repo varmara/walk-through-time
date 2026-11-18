@@ -4,7 +4,7 @@ when: "2017"
 source: https://en.wikipedia.org/wiki/Ilkeston
 check: 1947 | January 1967 | 1967 to 2017 | 2 April 2017 | great crested newts
 at:
-  - Ilkeston station, 52.9627, -1.2952
+  - Ilkeston station, 52.9794, -1.2949
 names: no
 note: "a pin near the new station"
 ---

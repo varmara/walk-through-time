@@ -1,5 +1,6 @@
 ---
 type: person
+when: "1813"
 source:
   - https://en.wikipedia.org/wiki/Thomas_Chambers_Hine
   - https://en.wikipedia.org/wiki/Adams_Building,_Nottingham

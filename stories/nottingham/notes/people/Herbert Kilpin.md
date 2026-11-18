@@ -1,5 +1,6 @@
 ---
 type: person
+when: "1870"
 kind: sport
 source: https://en.wikipedia.org/wiki/Herbert_Kilpin
 check: 129 Mansfield Road | 191 Mansfield Road | butcher | founding father | AC Milan

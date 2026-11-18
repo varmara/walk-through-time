@@ -1,5 +1,6 @@
 ---
 type: person
+when: "1865"
 kind: sport
 source: https://en.wikipedia.org/wiki/Tinsley_Lindley
 check: 14 Park Terrace | Nottingham Forest | County Court

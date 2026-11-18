@@ -1,5 +1,6 @@
 ---
 type: person
+when: "1928"
 kind: science
 source: https://en.wikipedia.org/wiki/Mary_Kendrick
 check: Curzon Street | haulage contractor | Thames Barrier | Mersey

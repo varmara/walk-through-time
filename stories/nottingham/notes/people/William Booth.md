@@ -1,5 +1,6 @@
 ---
 type: person
+when: "1829"
 kind: faith
 source: https://www.salvationarmy.org.uk/william-booth-birthplace-museum
 title: William Booth Birthplace Museum

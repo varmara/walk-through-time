@@ -4,9 +4,9 @@ when: "1952"
 source: https://en.wikipedia.org/wiki/Calverton,_Nottinghamshire
 check: 24 September | 1952 | 1,304 | 5,658 | 1993 | RJB Mining | 1999
 at:
-  - Calverton village, 53.037, -1.084
+  - Calverton Colliery, 53.0438, -1.1004
 names: no
-note: "a pin in the village; the colliery's site is not in the map's data"
+note: "the pin is OpenStreetMap's monument for Calverton Colliery, about 1.3 km from the village"
 ---
 
 Calverton Colliery was officially opened on 24 September 1952, and the village grew from 1,304 people in 1951 to

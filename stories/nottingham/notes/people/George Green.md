@@ -1,5 +1,6 @@
 ---
 type: person
+when: "1793"
 source:
   - https://en.wikipedia.org/wiki/George_Green_(mathematician)
   - https://en.wikipedia.org/wiki/Bromley_House_Library

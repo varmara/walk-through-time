@@ -1,5 +1,6 @@
 ---
 type: person
+when: "1889"
 source:
   - https://en.wikipedia.org/wiki/Thomas_Cecil_Howitt
   - https://en.wikipedia.org/wiki/Council_House,_Nottingham

@@ -4,7 +4,7 @@ when: "1992"
 source: https://en.wikipedia.org/wiki/Gedling
 check: Gedling House Woods | Gedling House Meadows | 1992 | 2007
 at:
-  - Gedling House Woods, 52.9800, -1.0650
+  - Gedling House Woods, 52.9792, -1.0676
 names: no
 note: "a pin near the walled garden of Gedling House"
 ---
