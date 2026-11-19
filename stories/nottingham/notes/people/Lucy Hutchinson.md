@@ -4,7 +4,7 @@ kind: writers
 source: https://en.wikipedia.org/wiki/Lucy_Hutchinson
 check: 1620 | Tower of London | Lucretius | Order and Disorder | 1806 | Owthorpe | 1681
 at:
-  - Owthorpe
+  - Owthorpe, 52.89388, -1.00555
 see:
   - "[[John Hutchinson]]"
 ---

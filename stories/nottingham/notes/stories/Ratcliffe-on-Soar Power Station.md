@@ -4,7 +4,8 @@ when: "1968"
 source: https://en.wikipedia.org/wiki/Ratcliffe-on-Soar_Power_Station
 check: 1968 | 2024 | 142 years | cooling towers
 at:
-  - Ratcliffe-on-Soar Power Station, 52.865268, -1.255
+  - https://www.openstreetmap.org/way/71118620
+note: "on the largest block on the site, unnamed in OpenStreetMap: taken to be the power station's main building"
 see:
   - "[[Wilford Power Station]]"
 ---

@@ -7,8 +7,8 @@ source:
   - https://en.wikipedia.org/wiki/Owthorpe
 check: Owthorpe | 1615 | 1643 | death warrant | 1664 | Memoirs
 at:
-  - Owthorpe, 52.89388, -1.00555
-note: a pin in Owthorpe, at its article's point; his hall there is gone
+  - https://www.openstreetmap.org/way/229250822
+note: on St Margaret's Church, Owthorpe, where he is buried; his hall there is gone
 ---
 
 John Hutchinson, born at Owthorpe in 1615, held Nottingham Castle for Parliament from 1643 and signed Charles I's

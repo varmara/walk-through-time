@@ -4,9 +4,9 @@ when: "13th century"
 source: https://en.wikipedia.org/wiki/St_Lawrence%27s_Church,_Gotham
 check: 13th century | 1789 | 1869 | Reuben Bosworth | 1848 | John St. Andrew | 1625
 at:
-  - St Lawrence's, Gotham, 52.8661, -1.2047
+  - https://www.openstreetmap.org/way/160063486
 names: no
-note: "a pin in the village centre; the church's outline is not in the map's data"
+note: "on the church"
 ---
 
 St Lawrence's dates from the 13th century; it was restored in 1789 and repaired in 1869, and Reuben Bosworth made its
