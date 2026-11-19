@@ -7,7 +7,6 @@ source:
 check: East Midlands Parkway | 2008 | Midland Main Line
 at:
   - https://www.openstreetmap.org/way/464631278
-names: no
 note: "on the station building"
 ---
 
