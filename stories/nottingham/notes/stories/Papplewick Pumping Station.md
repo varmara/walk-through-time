@@ -4,7 +4,10 @@ when: "1881"
 source: https://en.wikipedia.org/wiki/Papplewick_Pumping_Station
 check: 1881 | 1884 | Marriott Ogle Tarbotton | James Watt | 1969 | 1976
 at:
-  - Papplewick Pumping Station, 53.0636, -1.1304
+  - https://www.openstreetmap.org/way/368447058
+  - https://www.openstreetmap.org/way/368439707
+  - https://www.openstreetmap.org/way/368447062
+note: "on the engine house, boiler house and workshop, one Grade II* listing (1265301)"
 see:
   - "[[Thomas Hawksley]]"
 ---
