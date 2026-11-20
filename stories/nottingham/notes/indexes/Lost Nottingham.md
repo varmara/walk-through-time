@@ -12,6 +12,7 @@ Buildings, streets and a station that the middle of the town has lost, most of t
 - [[The Exchange]]
 - [[The Black Boy Hotel]]
 - [[Drury Hill]]
+- [[Halifax Place Wesleyan Chapel]]
 - [[Broad Marsh]]
 - [[Abel Collin]]
 - [[Nottingham Victoria station]]
@@ -22,7 +23,8 @@ Two industrial buildings that no longer stand: a tobacco warehouse and a silk mi
 - [[Lowe's Silk Mill]]
 
 ## Further out
-Lost places beyond the centre: a church, a hall, a viaduct, a station, a spring and a manor house, and the caves of the Hermitage.
+Lost places beyond the centre: a priory, a church, a hall, a viaduct, a station, a spring and a manor house, and the caves of the Hermitage.
+- [[Lenton Priory]]
 - [[The lost church of Flawford]]
 - [[Bulwell Hall]]
 - [[Forty Bridges]]

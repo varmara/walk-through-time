@@ -9,7 +9,7 @@ movements here.
 
 
 ## Churches
-The old and new churches of the city and its near neighbours, from the three mediaeval parish churches to Pugin's Catholic cathedral.
+The old and new churches of the city and its near neighbours, from the three mediaeval parish churches and the priory at Lenton, dissolved in 1538, to Pugin's Catholic cathedral.
 - [[St Mary's Church, Nottingham]]
 - [[St Peter's Church]]
 - [[Church of the Holy Rood]]
@@ -17,6 +17,7 @@ The old and new churches of the city and its near neighbours, from the three med
 - [[All Saints Church]]
 - [[St Mary's Church, Clifton]]
 - [[St Wilfrid's Church]]
+- [[Lenton Priory]]
 - [[St Nicholas' Church]]
 - [[The lost church of Flawford]]
 - [[St Stephen's Church]]
@@ -27,11 +28,12 @@ The old and new churches of the city and its near neighbours, from the three med
 - [[St Ann's Church]]
 
 ## Chapels
-Nonconformists, Methodists and the Salvation Army built chapels and halls of their own, and some of those buildings have since found other uses.
+Nonconformists, Methodists (in Nottingham from about 1740) and the Salvation Army built chapels and halls of their own, and some of those buildings have since found other uses.
 - [[John Wesley]]
 - plaque: Hockley Methodist Chapel
 - plaque: Wesley Place Methodist Chapel
 - [[High Pavement Chapel]]
+- [[Halifax Place Wesleyan Chapel]]
 - [[Broadway]]
 - [[William Booth]]
 - [[John Clifford]]

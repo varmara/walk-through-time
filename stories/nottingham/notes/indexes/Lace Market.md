@@ -15,6 +15,7 @@ The old Saxon town on its hill east of the square, where lace merchants built th
 - [[Broad Marsh]]
 - [[Drury Hill]]
 - [[High Pavement Chapel]]
+- [[Halifax Place Wesleyan Chapel]]
 - [[Adams Building]]
 - [[Watson Fothergill's offices]]
 - [[Nottingham station]]

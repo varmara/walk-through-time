@@ -6,8 +6,10 @@ order: 31
 sort: as listed
 ---
 
-Raleigh's works on Faraday Road, and the university at Highfields, where the MRI scanner was developed.
+A Cluniac priory, dissolved in 1538, and its fair; Raleigh's works on Faraday Road, and the university at Highfields, where the MRI scanner was developed.
 
+- [[Lenton Priory]]
+- [[Lenton Fair]]
 - [[Raleigh's Faraday Road works]]
 - [[Trent Building]]
 - [[Saturday Night and Sunday Morning]]

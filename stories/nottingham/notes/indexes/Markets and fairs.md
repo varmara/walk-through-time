@@ -15,9 +15,10 @@ The market has always drawn the crowds, from the Old Market Square to the market
 - [[Arnold Market]]
 
 ## Fairs
-Charter fairs, among them Goose Fair, which a charter of 1284 mentions, and a riot at one in 1766.
+Charter fairs, among them Goose Fair, which a charter of 1284 mentions, Lenton's horse fair, and a riot at one in 1766.
 - [[Ilkeston Charter Fair]]
 - 1284: [[Goose Fair]]
+- [[Lenton Fair]]
 - [[The cheese riot, 1766]]
 
 ## Shops
