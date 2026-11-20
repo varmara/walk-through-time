@@ -22,3 +22,5 @@ The sandstone rock at the west end of the old town: the castle, the passages and
 - [[Statue of Captain Albert Ball]]
 - [[Nottingham Castle Museum]]
 - [[True Brit at the castle]]
+- [[Edward IV's tower, 1476]]
+- [[The castle in decay]]

@@ -8,13 +8,14 @@ sort: as listed
 How the places on the map began and got their names: Bronze Age and Roman finds, Saxon burials, a cross and a fort, the villages Domesday Book wrote down in 1086, and names given since.
 
 ## Before the Normans
-The oldest traces: a Bronze Age settlement on piles, a Roman ford, an Anglo-Saxon burial ground and an Anglo-Saxon cross.
+The oldest traces: a Bronze Age settlement on piles, a Roman ford, an Anglo-Saxon burial ground, the Danes who took the town in 868, and an Anglo-Saxon cross.
 - [[Bronze Age finds, 1937]]
 - [[The Roman ford]]
 - [[Roman Chilwell]]
 - [[The Anglo-Saxon burial ground]]
 - [[Tilchestune]]
 - [[Addensburgh]]
+- [[The Danes in Nottingham, 868]]
 - [[A fort at the bridge]]
 - [[Stapleford Cross]]
 

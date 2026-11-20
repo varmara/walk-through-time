@@ -7,11 +7,12 @@ id: trent
 Crossing and taming the river: a Roman ford, the ferries, a fort at the bridge, the medieval bridge and its iron successor, the bridges to Wilford and Clifton, the embankment, a flood and the watersports centre.
 
 ## Fords and ferries
-Before the bridges the river was crossed by ford and ferry. These stories reach back from a Bronze Age settlement on piles and a Roman ford to Saxon Addensburgh, a ferry at Barton, and a fort built beside the bridge in the 920s.
+Before the bridges the river was crossed by ford and ferry. These stories reach back from a Bronze Age settlement on piles and a Roman ford to Saxon Addensburgh, a ferry at Barton, and the Danes who held Nottingham, against whom a fort was built beside the bridge in the 920s.
 - [[Bronze Age finds, 1937]]
 - [[The Roman ford]]
 - [[Addensburgh]]
 - [[Barton in the Beans]]
+- [[The Danes in Nottingham, 868]]
 - [[Ferry Inn]]
 - [[A fort at the bridge]]
 
