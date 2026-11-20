@@ -1,5 +1,6 @@
 ---
 type: story
+when: "1589"
 source: https://en.wikipedia.org/wiki/Stocking_frame
 check: William Lee | Calverton | 1589 | 1728
 at:

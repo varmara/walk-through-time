@@ -10,6 +10,7 @@ The old Saxon town on its hill east of the square, where lace merchants built th
 
 - [[The Danes in Nottingham, 868]]
 - [[St Mary's Church, Nottingham]]
+- [[Weekday Cross]]
 - [[Shire Hall]]
 - [[City of Caves]]
 - [[Broad Marsh]]

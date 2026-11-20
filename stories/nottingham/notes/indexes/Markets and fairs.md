@@ -7,8 +7,10 @@ id: markets
 Where Nottingham traded and made merry: the great square and the village markets, the fairs granted by medieval kings and a riot over cheese, and the shops that came after.
 
 ## Markets
-The market has always drawn the crowds, from the Old Market Square to the market towns of the county.
+The market has always drawn the crowds: at Weekday Cross, then in the Old Market Square, where the Exchange stood from 1726, and in the market towns of the county.
 - [[Old Market Square]]
+- [[Weekday Cross]]
+- [[The Exchange]]
 - [[Walker Gate]]
 - [[Bulwell market]]
 - [[Sneinton Market]]

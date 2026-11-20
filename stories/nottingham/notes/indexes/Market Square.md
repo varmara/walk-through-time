@@ -9,10 +9,11 @@ sort: as listed
 The Old Market Square, where the two medieval towns met, and the streets around it: the town's Exchange and the Council House that replaced it, old inns, a library, theatres and halls.
 
 ## The market
-The square where the two medieval towns met: its market and Goose Fair, St Peter's, old inns, the Exchange and the Council House that replaced it.
+The square where the two medieval towns met: its market and Goose Fair, St Peter's, the frame-knitting trade, old inns, the Exchange and the Council House that replaced it.
 - [[Old Market Square]]
 - [[St Peter's Church]]
 - [[Goose Fair]]
+- [[The frame-knitting town]]
 - [[The cheese riot, 1766]]
 - [[The Bell Inn]]
 - [[Malt Cross]]

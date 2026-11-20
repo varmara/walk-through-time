@@ -9,6 +9,7 @@ How the stocking frame and the lace machine made Nottingham's trade: the invento
 ## Knitting
 The county's cloth trades began with wool and the stocking frame, invented at Calverton in 1589, and went on to cotton mills, bleachworks, Luddite frame-breakers and silk.
 - [[The stocking frame]]
+- [[The frame-knitting town]]
 - [[Arkwright's first mill]]
 - [[Framework Knitters' Museum]]
 - [[The first Luddites]]
