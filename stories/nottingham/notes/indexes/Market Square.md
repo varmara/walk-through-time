@@ -19,6 +19,7 @@ The square where the two medieval towns met: its market and Goose Fair, St Peter
 - [[Malt Cross]]
 - [[The Exchange]]
 - [[Sturge and Walter, 1842]]
+- [[Three seats for Nottingham, 1885]]
 - [[A city, 1897]]
 - [[Council House]]
 - [[Statue of Brian Clough]]

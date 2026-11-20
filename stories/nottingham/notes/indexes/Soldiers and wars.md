@@ -7,10 +7,11 @@ id: wars
 Soldiers and sailors who lived here, and the two World Wars at home: the munitions works and depots, the airmen and nurses, the bombs and the memorial.
 
 ## Soldiers and sailors
-Soldiers and sailors from earlier centuries, and a home for the veterans of two Victorian wars.
+Soldiers and sailors from earlier centuries, the county's own regiment, and a home for the veterans of two Victorian wars.
 - [[Marshal Tallard]]
 - [[John Borlase Warren]]
 - [[Captain John Deane]]
+- [[The Sherwood Foresters]]
 - [[The Dorothy Boot Homes, 1908]]
 
 ## The First World War

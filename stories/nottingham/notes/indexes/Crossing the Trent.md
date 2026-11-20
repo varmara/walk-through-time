@@ -17,8 +17,9 @@ Before the bridges the river was crossed by ford and ferry. These stories reach 
 - [[A fort at the bridge]]
 
 ## The bridges
-Trent Bridge, the town's crossing, and the later bridges upstream and down: the toll and suspension bridges to Wilford, the bridge to Clifton and the railway bridge at Lady Bay.
+Trent Bridge, the town's crossing, rebuilt after the flood of 1683 and again in the 1860s, and the later bridges upstream and down: the toll and suspension bridges to Wilford, the bridge to Clifton and the railway bridge at Lady Bay.
 - [[Trent Bridge]]
+- [[The old bridge in flood, 1683]]
 - [[Marriott Ogle Tarbotton]]
 - [[Wilford Toll Bridge]]
 - [[Wilford Suspension Bridge]]

@@ -30,7 +30,8 @@ A bus company and two airfields.
 - [[Rolls-Royce at Hucknall]]
 
 ## Trams
-Trams left the city in 1936 and returned in 2004; a depot of 1900 recalls the first ones.
+Trolleybuses replaced the trams, which left the city in 1936, and ran until 1966; trams returned in 2004, and a depot of 1900 recalls the first ones.
+- [[The trolleybuses]]
 - [[The trams come back, 2004]]
 - [[Trams to Wilford, 2015]]
 - [[Sherwood tram depot]]

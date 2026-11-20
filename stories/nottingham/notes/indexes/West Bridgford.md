@@ -12,6 +12,7 @@ South of the river: Test cricket, Nottingham Forest and the county's headquarter
 From a fort of the 920s and a medieval stone bridge to Test cricket, Nottingham Forest's ground and County Hall, all at the south end of Trent Bridge.
 - [[A fort at the bridge]]
 - [[Trent Bridge]]
+- [[The old bridge in flood, 1683]]
 - [[Trent Bridge cricket ground]]
 - [[The Trent Bridge Inn]]
 - [[City Ground]]

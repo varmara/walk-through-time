@@ -14,17 +14,19 @@ Engineers who brought clean water to the city, and the pumping station that rais
 - [[Charles Blacker Vignoles]]
 
 ## Science
-A miller who became a mathematician, a library and a university where magnetic resonance imaging was developed.
+A miller who became a mathematician, a library, a college built in 1877–81, and the university where magnetic resonance imaging was developed.
 - [[George Green]]
 - [[Edward Joseph Lowe]]
 - [[Mary Kendrick]]
 - [[The MRI scanner]]
 - [[Green's Windmill]]
 - [[Bromley House]]
+- [[University College]]
 - [[Trent Building]]
 
 ## Medicine
-Doctors, nurses and hospitals: Nottingham's first woman GP, the making of ibuprofen and the asylum at Mapperley.
+Doctors, nurses and hospitals: the General Hospital of 1782, Nottingham's first woman GP, the making of ibuprofen and the asylum at Mapperley.
+- [[Nottingham General Hospital]]
 - [[Sarah Gray]]
 - [[Margaret Glen-Bott]]
 - [[Louisa May Long]]

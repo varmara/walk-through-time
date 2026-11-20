@@ -8,6 +8,7 @@ sort: as listed
 
 The hills north of the old town, built over in the 19th century: parks and cemeteries, a cathedral, a college and a railway station.
 
+- [[Nottingham General Hospital]]
 - [[Forest Recreation Ground]]
 - [[The Leavers lace machine]]
 - [[General Cemetery]]
