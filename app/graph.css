@@ -1,0 +1,102 @@
+/* The graph over the map (app/city/graph.js): people and story themes linked to the places where a checked story
+   ties them. Full-screen graph; a top bar (back to the map, search, settings); a settings panel; a sheet for the
+   tapped point. Read inside the graph's shadow root, so these rules reach only the graph.
+   Colours, fonts and shadows: app/theme.css (its custom properties reach in from the page). */
+
+[hidden]{display:none!important}
+:host{position:fixed;inset:0;z-index:60;display:block;font:15px/1.4 var(--sans);color:var(--ink);background:var(--bg);
+  overflow:hidden;-webkit-text-size-adjust:100%}
+:host([hidden]){display:none!important}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+a{color:var(--accent)}
+
+#graph{position:fixed;inset:0;width:100%;height:100%;touch-action:none;display:block}
+
+.top{position:fixed;top:0;left:0;right:0;z-index:5;padding:calc(env(safe-area-inset-top,0px) + 10px) 12px 8px;
+  display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.top > *{pointer-events:auto}
+.bar{display:flex;gap:8px;align-items:center}
+.brand{display:flex;align-items:center;gap:6px;background:var(--paper);border:1px solid var(--line);border-radius:12px;
+  padding:7px 10px;font-weight:600;white-space:nowrap;box-shadow:var(--shadow-2)}
+.brand a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:6px}
+.find{flex:1;min-width:0;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:8px 10px;box-shadow:var(--shadow-2)}
+.gear{flex:none;width:40px;height:40px;display:grid;place-items:center;background:var(--paper);border:1px solid var(--line);
+  border-radius:12px;box-shadow:var(--shadow-2);cursor:pointer}
+.gear[aria-expanded="true"]{background:var(--bg)}
+/* the settings panel, as Obsidian's: sections that fold, toggles and sliders */
+.settings{position:fixed;z-index:8;top:calc(env(safe-area-inset-top,0px) + 62px);right:12px;width:min(300px,calc(100vw - 24px));
+  max-height:calc(100vh - 140px);overflow-y:auto;background:var(--paper);border:1px solid var(--line);border-radius:12px;
+  box-shadow:var(--shadow-2);font-size:14px}
+.shd{display:flex;align-items:center;gap:4px;padding:8px 8px 8px 14px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--paper)}
+.shd b{flex:1}
+.shd button{width:34px;height:34px;border:0;border-radius:8px;background:none;cursor:pointer;font-size:16px;color:var(--muted)}
+.shd button:active{background:var(--bg)}
+.sec{border-bottom:1px solid var(--line)}
+.sec:last-child{border-bottom:0}
+.sec summary{cursor:pointer;padding:10px 14px;font-weight:600;list-style:none;display:flex;align-items:center;gap:8px}
+.sec summary::-webkit-details-marker{display:none}
+.sec summary::before{content:"";width:0;height:0;border-left:5px solid currentColor;border-top:4px solid transparent;border-bottom:4px solid transparent;transition:transform .15s}
+.sec[open] summary::before{transform:rotate(90deg)}
+.sec .body{padding:0 14px 12px;display:flex;flex-direction:column;gap:8px}
+.tg{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:32px;cursor:pointer}
+.tg span{display:flex;align-items:center;gap:8px}
+.tg .dot{width:10px;height:10px;border-radius:50%;flex:none}
+.tg input{position:absolute;opacity:0;width:1px;height:1px}
+.tg > i{flex:none;width:38px;height:22px;border-radius:11px;background:var(--line);position:relative;transition:background .15s}
+.tg > i::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--paper);box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s}
+.tg input:checked + i{background:var(--accent)}
+.tg input:checked + i::after{transform:translateX(16px)}
+.tg input:focus-visible + i{outline:2px solid var(--accent);outline-offset:2px}
+.sl{display:flex;flex-direction:column;gap:2px}
+.sl span{display:flex;justify-content:space-between;gap:8px}
+.sl output{color:var(--muted);font-variant-numeric:tabular-nums}
+.sl input{width:100%;accent-color:var(--accent);margin:0;height:28px}
+.settings .note{margin:0;font-size:12px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){ .tg > i,.tg > i::after,.sec summary::before{transition:none} }
+.hint{position:fixed;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);z-index:4;text-align:center;
+  font-size:13px;color:var(--muted);pointer-events:none}
+@media (max-width:759px){ .hint{right:72px;text-align:left} }
+
+.zoom{position:fixed;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 44px);z-index:7;display:flex;flex-direction:column;
+  background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-2);overflow:hidden}
+.zoom button{width:48px;height:48px;border:0;background:none;font-size:24px;line-height:1;cursor:pointer;display:grid;place-items:center}
+.zoom button + button{border-top:1px solid var(--line)}
+.zoom button:active{background:var(--bg)}
+@media (min-width:760px){ .zoom{right:auto;left:12px;bottom:24px} }
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:6;max-height:58vh;display:flex;flex-direction:column;background:var(--paper);
+  border-top:1px solid var(--line);border-radius:16px 16px 0 0;box-shadow:var(--shadow-sheet);
+  padding:12px 16px calc(env(safe-area-inset-bottom,0px) + 14px)}
+@media (min-width:760px){ .sheet{left:auto;top:12px;right:12px;bottom:12px;width:380px;max-height:none;border-radius:16px;border:1px solid var(--line)} }
+.shead{display:flex;align-items:flex-start;gap:10px}
+.shead h2{margin:0;font:600 22px/1.15 var(--serif);flex:1}
+.stype{font:500 13px var(--sans);color:var(--muted);margin-top:2px}
+.close{flex:none;width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--bg);cursor:pointer}
+.sacts{display:flex;gap:8px;margin:10px 0 4px}
+.go{flex:1;padding:9px 12px;border-radius:10px;border:0;background:var(--accent);color:var(--on-strong);font-weight:600;cursor:pointer}
+.go:disabled{opacity:.75;cursor:progress}
+.more{flex:none;padding:9px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-weight:600;cursor:pointer}
+.grab{display:none}
+/* on a phone the sheet is a drawer: a small bar (peek) until its cards are asked for */
+@media (max-width:759px){
+  .grab{display:block;align-self:center;width:64px;height:20px;margin:-6px 0 2px;border:0;background:none;cursor:pointer;padding:0}
+  .grab i{display:block;width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto}
+  .sheet{max-height:72vh;transition:max-height .2s ease}
+  .sheet.peek{max-height:none}
+  .sheet.peek .links{display:none}
+  .sheet.peek .shead h2{font-size:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .shead{cursor:pointer}
+}
+@media (min-width:760px){ .more{display:none} }
+@media (prefers-reduced-motion:reduce){ .sheet{transition:none} }
+.links{overflow-y:auto;margin-top:6px;-webkit-overflow-scrolling:touch}
+.links h3{font:500 13px var(--sans);color:var(--muted);margin:10px 0 4px}
+.link{border-top:1px solid var(--line);padding:8px 0}
+.link button{background:none;border:0;padding:0;font-weight:600;cursor:pointer;text-align:left;display:flex;gap:6px;align-items:center}
+.link button i{width:9px;height:9px;border-radius:50%;flex:none}
+.link p{margin:3px 0 0;font:15px/1.45 var(--serif)}
+.link .src{font-size:12px;color:var(--muted)}
+.loading{position:fixed;inset:0;display:grid;place-items:center;color:var(--muted)}
+.about{margin:8px 0 4px;font:15px/1.45 var(--serif)}
+.about p{margin:0 0 4px}
+.about .src{font-size:12px;color:var(--muted)}

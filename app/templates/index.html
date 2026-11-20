@@ -1,0 +1,58 @@
+<!doctype html>
+<!-- The landing page, written by pipeline/pages.py with a row per city. Edit this, not the written copy. -->
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Walk Through Time</title>
+<meta name="description" content="Explore cities building by building: when each one was built, what stood there before, and the stories behind them.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Walk Through Time">
+<meta property="og:title" content="Walk Through Time">
+<meta property="og:description" content="Historic cities in 3D, building by building.">
+<meta property="og:image" content="{{site}}app/share.png">
+<meta property="og:url" content="{{site}}">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="app/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap">
+<style>
+/* Layout: one narrow column; the clock-and-skyline mark beside the name, then the list of cities. */
+:root{ --bg:#e6e3da; --paper:#f4f2ec; --ink:#2a231d; --muted:#6d6459; --line:#d3cec2; --trail:#9b2335;
+  --sans:"Public Sans",system-ui,-apple-system,sans-serif; --serif:"Spectral",Georgia,serif; }
+@media (prefers-color-scheme: dark){ :root{ --bg:#1f1b18; --paper:#2a2521; --ink:#ece6dc; --muted:#a59b8e; --line:#3d3631; --trail:#e0707c; color-scheme:dark } }
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--sans)}
+main{max-width:640px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + 48px) 16px calc(env(safe-area-inset-bottom,0px) + 48px);display:grid;gap:32px}
+header{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;align-items:center}
+.mark{width:76px;height:76px;grid-row:span 2;color:var(--ink)}
+h1{font:italic 500 44px/1.05 var(--serif);margin:0;text-wrap:balance}
+.lead{color:var(--muted);margin:0;max-width:34em;grid-column:2}
+@media (max-width:420px){ header{grid-template-columns:1fr} .mark{grid-row:auto;width:64px;height:64px} .lead{grid-column:1} }
+.lbl{font:500 14px var(--sans);color:var(--muted)}
+.cities{display:grid;gap:10px}
+.city{display:flex;align-items:center;gap:14px;padding:16px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:inherit;text-decoration:none}
+.city:hover,.city:focus-visible{border-color:var(--ink)}
+.city:focus-visible{outline:2px solid var(--trail);outline-offset:2px}
+.city b{font:600 22px/1.2 var(--serif);display:block}
+.city span{font:400 14px var(--sans);color:var(--muted)}
+.city.soon{opacity:.55;pointer-events:none}
+footer{font:400 13px/1.45 var(--sans);color:var(--muted)}
+footer a{color:inherit}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <img class="mark" src="app/logo.svg" alt="">
+    <h1>Walk Through Time</h1>
+    <p class="lead">Explore cities building by building: when each one was built, what stood there before, and the stories behind them.</p>
+  </header>
+  <section class="cities" aria-label="Cities">
+    <div class="lbl">Cities</div>
+{{cities}}
+    <div class="city soon"><div><b>More cities</b><span>coming later</span></div></div>
+  </section>
+  <footer>Data: © OpenStreetMap contributors (ODbL) · Historic England (OGL) · Wikidata (CC0) · Wikipedia (CC BY-SA). Historic maps: National Library of Scotland.</footer>
+</main>
+</body>
+</html>
