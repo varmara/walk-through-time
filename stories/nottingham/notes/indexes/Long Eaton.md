@@ -6,7 +6,7 @@ order: 60
 sort: as listed
 ---
 
-A Domesday village by the Erewash that the railway and the lace mills turned into a town.
+Long Eaton, recorded in Domesday Book, remained a village until the railway arrived in 1839. It then grew rapidly, with a large railway yard nearby and, from the 1850s, lace mills, and its new prosperity can be seen in its Edwardian and Art Nouveau buildings.
 
 - [[St Laurence's, Long Eaton]]
 - [[The Great Fire of Long Eaton]]

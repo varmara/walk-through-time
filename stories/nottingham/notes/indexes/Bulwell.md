@@ -6,7 +6,7 @@ order: 47
 sort: as listed
 ---
 
-A market town on the Leen: its stone, its covered stalls, its hall, and the Bogs its people claimed.
+Bulwell, recorded in Domesday Book, was a market town on the River Leen with its own trades: limestone quarrying, glove-making and bleaching. Its people defended their common land, the Bogs, when the lord of the manor tried to enclose it in 1872.
 
 - [[Buleuuelle]]
 - [[Bulwell market]]

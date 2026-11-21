@@ -6,7 +6,7 @@ order: 13
 sort: as listed
 ---
 
-A village on the south bank of the Trent, upstream from Clifton, once called Barton in the Beans: its medieval church, a dovecote of 1677, and the new district of Fairham.
+Barton in Fabis is a small farming village on the south bank of the Trent. Its name records the beans once grown in its fields, and its medieval church and 17th-century dovecote reflect a long agricultural history, with a ferry linking it across the river.
 
 - [[St George's Church]]
 - [[Manor Farm dovecote]]

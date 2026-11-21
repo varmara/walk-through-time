@@ -6,7 +6,7 @@ order: 21
 sort: as listed
 ---
 
-An Anglo-Saxon burial ground, a 12th-century church, and a village that grew several times over when its colliery came.
+Cotgrave has a long history, from an Anglo-Saxon burial ground and a 12th-century church to its transformation in the 1960s, when a new colliery brought mining families from closed pits and the village grew several times over.
 
 - [[The Anglo-Saxon burial ground]]
 - [[All Saints' Church, Cotgrave]]

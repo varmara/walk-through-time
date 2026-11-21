@@ -6,10 +6,10 @@ order: 12
 sort: as listed
 ---
 
-An old village above the Trent, and next to it one of the largest housing estates ever built by a council.
+For centuries Clifton was the village of the Clifton family, who held the manor from the 13th century. After the Second World War the council built a very large housing estate beside it, changing the area completely, while the old village survived on its hill above the Trent.
 
 ## The village
-The old village on the hill above the Trent: its 12th-century church, the Cliftons' hall, thatched houses, almshouses, a dovecote and the school.
+The old village grew up around the Cliftons' hall and the parish church, which dates from about 1190. Its almshouses, dovecote and school were provided by the family and other benefactors, and some of its houses go back to the medieval period.
 - [[St Mary's Church, Clifton]]
 - [[Clifton Hall]]
 - [[The thatched houses of Village Road]]
@@ -18,14 +18,14 @@ The old village on the hill above the Trent: its 12th-century church, the Clifto
 - [[Clifton village school]]
 
 ## Clifton Grove
-Along the river below the village: a Bronze Age settlement, the avenue of elms, a ballad of a jilted lover, and the bridge of 1958.
+Below the village the land runs down to the Trent. Bronze Age remains have been found here, the Cliftons planted an avenue of elms in 1677, and the grove became the setting of a popular ballad. In 1958 Clifton Bridge was built nearby to relieve Trent Bridge.
 - [[Bronze Age finds, 1937]]
 - [[Clifton Grove]]
 - [[The legend of Clifton Grove]]
 - [[Clifton Bridge]]
 
 ## The estate and its people
-Beside the old village the council built one of its largest estates from the 1950s, and two sporting names came from here.
+In 1801 the village had fewer than 400 people. From the 1950s the council built a large estate beside it. The footballer Viv Anderson was born in Clifton in 1956.
 - [[Clifton estate]]
 - [[Viv Anderson]]
 - [[Torvill and Dean]]

@@ -6,7 +6,7 @@ order: 38
 sort: as listed
 ---
 
-The village by the Trent: its Saxon name, a general of the Civil War, the memorial to the Chilwell dead, and the gravel pits that became a nature reserve.
+Attenborough is an old village on the Trent, known in Saxon times as Addensburgh. The Civil War general Henry Ireton came from here, and its churchyard holds the memorial to those killed in the Chilwell explosion of 1918. Gravel digging in the 20th century left the lakes of the nature reserve.
 
 - [[Addensburgh]]
 - [[Henry Ireton]]

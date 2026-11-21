@@ -6,7 +6,7 @@ order: 35
 sort: as listed
 ---
 
-Forty Bridges, the lost railway viaduct, and where the Pentrich marchers of 1817 met the soldiers and scattered.
+Giltbrook, named after the stream that runs through it, lies in the Erewash valley. In 1817 the Pentrich rebels, marching on Nottingham, were dispersed nearby, and in the 1870s the Great Northern Railway built its long viaduct, the Forty Bridges, across the valley.
 
 - [[Gylden Broc]]
 - [[Forty Bridges]]

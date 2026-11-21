@@ -6,7 +6,7 @@ order: 49
 sort: as listed
 ---
 
-The hill north-east of the town: a medieval name, the Wrights' estate, two asylums, a church and the brickworks.
+Mapperley takes its name from Thomas Mapurley, a 14th-century official. The high ground north-east of the town was the estate of the Wright family, and in the 19th century it was chosen for hospitals and asylums. Its clay also supplied some of the area's largest brickworks.
 
 - [[Thomas Mapurley]]
 - [[Mapperley Hall and the Wrights]]

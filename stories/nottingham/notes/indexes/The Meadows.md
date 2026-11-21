@@ -6,7 +6,7 @@ order: 6
 sort: as listed
 ---
 
-The low ground between the city and the Trent, with two football grounds facing each other across the river, and a flood.
+The Meadows, the low ground between the city and the Trent, was built over with terraced housing before the First World War. The area was protected by the Victoria Embankment, is home to Notts County's ground, and was largely rebuilt in the 1970s.
 
 - [[Trent Bridge]]
 - [[The oldest professional club]]

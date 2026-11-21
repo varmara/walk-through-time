@@ -6,7 +6,7 @@ order: 15
 sort: as listed
 ---
 
-A village of framework knitters south of the city, the Second World War ammunition depot beyond it, the site of Flawford's lost church, whose name the village church took, and a Victorian banker's hall.
+Ruddington was a village of framework knitters south of the city, and its workshops are now a museum. Nearby stood the medieval church of Flawford, demolished in 1779, and in the 20th century a railway station and an ammunition depot were built on the village's edge.
 
 - [[The lost church of Flawford]]
 - [[St Peter's Church, Ruddington]]

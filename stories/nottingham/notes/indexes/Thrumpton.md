@@ -6,7 +6,7 @@ order: 14
 sort: as listed
 ---
 
-A small estate village on the Trent: its Jacobean hall and the families who owned it, its church, and the houses built for the estate.
+Thrumpton is a small estate village on the Trent. Its hall was built by the Pigot family in the early 17th century, and later owners built much of the village. The estate has passed through several families, including the Byrons.
 
 - [[All Saints Church]]
 - [[Thrumpton Hall]]

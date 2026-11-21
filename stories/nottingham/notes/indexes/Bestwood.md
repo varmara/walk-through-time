@@ -6,7 +6,7 @@ order: 43
 sort: as listed
 ---
 
-A royal hunting park, the Dukes of St Albans' lodge, and the colliery and ironworks that made a village.
+Bestwood began as a royal hunting park, recorded from 1286. In the 19th century it belonged to the Dukes of St Albans, who built a new lodge, and in the 1870s and 1880s its colliery and ironworks brought industry and a new village to the old parkland.
 
 - [[A royal hunting park]]
 - [[Bestwood Lodge]]

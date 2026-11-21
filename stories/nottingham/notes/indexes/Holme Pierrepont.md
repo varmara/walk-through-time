@@ -6,7 +6,7 @@ order: 18
 sort: as listed
 ---
 
-The flat land along the Trent east of the city: seven centuries of Pierreponts, their Tudor brick hall and church, a power station refused, and the gravel pits that became a centre for watersports.
+Holme Pierrepont, on the flat land along the Trent east of the city, was held by the Pierrepont family from the 13th century. Their Tudor brick hall and family church still stand. In the 20th century plans for a large power station here were dropped, and the gravel workings became the National Watersports Centre.
 
 - [[The Pierreponts]]
 - [[Holme Pierrepont Hall]]

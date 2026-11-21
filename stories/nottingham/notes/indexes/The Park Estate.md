@@ -6,7 +6,7 @@ order: 8
 sort: as listed
 ---
 
-The castle's old deer park, built over with Victorian villas and still lit by gas.
+The Park began as the castle's deer park. From the 1820s the Dukes of Newcastle developed it as a private estate of villas for the well-to-do, many designed by T. C. Hine, and its streets are still lit by gas.
 
 - [[The castle's deer park]]
 - [[Park Terrace]]

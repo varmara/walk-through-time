@@ -6,7 +6,7 @@ order: 3
 sort: as listed
 ---
 
-The old Saxon town on its hill east of the square, where lace merchants built their warehouses, and the low ground below it towards the canal and the station.
+The hill east of the Market Square was the site of the Saxon town, taken by the Danes in 868 and centred on St Mary's Church. In the 19th century lace merchants built their warehouses and showrooms here, giving the district its name. Below it lay the marshy ground of Broad Marsh.
 
 - [[The Danes in Nottingham, 868]]
 - [[St Mary's Church, Nottingham]]

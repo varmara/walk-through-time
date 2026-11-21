@@ -6,7 +6,7 @@ order: 31
 sort: as listed
 ---
 
-A Cluniac priory, dissolved in 1538, and its fair; Raleigh's works on Faraday Road, and the university at Highfields, where the MRI scanner was developed.
+Lenton was dominated for over four centuries by its Cluniac priory, founded in about 1102 and dissolved in 1538. Industrial growth came in the 19th century, with Raleigh's bicycle works, and in the 20th the University of Nottingham was built at Highfields, where MRI was later developed.
 
 - [[Lenton Priory]]
 - [[Lenton Fair]]

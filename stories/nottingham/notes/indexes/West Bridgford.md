@@ -6,10 +6,10 @@ order: 11
 sort: as listed
 ---
 
-South of the river: Test cricket, Nottingham Forest and the county's headquarters.
+West Bridgford, across the Trent from the city, grew from a small village into a large suburb from the late 19th century. It is the home of Trent Bridge cricket ground, of Nottingham Forest's City Ground, and of the county council.
 
 ## Trent Bridge
-From a fort of the 920s and a medieval stone bridge to Test cricket, Nottingham Forest's ground and County Hall, all at the south end of Trent Bridge.
+The southern end of Trent Bridge has been defended and settled since the 10th century. In the 19th century the land beside it became a cricket ground, which hosted its first Test in 1899, and in 1898 Nottingham Forest moved to the City Ground nearby.
 - [[A fort at the bridge]]
 - [[Trent Bridge]]
 - [[The old bridge in flood, 1683]]
@@ -23,7 +23,7 @@ From a fort of the 920s and a medieval stone bridge to Test cricket, Nottingham 
 - [[Forest's European Cups, 1979 and 1980]]
 
 ## Bridgford & Lady Bay
-The old village round St Giles', the estate said to have been won at cards, the railway bridge at Lady Bay, wartime bombs, the 1947 flood and a superstore.
+The old village of West Bridgford grew up around St Giles' Church. The Musters family held the estate from 1523, and when they sold land for building the suburb spread, reaching Lady Bay by the river, where bombs fell in 1941 and floods in 1947.
 - [[St Giles' Church]]
 - [[Won at cards]]
 - [[Lady Bay Bridge]]
@@ -32,7 +32,7 @@ The old village round St Giles', the estate said to have been won at cards, the 
 - [[The first out-of-town superstore]]
 
 ## Edwalton
-A village with a 12th-century church and a railway station, and Compton Acres, built mostly in the 1990s.
+Edwalton was a small village with a medieval church, given a station on the new railway in 1880. The district of Compton Acres was built beside it in the 1990s.
 - [[Church of the Holy Rood]]
 - [[Edwalton station]]
 - [[Compton Acres]]

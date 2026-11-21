@@ -6,7 +6,7 @@ order: 5
 sort: as listed
 ---
 
-The hill north-east of the old town: a healing well, the oldest allotments in England, the terraces of New Town, and the estate that replaced them.
+St Ann's takes its name from a medieval well once thought to heal. Its hillside allotments are among the oldest in England, and after enclosure in 1845 the fields were covered with dense terraced housing, much of which was cleared and rebuilt around 1970.
 
 - [[St Ann's Well]]
 - [[Hunger Hills]]

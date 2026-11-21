@@ -6,7 +6,7 @@ order: 42
 sort: as listed
 ---
 
-A village church with a famous spire, a colliery that became a country park, a closed station and the woods of Gedling House.
+Gedling was a farming village east of the city, with a 13th-century church. From 1899 its colliery was the main local employer for almost a century; the railway station that served it closed in 1960, and the colliery site has since become a country park.
 
 - [[All Hallows Church, Gedling]]
 - [[Gedling Colliery]]

@@ -6,7 +6,7 @@ order: 34
 sort: as listed
 ---
 
-A hamlet on the Ashby road that grew into a suburb, and the shell factory of the First World War.
+Chilwell began as a hamlet on the road to Ashby-de-la-Zouch, where Roman finds show earlier settlement. It grew into a suburb in the 20th century, and in the First World War it was the site of the National Shell Filling Factory, where an explosion killed 134 people in 1918.
 
 - [[Roman Chilwell]]
 - [[The Cadland]]

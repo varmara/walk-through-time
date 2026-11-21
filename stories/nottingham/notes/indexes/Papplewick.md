@@ -6,7 +6,7 @@ order: 44
 sort: as listed
 ---
 
-Cotton mills on the Leen, a Georgian hall, and the pumping station that brought Nottingham its water.
+Papplewick lies on the River Leen north of Nottingham. In the late 18th century cotton mills were built along the river and Papplewick Hall was built nearby, and in the 1880s a pumping station was built here to raise drinking water for the growing city.
 
 - [[The Leen cotton mills]]
 - [[Papplewick Hall]]

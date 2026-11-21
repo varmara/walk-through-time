@@ -6,7 +6,7 @@ order: 45
 sort: as listed
 ---
 
-The town at the north edge of the map: the church where the Byrons lie, its pits, the airfield where Rolls-Royce tested engines, and the end of the first tram line.
+Hucknall was a village of framework knitters that became a mining town after its collieries opened in the 1860s. Lord Byron is buried in its parish church. From 1927 Rolls-Royce tested aero engines at its airfield, and in 2004 the tram arrived.
 
 - [[Hucknall Torkard]]
 - [[The Byron vault]]

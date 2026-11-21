@@ -6,7 +6,7 @@ order: 5
 sort: as listed
 ---
 
-The hill east of the city: a windmill, cave dwellings, a church by Thomas Rickman, the old wholesale market and the later laboratory of the Boots team that discovered ibuprofen.
+Sneinton lies on the hill east of the city. Its windmill belonged to the family of the mathematician George Green, William Booth was born here in 1829, and the city's wholesale market moved here in the 1930s. Cave dwellings were once dug into its sandstone ridge.
 
 - [[Green's Windmill]]
 - [[William Booth's birthplace]]

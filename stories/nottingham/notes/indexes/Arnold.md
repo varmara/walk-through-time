@@ -6,7 +6,7 @@ order: 40
 sort: as listed
 ---
 
-A Domesday village and its church, a cotton mill and its house, a painter and a water engineer born here, the first Luddites, a brewery and a market.
+Arnold was a Domesday village north of Nottingham that grew into a town of hosiery and cotton. Its mill owners and framework knitters were part of the county's textile industry, and in 1811 the Luddite frame-breaking began here. The painter Richard Parkes Bonington and the water engineer Thomas Hawksley were both born in Arnold.
 
 - [[Ernehale]]
 - [[St Mary's, Arnold]]

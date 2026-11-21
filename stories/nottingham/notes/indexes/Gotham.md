@@ -6,7 +6,7 @@ order: 16
 sort: as listed
 ---
 
-The village of the Wise Men: its church, the name that travelled to New York and Batman, its gypsum, and the day a tornado hit it.
+Gotham is best known for the tales of its 'Wise Men', the fools of Gotham, already told in the 15th century. Its name later gave New York the nickname 'Gotham'. The village also had its medieval church and, from the late 19th century, gypsum mining.
 
 - [[St Lawrence's, Gotham]]
 - [[The Wise Men of Gotham]]

@@ -6,7 +6,7 @@ order: 32
 sort: as listed
 ---
 
-The Willoughbys' village: its church and dovecote, their Elizabethan hall, the wooden wagonway from the Strelley pits, described as the first railway in Britain, and the colliery that outlasted them.
+Wollaton was the village of the Willoughby family, who also worked coal here. Their Elizabethan hall, built in the 1580s, still dominates the park, and as early as 1603–04 a wooden wagonway carried coal from their pits. The last colliery here closed in 1965.
 
 - [[St Leonard's, Wollaton]]
 - [[Wollaton dovecote]]

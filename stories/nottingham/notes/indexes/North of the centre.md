@@ -6,7 +6,7 @@ order: 4
 sort: as listed
 ---
 
-The hills north of the old town, built over in the 19th century: parks and cemeteries, a cathedral, a college and a railway station.
+North of the old town lay open fields and common land until the 19th century. As Nottingham expanded, the area was used for public parks and cemeteries, a Catholic cathedral, a college and a great railway station. It is now part of the city centre.
 
 - [[Nottingham General Hospital]]
 - [[Forest Recreation Ground]]

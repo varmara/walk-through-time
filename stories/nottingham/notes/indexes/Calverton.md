@@ -6,7 +6,7 @@ order: 41
 sort: as listed
 ---
 
-The village of William Lee, who invented the stocking frame, and of the colliery that grew it fourfold.
+Calverton has two claims to a place in history. William Lee, who invented the stocking frame in 1589, came from here, and in 1952 a new colliery opened that quadrupled the village's population within a decade.
 
 - [[Calvretone]]
 - [[The stocking frame]]
