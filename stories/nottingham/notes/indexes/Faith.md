@@ -4,12 +4,11 @@ order: 16
 id: faith
 ---
 
-Churches and chapels from the medieval parish churches to the Methodist missions, and the preachers who founded
-movements here.
+Nottingham's churches and chapels record a long religious history: the medieval parishes, a priory dissolved at the Reformation, and the growth of Nonconformity and Methodism in the industrial town. William Booth, who founded the Salvation Army, was born here.
 
 
 ## Churches
-The old and new churches of the city and its near neighbours, from the three mediaeval parish churches and the priory at Lenton, dissolved in 1538, to Pugin's Catholic cathedral.
+The medieval town had three parish churches, St Mary's, St Peter's and St Nicholas', and nearby stood the wealthy Cluniac priory at Lenton until its dissolution in 1538. As the town grew in the 19th century, new churches were built for its new districts, among them Pugin's Catholic church of St Barnabas.
 - [[St Mary's Church, Nottingham]]
 - [[St Peter's Church]]
 - [[Church of the Holy Rood]]
@@ -28,7 +27,7 @@ The old and new churches of the city and its near neighbours, from the three med
 - [[St Ann's Church]]
 
 ## Chapels
-Nonconformists, Methodists (in Nottingham from about 1740) and the Salvation Army built chapels and halls of their own, and some of those buildings have since found other uses.
+From the late 17th century many in Nottingham worshipped outside the Church of England. The High Pavement congregation, later Unitarian, met from 1690, and Methodists from about 1740. Large chapels were built in the 19th century. William Booth, the founder of the Salvation Army, was born in Sneinton in 1829.
 - [[John Wesley]]
 - plaque: Hockley Methodist Chapel
 - plaque: Wesley Place Methodist Chapel
@@ -41,7 +40,7 @@ Nonconformists, Methodists (in Nottingham from about 1740) and the Salvation Arm
 - [[William Booth's birthplace]]
 
 ## Village churches
-Each village round the city has its own church, many going back to the 12th and 13th centuries.
+Most of the villages around Nottingham have parish churches older than the town's growth, many with 12th- and 13th-century work. They were rebuilt and restored over the centuries, and several record local families and events in their monuments.
 - [[St Mary's, Arnold]]
 - [[St Peter's, Tollerton]]
 - [[St Lawrence's, Gotham]]

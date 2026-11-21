@@ -4,11 +4,11 @@ order: 19
 id: sport
 ---
 
-Cricket at Trent Bridge, football on both banks of the Trent, prize-fighters, skaters and rowers.
+Nottingham has a long sporting history. Trent Bridge became one of England's main cricket grounds, the city is home to two of the oldest football clubs in the world, and its sportsmen and women have included prize-fighters, rowers and ice dancers.
 
 
 ## Cricket
-Trent Bridge grew from a ground behind an inn into a Test ground, and the county's bowlers played their part in Bodyline.
+Cricket was played behind the Trent Bridge Inn from 1838, and the ground became the home of Nottinghamshire and a Test venue from 1899. Nottinghamshire players were among the leading cricketers of their day, and two of its fast bowlers were central to the Bodyline series of 1932–33.
 - [[William Clarke]]
 - [[The Trent Bridge Inn]]
 - [[Trent Bridge cricket ground]]
@@ -19,7 +19,7 @@ Trent Bridge grew from a ground behind an inn into a Test ground, and the county
 - [[Bodyline, 1932–33]]
 
 ## Football
-Two of the oldest clubs in the country, Notts County and Nottingham Forest, played either side of the Trent, and Forest won the European Cup twice under Brian Clough.
+Notts County, founded in 1862, and Nottingham Forest, founded in 1865, are among the oldest professional clubs in the world. Their grounds face each other across the Trent. Forest won the FA Cup in 1898 and, under Brian Clough, the European Cup in 1979 and 1980.
 - [[Forest Recreation Ground]]
 - plaque: Notts County Football Club
 - [[City Ground]]
@@ -37,7 +37,7 @@ Two of the oldest clubs in the country, Notts County and Nottingham Forest, play
 - [[Statue of Brian Clough]]
 
 ## Other sports
-A bare-knuckle champion, a rowing course, ice dancers and a racehorse.
+Nottingham's sporting history also includes the bare-knuckle boxer William "Bendigo" Thompson, a Derby winner, the international rowing course at Holme Pierrepont and the ice dancers Jayne Torvill and Christopher Dean.
 - [[William Thompson]]
 - [[National Watersports Centre]]
 - [[Torvill and Dean]]

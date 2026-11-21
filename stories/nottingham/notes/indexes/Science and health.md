@@ -4,17 +4,17 @@ order: 11
 id: science
 ---
 
-Nottingham's scientists, engineers, doctors and nurses: clean water and sewers, a self-taught mathematician, medicines and the MRI scanner.
+Nottingham's contribution to science and medicine ranges from George Green's mathematics to the development of MRI. Its engineers improved the town's water supply and drainage, and its hospitals and doctors, many of them women, cared for a growing population.
 
 ## Water
-Engineers who brought clean water to the city, and the pumping station that raised it.
+In the 19th century Nottingham grew rapidly and its supply of clean water became a serious problem. Thomas Hawksley's waterworks of 1831 gave the town Britain's first high-pressure constant supply, and later pumping stations such as Papplewick met the city's growing needs.
 - [[Thomas Hawksley]]
 - [[Marriott Ogle Tarbotton]]
 - [[Papplewick Pumping Station]]
 - [[Charles Blacker Vignoles]]
 
 ## Science
-A miller who became a mathematician, a library, a college built in 1877–81, and the university where magnetic resonance imaging was developed.
+Nottingham produced the mathematician George Green, a miller by trade. Learning was supported by the Subscription Library at Bromley House and University College, and in the 20th century the University of Nottingham developed magnetic resonance imaging.
 - [[George Green]]
 - [[Edward Joseph Lowe]]
 - [[Mary Kendrick]]
@@ -25,7 +25,7 @@ A miller who became a mathematician, a library, a college built in 1877–81, an
 - [[Trent Building]]
 
 ## Medicine
-Doctors, nurses and hospitals: the General Hospital of 1782, Nottingham's first woman GP, the making of ibuprofen and the asylum at Mapperley.
+The General Hospital opened in 1782, and through the 19th and 20th centuries new hospitals and asylums were built. Women doctors and nurses came to play a leading role, and the city's industry contributed to medicine too: ibuprofen was developed at Boots.
 - [[Nottingham General Hospital]]
 - [[Sarah Gray]]
 - [[Margaret Glen-Bott]]

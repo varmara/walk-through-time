@@ -4,7 +4,7 @@ order: 4
 id: riots
 ---
 
-When Nottingham rose: a riot over cheese at Goose Fair, the frame-breakers, a march on the town, the Reform riots that burned the castle and a mill, the Chartists on Mapperley Hills, Bulwell's march to save its common, and the riots of 1958.
+Nottingham was known for popular protest. Food riots, machine-breaking, political riots and the Chartist campaigns all left their mark, as working people reacted to hunger, falling wages and their exclusion from political power. The St Ann's riots of 1958 had different causes.
 
 - [[The cheese riot, 1766]]
 - [[The first Luddites]]

@@ -4,10 +4,10 @@ order: 3
 id: frames
 ---
 
-How the stocking frame and the lace machine made Nottingham's trade: the inventors, the mills and workshops, the hosiers and lace merchants, and the frame-breakers who fought the machines.
+For three centuries Nottingham's economy rested on textiles. The stocking frame, invented nearby in 1589, made the area the centre of English hosiery, and in the 19th century machine-made lace made the town prosperous. The same machines brought hardship and unrest when trade was poor.
 
 ## Knitting
-The county's cloth trades began with wool and the stocking frame, invented at Calverton in 1589, and went on to cotton mills, bleachworks, Luddite frame-breakers and silk.
+William Lee's stocking frame was slow to spread at first, but by the 18th century Nottingham was the centre of the trade. Its knitters' demand for yarn helped bring the first cotton mills, including Arkwright's. In 1811 frame-breaking began in Arnold, the start of the Luddite movement.
 - [[The stocking frame]]
 - [[The frame-knitting town]]
 - [[Arkwright's first mill]]
@@ -23,7 +23,7 @@ The county's cloth trades began with wool and the stocking frame, invented at Ca
 - [[Gloves and bleach]]
 
 ## Lace
-Lace made Nottingham's fortune in the 19th century, from the Leavers machine and Thomas Adams's warehouse to the big mills of Long Eaton.
+In the early 19th century new machines, above all John Leavers', made lace by machine, and lace made Nottingham's fortune. Merchants such as Thomas Adams built warehouses and showrooms in the Lace Market, and large lace mills spread to towns such as Long Eaton.
 - [[The Leavers lace machine]]
 - [[Thomas Adams]]
 - [[Adams Building]]

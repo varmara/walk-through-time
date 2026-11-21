@@ -4,11 +4,10 @@ order: 14
 id: lost
 ---
 
-Buildings and streets that are gone: pulled down for the Council House, the Victoria and Broad Marsh centres and
-Maid Marian Way, or burned and closed. Their pins mark where they stood.
+Much of historic Nottingham has gone. Some buildings were cleared for road schemes and shopping centres in the 20th century; others were destroyed in riots or simply outlived their purpose. These stories record what stood on sites that look very different today.
 
 ## The town centre
-Buildings, streets and a station that the middle of the town has lost, most of them demolished in the 20th century.
+The town centre lost many old buildings, especially in the 1960s and 1970s. The Exchange made way for the Council House, the Victoria station for a shopping centre and the Broad Marsh area for redevelopment, and older losses include the medieval friary and Georgian chapels.
 - [[The Exchange]]
 - [[The Black Boy Hotel]]
 - [[Drury Hill]]
@@ -18,12 +17,12 @@ Buildings, streets and a station that the middle of the town has lost, most of t
 - [[Nottingham Victoria station]]
 
 ## Industry
-Two industrial buildings that no longer stand: a tobacco warehouse and a silk mill.
+Industrial buildings have also been lost: some burned, like Lowe's silk mill in the Reform riots of 1831, and some demolished when their industries declined, like Player's bonded warehouses.
 - [[Player's bonded warehouses]]
 - [[Lowe's Silk Mill]]
 
 ## Further out
-Lost places beyond the centre: a priory, a church, a hall, a viaduct, a station, a spring and a manor house, and the caves of the Hermitage.
+Beyond the centre, a medieval priory, a village church, halls, a viaduct and a railway station have disappeared, along with places that gave their names to districts, such as St Ann's Well.
 - [[Lenton Priory]]
 - [[The lost church of Flawford]]
 - [[Bulwell Hall]]

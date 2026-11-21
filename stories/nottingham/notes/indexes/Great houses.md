@@ -4,10 +4,10 @@ order: 15
 id: houses
 ---
 
-The halls of the families who owned the land round Nottingham, and the villages and estates they shaped.
+The countryside around Nottingham was dominated for centuries by landed families: the Cliftons, Pierreponts, Willoughbys and others. Their houses and estates shaped the villages around them, and many were sold, divided or put to new uses in the 20th century.
 
 ## Clifton and Wilford
-On the south bank of the Trent: Clifton Hall with its grove and dovecote, Wilford House and the manor of Wilford, and the West Bridgford estate said to have been won at cards.
+On the south bank of the Trent, the Clifton family held Clifton from the 13th century until the 20th, and shaped the village and the grove beside the river. At neighbouring Wilford the manor passed through several hands, and in 1781 the Smiths built Wilford House.
 - [[Clifton Hall]]
 - [[Clifton Grove]]
 - [[Clifton dovecote]]
@@ -17,7 +17,7 @@ On the south bank of the Trent: Clifton Hall with its grove and dovecote, Wilfor
 - [[Won at cards]]
 
 ## The south-west and Thrumpton
-South-west of the city and up the Trent valley: Chilwell Hall, Ruddington Hall, and Thrumpton Hall, with its staircase, its estate village, the Byrons of Thrumpton and its owners since 1949.
+South-west of the city lay smaller estates. At Thrumpton the Pigots built a hall in the early 17th century and their successors built much of the village. Chilwell had its hall, and at Ruddington a banker built one in 1860.
 - plaque: Chilwell Hall
 - [[Hall, manor and green]]
 - [[Ruddington Hall]]
@@ -28,14 +28,14 @@ South-west of the city and up the Trent valley: Chilwell Hall, Ruddington Hall, 
 - [[Owners since 1949]]
 
 ## East of the city
-East of the city: Holme Pierrepont Hall and the Pierreponts, Tollerton Hall, which became a seminary, and Shelford House, stormed in the Civil War.
+East of the city the Pierreponts held Holme Pierrepont from the 13th century. Nearby, Shelford House was garrisoned for the King in the Civil War and taken by storm in 1645.
 - [[Holme Pierrepont Hall]]
 - [[The Pierreponts]]
 - [[Tollerton Hall]]
 - [[The storming of Shelford House]]
 
 ## The city and the Park
-In and just outside the city: the dukes' mansion on the castle rock, the Park estate that its residents now run, and the hall and grange of Mapperley and Woodthorpe.
+In Nottingham itself the largest estate belonged to the Dukes of Newcastle, whose deer park below the castle was laid out with villas from the 1820s. On the hills to the north, wealthy families such as the Wrights built houses that were later swallowed by the growing city.
 - 1670s: [[Nottingham Castle]]
 - [[Hine's Park]]
 - [[Sold, saved and run by its residents]]
@@ -43,7 +43,7 @@ In and just outside the city: the dukes' mansion on the castle rock, the Park es
 - [[Woodthorpe Grange]]
 
 ## North and west
-North and west of the city: Wollaton Hall, whose restoration Cassandra Willoughby oversaw, Bestwood Lodge, Papplewick Hall and Bulwell Hall.
+To the north and west lay some of the grandest houses. Wollaton Hall was built by Sir Francis Willoughby in the 1580s, probably to Robert Smythson's designs. The former royal park at Bestwood and the halls at Papplewick and Bulwell were also nearby.
 - [[Wollaton Hall]]
 - [[Cassandra Willoughby]]
 - [[Bestwood Lodge]]

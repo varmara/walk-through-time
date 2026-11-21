@@ -4,10 +4,10 @@ order: 5
 id: vote
 ---
 
-Who got a say: the Reform riots of 1831, the Chartists' strike and the election of 1842, the Chartist leader the town elected in 1847, an MP and employer, and the women who campaigned for the vote and first used it in 1918.
+Nottingham had a reputation for radical politics in the 19th century. Its people rioted for parliamentary reform in 1831, supported the Chartists, and elected Feargus O'Connor as their MP in 1847. In the 20th century the city's women took part in the campaign for women's suffrage.
 
 ## Reform and Chartists
-From the burning of the castle in 1831 to the Chartist by-election of 1842 and O'Connor's win in 1847, men demanded the vote and the right to be heard, until in 1885 the city was given three seats.
+When the House of Lords rejected the Second Reform Bill in 1831, rioters in Nottingham burned the castle. In the 1830s and 1840s the Chartists campaigned for the vote for all men, and Nottingham elected their leader to Parliament. The city's representation was reorganised in 1885.
 - [[The castle burned, 1831]]
 - [[Sturge and Walter, 1842]]
 - [[The Battle of Mapperley Hills, 1842]]
@@ -16,7 +16,7 @@ From the burning of the castle in 1831 to the Chartist by-election of 1842 and O
 - [[Three seats for Nottingham, 1885]]
 
 ## Votes for women
-Women's campaign for the vote came later, and was won in part in 1918.
+From the 1890s women in Nottingham campaigned for the vote, some peacefully as suffragists, others as militant suffragettes who were imprisoned for their actions. The Representation of the People Act of 1918 gave the vote to some women.
 - [[Helena Dowson]]
 - [[Kate Watson Wallis]]
 - [[Helen Watts]]

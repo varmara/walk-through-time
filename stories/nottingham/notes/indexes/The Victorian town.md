@@ -4,10 +4,10 @@ order: 9
 id: victorian
 ---
 
-The town that grew in the 19th century: cemeteries and parks on the hills to the north, a college, theatres and halls, and the architects whose buildings line its streets.
+In the 19th century Nottingham grew from a crowded market town into a large industrial city. New suburbs, parks, public buildings and commercial buildings were built, and in 1897 Nottingham was made a city.
 
 ## Parks and cemeteries
-The Victorians laid out public green space: cemeteries, an arboretum and grounds for recreation and sport.
+As the town grew, public parks and cemeteries were laid out on the hills to the north, among them the General Cemetery in 1836 and the Arboretum in 1852.
 - [[General Cemetery]]
 - [[The Arboretum]]
 - [[Church Cemetery]]
@@ -15,7 +15,7 @@ The Victorians laid out public green space: cemeteries, an arboretum and grounds
 - [[St Ann's Allotments]]
 
 ## Buildings
-Buildings of a town grown rich on lace: a warehouse, offices, a hotel, theatres, a music hall and a house.
+The prosperity of the lace trade paid for a new generation of buildings in the town centre: warehouses, offices, hotels, theatres and music halls. Architects such as T. C. Hine and Watson Fothergill gave Victorian Nottingham its distinctive character.
 - [[Adams Building]]
 - [[Watson Fothergill's offices]]
 - [[The Black Boy Hotel]]
@@ -25,7 +25,7 @@ Buildings of a town grown rich on lace: a warehouse, offices, a hotel, theatres,
 - [[Tower House]]
 
 ## Villages become suburbs
-Villages and open fields became suburbs, from the villas of the Park to the railway suburb of Carlton and new housing on the old Clay Fields.
+The enclosure of the open fields in 1845 allowed Nottingham to expand at last. The Park was laid out with villas for the well-to-do, while new working-class districts and railway suburbs spread over the former fields and absorbed the surrounding villages.
 - [[Village to suburb]]
 - [[Park Terrace]]
 - [[Hine's Park]]
@@ -37,7 +37,7 @@ Villages and open fields became suburbs, from the villas of the Park to the rail
 - [[Who lived in the Park]]
 
 ## Public buildings
-The civic buildings of a town that became a city in 1897: a college, a guildhall, a village school and a railway station.
+Civic and public buildings reflected the town's growing status: a university college, a guildhall, new schools and a great railway station. In 1897 Nottingham was granted city status.
 - [[University College]]
 - [[Guildhall]]
 - [[Clifton village school]]

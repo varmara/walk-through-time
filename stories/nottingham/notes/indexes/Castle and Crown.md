@@ -4,10 +4,10 @@ order: 1
 id: crown
 ---
 
-Kings and the castle on the rock: a favourite seized in 1330, Charles I's call to arms in 1642, the Parliamentary governor who held it, the dukes' mansion that replaced it, and the riot that burned it.
+For nearly six centuries the castle on its sandstone rock was a royal fortress, and the town grew up below it. These stories follow its history from Norman stronghold to the Civil War, its rebuilding as a ducal mansion, the burning of that mansion in 1831, and its reopening as a museum.
 
 ## The medieval castle
-For centuries the castle was a royal fortress, and the hunting lands round it belonged to the Crown. The stories here run from Robin Hood and the secret tunnel of 1330, by way of the deer parks and Edward IV's new tower, to the castle's decay under the Tudors.
+Medieval kings held Nottingham Castle as a royal fortress, and kept the forests and parks around it for hunting. It was here in 1330 that the young Edward III seized Roger Mortimer and took power for himself. Edward IV added new royal apartments, but under the Tudors the castle was neglected and fell into disrepair.
 - [[Statue of Robin Hood]]
 - [[Mortimer's Hole]]
 - [[The castle's deer park]]
@@ -16,7 +16,7 @@ For centuries the castle was a royal fortress, and the hunting lands round it be
 - [[The castle in decay]]
 
 ## The Civil War
-In August 1642 Charles I raised his standard outside the castle. Parliament then held it, under Colonel John Hutchinson, through years of Royalist raids from Newark.
+In August 1642 Charles I raised his standard at Nottingham, marking the start of the Civil War. The town and castle were soon held for Parliament, and under Colonel John Hutchinson they withstood repeated attacks from the Royalist garrison at Newark.
 - 1642: [[Charles I]]
 - [[Charles I raised his standard, 1642]]
 - 1642: [[Henry Ireton]]
@@ -27,11 +27,11 @@ In August 1642 Charles I raised his standard outside the castle. Parliament then
 - [[Royalist raids on Nottingham]]
 
 ## The dukes' mansion
-After the Civil War the ruined castle was bought by the Duke of Newcastle and rebuilt as a mansion, which a crowd burned in the Reform riots of 1831, and its shell stood empty for over forty years.
+After the war the castle was demolished, and in the 1670s the Duke of Newcastle built a mansion on the rock. In 1831, when the House of Lords rejected the Second Reform Bill, rioters burned the mansion, and the shell stood empty for more than forty years.
 - 1670s: [[Nottingham Castle]]
 - [[The castle burned, 1831]]
 
 ## The castle museum
-From 1878 the mansion was a museum and art gallery, and its gardens hold a memorial to the airman Albert Ball.
+Thomas Chambers Hine restored the ruined mansion, and in 1878 it opened as a museum and art gallery, the first municipal one outside London. Its grounds also hold the city's memorial to Albert Ball, the airman killed in 1917.
 - [[Nottingham Castle Museum]]
 - [[Statue of Captain Albert Ball]]

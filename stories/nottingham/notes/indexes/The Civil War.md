@@ -4,23 +4,23 @@ order: 2
 id: civilwar
 ---
 
-Nottingham in the Civil War: where the King raised his standard, the castle held for Parliament through raid after raid, a church destroyed in the fighting, a Royalist house stormed and burned, and Shelford's church tower held by Royalists led by a woman.
+Nottingham played an important part in the English Civil War. Charles I began the war here in 1642, but the town and castle were held for Parliament for the rest of the conflict, surrounded by Royalist strongholds such as Newark and Shelford.
 
 ## The King's standard
-In August 1642 Charles I raised his standard outside Nottingham Castle, at the opening of the English Civil War. The stories here are the King, the standard and Henry Ireton, baptised in the town, who fought for Parliament.
+In August 1642 Charles I raised his royal standard at Nottingham, calling his supporters to arms against Parliament. Among local men who fought for Parliament was Henry Ireton, later one of its leading commanders.
 - 1642: [[Charles I]]
 - [[Charles I raised his standard, 1642]]
 - 1642: [[Henry Ireton]]
 
 ## Holding the castle
-From 1643 Colonel John Hutchinson held Nottingham Castle for Parliament. These stories tell of his garrison, of his wife Lucy, who wrote his life, and of the church he had pulled down.
+From 1643 John Hutchinson commanded the castle for Parliament. His garrison held it through the rest of the war, and his wife Lucy later wrote an account of his life that remains one of the main sources for these years.
 - [[Hutchinson's garrison]]
 - 1643: [[John Hutchinson]]
 - 1643: [[Lucy Hutchinson]]
 - 1643: [[St Nicholas' Church]]
 
 ## Raids, Shelford and the end of the castle
-The Royalists of Newark raided the town, Parliament's troops stormed Shelford House in 1645, and in 1651 the castle itself was razed.
+The Royalists at Newark raided Nottingham repeatedly. In 1645 Parliament's forces stormed the Royalist garrison at Shelford House, and after the war, in 1651, the castle was demolished so that it could not be used again.
 - [[Royalist raids on Nottingham]]
 - [[The storming of Shelford House]]
 - [[The siege in the tower]]

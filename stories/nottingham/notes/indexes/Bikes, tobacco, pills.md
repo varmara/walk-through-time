@@ -5,10 +5,10 @@ id: making
 title: Made in Nottingham
 ---
 
-What Nottingham made: Humber's and Raleigh's bicycles and Brough's motorcycles, Player's cigarettes, the medicines of Boots, from Jesse and Florence Boot's shop to ibuprofen, and Paul Smith's clothes.
+From the later 19th century Nottingham was known as much for what it made as for lace. Bicycles, cigarettes and medicines were made here on an industrial scale, and the firms behind them, Raleigh, Player's and Boots, became household names and among the city's largest employers.
 
 ## Bicycles and motorcycles
-From the 1870s Nottingham and its neighbours made bicycles, and later motorcycles: the Humber works at Beeston, the small workshop in Raleigh Street that became Raleigh, and George Brough's Superior machines.
+Cycling became popular in the 1870s and 1880s, and Nottingham's engineering workshops turned to it. Thomas Humber moved his works to Beeston, and a small workshop in Raleigh Street grew, under Frank Bowden, into a company that covered acres of Radford. George Brough later built some of the most admired motorcycles of their day.
 - [[Thomas Humber]]
 - [[The Humber works]]
 - [[Raleigh Street]]
@@ -18,12 +18,12 @@ From the 1870s Nottingham and its neighbours made bicycles, and later motorcycle
 - 1960: [[Saturday Night and Sunday Morning]]
 
 ## Tobacco
-John Player's Castle Tobacco Factories stood in Radford; the bonded warehouses that remain were finished in 1939, and tobacco making in Nottingham ended in 2016.
+John Player's Castle Tobacco Factories made Radford one of the centres of the British cigarette trade. The bonded warehouses where the firm kept its tobacco were among the last of its buildings to go up, in 1939, and tobacco making in the city lasted until 2016.
 - [[John Player]]
 - [[Player's bonded warehouses]]
 
 ## Boots
-From a herbalist's shop on Goose Gate in 1849 Boots grew into a great firm. These stories follow the family, the Grade I factories of the 1930s, the Blitz and the making of ibuprofen.
+Boots began with a herbalist's shop on Goose Gate in 1849 and grew into a national firm. Jesse and Florence Boot built up the firm and gave generously to Nottingham. In the 1930s it built factories now listed Grade I, and in 1961 its chemists made ibuprofen.
 - [[Jesse Boot]]
 - [[Florence Boot]]
 - [[The Dorothy Boot Homes, 1908]]
@@ -35,20 +35,20 @@ From a herbalist's shop on Goose Gate in 1849 Boots grew into a great firm. Thes
 - [[Boots on Goose Gate]]
 
 ## Clothes
-The county's hosiery firms, and a fashion designer from Beeston who opened his first shop in a tiny room off Byard Lane in 1970, showed his work at the castle in 1995 and designed seating for a Nottingham cinema.
+Clothing was a long-standing trade in Nottingham, grown out of the stocking frame. In the 19th century hosiery firms such as I. & R. Morley employed thousands. A century later Paul Smith, from Beeston, opened a small shop off Byard Lane and built an international fashion business from it.
 - [[Samuel Morley]]
 - 1970: [[Paul Smith]]
 - [[True Brit at the castle]]
 - [[Broadway]]
 
 ## Beer, sauce and soap
-Basford made things for the kitchen and the bathroom, and brewed: two breweries, a sauce factory and a soap works.
+Along the River Leen at Basford, the 19th century brought breweries and works making goods for the household. Shipstones and the Home Brewery supplied the city's pubs for over a century, and HP Sauce began in a pickle and sauce factory nearby.
 - [[Home Brewery]]
 - [[Shipstones' Star Brewery]]
 - [[HP Sauce and soap]]
 
 ## Engines and bricks
-Heavy industry on the edges of the city: bricks, stone, pots and iron, and the aero engines tested at Hucknall.
+Beyond the textile and consumer trades lay heavier industry on the city's edges. The clay of Mapperley fed large brickworks, Stanton made iron castings in great quantity, Bulwell's limestone was quarried for building, and from 1927 Rolls-Royce tested its aero engines at Hucknall.
 - [[Mapperley bricks]]
 - [[Rolls-Royce at Hucknall]]
 - [[Stanton ironworks]]

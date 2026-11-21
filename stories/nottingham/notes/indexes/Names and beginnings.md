@@ -5,10 +5,10 @@ id: names
 sort: as listed
 ---
 
-How the places on the map began and got their names: Bronze Age and Roman finds, Saxon burials, a cross and a fort, the villages Domesday Book wrote down in 1086, and names given since.
+Many of the places around Nottingham are far older than the city's growth. Their names, and finds in the ground, record people who lived here before the Norman Conquest, and Domesday Book gives the first written account of many of them.
 
 ## Before the Normans
-The oldest traces: a Bronze Age settlement on piles, a Roman ford, an Anglo-Saxon burial ground, the Danes who took the town in 868, and an Anglo-Saxon cross.
+Finds along the Trent show settlement from the Bronze Age and use of the river in Roman times. Anglo-Saxon villages followed, and in the 9th century the Danes took Nottingham, which became one of the Five Boroughs of the Danelaw before English kings regained it.
 - [[Bronze Age finds, 1937]]
 - [[The Roman ford]]
 - [[Roman Chilwell]]
@@ -20,7 +20,7 @@ The oldest traces: a Bronze Age settlement on piles, a Roman ford, an Anglo-Saxo
 - [[Stapleford Cross]]
 
 ## In Domesday Book
-In 1086 Domesday Book recorded many of the villages round Nottingham, some under names we would barely know.
+The Domesday survey of 1086 recorded most of the villages around Nottingham, often under spellings very different from their modern names. The entries tell us who held the land and give the earliest written evidence for many places.
 - [[Ernehale]]
 - [[Baseford]]
 - [[Buleuuelle]]
@@ -31,7 +31,7 @@ In 1086 Domesday Book recorded many of the villages round Nottingham, some under
 - [[The manor of Wilford]]
 
 ## Names given since
-Other names came later, from the cloth trade, a healing spring, a local official or a legend.
+Other names came later and record local history: a cloth trade, a healing spring, a medieval official, a legend, even a crop. Some, such as Gotham, travelled much further than the place itself.
 - [[Walker Gate]]
 - [[St Ann's Well]]
 - [[Thomas Mapurley]]

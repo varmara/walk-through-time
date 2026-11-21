@@ -4,10 +4,10 @@ order: 7
 id: transport
 ---
 
-How people got about: the railways and their stations, a bridge turned over to cars, the buses and aircraft that came after, and the trams that came back.
+Transport shaped Nottingham's growth. The canal and then the railways brought coal and carried away goods, the railways created new suburbs, and in the 20th century buses, trolleybuses and aircraft were added. In 2004 trams returned to the city.
 
 ## The railways
-Railways reached the county in 1839 and shaped it for a century: stations, viaducts, a great railway yard and the stations that closed.
+The railway reached Nottingham in 1839, and over the following decades competing companies built lines, stations and viaducts across the area. Many of these closed in the 1960s, though some stations have since reopened or been built anew.
 - [[The railway that began in a pub]]
 - [[Edwalton station]]
 - [[Bennerley Viaduct]]
@@ -24,13 +24,13 @@ Railways reached the county in 1839 and shaped it for a century: stations, viadu
 - [[No station for fifty years]]
 
 ## Buses and aircraft
-A bus company and two airfields.
+In the 20th century road and air transport grew. Local bus companies carried people across the county, and airfields at Tollerton and Hucknall served civil flying and the aircraft industry.
 - [[T. H. Barton]]
 - [[Tollerton airfield]]
 - [[Rolls-Royce at Hucknall]]
 
 ## Trams
-Trolleybuses replaced the trams, which left the city in 1936, and ran until 1966; trams returned in 2004, and a depot of 1900 recalls the first ones.
+Nottingham Corporation's trams were running to Sherwood by 1900. From 1927 trolleybuses replaced them, and the last tram ran in 1936. The trolleybuses were withdrawn in 1966, and almost forty years later trams returned with the opening of Nottingham Express Transit in 2004.
 - [[The trolleybuses]]
 - [[The trams come back, 2004]]
 - [[Trams to Wilford, 2015]]
@@ -38,7 +38,7 @@ Trolleybuses replaced the trams, which left the city in 1936, and ran until 1966
 - [[Compton Acres]]
 
 ## Canals and a tunnel
-Before railways came the canal; some of its buildings survive, and so does a tunnel meant for carriages.
+The Nottingham Canal opened in 1796 to bring coal into the town, and wharves and warehouses grew up along it. Railways later took much of its trade, but some canalside buildings survive. The Park Tunnel was cut through the sandstone in the 1840s and 1850s for carriages.
 - [[The Nottingham Canal]]
 - [[Fellows Morton & Clayton]]
 - [[The Trent Navigation warehouse]]

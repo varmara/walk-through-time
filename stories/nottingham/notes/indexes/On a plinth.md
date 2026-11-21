@@ -4,8 +4,7 @@ order: 13
 id: plinths
 ---
 
-Who Nottingham has put on a plinth, in the order the statues and memorials went up: a Chartist, a regiment, an MP, a
-queen, an airman, the city's war dead, a hosier, an outlaw and a football manager.
+Statues and memorials show who a town chose to honour, and when. Nottingham's range from a Chartist leader and Victorian MPs to the city's war dead and, in the 20th and 21st centuries, figures of legend and football.
 
 - [[The Arboretum war memorial]]
 - [[Statue of Feargus O'Connor]]

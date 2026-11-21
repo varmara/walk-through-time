@@ -4,10 +4,10 @@ order: 6
 id: coal
 ---
 
-The pits that dug Nottinghamshire's coal, the wagonway, canal and railway that carried it, and the power stations that burned it.
+The Nottinghamshire coalfield shaped much of the county for over three centuries. These stories cover the mines and the communities that grew around them, the ways coal was carried from the pits, and the power stations that burned it.
 
 ## The pits
-Collieries and ironworks across the county, from the first sinkings of the 1860s to the closures after the 1984–85 strike. Each shaped a village or a town around it.
+Coal had been dug near Nottingham for centuries, but large collieries came in the second half of the 19th century, at Clifton, Bestwood, Hucknall and Gedling. More pits followed in the 20th century at Calverton and Cotgrave. Each brought new housing and many new residents, and most closed in the decades after the miners' strike of 1984–85.
 - [[Sir Robert Clifton's colliery]]
 - [[Bestwood winding engine]]
 - [[Gedling Colliery]]
@@ -19,14 +19,14 @@ Collieries and ironworks across the county, from the first sinkings of the 1860s
 - [[Bennerley Ironworks]]
 
 ## Carrying the coal
-The coal needed carrying: by the wooden wagonway of 1603–04, by canal, by railway, and over the iron viaduct at Bennerley.
+Coal is heavy, and getting it to market cheaply mattered as much as digging it. As early as 1603–04 a wooden wagonway carried coal from the Strelley pits towards Wollaton. It was followed by the Nottingham Canal and, from the 1830s, by railways first proposed by local coal owners.
 - [[Wollaton Wagonway]]
 - [[The Nottingham Canal]]
 - [[The railway that began in a pub]]
 - [[Bennerley Viaduct]]
 
 ## Power stations
-At the end of the line coal was burned for electricity, from the station at Wilford in 1925 to Ratcliffe-on-Soar, the last coal-fired power station in Britain, which shut in 2024.
+In the 20th century much of the coal went to generate electricity. A power station at Wilford supplied the city from 1925, and Ratcliffe-on-Soar, opened in 1968, became the last coal-fired power station in Britain when it closed in 2024.
 - [[Wilford Power Station]]
 - [[Ratcliffe-on-Soar Power Station]]
 - [[The power station that was not built]]

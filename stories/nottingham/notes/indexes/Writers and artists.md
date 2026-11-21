@@ -4,11 +4,11 @@ order: 18
 id: writers
 ---
 
-The poets, novelists, painters and photographers who lived, worked or were born here.
+Nottinghamshire has produced or attracted a number of notable writers and artists. Their work often draws on the life of the area, from the Byrons and the Romantic poets to the mining communities of D. H. Lawrence and the working-class Nottingham of Alan Sillitoe.
 
 
 ## Writers
-Poets and novelists who lived in, wrote of or were born in the county, from Lucy Hutchinson to Alan Sillitoe, by way of Byron and D. H. Lawrence.
+Writers connected with Nottingham include Lucy Hutchinson in the 17th century, Byron and Henry Kirke White in the Romantic period, and in the 20th century D. H. Lawrence, born in Eastwood, and Alan Sillitoe, whose novel Saturday Night and Sunday Morning is set in the city.
 - [[Lucy Hutchinson]]
 - [[Ruth Bryan]]
 - [[Mary Howitt]]
@@ -35,7 +35,7 @@ Poets and novelists who lived in, wrote of or were born in the county, from Lucy
 - [[The Lawrences on Garden Road]]
 
 ## Artists
-Artists who were born or worked here, and an art centre.
+Painters and photographers have also come from the area, among them Richard Parkes Bonington, born in Arnold; today Nottingham Contemporary shows art in the city.
 - [[Richard Parkes Bonington]]
 - [[Henry Dawson]]
 - [[Samuel Bourne]]
