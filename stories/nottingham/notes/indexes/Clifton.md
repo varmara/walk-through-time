@@ -8,6 +8,10 @@ sort: as listed
 
 For centuries Clifton was the village of the Clifton family, who held the manor from the 13th century. After the Second World War the council built a very large housing estate beside it, changing the area completely, while the old village survived on its hill above the Trent.
 
+## Before the village
+Long before the village grew up, a farm stood on the higher ground to its south-west, from around the time of the Roman conquest.
+- [[A Roman farm by the A453]]
+
 ## The village
 The old village grew up around the Cliftons' hall and the parish church, which dates from about 1190. Its almshouses, dovecote and school were provided by the family and other benefactors, and some of its houses go back to the medieval period.
 - [[St Mary's Church, Clifton]]

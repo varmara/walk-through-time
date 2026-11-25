@@ -8,6 +8,7 @@ sort: as listed
 
 Barton in Fabis is a small farming village on the south bank of the Trent. Its name records the beans once grown in its fields, and its medieval church and 17th-century dovecote reflect a long agricultural history, with a ferry linking it across the river.
 
+- [[Glebe Farm Roman villa]]
 - [[St George's Church]]
 - [[Manor Farm dovecote]]
 - [[Barton in the Beans]]
