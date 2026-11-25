@@ -6,7 +6,7 @@ check: Roman coins | hut settlement
 at:
   - Broxtowe Roman fort site, 52.98083, -1.21651
 names: no
-note: "the pin is the point the Pleiades gazetteer gives for the fort (place 985158683, CC BY 3.0, read from the Pleiades datasets on GitHub), among the houses of the estate; the fort's plan and size are not known. roman-britain.co.uk: facts only (All Rights Reserved, no licence)"
+note: "the pin is on the OpenStreetMap point for the fort (node/6920056669, in the Historic sites layer), which the Pleiades gazetteer also gives (place 985158683, CC BY 3.0), among the houses of the estate; the fort's plan and size are not known. roman-britain.co.uk: facts only (All Rights Reserved, no licence)"
 ---
 
 Workmen laying the sewers and roads of the new Broxtowe council estate found Roman coins and pottery.
