@@ -22,6 +22,7 @@ North of the old town lay open fields and common land until the 19th century. As
 - [[University College]]
 - [[Mary Potter]]
 - [[Guildhall]]
+- [[The Guildhall caves]]
 - [[Nottingham Victoria station]]
 - 1919: [[George Brough]]
 - [[Victoria Centre]]

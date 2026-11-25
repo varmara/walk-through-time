@@ -11,3 +11,4 @@ Stapleford is an old village west of the city with an Anglo-Saxon cross of about
 - [[The Hemlock Stone]]
 - [[Stapleford Cross]]
 - [[St Helen's, Stapleford]]
+- [[Sandiacre lock-up and pound]]

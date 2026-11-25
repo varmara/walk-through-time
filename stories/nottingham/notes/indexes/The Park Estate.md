@@ -10,6 +10,7 @@ The Park began as the castle's deer park. From the 1820s the Dukes of Newcastle 
 
 - [[The castle's deer park]]
 - [[Park Terrace]]
+- [[Columns Cave]]
 - [[Tower House]]
 - [[Hine's Park]]
 - [[The Park Tunnel]]

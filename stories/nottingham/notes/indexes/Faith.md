@@ -17,6 +17,8 @@ The medieval town had three parish churches, St Mary's, St Peter's and St Nichol
 - [[St Mary's Church, Clifton]]
 - [[St Wilfrid's Church]]
 - [[Lenton Priory]]
+- [[St Mary de la Roche]]
+- [[Beauvale Priory]]
 - [[St Nicholas' Church]]
 - [[The lost church of Flawford]]
 - [[St Stephen's Church]]

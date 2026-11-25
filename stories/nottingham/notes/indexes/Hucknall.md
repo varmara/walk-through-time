@@ -12,4 +12,6 @@ Hucknall was a village of framework knitters that became a mining town after its
 - [[The Byron vault]]
 - [[Hucknall's pits]]
 - [[Rolls-Royce at Hucknall]]
+- [[Hucknall's battle headquarters]]
+- [[Hucknall airfield's defences]]
 - [[The trams come back, 2004]]

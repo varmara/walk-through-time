@@ -12,6 +12,7 @@ Medieval kings held Nottingham Castle as a royal fortress, and kept the forests 
 - [[Mortimer's Hole]]
 - [[The castle's deer park]]
 - [[A royal hunting park]]
+- [[The middle bailey wall]]
 - [[Edward IV's tower, 1476]]
 - [[The castle in decay]]
 

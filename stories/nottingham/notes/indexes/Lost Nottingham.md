@@ -25,6 +25,8 @@ Industrial buildings have also been lost: some burned, like Lowe's silk mill in 
 Beyond the centre, a medieval priory, a village church, halls, a viaduct and a railway station have disappeared, along with places that gave their names to districts, such as St Ann's Well.
 - [[Lenton Priory]]
 - [[The lost church of Flawford]]
+- [[Keighton]]
+- [[Crow Close]]
 - [[Bulwell Hall]]
 - [[Forty Bridges]]
 - [[Gedling station]]

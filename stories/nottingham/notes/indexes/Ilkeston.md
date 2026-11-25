@@ -11,4 +11,5 @@ Ilkeston, on a hill above the Erewash, received a market charter from Henry III 
 - [[Tilchestune]]
 - [[Ilkeston Charter Fair]]
 - [[Stanton ironworks]]
+- [[Woodside Colliery]]
 - [[No station for fifty years]]

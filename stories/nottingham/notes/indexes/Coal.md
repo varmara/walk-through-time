@@ -17,6 +17,7 @@ Coal had been dug near Nottingham for centuries, but large collieries came in th
 - [[Calverton Colliery]]
 - [[Coal and iron at Bestwood]]
 - [[Bennerley Ironworks]]
+- [[Woodside Colliery]]
 
 ## Carrying the coal
 Coal is heavy, and getting it to market cheaply mattered as much as digging it. As early as 1603–04 a wooden wagonway carried coal from the Strelley pits towards Wollaton. It was followed by the Nottingham Canal and, from the 1830s, by railways first proposed by local coal owners.
