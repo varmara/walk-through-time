@@ -33,3 +33,8 @@ As the town grew richer in the 18th and 19th centuries, the streets around the s
 - [[Albert Hall]]
 - [[Nottingham Playhouse]]
 - [[Rock City]]
+
+## Shops
+Around 1900 the streets off the square filled with new shops built to catch the eye. Two of them, for a grocer and for Boots, carry some of the city's rare Art Nouveau decoration.
+- [[Furley & Co]]
+- [[Boots on Pelham Street]]

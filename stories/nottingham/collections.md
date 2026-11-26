@@ -19,3 +19,6 @@ Several values are separated by ;.
 | D. H. Lawrence | https://picturenottingham.co.uk/image-themes/dh-lawrence.html |  |  |  | D. H. Lawrence |  |
 | Lord Byron | https://picturenottingham.co.uk/image-themes/lord-byron-and-newstead-abbey.html |  |  |  | George Gordon Byron |  |
 | Sport | https://picturenottingham.co.uk/image-themes/sport.html |  | city ground; meadow lane; trent bridge cricket ground |  |  |  |
+| Boots' Art Nouveau shopfront (Historic England Archive) | https://historicengland.org.uk/images-books/photos/item/DP346480 |  | boots the chemist |  |  |  |
+| Nottingham station's iron gates (Geograph, Stephen Craven) | https://www.geograph.org.uk/photo/8354526 |  | nottingham station |  |  |  |
+| Sneinton's porch tiles (Stephen Best, Sneinton Magazine) | https://www.nottshistory.org.uk/articles/sneinton/sm28_14-20.htm |  | loughborough avenue; port arthur road; holborn avenue |  |  |  |

@@ -33,6 +33,7 @@ Boots began with a herbalist's shop on Goose Gate in 1849 and grew into a nation
 - [[Ibuprofen]]
 - 1941: [[Vera Anderson]]
 - [[Boots on Goose Gate]]
+- [[Boots on Pelham Street]]
 
 ## Clothes
 Clothing was a long-standing trade in Nottingham, grown out of the stocking frame. In the 19th century hosiery firms such as I. & R. Morley employed thousands. A century later Paul Smith, from Beeston, opened a small shop off Byard Lane and built an international fashion business from it.

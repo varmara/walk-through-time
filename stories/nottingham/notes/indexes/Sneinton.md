@@ -14,3 +14,4 @@ Sneinton lies on the hill east of the city. Its windmill belonged to the family 
 - [[Sneinton Market]]
 - [[Ibuprofen]]
 - [[Sneinton Hermitage]]
+- [[Sneinton's porch tiles]]

@@ -6,3 +6,6 @@ line. The pictures are linked, not shown, as they are not openly licensed.
 | Site | Credit |
 |---|---|
 | picturenottingham.co.uk | Picture Nottingham |
+| historicengland.org.uk | Historic England Archive |
+| geograph.org.uk | Geograph |
+| nottshistory.org.uk | Nottinghamshire History |
