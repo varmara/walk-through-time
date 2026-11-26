@@ -3,7 +3,7 @@
 import { $, dateText, esc, flightPace, whenText } from './util.js';
 import { S } from './state.js';
 import { fstate, isB, isThread, loadCard, loadSet, parseRef, refCentre, refOf, storyFor, tiled } from './data.js';
-import { paintBuildings } from './map.js';
+import { groundAt, paintBuildings } from './map.js';
 import { closeSheet } from './sheet.js';
 import { openRef, refName } from './cards.js';
 
@@ -176,11 +176,13 @@ function chapterCards(P, k){
   for (const c of P.cards.slice(k + 1)) { if (c.intro) break; out.push(c); }
   return out;
 }
+// the room the cards leave for the map: one padding for every card, so going from card to card never shifts it
+const cardPad = () => ({ top: 70, left: 16, right: 60, bottom: $('placesbar').offsetHeight + 24 });
 function fitAll(card){
   const P = S.places; if (!P) return;
   // (a chapter's card takes the map to that chapter's places)
   const rs = card?.chapter ? chapterCards(P, P.cards.indexOf(card)).flatMap(c => c.refs) : P.bs;
-  const cam = fitCamera((rs.length ? rs : P.bs).map(refCentre), { top: 70, left: 16, right: 60, bottom: $('placesbar').offsetHeight + 24 }, 16);
+  const cam = fitCamera((rs.length ? rs : P.bs).map(refCentre), cardPad(), 16);
   glide({ ...cam, bearing: S.map.getBearing(), pitch: S.map.getPitch() });
 }
 // the camera that shows all of pts inside the padding, worked out here rather than by the map's cameraForBounds:
@@ -252,13 +254,32 @@ const smooth = t => t < 0.5 ? Math.pow(2, EASE - 1) * Math.pow(t, EASE) : 1 - Ma
 // jumped: Women's lives, from Mary Howitt's house in the town to Frances Bush's plaque 8 km away)
 export const flightMs = (km, dz = 0) => Math.round(Math.min(3600, 1200 + 650 * Math.log2(1 + km) + 120 * Math.abs(dz)));
 export function glide(camera){
+  const run = ++glideRun;          // (a later glide wins)
+  if (!camera.center || !S.map.getTerrain()) return glideNow(camera);
+  // On the hills the camera works with one height for the ground and keeps it through a flight. A place higher than
+  // that shows where flat ground further on would, so the camera is aimed there, and the place lands in the middle
+  // of the view (MapLibre settles the camera's height onto the ground afterwards without the view moving). Without
+  // this, flying from the whole city (ground taken as 0 m) onto a place on a hill (Broxtowe, 90 m) the place swung
+  // down towards the middle and then rose well above it: the twitch
+  const to = maplibregl.LngLat.convert(camera.center);
+  Promise.race([groundAt([to.lng, to.lat]), new Promise(r => setTimeout(() => r(null), 600))]).then(h => {
+    if (run !== glideRun) return;
+    if (h == null) return glideNow(camera);
+    const pitch = (camera.pitch ?? S.map.getPitch()) * Math.PI / 180, bearing = (camera.bearing ?? S.map.getBearing()) * Math.PI / 180;
+    const d = (h - S.map.getCameraTargetElevation()) * Math.tan(pitch);     // metres on, away from the camera
+    const lat = to.lat + d * Math.cos(bearing) / 111320, lng = to.lng + d * Math.sin(bearing) / (111320 * Math.cos(to.lat * Math.PI / 180));
+    glideNow({ ...camera, center: [lng, lat] });
+  });
+}
+let glideRun = 0;
+function glideNow(camera){
   const pace = flightPace();
   if (!pace) return S.map.jumpTo(camera);
-  if (reduced()) return S.map.easeTo({ ...camera, duration: 300 });
+  if (reduced()) return S.map.easeTo({ ...camera, duration: 300, freezeElevation: true });
   const to = camera.center && maplibregl.LngLat.convert(camera.center);
   const km = to ? S.map.getCenter().distanceTo(to) / 1000 : 0;
   const dz = camera.zoom != null ? camera.zoom - S.map.getZoom() : 0;
-  S.map.flyTo({ ...camera, curve: 1.9, easing: smooth, duration: Math.round(flightMs(km, dz) * pace), essential: true });
+  S.map.flyTo({ ...camera, curve: 1.9, easing: smooth, duration: Math.round(flightMs(km, dz) * pace), essential: true, freezeElevation: true });
 }
 // how close a card takes the map to its place: near enough to pick out the building, with its street round it
 const PLACE_ZOOM = 16;
@@ -281,9 +302,9 @@ export function setPlace(k, fly = true){
   if (fly) flyWait = setTimeout(() => {
     if (!S.places || S.places.i !== k) return;
     if (c.intro) return fitAll(c);
-    const pts = c.refs.map(refCentre), pad = { top: 70, left: 30, right: 70, bottom: $('placesbar').offsetHeight + 20 };
+    const pts = c.refs.map(refCentre), pad = cardPad();
     if (pts.length > 1) return glide({ ...fitCamera(pts, pad, PLACE_ZOOM), bearing: S.map.getBearing(), pitch: S.map.getPitch() });
-    glide({ center: pts[0], zoom: Math.max(S.map.getZoom(), PLACE_ZOOM), padding: { top: 0, left: 0, right: 0, bottom: pad.bottom } });  // (all four: a fit's padding stays on the map)
+    glide({ center: pts[0], zoom: Math.max(S.map.getZoom(), PLACE_ZOOM), padding: pad });
   }, FLY_AFTER);
 }
 const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
