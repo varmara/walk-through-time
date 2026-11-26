@@ -3,7 +3,7 @@ type: story
 source: https://en.wikipedia.org/wiki/Barton_in_Fabis
 check: Barton in the Beans | 1774 | Attenborough | Fairham
 at:
-  - Barton in the Beans, 52.8901, -1.2231
+  - Barton in the Beans, 52.8901, -1.2231, approximate
 names: no
 ---
 

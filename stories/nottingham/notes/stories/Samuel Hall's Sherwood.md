@@ -5,7 +5,7 @@ source: https://nottinghamcity.gov.uk/media/euqmlxqh/carrington-and-sherwood-wal
 title: "Carrington and Sherwood walk (Nottingham Local Access Forum, 2018)"
 read: 2026-11-16
 at:
-  - Sherwood, 52.9805, -1.1470
+  - Sherwood, 52.9805, -1.1470, approximate
 names: no
 note: "facts only (no notice)"
 ---

@@ -4,7 +4,7 @@ when: "1086"
 source: https://en.wikipedia.org/wiki/Carlton,_Nottinghamshire
 check: Carentune | 1086 | framework knitters
 at:
-  - Carlton, 52.9665, -1.0830
+  - Carlton, 52.9665, -1.0830, approximate
 names: no
 ---
 

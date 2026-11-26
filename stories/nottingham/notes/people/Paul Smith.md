@@ -6,7 +6,7 @@ source: https://en.wikipedia.org/wiki/Paul_Smith_(fashion_designer)
 wikipedia: Paul Smith (fashion designer)
 check: Beeston | 5 July 1946 | 1970 | 6 Byard Lane | twelve feet by twelve feet | 2000
 at:
-  - 6 Byard Lane, 52.9519, -1.1452
+  - 6 Byard Lane, 52.95195, -1.14655
 note: a pin on Byard Lane, at about where number 6 is
 ---
 

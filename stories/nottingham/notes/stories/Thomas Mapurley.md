@@ -4,7 +4,7 @@ when: "1387"
 source: https://en.wikipedia.org/wiki/Mapperley
 check: Thomas Mapurley | 1387 | 1402 | Mapperley Plains
 at:
-  - Mapperley, 52.9800, -1.1220
+  - Mapperley, 52.9800, -1.1220, approximate
 names: no
 ---
 

@@ -4,7 +4,7 @@ when: "1086"
 source: https://en.wikipedia.org/wiki/Bulwell
 check: Domesday | Buleuuelle | Bull Well | Bulla
 at:
-  - Bulwell, 53.0010, -1.1960
+  - Bulwell, 53.0010, -1.1960, approximate
 names: no
 ---
 

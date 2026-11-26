@@ -3,7 +3,7 @@ type: story
 source: https://en.wikipedia.org/wiki/1831_reform_riots
 check: Lowe's Silk Mill | Beeston | 11 October
 at:
-  - Lowe's Silk Mill, 52.9265, -1.2165
+  - Lowe's Silk Mill, 52.9265, -1.2165, approximate
 names: no
 see:
   - "[[The castle burned, 1831]]"

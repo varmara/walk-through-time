@@ -4,7 +4,7 @@ when: "1086"
 source: https://en.wikipedia.org/wiki/Basford,_Nottingham
 check: Baseford | 1086 | Basa | 1877
 at:
-  - Basford, 52.9795, -1.1775
+  - Basford, 52.9795, -1.1775, approximate
 names: no
 ---
 

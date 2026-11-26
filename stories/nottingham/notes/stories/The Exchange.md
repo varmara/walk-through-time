@@ -4,10 +4,10 @@ when: "1724"
 source: https://en.wikipedia.org/wiki/Nottingham_Exchange
 check: 1724 | 1726 | Marmaduke Pennell | Great Hall | 1926
 at:
-  - The Exchange, 52.952162, -1.147844
+  - The Exchange, 52.9534, -1.1484
 see:
   - "[[Council House]]"
-note: a pin at the article's point, on the Council House that replaced it
+note: a pin on the Council House that replaced it
 ---
 
 In 1724–26 the town's Exchange was built in the Market Place to a design by the mayor, Marmaduke Pennell. It held

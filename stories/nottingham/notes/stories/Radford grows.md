@@ -4,7 +4,7 @@ when: "1891"
 source: https://en.wikipedia.org/wiki/Radford,_Nottingham
 check: 1891 | 38,718 | 1 April 1897 | Raleigh | Player
 at:
-  - Radford, 52.9605, -1.1780
+  - Radford, 52.9605, -1.1780, approximate
 names: no
 ---
 

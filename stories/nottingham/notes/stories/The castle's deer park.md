@@ -4,7 +4,7 @@ when: "1663"
 source: https://en.wikipedia.org/wiki/The_Park_Estate
 check: deer park | 1663 | William Cavendish
 at:
-  - The Park Estate, 52.9502, -1.1608
+  - The Park Estate, 52.9502, -1.1608, approximate
 names: no
 ---
 

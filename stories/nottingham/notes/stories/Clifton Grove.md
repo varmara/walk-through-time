@@ -4,7 +4,7 @@ when: "1677"
 source: https://en.wikipedia.org/wiki/Henry_Kirke_White
 check: Clifton Grove | 1803 | butcher
 at:
-  - Clifton Grove, 52.914, -1.1876
+  - Clifton Grove, 52.914, -1.1876, approximate
 see:
   - "[[The poet in the churchyard]]"
   - "[[The legend of Clifton Grove]]"

@@ -4,7 +4,7 @@ when: "1745"
 source: https://en.wikipedia.org/wiki/Thrumpton
 check: Emerton | 1745
 at:
-  - An estate village, 52.8752, -1.2432
+  - An estate village, 52.8752, -1.2432, approximate
 names: no
 ---
 

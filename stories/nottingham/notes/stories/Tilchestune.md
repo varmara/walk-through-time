@@ -4,7 +4,7 @@ when: "1086"
 source: https://en.wikipedia.org/wiki/Ilkeston
 check: Tilchestune | 1086 | Gilbert de Ghent | 6th century | Elch
 at:
-  - Ilkeston, 52.9710, -1.3090
+  - Ilkeston, 52.9710, -1.3090, approximate
 names: no
 ---
 

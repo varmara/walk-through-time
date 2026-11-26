@@ -4,7 +4,7 @@ when: "1086"
 source: https://en.wikipedia.org/wiki/Arnold,_Nottinghamshire
 check: Ernehale | 1086
 at:
-  - Arnold, 53.0050, -1.1270
+  - Arnold, 53.0050, -1.1270, approximate
 names: no
 ---
 
