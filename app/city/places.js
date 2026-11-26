@@ -147,6 +147,16 @@ export function showPlaces(name, bs, hints, intro, set, chapters){
   });
   let num = 0, open = null;
   cards.forEach(c => { if (!c.intro) { c.n = ++num; if (open) open.n++; } else { c.n = 0; open = c.chapter || null; } });
+  // a story at the place the card before it showed, and only there: the map, there already, stays
+  let before = null;
+  cards.forEach(c => {
+    if (c.intro) { before = null; return; }
+    // (a place by where it is: the same pin comes once for each layer that tells of it)
+    const at = x => isB(x) ? 'b' + x : refCentre(x).map(v => v.toFixed(5)).join();
+    const r = c.refs.length === 1 ? at(c.refs[0]) : null;
+    c.same = !!r && before === r;
+    before = r;
+  });
   const P = S.places = { name, intro, bs, cards, chapters: chapters ? chapters.length : 0, i: 0, page: false, set: need.length && set ? set : null };
   if (P.set) P.set.catch(() => {}).then(() => { if (S.places !== P) return; P.set = null;
     P.cards.forEach((c, k) => fillCard(k)); loadAround(P.i); });
@@ -318,6 +328,7 @@ const FLY_AFTER = 350;       // ms of the cards left still before the map flies
 let flyWait;
 export function setPlace(k, fly = true){
   const P = S.places; if (!P) return;
+  const from = P.i;
   P.i = k;
   const c = P.cards[k], n = P.cards.filter(x => !x.intro).length;
   $('pCount').textContent = c.intro ? (c.chapter ? `Chapter ${c.chapter.j} of ${c.chapter.m}` : `${n} ${n === 1 ? 'story' : 'stories'}`) : `${numOf(P, k)} of ${n}`;
@@ -334,6 +345,8 @@ export function setPlace(k, fly = true){
   if (fly) flyWait = setTimeout(() => {
     if (!S.places || S.places.i !== k) return;
     if (c.intro) return fitAll(c);
+    // the same place as the card before, come to from it: the map is there already
+    if (c.same && from === k - 1) return;
     const pts = c.refs.map(refCentre), pad = cardPad();
     if (pts.length > 1) return glide({ ...fitCamera(pts, pad, PLACE_ZOOM), bearing: S.map.getBearing(), pitch: S.map.getPitch() });
     glide({ center: pts[0], zoom: Math.max(S.map.getZoom(), PLACE_ZOOM), padding: pad });
