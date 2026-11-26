@@ -181,6 +181,7 @@ a.fab{display:grid;place-items:center;text-decoration:none;color:inherit}
 .pin{width:26px;height:26px;border-radius:50%;border:2px solid var(--on-strong);background:var(--hl);color:var(--on-strong);font:600 12px var(--sans);
   display:grid;place-items:center;cursor:pointer;box-shadow:var(--shadow-pin);padding:0}
 .pin.on{background:var(--ink);color:var(--paper);transform:scale(1.25)}
+.pin.dim{filter:opacity(.35)}       /* (not opacity: the map sets each marker's own) */
 .allplaces{display:block;margin:4px 0 0}
 @media (min-width:760px){ .placesbar{left:16px;right:auto;width:420px;bottom:16px} .phead{margin:0} .pcards{padding:2px 0 6px;scroll-padding:0} }
 /* one story at a time: the card fills the strip; pins too close to tell apart show the stories' numbers in them */

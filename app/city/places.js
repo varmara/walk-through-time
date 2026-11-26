@@ -170,14 +170,33 @@ export function showPlaces(name, bs, hints, intro, set, chapters){
   // has its cards: its height is the bottom of the view
   requestAnimationFrame(() => { if (S.places === P) fitAll(); });
 }
+// the story cards of the chapter whose opening card is card k (up to the next chapter's)
+function chapterCards(P, k){
+  const out = [];
+  for (const c of P.cards.slice(k + 1)) { if (c.intro) break; out.push(c); }
+  return out;
+}
 function fitAll(card){
   const P = S.places; if (!P) return;
   // (a chapter's card takes the map to that chapter's places)
-  const rs = card?.chapter ? P.cards.slice(P.cards.indexOf(card) + 1).filter((c, k, a) => !a.slice(0, k).some(x => x.intro)).flatMap(c => c.intro ? [] : c.refs) : P.bs;
-  const pts = (rs.length ? rs : P.bs).map(refCentre), lons = pts.map(p => p[0]), lats = pts.map(p => p[1]);
-  const cam = S.map.cameraForBounds([[Math.min(...lons), Math.min(...lats)], [Math.max(...lons), Math.max(...lats)]],
-    { padding: { top: 70, left: 16, right: 60, bottom: $('placesbar').offsetHeight + 24 }, maxZoom: 16 });
-  if (cam) glide({ ...cam, bearing: S.map.getBearing(), pitch: S.map.getPitch() });
+  const rs = card?.chapter ? chapterCards(P, P.cards.indexOf(card)).flatMap(c => c.refs) : P.bs;
+  const cam = fitCamera((rs.length ? rs : P.bs).map(refCentre), { top: 70, left: 16, right: 60, bottom: $('placesbar').offsetHeight + 24 }, 16);
+  glide({ ...cam, bearing: S.map.getBearing(), pitch: S.map.getPitch() });
+}
+// the camera that shows all of pts inside the padding, worked out here rather than by the map's cameraForBounds:
+// that works from the camera as it is, and from close in at a tilt it gave a point miles off at a far lower zoom.
+// The tilt squeezes the ground's depth, so the height allowed is stretched by it, and widens what is near, so the
+// width allowed is narrowed (pitch: the camera's, kept)
+function fitCamera(pts, pad, maxZoom){
+  const merc = ([lon, lat]) => [(lon + 180) / 360, (1 - Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360)) / Math.PI) / 2];
+  const xs = pts.map(p => merc(p)[0]), ys = pts.map(p => merc(p)[1]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const c = S.map.getCanvas(), w = c.clientWidth - pad.left - pad.right, h = c.clientHeight - pad.top - pad.bottom;
+  const tilt = Math.max(0.35, Math.cos(S.map.getPitch() * Math.PI / 180));
+  const fit = Math.min(w * tilt ** 0.75 / Math.max(x1 - x0, 1e-9), h / tilt / Math.max(y1 - y0, 1e-9)) / 512;
+  const zoom = Math.min(maxZoom, Math.max(S.map.getMinZoom(), Math.log2(fit)));
+  const lon = (x0 + x1) / 2 * 360 - 180, lat = Math.atan(Math.sinh(Math.PI * (1 - (y0 + y1)))) * 180 / Math.PI;
+  return { center: [lon, lat], zoom, padding: pad };
 }
 // a layer's groups (or a whole story layer or topic, by its id) as one set of cards, in the build's date order,
 // item by item: each story at a place once (a building with two stories of the set has a card for each). A whole
@@ -263,12 +282,8 @@ export function setPlace(k, fly = true){
     if (!S.places || S.places.i !== k) return;
     if (c.intro) return fitAll(c);
     const pts = c.refs.map(refCentre), pad = { top: 70, left: 30, right: 70, bottom: $('placesbar').offsetHeight + 20 };
-    if (pts.length > 1) {
-      const lons = pts.map(p => p[0]), lats = pts.map(p => p[1]);
-      const cam = S.map.cameraForBounds([[Math.min(...lons), Math.min(...lats)], [Math.max(...lons), Math.max(...lats)]], { padding: pad, maxZoom: PLACE_ZOOM });
-      if (cam) return glide({ ...cam, bearing: S.map.getBearing(), pitch: S.map.getPitch() });
-    }
-    glide({ center: pts[0], zoom: Math.max(S.map.getZoom(), PLACE_ZOOM), padding: { bottom: pad.bottom } });
+    if (pts.length > 1) return glide({ ...fitCamera(pts, pad, PLACE_ZOOM), bearing: S.map.getBearing(), pitch: S.map.getPitch() });
+    glide({ center: pts[0], zoom: Math.max(S.map.getZoom(), PLACE_ZOOM), padding: { top: 0, left: 0, right: 0, bottom: pad.bottom } });  // (all four: a fit's padding stays on the map)
   }, FLY_AFTER);
 }
 const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -317,6 +332,8 @@ export function clearPlaces(showTime){
 export function drawPins(){
   if (!S.map || !S.map.getSource('places')) return;
   const seen = new Set(), drawn = [], P = S.places, cur = P && !P.cards[P.i]?.intro ? numOf(P, P.i) : null;
+  // on a chapter's opening card, the other chapters' pins are faded
+  const chap = P && P.cards[P.i]?.chapter ? new Set(chapterCards(P, P.i).map(c => c.n)) : null;
   for (const f of S.map.querySourceFeatures('places')) {
     const pr = f.properties, cl = pr.cluster;
     // (a joined pin can come once from each map tile it lies across, under another id and a little apart: the
@@ -342,6 +359,7 @@ export function drawPins(){
     // (classes toggled, not set: the map's own classes on the marker place it)
     const html = `${shown}${more ? `<span class="more">+${more}</span>` : ''}`;
     el.classList.add('pin'); el.classList.toggle('joined', !!more); el.classList.toggle('on', mine);
+    el.classList.toggle('dim', !!chap && !nums.some(x => chap.has(x)));
     if (el.innerHTML !== html) el.innerHTML = html;
     el.setAttribute('aria-label', more ? `Stories ${nums.join(', ')} here` : `Story ${shown}`);
     el.onclick = e => {
