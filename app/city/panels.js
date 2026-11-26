@@ -8,12 +8,19 @@ import { openRef } from './cards.js';
 import { clearPlaces, showGroups, showPlaces } from './places.js';
 import { closeSheet } from './sheet.js';
 
+// places fold under their area's heading: all of an area's places together, the areas in the order their first
+// place comes, each area's places in their own order (a place added later, with a higher order, joins its area's
+// heading rather than starting a second one at the end)
+function byArea(Ls){
+  const areas = [...new Set(Ls.map(L => L.area || null))];
+  return areas.flatMap(a => Ls.filter(L => (L.area || null) === a));
+}
 // ================= Layers panel =================
 export function renderLayers(){
   renderStories();
   const html = [];
   for (const sec of SECTIONS.filter(s => !STORY_SECTIONS.includes(s))) {
-    const Ls = S.layers.filter(L => L.section === sec && L.groups.some(g => g.count > 0));
+    const Ls = byArea(S.layers.filter(L => L.section === sec && L.groups.some(g => g.count > 0)));
     if (!Ls.length) continue;
     html.push(`<div class="section"><div class="seclbl">${esc(sec)}</div>`);
     // places fold under small headings (The city, South of the Trent…), each open while one of its layers is on
@@ -87,7 +94,7 @@ export function renderStories(){
       <button class="more" data-sinfo="${esc(key)}" aria-label="About ${esc(title)}" aria-expanded="false">ⓘ</button></div>
     <div class="linfo" id="sinfo-${esc(key)}" hidden>${infoHtml(L, g, !g || !indent)}</div>`;
   for (const sec of STORY_SECTIONS) {
-    const Ls = S.layers.filter(L => L.section === sec && L.groups.some(g => g.count > 0 && g.items?.length));
+    const Ls = byArea(S.layers.filter(L => L.section === sec && L.groups.some(g => g.count > 0 && g.items?.length)));
     if (!Ls.length) continue;
     html.push(`<div class="section"><div class="seclbl">${esc(STORY_LABELS[sec] || sec)}</div>`);
     let area = null;

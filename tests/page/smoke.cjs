@@ -93,6 +93,8 @@ const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (
   // a thread's stories as numbered cards, from the Stories sheet
   await open('');
   await page.click('#bStories'); await page.waitForTimeout(300);
+  const areaHeads = await page.$$eval('#stSections details.area > summary', els => els.map(e => e.childNodes[0].textContent.trim()));
+  check(areaHeads.length > 0 && new Set(areaHeads).size === areaHeads.length, 'each area has one heading in the Stories sheet');
   const thread = await page.$('#stSections .section:has(.seclbl:text-is("Themes")) [data-set]');
   check(!!thread, 'the Stories sheet has threads');
   if (thread) {
