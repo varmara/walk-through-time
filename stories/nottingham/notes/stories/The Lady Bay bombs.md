@@ -3,7 +3,7 @@ type: story
 source: https://en.wikipedia.org/wiki/Lady_Bay,_Nottinghamshire
 check: 1941 | Luftwaffe | Pinders Ponds | bomb sites
 at:
-  - The Lady Bay bombs, 52.938, -1.119
+  - The Lady Bay bombs, 52.938, -1.119, approximate
 names: no
 ---
 

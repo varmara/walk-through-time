@@ -3,7 +3,7 @@ type: event
 source: https://en.wikipedia.org/wiki/National_Shell_Filling_Factory,_Chilwell
 check: Chetwynd | 1915 | 1 July 1918 | 134 | Chetwynd Barracks
 at:
-  - National Shell Filling Factory, 52.9118, -1.245
+  - National Shell Filling Factory, 52.9118, -1.245, approximate
 names: no
 note: the pin is at the article's point, as before; the factory's buildings are gone
 ---

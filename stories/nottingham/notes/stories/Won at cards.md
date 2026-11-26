@@ -3,7 +3,7 @@ type: story
 source: https://en.wikipedia.org/wiki/West_Bridgford
 check: 1523 | game of cards | 1894 | 1972 | Rushcliffe
 at:
-  - Won at cards, 52.932, -1.1274
+  - Won at cards, 52.932, -1.1274, approximate
 names: no
 ---
 

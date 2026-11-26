@@ -4,7 +4,7 @@ when: "1086"
 source: https://en.wikipedia.org/wiki/Hucknall
 check: Hochenale | 1086 | 1295 | 1915 | Hucknall Torkard | Torcard
 at:
-  - Hucknall, 53.0385, -1.2050
+  - Hucknall, 53.0385, -1.2050, approximate
 names: no
 ---
 

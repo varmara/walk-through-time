@@ -6,7 +6,7 @@ source:
   - https://en.wikipedia.org/wiki/Gedling_Country_Park
 check: Gedling Colliery | 1899 | pit of all nations | Caribbean | 128 | 1991 | 2015
 at:
-  - Gedling Colliery, 52.991, -1.085
+  - Gedling Colliery, 52.991, -1.085, approximate
 names: no
 see:
   - "[[Cotgrave Colliery]]"

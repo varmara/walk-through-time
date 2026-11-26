@@ -3,7 +3,7 @@ type: event
 source: https://en.wikipedia.org/wiki/Gotham,_Nottinghamshire
 check: 2 August 1984 | tornado
 at:
-  - Gotham, 52.8655, -1.2035
+  - Gotham, 52.8655, -1.2035, approximate
 names: no
 see:
   - "[[The Wise Men of Gotham]]"

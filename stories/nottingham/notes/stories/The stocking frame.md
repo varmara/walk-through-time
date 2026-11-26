@@ -4,7 +4,7 @@ when: "1589"
 source: https://en.wikipedia.org/wiki/Stocking_frame
 check: William Lee | Calverton | 1589 | 1728
 at:
-  - The stocking frame, 53.0368, -1.082
+  - The stocking frame, 53.0368, -1.082, approximate
 names: no
 see:
   - "[[The first Luddites]]"

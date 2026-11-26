@@ -6,7 +6,7 @@ source:
   - https://en.wikipedia.org/wiki/Gotham,_Nottinghamshire
 check: Towneley | King John | cuckoo | Washington Irving | 1807 | Batman
 at:
-  - The Wise Men of Gotham, 52.867, -1.206
+  - The Wise Men of Gotham, 52.867, -1.206, approximate
 names: no
 ---
 

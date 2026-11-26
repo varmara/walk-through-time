@@ -3,7 +3,7 @@ type: story
 source: https://en.wikipedia.org/wiki/Attenborough,_Nottinghamshire
 check: Addensburgh | 1774 | 1966 | Barrett Lane
 at:
-  - Attenborough village, 52.9049, -1.23
+  - Attenborough village, 52.9049, -1.23, approximate
 names: no
 note: "a pin in the village, on Church Lane"
 ---
