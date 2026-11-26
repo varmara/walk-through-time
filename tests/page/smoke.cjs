@@ -29,6 +29,15 @@ const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (
     && errors.push('could not load ' + r.url().slice(BASE.length) + ' (' + r.failure()?.errorText + ')'));
   page.on('response', r => r.url().startsWith(BASE) && r.status() >= 400 && !/\.pbf/.test(r.url()) && errors.push(`${r.status()} ${r.url().slice(BASE.length)}`));
   const text = async sel => ((await page.textContent(sel)) || '').replace(/\s+/g, ' ').trim();
+  // a card's counter changes once the strip has settled on the next card, which can take longer than a fixed pause
+  // when the map flies far between pins: wait for the change (up to 10 s), not a set time
+  const counterAfter = async action => {
+    const before = await text('#pCount');
+    await action();
+    await page.waitForFunction(b => (document.getElementById('pCount')?.textContent || '').replace(/\s+/g, ' ').trim() !== b,
+      before, { timeout: 10000 }).catch(() => {});
+    await page.waitForTimeout(200);
+  };
   const open = async q => {
     await page.goto(`${BASE}${CITY}/${q}`, { waitUntil: 'load' });
     await page.waitForSelector('#loader.done', { timeout: 90000 });
@@ -93,14 +102,14 @@ const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (
     // (a thread of several chapters has a card for each chapter too, unnumbered, before its stories)
     const intros = (await page.$$('#pCards .pintro')).length;
     check(n > 0 && intros > 0 && (await page.$$('#pCards .pcard')).length === n + intros, "a thread opens on its opening card, then a card for each story (and each chapter)");
-    if (intros > 1) { await page.click('#pNext'); await page.waitForTimeout(800); check(/^Chapter 1 of \d+$/.test(await text('#pCount')) && /^Chapter 1 of/.test(await text('#pCards .pintro.on')), 'a thread of several chapters opens its first chapter on a card of its own'); }
-    for (let i = 0; i < intros && !/^1 of /.test(await text('#pCount')); i++) { await page.click('#pNext'); await page.waitForTimeout(800); }
+    if (intros > 1) { await counterAfter(() => page.click('#pNext')); check(/^Chapter 1 of \d+$/.test(await text('#pCount')) && /^Chapter 1 of/.test(await text('#pCards .pintro.on')), 'a thread of several chapters opens its first chapter on a card of its own'); }
+    for (let i = 0; i < intros && !/^1 of /.test(await text('#pCount')); i++) { await counterAfter(() => page.click('#pNext')); }
     check(await text('#pCount') === `1 of ${n}`, "the next card is its first story, numbered");
     // the same cards as a page: one under another, each with its way back to the map
     await page.click('#pPage'); await page.waitForTimeout(500);
     check(await page.$eval('#placesbar', el => el.classList.contains('page')) && (await page.$$('#pCards .pmap')).length > 0, 'the thread shows as a page');
     const back = await page.$$('#pCards .pcard:not(.pintro) [data-map]');
-    if (back[1]) { await back[1].click(); await page.waitForTimeout(800); }
+    if (back[1]) { await counterAfter(() => back[1].click()); }
     check(!(await page.$eval('#placesbar', el => el.classList.contains('page'))) && await text('#pCount') === `2 of ${n}`, '"Show on the map" goes back to its card');
   }
   // a link to a place opens its cards, not a tickbox
