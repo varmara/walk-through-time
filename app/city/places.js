@@ -181,9 +181,20 @@ const cardPad = () => ({ top: 70, left: 16, right: 60, bottom: $('placesbar').of
 function fitAll(card){
   const P = S.places; if (!P) return;
   // (a chapter's card takes the map to that chapter's places)
+  glide({ ...introCamera(P, card), bearing: S.map.getBearing(), pitch: S.map.getPitch() });
+}
+const introCamera = (P, card) => {
   const rs = card?.chapter ? chapterCards(P, P.cards.indexOf(card)).flatMap(c => c.refs) : P.bs;
-  const cam = fitCamera((rs.length ? rs : P.bs).map(refCentre), cardPad(), 16);
-  glide({ ...cam, bearing: S.map.getBearing(), pitch: S.map.getPitch() });
+  return fitCamera((rs.length ? rs : P.bs).map(refCentre), cardPad(), 16);
+};
+// where the cards either side of card k take the map: the ground's height there read now, so a flight to them
+// need not wait for it (on a slow connection it came too late, and the place jumped at the end)
+function warmNext(P, k){
+  for (const j of [k + 1, k - 1]) {
+    const c = P.cards[j]; if (!c) continue;
+    const at = c.intro ? introCamera(P, c).center : c.refs.length === 1 ? refCentre(c.refs[0]) : fitCamera(c.refs.map(refCentre), cardPad(), PLACE_ZOOM).center;
+    groundAt(at);
+  }
 }
 // the camera that shows all of pts inside the padding, worked out here rather than by the map's cameraForBounds:
 // that works from the camera as it is, and from close in at a tilt it gave a point miles off at a far lower zoom.
@@ -262,7 +273,7 @@ export function glide(camera){
   // this, flying from the whole city (ground taken as 0 m) onto a place on a hill (Broxtowe, 90 m) the place swung
   // down towards the middle and then rose well above it: the twitch
   const to = maplibregl.LngLat.convert(camera.center);
-  Promise.race([groundAt([to.lng, to.lat]), new Promise(r => setTimeout(() => r(null), 600))]).then(h => {
+  Promise.race([groundAt([to.lng, to.lat]), new Promise(r => setTimeout(() => r(null), 1200))]).then(h => {
     if (run !== glideRun) return;
     if (h == null) return glideNow(camera);
     const pitch = (camera.pitch ?? S.map.getPitch()) * Math.PI / 180, bearing = (camera.bearing ?? S.map.getBearing()) * Math.PI / 180;
@@ -279,7 +290,27 @@ function glideNow(camera){
   const to = camera.center && maplibregl.LngLat.convert(camera.center);
   const km = to ? S.map.getCenter().distanceTo(to) / 1000 : 0;
   const dz = camera.zoom != null ? camera.zoom - S.map.getZoom() : 0;
-  S.map.flyTo({ ...camera, curve: 1.9, easing: smooth, duration: Math.round(flightMs(km, dz) * pace), essential: true, freezeElevation: true });
+  // The flight rises to see both ends at once; from the whole city it would rise to the furthest out the map goes
+  // (its minZoom) or beyond. The map then holds the height but not the path worked out for it: the place ran off to
+  // a corner, waited there and jumped back (the twitch onto and off a chapter's card, seen on a phone). Such a
+  // flight is kept just under the limit (flyTo's minZoom: the curve is worked out from it); one with both ends at
+  // the limit already, as from the thread's card to a chapter's, has no room to rise, and glides across
+  const floor = S.map.getMinZoom() + 0.05;
+  const low = to && camera.zoom != null && peakZoom(to, camera.zoom, 1.9) < floor;
+  const how = { ...camera, easing: smooth, duration: Math.round(flightMs(km, dz) * pace), essential: true, freezeElevation: true };
+  if (low && Math.min(S.map.getZoom(), camera.zoom) < floor + 0.25) return S.map.easeTo(how);
+  S.map.flyTo({ ...how, ...(low ? { minZoom: floor } : { curve: 1.9 }) });
+}
+// the zoom at the top of a flight to `to` with this curve, as MapLibre's flyTo works it out (van Wijk and Nuij)
+function peakZoom(to, z1, rho){
+  const merc = ll => [(ll.lng + 180) / 360, (1 - Math.log(Math.tan(Math.PI / 4 + ll.lat * Math.PI / 360)) / Math.PI) / 2];
+  const z0 = S.map.getZoom(), a = merc(S.map.getCenter()), b = merc(to), c = S.map.getCanvas();
+  const u1 = Math.hypot(b[0] - a[0], b[1] - a[1]) * 512 * 2 ** z0;
+  if (u1 < 1e-6) return Math.min(z0, z1);
+  const w0 = Math.max(c.clientWidth, c.clientHeight), w1 = w0 / 2 ** (z1 - z0), rho2 = rho * rho;
+  const r = i => { const q = (w1 * w1 - w0 * w0 + (i ? -1 : 1) * rho2 * rho2 * u1 * u1) / (2 * (i ? w1 : w0) * rho2 * u1); return Math.log(Math.sqrt(q * q + 1) - q); };
+  const r0 = r(0), r1 = r(1), top = r0 < 0 && r1 > 0 ? 0 : Math.abs(r0) < Math.abs(r1) ? r0 : r1;
+  return z0 - Math.log2(Math.cosh(r0) / Math.cosh(top));
 }
 // how close a card takes the map to its place: near enough to pick out the building, with its street round it
 const PLACE_ZOOM = 16;
@@ -296,6 +327,7 @@ export function setPlace(k, fly = true){
   drawPins();
   $('pCards').querySelectorAll('.pcard').forEach(el => el.classList.toggle('on', +el.dataset.i === k));
   loadAround(k);
+  if (S.map.getTerrain()) warmNext(P, k);
   // the flight starts once the cards are left still: swiping back and forth would otherwise start a new flight
   // from wherever the last one had got to, low and short, never rising
   clearTimeout(flyWait);
