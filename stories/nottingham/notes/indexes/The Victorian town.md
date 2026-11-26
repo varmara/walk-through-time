@@ -18,6 +18,7 @@ As the town grew, public parks and cemeteries were laid out on the hills to the 
 The prosperity of the lace trade paid for a new generation of buildings in the town centre: warehouses, offices, hotels, theatres and music halls. Architects such as T. C. Hine and Watson Fothergill gave Victorian Nottingham its distinctive character.
 - [[Adams Building]]
 - [[Watson Fothergill's offices]]
+- [[Furley & Co]]
 - [[The Black Boy Hotel]]
 - [[Theatre Royal]]
 - [[Royal Concert Hall]]

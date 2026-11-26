@@ -10,6 +10,8 @@ Many of the places around Nottingham are far older than the city's growth. Their
 ## Before the Normans
 Finds along the Trent show settlement from the Bronze Age and use of the river in Roman times. Anglo-Saxon villages followed, and in the 9th century the Danes took Nottingham, which became one of the Five Boroughs of the Danelaw before English kings regained it.
 - [[Bronze Age finds, 1937]]
+- [[Roman Broxtowe]]
+- [[Roman Calverton]]
 - [[The Roman ford]]
 - [[Roman Chilwell]]
 - [[The Anglo-Saxon burial ground]]

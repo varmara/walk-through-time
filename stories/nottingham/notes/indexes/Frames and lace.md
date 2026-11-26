@@ -33,3 +33,4 @@ In the early 19th century new machines, above all John Leavers', made lace by ma
 - [[Nottingham Contemporary]]
 - [[Long Eaton lace]]
 - [[Harrington Mill]]
+- [[Art Nouveau Long Eaton]]

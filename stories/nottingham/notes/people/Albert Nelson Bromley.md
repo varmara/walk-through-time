@@ -9,5 +9,5 @@ at:
 
 The architect Albert Nelson Bromley designed these houses on Newcastle Drive in 1878, and died here in 1934. His
 buildings in the city include Boots' stores on Pelham Street and Turney Street.
-He designed many of Boots' shops, in Nottingham and in other towns, and in 1904 the young T. Cecil Howitt, later the
+He designed many of Boots' shops, in Nottingham and in other towns, and in 1904 the young [[Thomas Cecil Howitt]], later the
 architect of the Council House, joined his office as an apprentice.

@@ -7,6 +7,10 @@ id: faith
 Nottingham's churches and chapels record a long religious history: the medieval parishes, a priory dissolved at the Reformation, and the growth of Nonconformity and Methodism in the industrial town. William Booth, who founded the Salvation Army, was born here.
 
 
+## Before the churches
+Long before the first churches, people worshipped on Red Hill, where the Soar meets the Trent: a temple stood there in Roman times.
+- [[The temple on Red Hill]]
+
 ## Churches
 The medieval town had three parish churches, St Mary's, St Peter's and St Nicholas', and nearby stood the wealthy Cluniac priory at Lenton until its dissolution in 1538. As the town grew in the 19th century, new churches were built for its new districts, among them Pugin's Catholic church of St Barnabas.
 - [[St Mary's Church, Nottingham]]
