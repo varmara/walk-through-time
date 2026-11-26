@@ -71,6 +71,9 @@ Rules, checked by step `s04_curated` every time the pipeline runs:
 - **A story about an area or a lost building gets a pin** (`Name, latitude, longitude`): a village, a district, an estate,
   or a building that is gone. Otherwise the article's coordinates can land it on whatever house or shop stands
   there now, and that building takes the story's name.
+- **A pin whose place is not known exactly ends with `, approximate`** (or `, ~300 m` for another radius): the map
+  draws a pale halo of that size (200 m by default) round it, and its card says "place approximate, within about
+  200 m", so the text need not say so.
 - **A `year` is about the building standing there today** (built, rebuilt or opened), not an earlier building on
   the site. Its digits must appear in the article, and it becomes a date source.
 - **Stories are short and plain:** one or two sentences, what happened and when. Name legends as legends.
@@ -90,6 +93,7 @@ check: 8 October 1831 | Duke of Newcastle                    # words the pages m
 at:                            # its places
   - https://www.openstreetmap.org/way/16459858               # a building: its OpenStreetMap link
   - Lowe's Silk Mill, 52.9265, -1.2165                       # a new pin: its name, latitude, longitude
+  - Saxon Nottingham, 52.9513, -1.1428, approximate         # a pin not placed exactly: a halo of 200 m (or ", ~300 m")
   - Bendigo's tomb                                           # a pin another note made
   - from the article                                         # a pin at the source article's point
 see:

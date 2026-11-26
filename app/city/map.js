@@ -126,6 +126,17 @@ export function drawMap(){
         'fill-extrusion-vertical-gradient':true } });
 
       S.map.addSource('storypins', { type:'geojson', data: S.data.pins || { type:'FeatureCollection', features:[] } });
+      // a pin whose place is not known exactly (", approximate" in its note): a pale halo of its radius in metres,
+      // drawn on the ground under the buildings; 'approx' holds the open story set's, 'storypins-halo' a ticked layer's
+      const mPx = 1 / (156543.03 * Math.cos(S.map.getCenter().lat * Math.PI / 180));     // pixels per metre at zoom 0
+      const halo = colour => ({ 'circle-radius':['interpolate', ['exponential', 2], ['zoom'],
+          8, ['*', ['get', 'approx'], mPx * 256], 22, ['*', ['get', 'approx'], mPx * 4194304]],
+        'circle-color':colour, 'circle-opacity':0.16, 'circle-stroke-color':colour, 'circle-stroke-opacity':0.6,
+        'circle-stroke-width':1, 'circle-pitch-alignment':'map', 'circle-pitch-scale':'map' });
+      S.map.addSource('approx', { type:'geojson', data:{ type:'FeatureCollection', features:[] } });
+      S.map.addLayer({ id:'approx', type:'circle', source:'approx', paint:halo(tok('--hl')) }, 'b');
+      S.map.addLayer({ id:'storypins-halo', type:'circle', source:'storypins', filter:['has', 'approx'],
+        layout:{ visibility:'none' }, paint:halo(pinColour()) }, 'b');
       S.map.addLayer({ id:'storypins', type:'circle', source:'storypins', layout:{ visibility:'none' }, paint:{
         'circle-radius':['interpolate', ['linear'], ['zoom'], 13, 4, 18, 9], 'circle-color':pinColour(),
         'circle-stroke-color':tok('--on-strong'), 'circle-stroke-width':2, 'circle-pitch-alignment':'map' } });

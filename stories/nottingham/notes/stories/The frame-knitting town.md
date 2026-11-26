@@ -4,7 +4,7 @@ when: "1728"
 source: https://en.wikipedia.org/wiki/Stocking_frame
 check: 1614 | 1644 | 400 to 500 frames | about 150 | 1728 | Nottingham magistrates | Worshipful Company of Framework Knitters | 1750 | 14,000 | 1758 | Jedediah Strutt | Derby rib | India | cotton
 at:
-  - The frame-knitting town, 52.9530, -1.1490
+  - The frame-knitting town, 52.9530, -1.1490, approximate
 names: no
 note: "a pin in the town centre, as the story is of the town's trade; the pin is approximate"
 ---

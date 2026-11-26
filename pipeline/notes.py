@@ -44,7 +44,15 @@ TYPES = ("person", "event", "story", "index")
 OSM = re.compile(r"^https?://(?:www\.)?openstreetmap\.org/(way|node|relation)/(\d+)")
 NHLE = re.compile(r"^https?://historicengland\.org\.uk/listing/the-list/list-entry/(\d+)")
 WIKI = re.compile(r"^https?://([a-z]+)\.(?:m\.)?wikipedia\.org/wiki/([^#?]+)")
-PIN = re.compile(r"^(.+?),\s*(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)$")
+# a new pin: "name, latitude, longitude", and for a pin whose place is not known exactly ", approximate" (shown with a
+# halo of 200 m) or ", ~300 m" (a halo of that radius)
+PIN = re.compile(r"^(.+?),\s*(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)(?:,\s*(?:~\s*(\d+)\s*m|(approximate)))?$")
+APPROX_M = 200
+
+
+def approx_of(m):
+    """The halo radius in metres of a PIN match, or None for an exact pin."""
+    return int(m[4]) if m[4] else (APPROX_M if m[5] else None)
 WIKILINK = re.compile(r"\[\[([^\]|#]+)(?:#[^\]|]*)?(?:\|([^\]]+))?\]\]")
 MDLINK = re.compile(r"(?<!!)\[([^\]]+)\]\((https?://[^)\s]+)\)")
 FOOTNOTE_DEF = re.compile(r"^\[\^([\w-]+)\]:\s*(.+)$")
@@ -151,7 +159,7 @@ def body_parts(body, name):
 
 
 def place(a, name, pins):
-    """One `at:` item -> (at as the build writes it, where: the pin's name or None). pins: name -> (lon, lat)."""
+    """One `at:` item -> (at as the build writes it, where: the pin's name or None). pins: name -> (lon, lat, halo m)."""
     a = str(a).strip()
     if m := OSM.match(a):
         return f"osm:{m[1]}/{m[2]}", None
@@ -294,10 +302,11 @@ def load(folder):
         for a in listed(props.get("at")):
             if m := PIN.match(a):
                 pname = m[1].strip()
-                xy = (float(m[3]), float(m[2]))
-                if pname in pins and pins[pname] != xy:
+                xy = (float(m[3]), float(m[2]), approx_of(m))
+                if pname in pins and pins[pname][:2] != xy[:2]:
                     problems.append(f"{name}: the pin {pname!r} is made twice, at different points")
-                pins[pname] = xy
+                if pname not in pins or xy[2]:
+                    pins[pname] = xy
     # the indexes: layers, and where each story or event is told (its Places index and group)
     kinds = {name: props.get("type") for name, props, _ in notes}
     indexes = []
@@ -397,6 +406,8 @@ def load(folder):
                             e["unplaced"] = True        # a person's own text, on their card only
                         if where:
                             e["where"] = where
+                            if where in pins and pins[where][2]:
+                                e["approx"] = pins[where][2]      # its halo's radius, in metres
                         T["entries"].append(e)
             for f in facts:
                 if facts_layer is None:

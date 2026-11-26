@@ -491,7 +491,8 @@ def main(city_id):
                             **({"architect": e["architect"]} if e.get("architect") else {}),
                             **({"names": False} if e.get("names") is False else {}),
                             **({"see": e["see"]} if e.get("see") else {}),
-                            **({"where": e["where"]} if e.get("where") else {})})
+                            **({"where": e["where"]} if e.get("where") else {}),
+                            **({"approx": e["approx"]} if e.get("approx") and b is None else {})})
         log(f"s04 {L['id']}: {kept}/{len(L['entries'])} stories kept")
     for d in dropped:
         log(f"    dropped {d['layer']} / {d['name']}: {d['why']}")

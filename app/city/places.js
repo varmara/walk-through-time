@@ -24,7 +24,7 @@ function told(b, name, hint){
   if (!isB(b)) {
     const pp = refOf(b).properties;
     return { nm: pp.nm, when: pp.when, made: pp.made, text: pp.text, here: pp.here, source: parseJ(pp.source), layer: pp.layer,
-      who: pp.who && !pp.own ? pp.who : null, at: refName(b) };
+      who: pp.who && !pp.own ? pp.who : null, at: refName(b), approx: pp.approx };
   }
   const f = S.features[b], p = f.properties, st = storyFor(b, hint?.name || name, hint?.layer);
   return { ...(st || {}), at: refName(b), y: p.y, f: p.f, per: p.per, dt: p.dt, own: st?.nm && st.nm === refName(b) && !hint?.person };
@@ -73,6 +73,9 @@ function cardHtml(card, n, P){
   else if (hint?.person && !hint.when && first.layer !== 'people' && !first.who) wt = '';
   const at = [...new Set(ts.map(x => x.at).filter(a => a && a !== title))];
   const meta = [wt, at.length ? (/^(Plaque|Statue|Memorial)\b/.test(at[0]) ? '' : 'At ') + at.join(', ') : ''].filter(Boolean);
+  // a pin not placed exactly (its halo on the map)
+  const ap = ts.find(x => x.approx)?.approx;
+  if (ap) meta.push(`place approximate, within about ${ap} m`);
   const seen = new Set(), parts = [];
   ts.forEach((x, j) => {
     if (!x.text || seen.has(x.text)) return; seen.add(x.text);
@@ -152,6 +155,10 @@ export function showPlaces(name, bs, hints, intro, set, chapters){
   // every place of a story carries the story's number
   S.map.getSource('places').setData({ type:'FeatureCollection', features: cards.flatMap((c, k) => c.intro ? [] :
     c.refs.map((b, j) => ({ type:'Feature', properties:{ n: numOf(P, k), k, j }, geometry:{ type:'Point', coordinates: refCentre(b) } }))) });
+  // the approximate ones (", approximate" in their notes) with a halo of their radius
+  S.map.getSource('approx')?.setData({ type:'FeatureCollection', features: cards.flatMap(c => c.intro ? [] :
+    c.refs.filter(b => !isB(b) && refOf(b).properties?.approx).map(b => ({ type:'Feature',
+      properties:{ approx: refOf(b).properties.approx }, geometry:{ type:'Point', coordinates: refCentre(b) } }))) });
   $('pName').textContent = name;
   $('pCards').innerHTML = cards.map((c, k) => `<article class="pcard${c.intro ? ' pintro' : ''}" data-i="${k}">${cardHtml(c, numOf(P, k), P)}</article>`).join('');
   $('pCards').querySelectorAll('.pcard').forEach(el => { if (el.querySelector('.pwait') == null) el.dataset.full = '1'; wire(el); });
@@ -299,6 +306,7 @@ export function clearPlaces(showTime){
   S.places = null;
   if (S.applyLayers) S.applyLayers(); else if (S.map) paintBuildings();
   if (S.map && S.map.getSource('places')) S.map.getSource('places').setData({ type:'FeatureCollection', features:[] });
+  S.map?.getSource('approx')?.setData({ type:'FeatureCollection', features:[] });
   Object.keys(S.pins).forEach(k => { S.pins[k].remove(); delete S.pins[k]; });
   $('placesbar').hidden = true;
   if (showTime) $('timebar').hidden = false;

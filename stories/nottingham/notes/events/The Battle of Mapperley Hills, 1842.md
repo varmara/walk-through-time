@@ -4,7 +4,7 @@ when: "1842"
 source: https://en.wikipedia.org/wiki/Battle_of_Mapperley_Hills
 check: 18 August | Market Place | 23 August 1842 | 2nd Dragoon Guards | Colonel Rolleston | four hundred | Ransom Road | Corn Laws
 at:
-  - Mapperley Hills Common, 52.9728, -1.1368
+  - Mapperley Hills Common, 52.9728, -1.1368, approximate
   - Old Market Square
 names: no
 note: "the pin is near where Ransom Road meets Woodborough Road, where the article says the meeting may have been"
@@ -16,4 +16,4 @@ across the town. On 23 August Chartists from Hucknall, Bulwell, Arnold, Basford 
 Mapperley Hills; the 2nd Dragoon Guards were sent, and when the crowd, sitting on the grass to eat, would not
 disperse, Colonel Rolleston had about four hundred arrested. As they were marched into the town, a crowd
 stoned the soldiers and police. About fifty went for trial, some getting hard labour. Afterwards the town's workers turned instead
-against the Corn Laws and the price of bread. The pin is approximate.
+against the Corn Laws and the price of bread.

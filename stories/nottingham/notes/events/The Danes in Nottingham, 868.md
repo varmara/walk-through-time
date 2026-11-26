@@ -4,7 +4,7 @@ when: "868"
 source: https://en.wikipedia.org/wiki/Five_Boroughs_of_the_Danelaw
 check: Ivar the Boneless | Halfdan Ragnarsson | 868 | winter quarters | Burgred | 869 | 877 | 918 | Five Boroughs | 942 | 39 acres
 at:
-  - Saxon Nottingham, 52.9513, -1.1428
+  - Saxon Nottingham, 52.9513, -1.1428, approximate
 note: "a pin in the Lace Market, on the hill where the Saxon town stood; the pin is approximate"
 ---
 

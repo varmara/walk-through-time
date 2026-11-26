@@ -571,6 +571,7 @@ function pinCard(p){
   // (a story's place is one of its threads, listed with the others under the card)
   const G = S.groups.get(p.group), place = G && isThread(G.layer);
   const rows = place ? [] : [['Layer', esc((G || {}).title || layerTitle(p.layer))]];
+  if (p.approx) rows.push(['Location', esc(`Approximate, within about ${p.approx} m`)]);
   if (p.artist) rows.push(['Artist', esc(p.artist)]);
   if (p.start) rows.push(['From', esc(dayText(p.start))]);
   const open = openRows(p.oh || p.web ? [{ oh: p.oh, web: p.web }] : [], p.name);

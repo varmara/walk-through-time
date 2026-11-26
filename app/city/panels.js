@@ -190,10 +190,13 @@ export function applyLayers(){
   S.map.setLayoutProperty('basics', 'visibility', basics.length ? 'visible' : 'none');
   S.map.setFilter('basics', ['in', ['get', 't'], ['literal', basics.length ? basics : ['none']]]);
   S.map.setLayoutProperty('storypins', 'visibility', pinGroups.length ? 'visible' : 'none');
+  S.map.setLayoutProperty('storypins-halo', 'visibility', pinGroups.length ? 'visible' : 'none');
   // a pin is in its own layer's group, and in any topic's groups it was put in (its T: ",war-1831,coal,")
   const topics = pinGroups.filter(k => kindOf(k) === 'topics');
-  S.map.setFilter('storypins', ['any', ['in', ['get', 'group'], ['literal', pinGroups.length ? pinGroups : ['none']]],
-    ...topics.map(k => ['in', ',' + k + ',', ['coalesce', ['get', 'T'], '']])]);
+  const pinFilter = ['any', ['in', ['get', 'group'], ['literal', pinGroups.length ? pinGroups : ['none']]],
+    ...topics.map(k => ['in', ',' + k + ',', ['coalesce', ['get', 'T'], '']])];
+  S.map.setFilter('storypins', pinFilter);
+  S.map.setFilter('storypins-halo', ['all', ['has', 'approx'], pinFilter]);
   S.landTypes = [...active].filter(k => kindOf(k) === 'land');
   setLand(S.landTypes, curYear());
   const types = [...active].filter(isArea);

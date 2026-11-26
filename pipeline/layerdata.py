@@ -141,7 +141,7 @@ def in_date_order(meta, stories, pins, dates, about):
                 g["items"] = [it for _, it in sorted(ordered, key=lambda k: k[0])]
 
 
-MORE = ("sources", "cites", "weblinks", "links", "when", "made", "nm", "whenSrc", "madeSrc")
+MORE = ("sources", "cites", "weblinks", "links", "when", "made", "nm", "whenSrc", "madeSrc", "approx")
 
 
 def more_of(e):
