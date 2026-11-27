@@ -18,16 +18,20 @@ import { goToCard, showGroups, showPlaces } from './places.js';
 
 export async function main(){
   progress(5, 'loading map data…');
-  // the index's second part (what the map draws without: names, people, places' names…), fetched at once,
-  // alongside the first; merged when it comes (pipeline/s10_tiles.py)
-  const moreUrl = `../data/${CITY_ID}-more.json`, moreFirst = fetchJSON(moreUrl).catch(() => null);
   const early = window.__early || {};
   S.city = await fetchJSON(`../cities/${CITY_ID}.json`, undefined, early.city);
   setPeriods(S.city.periods);
   drawLegend();
   S.data = await fetchData(`../data/${CITY_ID}.json`, early.index);
-  S.more = !S.data.versions?.more ? Promise.resolve() : moreFirst.then(m => m && m.build === S.data.build ? m
-    : fetchJSON(`${moreUrl}?v=${S.data.versions.more}`)).then(mergeMore);     // (from another build: this one's)
+  // the index's second part (what the map draws without: names, people, places' names…, pipeline/s10_tiles.py): asked
+  // for once the map is drawn, so the map's own files have the connection to themselves; at once for a link that
+  // names a person, a place or a layer, which needs it to open
+  let startMore;
+  S.more = !S.data.versions?.more ? Promise.resolve() : new Promise(ok => { startMore = ok; })
+    .then(() => fetchJSON(`../data/${CITY_ID}-more.json?v=${S.data.versions.more}`))
+    .then(m => { if (m.build !== S.data.build) throw new Error('the second part of the index is from another build'); mergeMore(m); });
+  S.more.catch(() => {});
+  if (startMore && wantsMore()) startMore();
   keepOnPhone(S.data.build);
   if (graphWanted()) syncGraph();                // a link to the graph (#graph): opened now, the map drawn behind
   progress(70, 'reading buildings…');
@@ -66,6 +70,7 @@ export async function main(){
   await drawMap();
   progress(100);
   $('loader').classList.add('done');
+  startMore?.();
   if (S.data.built) $('dataNote').textContent = 'Data updated ' + new Date(S.data.built).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' }) + '.';
   applyLayers();
   updateYear();
@@ -73,6 +78,12 @@ export async function main(){
   mapReady();
   await openLink(new URLSearchParams(location.search), true);
   later(prefetchGraph);
+}
+
+// a link that needs the index's second part before anything is drawn: a person, a pin, places, a layer, the graph
+function wantsMore(){
+  const q = new URLSearchParams(location.search);
+  return graphWanted() || ['person', 'pin', 'focus', 'group', 'layer', 'story'].some(k => q.has(k));
 }
 
 // the index's second part, into the first: the named buildings' details (into those already made), people, …

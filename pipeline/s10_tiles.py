@@ -21,7 +21,8 @@ and build the whole city before showing anything. Now:
                                       file until its version changes (sw.js).
   data/<city>-more.json               the index's second part, which the map draws without (the named buildings'
                                       names and layers, people, places' names, the land's entries…): fetched
-                                      alongside the first and merged when it comes.
+                                      once the map is drawn (at once for a link that needs it) and merged when
+                                      it comes.
   data/<city>/osm/<n>.json            OpenStreetMap id -> building number, for links that name one (?osm=way/123),
                                       in OSM_PARTS files by the id's number (n = number % OSM_PARTS), so a link
                                       loads a few kilobytes, not the list of every building.
@@ -52,7 +53,7 @@ MIN_Z, MAX_Z = 10, 15         # zoomed out (10-11) the smallest buildings are le
 # what the map draws a building by. Not the layers it is in (L, in the index: the page marks them), so a story
 # edited does not change the tiles, which phones keep until they change
 TILE_PROPS = ("y", "f", "h", "base")
-# the index's parts the map draws without (in <city>-more.json): see main() below
+# the index's parts the map draws without (in <city>-more.json, fetched once the map is drawn): see main() below
 MORE = ("people", "placeNames", "land", "near")
 # a shed or a garage under this many square metres is drawn only close up (zoom 15), as are the smallest
 # outlines: zoomed out they are specks that make the tiles bigger and slower to draw
