@@ -40,14 +40,14 @@ function introHtml(P, card){
   const ch = card?.chapter;
   if (ch) {
     const k = P.cards.indexOf(card), yrs = chapterYears(ch.title, chapterCards(P, k));
-    return `<p class="pmeta pchap" style="color:${ch.colour}">Chapter ${ch.j} of ${ch.m}${yrs ? ' · ' + yrs : ''}</p><h3 class="ptitle">${esc(ch.title)}</h3>${ch.text ? citedText(ch.text, P.cites) : ''}
+    return `<p class="pmeta pchap" style="color:${ch.colour}">Chapter ${ch.j} of ${ch.m}${yrs ? ' · ' + yrs : ''}</p><h3 class="ptitle">${esc(splitTitle(ch.title)[0])}</h3>${ch.text ? citedText(ch.text, P.cites) : ''}
       <div class="plist">${chapterCards(P, k).map(c => `<button data-go="${P.cards.indexOf(c)}"><span class="snum" style="background:${c.colour}">${c.n}</span><span class="pdate">${esc(dateOf(c))}</span><span class="pname">${esc(c.hint?.name || refName(c.refs[0]))}</span></button>`).join('')}</div>`;
   }
   const n = P.cards.filter(c => !c.intro).length;
   // a thread of chapters: its chapters to choose from, each with its years; else how many stories, and Start
   const chaps = P.cards.map((c, k) => [c, k]).filter(([c]) => c.chapter);
   return `<h3 class="ptitle">${esc(P.name)}</h3>${P.intro ? citedText(P.intro, P.cites) : ''}
-    ${chaps.length ? `<div class="plist chaps">${chaps.map(([c, k]) => `<button data-go="${k}"><i style="background:${c.chapter.colour}"></i><span class="pdate">${esc(chapterYears(c.chapter.title, chapterCards(P, k)).split('–')[0])}</span><span class="pname">${esc(c.chapter.title)}</span></button>`).join('')}</div>`
+    ${chaps.length ? `<div class="plist chaps">${chaps.map(([c, k]) => `<button data-go="${k}"><i style="background:${c.chapter.colour}"></i><span class="pdate">${esc(fromYear(chapterYears(c.chapter.title, chapterCards(P, k))))}</span><span class="pname">${esc(splitTitle(c.chapter.title)[0])}</span></button>`).join('')}</div>`
       : `<p class="pmeta">${n} ${n === 1 ? 'story' : 'stories'}</p><button class="textbtn pnext" data-first>Start</button>`}`;
 }
 // a story's date in a list: the thread's, else its own (not a year the build took from its words: Addensburgh's
@@ -58,9 +58,16 @@ function dateOf(c){
 }
 // a chapter's years: those its title ends with ("The Reform riots, 1831"), else its stories'
 function chapterYears(title, cs){
-  const m = /\b(\d{3,4}(?:[–-]\d{2,4})?)$/.exec(title || '');
-  return m ? m[1] : span(cs);
+  return splitTitle(title)[1] || span(cs);
 }
+// a chapter's title and the years it ends with: "The Danes, 868–924" -> ["The Danes", "868–924"]; "Before the
+// English, c. 1000 BC–AD 400" -> ["Before the English", "c. 1000 BC–AD 400"]
+function splitTitle(title){
+  const m = /^(.*),\s+([^,]*\d[^,]*)$/.exec(title || '');
+  return m ? [m[1], m[2]] : [title || '', ''];
+}
+// where the years start: "c. 1000 BC" of "c. 1000 BC–AD 400", "6th" of "6th–10th centuries"
+const fromYear = y => String(y || '').split('–')[0].replace(/ centur(y|ies)$/, '').replace(/^(\d+(?:st|nd|rd|th))$/, '$1 c.');
 // the years of a run of cards: "1831", "1842–1847"
 function span(cs){
   const ys = cs.map(c => Number.isFinite(c.hint?.y) ? c.hint.y : yearOf(c.hint?.when)).filter(Number.isFinite);
@@ -107,7 +114,7 @@ function cardHtml(card, n, P){
   const ch = card.chapter || (P.chapterList && hint?.ch != null ? P.chapterList[hint.ch] : null);
   const about = refs.map(r => `<button class="textbtn" data-open="${r}">About ${esc(refName(r))} ›</button>`).join('');
   return storyCard({ n, colour: card.colour, title,
-    chapter: ch ? `Chapter ${hint.ch + 1} of ${P.chapterList.length} · ${ch.title}` : '',
+    chapter: ch ? `Chapter ${hint.ch + 1} of ${P.chapterList.length} · ${splitTitle(ch.title).filter(Boolean).join(' · ')}` : '',
     meta: meta.join(' · '), s: st, who: who?.text ? { text: who.text, url: who.url, title: who.title } : null,
     rel: relatedOf(st, refs, { title, thread: P.thread, self: hint?.person ? name : null }),
     share: P.thread ? storyLink(P.thread, title) : '',
@@ -318,8 +325,8 @@ function contents(P){
   const html = groups.map((g, j) => {
     const open = P.open.has(j) || !g.c, yrs = g.c ? chapterYears(g.c.chapter.title, g.cards.map(([c]) => c)) : span(g.cards.map(([c]) => c));
     const colour = g.c ? g.c.chapter.colour : 'var(--hl)';
-    return `<section class="cchap"><b class="cyr" style="color:${colour}">${esc(yrs.split('–')[0])}</b><i class="cdot" style="background:${colour}"></i>
-      <div class="cbody">${g.c ? `<button class="chead" data-chap="${j}" aria-expanded="${open}"><span>${esc(g.c.chapter.title)}</span><span class="chev">${open ? '▾' : '▸'}</span></button>` : ''}
+    return `<section class="cchap"><b class="cyr" style="color:${colour}">${esc(fromYear(yrs))}</b><i class="cdot" style="background:${colour}"></i>
+      <div class="cbody">${g.c ? `<button class="chead" data-chap="${j}" aria-expanded="${open}"><span>${esc(splitTitle(g.c.chapter.title)[0])}</span><span class="chev">${open ? '▾' : '▸'}</span></button>` : ''}
       ${open ? full(g) : g.cards.map(row).join('')}</div></section>`;
   }).join('');
   $('pCards').innerHTML = `<div class="contents"><div class="chd"><b>${esc(P.name)}</b>${groups.some(g => g.c) ? `<button class="textbtn" data-chap="-1">${P.open.size === groups.length ? 'Close all' : 'Open all'}</button>` : ''}</div>

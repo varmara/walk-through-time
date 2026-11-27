@@ -145,6 +145,9 @@ export function timeLine(pts, cur){
 }
 // the first year a date or a text tells of ("c. 1450", "1831", "the 12th century")
 export function yearOf(w){
+  if (w === 'Roman times') return 43;
+  const bc = /(\d{3,4})(?:–\d{3,4})? BC/.exec(w || '');
+  if (bc) return -bc[1];
   const c = /(\d{1,2})(?:st|nd|rd|th) century/i.exec(w || '');
   if (c) return (+c[1] - 1) * 100;
   const m = /\b(1[0-9]{3}|20[0-9]{2}|[5-9][0-9]{2})\b/.exec(w || '');

@@ -481,7 +481,7 @@ def main(city_id):
             story, auto = footnoted(e["story"], list(e.get("facts", ())), checked, cites)
             dated = {}
             for k in ("when", "made"):
-                if e.get(k):
+                if e.get(k) and re.search(r"\d", e[k]):         # (a period, "Roman times", has no page to give it)
                     p = date_page(e[k], checked + list(cites.values())) or noted_page(e[k], e["story"], cites) \
                         or (pages[0] if pages and not checked else None)
                     if p:

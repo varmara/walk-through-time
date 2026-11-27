@@ -174,7 +174,9 @@ def read_notes(folder):
 SECTIONS = ("Places", "Threads")
 ITEM_PLAQUE = re.compile(r"^plaque:\s*(.+)$")
 # a date as a note's when: or a thread's line gives it: 1952, c. 1200, 1930s, 13th century
-WHEN = r"(?:c\.\s*)?\d{3,4}s?|\d{1,2}(?:st|nd|rd|th) century"
+# a date as written: a year, a decade, a century; a year or span BC; or a period ("Roman times", for a find whose
+# date is no closer than that)
+WHEN = r"(?:c\.\s*)?\d{3,4}s?|\d{1,2}(?:st|nd|rd|th) century|(?:c\.\s*)?\d{3,4}(?:–\d{3,4})? BC|Roman times"
 ITEM_WHEN = re.compile(rf"^({WHEN}):\s+(.+)$")
 
 
@@ -182,7 +184,7 @@ def when(value, name, prop="when"):
     """A note's when: or made: as written ("c. 1200"), checked to be a date the build can order."""
     v = str(value).strip()
     if not re.fullmatch(WHEN, v):
-        raise NoteError(f"{name}: {prop}: {v!r} is not a date: write 1952, c. 1200, 1930s or 13th century")
+        raise NoteError(f"{name}: {prop}: {v!r} is not a date: write 1952, c. 1200, 1930s, 13th century, 1000–500 BC or Roman times")
     return v
 
 

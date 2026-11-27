@@ -70,6 +70,10 @@ def year_in(text):
 def when_year(w):
     """The year a written date orders by: "c. 1200" 1200, "1930s" 1930, "13th century" 1200; None for none."""
     w = str(w or "")
+    if w == "Roman times":
+        return 43                         # (the conquest)
+    if m := re.search(r"(\d{3,4})(?:–\d{3,4})? BC", w):
+        return -int(m[1])
     if m := re.search(r"(\d{1,2})(?:st|nd|rd|th) century", w):
         return (int(m[1]) - 1) * 100
     m = re.search(r"\d{3,4}", w)

@@ -1,6 +1,6 @@
 ---
 type: event
-when: "1900"
+when: "Roman times"
 source: https://en.wikipedia.org/wiki/Wilford
 check: paved Roman ford | oak posts | 1900
 at:
