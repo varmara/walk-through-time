@@ -39,7 +39,7 @@ const src = s => s && s.url ? `<p class="psrc">${esc(s.kind || 'Source')}: <a hr
 function introHtml(P, card){
   const ch = card?.chapter;
   if (ch) {
-    const k = P.cards.indexOf(card), yrs = span(chapterCards(P, k));
+    const k = P.cards.indexOf(card), yrs = chapterYears(ch.title, chapterCards(P, k));
     return `<p class="pmeta pchap" style="color:${ch.colour}">Chapter ${ch.j} of ${ch.m}${yrs ? ' · ' + yrs : ''}</p><h3 class="ptitle">${esc(ch.title)}</h3>${ch.text ? citedText(ch.text, P.cites) : ''}
       <div class="plist">${chapterCards(P, k).map(c => `<button data-go="${P.cards.indexOf(c)}"><span class="snum" style="background:${c.colour}">${c.n}</span><span class="pdate">${esc(dateOf(c))}</span><span class="pname">${esc(c.hint?.name || refName(c.refs[0]))}</span></button>`).join('')}</div>`;
   }
@@ -47,13 +47,18 @@ function introHtml(P, card){
   // a thread of chapters: its chapters to choose from, each with its years; else how many stories, and Start
   const chaps = P.cards.map((c, k) => [c, k]).filter(([c]) => c.chapter);
   return `<h3 class="ptitle">${esc(P.name)}</h3>${P.intro ? citedText(P.intro, P.cites) : ''}
-    ${chaps.length ? `<div class="plist chaps">${chaps.map(([c, k]) => `<button data-go="${k}"><i style="background:${c.chapter.colour}"></i><span class="pdate">${esc(span(chapterCards(P, k)).split('–')[0])}</span><span class="pname">${esc(c.chapter.title)}</span></button>`).join('')}</div>`
+    ${chaps.length ? `<div class="plist chaps">${chaps.map(([c, k]) => `<button data-go="${k}"><i style="background:${c.chapter.colour}"></i><span class="pdate">${esc(chapterYears(c.chapter.title, chapterCards(P, k)).split('–')[0])}</span><span class="pname">${esc(c.chapter.title)}</span></button>`).join('')}</div>`
       : `<p class="pmeta">${n} ${n === 1 ? 'story' : 'stories'}</p><button class="textbtn pnext" data-first>Start</button>`}`;
 }
 // a story's date in a list: the thread's, else its own, else the year the build ordered it by
 function dateOf(c){
   const t = ready(c.refs) ? told(c.refs[0], S.places.name, c.hint) : {};
   return c.hint?.when || t.when || (Number.isFinite(c.hint?.y) ? String(c.hint.y) : '');
+}
+// a chapter's years: those its title ends with ("The Reform riots, 1831"), else its stories'
+function chapterYears(title, cs){
+  const m = /\b(\d{3,4}(?:[–-]\d{2,4})?)$/.exec(title || '');
+  return m ? m[1] : span(cs);
 }
 // the years of a run of cards: "1831", "1842–1847"
 function span(cs){
@@ -310,7 +315,7 @@ function contents(P){
   const row = ([c, k]) => `<button class="crow${k === P.i ? ' here' : ''}" data-go="${k}"><span class="snum" style="background:${c.colour}">${c.n}</span><span class="pname">${esc(c.hint?.name || refName(c.refs[0]))}</span>${k === P.i ? '<span class="muted">you are here</span>' : ''}</button>`;
   const full = g => (g.c?.chapter.text ? citedText(g.c.chapter.text, P.cites) : '') + g.cards.map(([c, k]) => `<article class="cstory" data-i="${k}">${ready(c.refs) ? cardHtml(c, c.n, P) : '<p class="pwait">Loading…</p>'}</article>`).join('');
   const html = groups.map((g, j) => {
-    const open = P.open.has(j) || !g.c, yrs = span(g.cards.map(([c]) => c));
+    const open = P.open.has(j) || !g.c, yrs = g.c ? chapterYears(g.c.chapter.title, g.cards.map(([c]) => c)) : span(g.cards.map(([c]) => c));
     const colour = g.c ? g.c.chapter.colour : 'var(--hl)';
     return `<section class="cchap"><b class="cyr" style="color:${colour}">${esc(yrs.split('–')[0])}</b><i class="cdot" style="background:${colour}"></i>
       <div class="cbody">${g.c ? `<button class="chead" data-chap="${j}" aria-expanded="${open}"><span>${esc(g.c.chapter.title)}</span><span class="chev">${open ? '▾' : '▸'}</span></button>` : ''}
