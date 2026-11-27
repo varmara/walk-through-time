@@ -240,7 +240,7 @@ the member.
 ```markdown
 - 1847: [[Feargus O'Connor]]          elected MP that year (else he would sort by his birth, 1796)
 - 1643: [[St Nicholas' Church]]       pulled down in the siege (its own story is dated by the rebuilding, 1678)
-- 1952: [[Statue of Robin Hood]]      on the On a plinth thread, by when it was put up; its card shows both dates
+- 1952: [[Statue of Robin Hood]]      on the Statues and memorials thread, by when it was put up; its card shows both dates
 ```
 
 ### A checklist for a new story

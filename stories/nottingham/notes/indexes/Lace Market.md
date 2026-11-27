@@ -14,6 +14,7 @@ The hill east of the Market Square was the site of the Saxon town, taken by the 
 - [[Shire Hall]]
 - [[City of Caves]]
 - [[Broad Marsh]]
+- [[Standing in This Place, 2025]]
 - [[Drury Hill]]
 - [[High Pavement Chapel]]
 - [[Halifax Place Wesleyan Chapel]]
