@@ -12,6 +12,7 @@ Sneinton lies on the hill east of the city. Its windmill belonged to the family 
 - [[William Booth's birthplace]]
 - [[St Stephen's Church]]
 - [[Sneinton Market]]
+- [[Penicillin at Daleside Road, 1944]]
 - [[Ibuprofen]]
 - [[Sneinton Hermitage]]
 - [[Sneinton's porch tiles]]

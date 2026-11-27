@@ -28,6 +28,7 @@ The old village of West Bridgford grew up around St Giles' Church. The Musters f
 - [[Won at cards]]
 - [[Lady Bay Bridge]]
 - [[The Lady Bay bombs]]
+- [[Boots' research houses, West Bridgford]]
 - [[The 1947 flood]]
 - [[The first out-of-town superstore]]
 

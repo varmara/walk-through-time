@@ -42,8 +42,10 @@ From 11 August 1876 the Medical Act let every British medical authority license 
 - [[Margaret Glen-Bott]]
 - [[Louisa May Long]]
 
-## Discoveries, 1948–1978
-In 1948 the college was granted a royal charter as the University of Nottingham, able to award its own degrees.[^1948]
+## Discoveries, 1944–1978
+Alexander Fleming found penicillin in 1928; Howard Florey and Ernst Chain's team at Oxford made it into a medicine, and the three shared the Nobel Prize in 1945. During the war it became an important part of the Allied effort, saving thousands of lives.[^pen]
+- [[Penicillin at Daleside Road, 1944]]
+- [[Boots' research houses, West Bridgford]]
 - [[Mary Kendrick]]
 - [[Ibuprofen]]
 - [[The MRI scanner]]
@@ -54,4 +56,4 @@ In 1948 the college was granted a royal charter as the University of Nottingham,
 [^lunacy]: https://en.wikipedia.org/wiki/Lunacy_Act_1845 — title: Lunacy Act 1845 — check: status of mentally ill people to patients | gaol | county asylums
 [^univ]: https://en.wikipedia.org/wiki/University_of_Nottingham — title: University of Nottingham — check: 1798 | 1873 | 1881
 [^1876]: https://en.wikipedia.org/wiki/Medical_Act_1876 — title: Medical Act 1876 — check: whatever their gender
-[^1948]: https://en.wikipedia.org/wiki/University_of_Nottingham — title: University of Nottingham — check: 1948 | royal charter
+[^pen]: https://en.wikipedia.org/wiki/History_of_penicillin — title: History of penicillin — check: Fleming | Florey | Chain | 1945 Nobel Prize | saving thousands of lives

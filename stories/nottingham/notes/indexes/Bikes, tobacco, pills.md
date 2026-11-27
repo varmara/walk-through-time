@@ -27,6 +27,8 @@ Boots is now one of the largest retailers in the UK and Ireland, by its sales an
 - [[Building D6]]
 - 1941: [[Vera Anderson]]
 - [[The Nottingham Blitz, 1941]]
+- [[Penicillin at Daleside Road, 1944]]
+- [[Boots' research houses, West Bridgford]]
 - [[Ibuprofen]]
 
 ## Beer, sauce and soap, 1852–1895
