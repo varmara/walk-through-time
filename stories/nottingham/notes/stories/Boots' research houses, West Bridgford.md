@@ -5,13 +5,14 @@ source: http://www.nottsheritagegateway.org.uk/themes/boots/bootsstructural.htm
 title: "Boots: structural (Nottinghamshire Heritage Gateway)"
 read: 2026-11-27
 at:
+  - https://www.openstreetmap.org/way/78191005
   - Boots' research houses, 52.9373, -1.1225, ~150 m
 names: no
 see:
   - "[[Penicillin at Daleside Road, 1944]]"
   - "[[Ibuprofen]]"
   - "[[Stewart Adams]]"
-note: "facts only; a pin at the corner of Oakfields Road and Rutland Road, where the nursery that was part of Boots stands; the sources give no house number"
+note: "facts only; on the Wishing Well Day Nursery, 2 Oakfields Road, which was part of Boots, and an approximate pin for the research houses, whose sources give no house number"
 ---
 
 In 1920 Boots bought a site on Oakfields Road for pharmacological and bacteriological research, which was done here
