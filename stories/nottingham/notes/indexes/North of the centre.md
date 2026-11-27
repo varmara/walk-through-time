@@ -28,3 +28,6 @@ North of the old town lay open fields and common land until the 19th century. As
 - 1919: [[George Brough]]
 - [[Victoria Centre]]
 - [[Maid Marian, 2026]]
+- [[From inn to inn, 1755]]
+- [[The School of Art's stone, 1863]]
+- [[The Masonic Hall, Goldsmith Street]]
