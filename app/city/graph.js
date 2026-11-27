@@ -33,7 +33,6 @@ const MARKUP = `
     <button id="sClose" aria-label="Close settings">✕</button></div>
   <div id="settingsBody"></div>
 </aside>
-<div class="hint" id="hint">Each line is a checked story. A dotted ring holds folded places. Tap a point; the gear has the settings.</div>
 <div class="zoom" id="zoom" aria-label="Zoom">
   <button id="zIn" aria-label="Zoom in">+</button>
   <button id="zOut" aria-label="Zoom out">−</button>
@@ -473,9 +472,9 @@ function select(id, fromCards){
   sel = id;
   if (spread() !== spreadNow) draw(true); else redraw();
   requestAnimationFrame(placeZoom);
-  if (!id) { $('sheet').hidden = true; $('hint').hidden = false; return; }
+  if (!id) { $('sheet').hidden = true; return; }
   const n = G.byId.get(id);
-  $('hint').hidden = true; $('sheet').hidden = false;
+  $('sheet').hidden = false;
   drawer(fromCards && wasOpen);
   cardsFor(id);
   if (n.hub) return groupSheet(n);
