@@ -29,9 +29,9 @@ export async function main(){
   const drawing = S.boot ? drawMap() : null;
   drawing?.catch(() => {});                       // (reported where it is waited for, below)
   S.data = await fetchData(`../data/${CITY_ID}.json${S.boot ? '?v=' + S.boot.versions.index : ''}`, early.index);
-  // the index's second part (what the map draws without: names, people, places' names…, pipeline/s10_tiles.py): asked
-  // for once the map is drawn, so the map's own files have the connection to themselves; at once for a link that
-  // names a person, a place or a layer, which needs it to open
+  // the index's second part (what the map draws without: layers, pins, names, people…, pipeline/s10_tiles.py): asked
+  // for once the map's first view is in, so the map's own files have the connection to themselves; at once for a
+  // link that names a person, a place or a layer, which needs it to open, and for a tap on Stories or Layers
   let startMore;
   S.more = !S.data.versions?.more ? Promise.resolve() : new Promise(ok => { startMore = ok; })
     .then(() => fetchJSON(`../data/${CITY_ID}-more.json?v=${S.data.versions.more}`))
@@ -70,7 +70,8 @@ export async function main(){
   progress(100);
   $('loader').classList.add('done');
   const firstView = settled();
-  startMore?.();
+  firstView.then(() => startMore?.());
+  S.loadMore = () => startMore?.();             // (a tap on Stories or Layers before then asks at once)
   if (S.data.built) $('dataNote').textContent = 'Data updated ' + new Date(S.data.built).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' }) + '.';
   applyLayers();
   updateYear();

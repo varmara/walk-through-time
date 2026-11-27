@@ -183,8 +183,8 @@ export function updateSummary(){
   $('layerCount').textContent = names.length;
 }
 $('lClear').onclick = () => { if (S.places) clearPlaces(true); S.active.clear(); saveActive(); renderLayers(); applyLayers(); };
-$('bLayers').addEventListener('click', () => updateSummary());       // (the numbered places may have changed since)
-$('bStories').addEventListener('click', () => renderStories());     // (the open set's area unfolds)
+$('bLayers').addEventListener('click', () => { S.loadMore?.(); updateSummary(); });       // (the numbered places may have changed since)
+$('bStories').addEventListener('click', () => { S.loadMore?.(); renderStories(); });     // (the open set's area unfolds)
 
 S.applyLayers = () => applyLayers();
 export function applyLayers(){

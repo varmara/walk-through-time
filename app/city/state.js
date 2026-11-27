@@ -9,6 +9,7 @@ export const S = {
   stats: null,           // { total, known, estimated }
   hist: null,            // buildings per year, for the count under the slider
   layers: [],            // layer metadata (from the index's second part: empty until it is in, moreIn)
+  loadMore: null,        // asks for the index's second part now (main.js), if it has not been asked for
   moreIn: false,         // the index's second part (layers, pins, names, people…) has been merged in
   groups: new Map(),     // group key -> { key, title, count, items, layer }
   active: new Set(),     // ticked group keys
