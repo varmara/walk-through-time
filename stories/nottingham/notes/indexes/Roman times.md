@@ -25,5 +25,5 @@ Roman builders paved fords with flagstones on timber piles, as at Littleborough 
 
 [^cor]: https://en.wikipedia.org/wiki/Corieltauvi — title: Corieltauvi — check: Celtic tribe | East Midlands | Leicester | little evidence
 [^fosse]: https://en.wikipedia.org/wiki/Fosse_Way — title: Fosse Way — check: first few decades | 43 AD | western frontier
-[^rb]: https://en.wikipedia.org/wiki/Roman_Britain — title: Roman Britain — check: improved agriculture | export grain | between AD 300 and 350
+[^rb]: https://en.wikipedia.org/wiki/Roman_Britain — title: Roman Britain — check: improved agriculture | export grain | blossoming of villa building
 [^trent]: https://en.wikipedia.org/wiki/River_Trent — title: River Trent — check: paved with flagstones | Segelocum
