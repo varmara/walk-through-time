@@ -2,29 +2,39 @@
 type: index
 order: 8
 id: markets
+sort: as listed
 ---
 
-Nottingham was a market town long before it was an industrial city. Its markets and fairs brought in traders from the surrounding countryside and further afield, and the Old Market Square remained the heart of the town. These stories also follow the shift from markets to shops.
+After the Normans, Nottingham was two boroughs, the English one round the old settlement and the French one under the castle. The open ground between them was built on as the town grew, and became the Old Market Square.[^two]
 
-## Markets
-The medieval town held markets at Weekday Cross and in the great Market Place, now one of the largest paved squares in the country. The Exchange, built there in the 1720s, housed the town's government. Around Nottingham, towns such as Bulwell and Arnold had markets of their own.
+## Charters, markets and fairs, 11th–14th centuries
+After the Norman Conquest the right to hold a market was the king's to grant. A charter let the lord take tolls, and no new market could be set up within about a day's travel of an old one.[^charter]
 - [[Old Market Square]]
-- [[Weekday Cross]]
-- [[The Exchange]]
-- [[Walker Gate]]
-- [[Bulwell market]]
-- [[Sneinton Market]]
-- [[Arnold Market]]
-
-## Fairs
-Fairs held under royal charter were major events in the medieval and early modern calendar. Nottingham's Goose Fair is recorded by 1284, and the priory at Lenton held a great fair of its own. Fairs could also be occasions of unrest, as in the cheese riot of 1766.
+- [[Lenton Fair]]
 - [[Ilkeston Charter Fair]]
 - 1284: [[Goose Fair]]
-- [[Lenton Fair]]
+- [[Walker Gate]]
+- [[Bulwell market]]
+
+## Cross and Exchange, 1529–1726
+In 1449 the town became a county corporate, governing itself.[^1449]
+- [[Weekday Cross]]
+- [[The Exchange]]
+
+## The cheese riot, 1766
+Food riots were a familiar part of 18th-century life. In 1766 poor harvests had pushed up the price of grain, and when it began to be shipped abroad that August, riots broke out across England.[^food]
 - [[The cheese riot, 1766]]
 
-## Shops
-In the 19th and 20th centuries shops replaced markets as the main places to buy goods. Boots grew from a single shop on Goose Gate, and in the 1960s and 1970s the first out-of-town superstore and the Victoria Centre changed how people shopped.
+## From market to shop, 1849–1972
+Shops of one name in many towns, the chains, began in the railway age: W. H. Smith opened its first station bookstalls in 1848.[^chain]
 - [[Boots on Goose Gate]]
+- [[Sneinton Market]]
 - 1964: [[The first out-of-town superstore]]
+- [[Arnold Market]]
 - 1972: [[Victoria Centre]]
+
+[^two]: https://en.wikipedia.org/wiki/History_of_Nottingham — title: History of Nottingham — check: English Borough | Old Market Square
+[^charter]: https://en.wikipedia.org/wiki/Market_town — title: Market town — check: royal prerogative | tolls | travelling distance
+[^1449]: https://en.wikipedia.org/wiki/History_of_Nottingham — title: History of Nottingham — check: county corporate in 1449
+[^food]: https://en.wikipedia.org/wiki/1766_food_riots — title: 1766 food riots — check: first large-scale exports | August
+[^chain]: https://en.wikipedia.org/wiki/Chain_store — title: Chain store — check: 1848 | railway
