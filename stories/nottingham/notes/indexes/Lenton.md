@@ -16,3 +16,5 @@ Lenton was dominated for over four centuries by its Cluniac priory, founded in a
 - [[Trent Building]]
 - [[Saturday Night and Sunday Morning]]
 - [[The MRI scanner]]
+- [[Queen's Medical Centre]]
+- [[A brain scanner you can wear, 2018]]

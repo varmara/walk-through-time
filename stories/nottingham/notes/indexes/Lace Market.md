@@ -13,6 +13,7 @@ The hill east of the Market Square was the site of the Saxon town, taken by the 
 - [[The body snatchers of Barker Gate, 1827]]
 - [[George Africanus]]
 - [[Weekday Cross]]
+- [[Plumptre Hospital]]
 - [[Shire Hall]]
 - [[The crush at Saville's hanging, 1844]]
 - [[City of Caves]]

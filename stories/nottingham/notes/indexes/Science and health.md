@@ -7,6 +7,10 @@ sort: as listed
 
 A library and a hospital paid for by subscribers, a miller who taught himself mathematics, engineers who brought clean water, women who fought their way into medicine, and two discoveries that went round the world.
 
+## Almshouses and hospitals, 1241–1392
+By 1241 Nottingham's Hospital of St John the Baptist had a rule of life for its brothers and sisters, laid down by Walter de Grey, Archbishop of York;[^orb] it stood at the corner of today's Parliament Street and Glasshouse Street.[^nhh]
+- [[Plumptre Hospital]]
+
 ## Learning and healing, 1752–1821
 Hospitals of this time were voluntary: they were paid for by subscriptions, gifts and fundraising. By the middle of the 18th century there were six in London.[^vol]
 - [[Bromley House]]
@@ -42,13 +46,15 @@ From 11 August 1876 the Medical Act let every British medical authority license 
 - [[Margaret Glen-Bott]]
 - [[Louisa May Long]]
 
-## Discoveries, 1944–1978
+## Discoveries, 1944–2018
 Alexander Fleming found penicillin in 1928; Howard Florey and Ernst Chain's team at Oxford made it into a medicine, and the three shared the Nobel Prize in 1945. During the war it became an important part of the Allied effort, saving thousands of lives.[^pen]
 - [[Penicillin at Daleside Road, 1944]]
 - [[Boots' research houses, West Bridgford]]
 - [[Mary Kendrick]]
 - [[Ibuprofen]]
 - [[The MRI scanner]]
+- [[Queen's Medical Centre]]
+- [[A brain scanner you can wear, 2018]]
 
 [^vol]: https://en.wikipedia.org/wiki/Voluntary_hospital — title: Voluntary hospital — check: public subscription | six in London
 [^mech]: https://en.wikipedia.org/wiki/Mechanics%27_Institutes — title: Mechanics' Institutes — check: working men | 1821 | over 700
@@ -57,3 +63,5 @@ Alexander Fleming found penicillin in 1928; Howard Florey and Ernst Chain's team
 [^univ]: https://en.wikipedia.org/wiki/University_of_Nottingham — title: University of Nottingham — check: 1798 | 1873 | 1881
 [^1876]: https://en.wikipedia.org/wiki/Medical_Act_1876 — title: Medical Act 1876 — check: whatever their gender
 [^pen]: https://en.wikipedia.org/wiki/History_of_penicillin — title: History of penicillin — check: Fleming | Florey | Chain | 1945 Nobel Prize | saving thousands of lives
+[^orb]: https://the-orb.arlima.net/encyclop/culture/towns/florilegium/community/cmreli15.html — title: Rules of St John's Hospital, Nottingham, 1241 (Florilegium Urbanum, ORB) — read: 2026-11-27
+[^nhh]: https://www.nottinghamhospitalshistory.co.uk/?p=25 — title: Nottingham hospitals history — read: 2026-11-27
