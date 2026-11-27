@@ -40,7 +40,10 @@ export const tiled = () => !!S.data.index;
 // a data file's version, from its content (pipeline/s10_tiles.py: versions): kept on the phone until it changes;
 // an older index has only the build's
 export const ver = (kind, n) => { const v = S.data.versions?.[kind]; return (Array.isArray(v) ? v[n] : v) || S.data.build; };
-export const fstate = (id, st) => S.map.setFeatureState(tiled() ? { source:'b', sourceLayer:'b', id } : { source:'b', id }, st);
+// where the buildings are drawn from: their layer in the city's one tile source (roads, water and the rest are
+// its other layers, so each tile is fetched and unpacked once), or the old single file's GeoJSON
+export const bsrc = () => tiled() ? { source:'city', sourceLayer:'b' } : { source:'b' };
+export const fstate = (id, st) => S.map.setFeatureState({ ...bsrc(), id }, st);
 export function loadCard(id){       // the card's details, merged into the building's properties
   if (!tiled() || S.features[id].full) return Promise.resolve();
   const n = Math.floor(id / S.data.tiles.chunk);

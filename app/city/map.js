@@ -1,7 +1,7 @@
 // Walk Through Time, city page: The map: MapLibre layers for buildings (coloured by era), roads, water, parks, areas and pins.
 import { AREA_TYPES, BASICS, CITY_ID, ERAS, FADE, LAND, PIN_LAYERS, mix, store, tok } from './util.js';
 import { S } from './state.js';
-import { marksBuildings, ver } from './data.js';
+import { bsrc, marksBuildings, ver } from './data.js';
 import { turnNeedle } from './sheet.js';
 import { selectBuilding, showArea, showBasic, showLand, showPin, showRoute } from './cards.js';
 import { drawPins } from './places.js';
@@ -66,7 +66,7 @@ function markLayers(){
       : S.features.flatMap((f, i) => f.properties.L ? [[i, f.properties.L]] : []));
     for (const [i, L] of S.inLayers) if (keys.some(k => L.includes(',' + k + ','))) now.add(i);
   }
-  const src = S.data.index ? { source:'b', sourceLayer:'b' } : { source:'b' };
+  const src = bsrc();
   for (const i of marked) if (!now.has(i)) S.map.setFeatureState({ ...src, id: i }, { on:false });
   for (const i of now) if (!marked.has(i)) S.map.setFeatureState({ ...src, id: i }, { on:true });
   marked = now;
@@ -145,15 +145,14 @@ export function drawMap(){
       S.map.addLayer({ id:'routes', type:'line', ...routeSrc, layout:{ visibility:'none', 'line-cap':'round', 'line-join':'round' },
         paint:{ 'line-color':tok('--route'), 'line-width':['interpolate', ['linear'], ['zoom'], 11, 2, 17, 5], 'line-dasharray':[1.6, 1.2] } });
 
-      if (T) S.map.addSource('b', { type:'vector', tiles:[tileUrl], minzoom:T.minzoom, maxzoom:T.maxzoom });
-      else S.map.addSource('b', { type:'geojson', data:{ type:'FeatureCollection', features: S.features } });
-      S.map.addLayer({ id:'b', type:'fill-extrusion', source:'b', ...(T ? { 'source-layer':'b' } : {}), paint:{
+      if (!T) S.map.addSource('b', { type:'geojson', data:{ type:'FeatureCollection', features: S.features } });
+      S.map.addLayer({ id:'b', type:'fill-extrusion', ...(T ? { source:'city', 'source-layer':'b' } : { source:'b' }), paint:{
         'fill-extrusion-color':buildingColour(),
         'fill-extrusion-height':['get', 'h'], 'fill-extrusion-base':['coalesce', ['get', 'base'], 0], 'fill-extrusion-opacity':0.95,
         'fill-extrusion-vertical-gradient':true } });
       // the hatching on the roofs of buildings with something to read: a thin see-through slab just above the roof
       hatch();
-      S.map.addLayer({ id:'told', type:'fill-extrusion', source:'b', ...(T ? { 'source-layer':'b' } : {}), filter:told(),
+      S.map.addLayer({ id:'told', type:'fill-extrusion', ...(T ? { source:'city', 'source-layer':'b' } : { source:'b' }), filter:told(),
         paint:{ 'fill-extrusion-pattern':['step', ['zoom'], 'hatch-finest', 15, 'hatch-fine', 16, 'hatch'], 'fill-extrusion-base':['+', ['get', 'h'], 0.05],
           'fill-extrusion-height':['+', ['get', 'h'], 0.25], 'fill-extrusion-opacity':1 } });
 
