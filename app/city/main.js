@@ -56,15 +56,8 @@ export async function main(){
   S.stats = { total: S.features.length, known, estimated };
   groundNote();
 
-  S.layers = (S.data.layers || []).map(L => ({ ...L, groups: (L.groups || []).map(g => Array.isArray(g) ? { key: g[0], title: g[1] } : g) }));
-  S.layers.forEach(L => L.groups.forEach(g => S.groups.set(g.key, { ...g, layer: L })));
-  S.layers.forEach(L => L.groups.forEach(g => (g.items || []).forEach(it => {
-    const [name, bs] = typeof it[0] === 'number' ? [it[1], [it[0]]] : it;
-    if (bs.length > 1) bs.filter(b => typeof b === 'number').forEach(b => (S.entitiesAt[b] = S.entitiesAt[b] || []).some(x => x.name === name) || S.entitiesAt[b].push({ name, bs }));
-  })));
-  S.active = new Set([...S.active].filter(k => S.groups.has(k) && !isStorySet(k)));
-  saveActive();
-  renderLayers();
+  // (the layers and pins come with the index's second part, once the map is drawn: setLayers, below)
+  if (S.data.layers) setLayers();                // (the old single file has them in it)
 
   progress(90, 'drawing the map…');
   await drawMap();
@@ -86,14 +79,31 @@ function wantsMore(){
   return graphWanted() || ['person', 'pin', 'focus', 'group', 'layer', 'story'].some(k => q.has(k));
 }
 
+// The layers (their groups, what each place belongs to) and the pins, from the index's second part: the Layers and
+// Stories sheets are drawn from them, and the ticked layers saved on the phone are kept only if they still exist
+function setLayers(){
+  S.moreIn = true;
+  S.layers = (S.data.layers || []).map(L => ({ ...L, groups: (L.groups || []).map(g => Array.isArray(g) ? { key: g[0], title: g[1] } : g) }));
+  S.layers.forEach(L => L.groups.forEach(g => S.groups.set(g.key, { ...g, layer: L })));
+  S.layers.forEach(L => L.groups.forEach(g => (g.items || []).forEach(it => {
+    const [name, bs] = typeof it[0] === 'number' ? [it[1], [it[0]]] : it;
+    if (bs.length > 1) bs.filter(b => typeof b === 'number').forEach(b => (S.entitiesAt[b] = S.entitiesAt[b] || []).some(x => x.name === name) || S.entitiesAt[b].push({ name, bs }));
+  })));
+  S.active = new Set([...S.active].filter(k => S.groups.has(k) && !isStorySet(k)));
+  saveActive();
+  renderLayers();
+
+}
+
 // the index's second part, into the first: the named buildings' details (into those already made), people, …
 function mergeMore(m){
   Object.assign(S.data.index.props, m.props);
-  for (const k of ['people', 'placeNames', 'land', 'near']) if (k in m) S.data[k] = m[k];
+  for (const k of Object.keys(m)) if (k !== 'build' && k !== 'props') S.data[k] = m[k];     // (pipeline/s10_tiles.py: MORE)
   (S.madeFeatures || []).forEach((f, i) => { if (f && m.props[i]) f.properties = { ...m.props[i], ...f.properties }; });
   S.inLayers = null;
-  if (S.layers) renderLayers();
-  if (S.map) applyLayers();
+  setLayers();
+  if (S.map) { S.map.getSource('storypins')?.setData(S.data.pins); applyLayers(); }
+  document.body.dataset.more = 'in';            // (the page test waits for it)
 }
 
 // What a link asks the map to show: on opening the page, and from the graph (its "Show on the map" opens the same

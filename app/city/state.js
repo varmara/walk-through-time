@@ -2,12 +2,13 @@
 // One object, so that any module can read and change it (an imported variable cannot be reassigned).
 export const S = {
   city: null,            // cities/<city>.json
-  data: null,            // data/<city>.json: the index, layers, pins, areas
+  data: null,            // data/<city>.json: the index (what the map draws), areas; the layers and pins come with its second part
   features: [],          // one per building: { properties, full } (full: its card file has been merged in)
   map: null,             // the MapLibre map
   stats: null,           // { total, known, estimated }
   hist: null,            // buildings per year, for the count under the slider
-  layers: [],            // layer metadata
+  layers: [],            // layer metadata (from the index's second part: empty until it is in, moreIn)
+  moreIn: false,         // the index's second part (layers, pins, names, people…) has been merged in
   groups: new Map(),     // group key -> { key, title, count, items, layer }
   active: new Set(),     // ticked group keys
   entitiesAt: {},        // building index -> [{name, bs}] for people and stories with several places

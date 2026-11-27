@@ -41,6 +41,7 @@ const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (
   const open = async q => {
     await page.goto(`${BASE}${CITY}/${q}`, { waitUntil: 'load' });
     await page.waitForSelector('#loader.done', { timeout: 90000 });
+    await page.waitForSelector('body[data-more="in"]', { timeout: 90000 });      // the layers and pins, which come after the map
     await page.waitForTimeout(2000);
   };
 

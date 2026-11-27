@@ -13,16 +13,16 @@ and build the whole city before showing anything. Now:
                                       routes (walking routes: i, name) and basics (toilets, water, benches: t and
                                       a few details, in the zoom 14 and 15 tiles only, drawn close up), and land
                                       (brooks, woods, old railways and canals… from s06_land: t, i, k, u, y0, y1, o).
-  data/<city>.json                    the index: only what the page needs before any card opens: the few buildings
-                                      with a name, layers or a listing (see index()), how many buildings stand by
-                                      each year (for the count under the slider), layers, pins, and the areas'
-                                      names and bounds. Small however big the map gets: no outlines, no centres.
+  data/<city>.json                    the index: only what the map needs to draw: how many buildings stand by each
+                                      year (for the count under the slider), the areas' names and bounds, the
+                                      routes, the tiles' and the ground's settings, the files' versions. Small
+                                      however big the map gets: no outlines, no centres.
                                       Each kind of file's version, from its content (versions): a phone keeps a
                                       file until its version changes (sw.js).
   data/<city>-more.json               the index's second part, which the map draws without (the named buildings'
-                                      names and layers, people, places' names, the land's entries…): fetched
-                                      once the map is drawn (at once for a link that needs it) and merged when
-                                      it comes.
+                                      names and layers, people, places' names, the land's entries, the layers
+                                      and the story pins…): fetched once the map is drawn (at once for a link
+                                      that needs it) and merged when it comes.
   data/<city>/osm/<n>.json            OpenStreetMap id -> building number, for links that name one (?osm=way/123),
                                       in OSM_PARTS files by the id's number (n = number % OSM_PARTS), so a link
                                       loads a few kilobytes, not the list of every building.
@@ -54,7 +54,7 @@ MIN_Z, MAX_Z = 10, 15         # zoomed out (10-11) the smallest buildings are le
 # edited does not change the tiles, which phones keep until they change
 TILE_PROPS = ("y", "f", "h", "base")
 # the index's parts the map draws without (in <city>-more.json, fetched once the map is drawn): see main() below
-MORE = ("people", "placeNames", "land", "near")
+MORE = ("people", "placeNames", "land", "near", "pins", "layers")
 # a shed or a garage under this many square metres is drawn only close up (zoom 15), as are the smallest
 # outlines: zoomed out they are specks that make the tiles bigger and slower to draw
 SMALL_M2, SHED_M2 = 30, 60
@@ -253,4 +253,4 @@ def main(city_id):
                  "versions": versions, "build": build})
     out_json.write_text(json.dumps(slim, separators=(",", ":"), ensure_ascii=False))
     log(f"s10 tiles: {n_tiles} tiles ({size / 1e6:.1f} MB gzipped) in {time.time() - t0:.0f} s; "
-        f"index {out_json.stat().st_size / 1e6:.1f} MB; {len(cards)} card files")
+        f"index {out_json.stat().st_size / 1e6:.2f} MB, its second part {more_json.stat().st_size / 1e6:.2f} MB; {len(cards)} card files")

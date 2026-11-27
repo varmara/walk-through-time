@@ -16,8 +16,11 @@ function byArea(Ls){
   return areas.flatMap(a => Ls.filter(L => (L.area || null) === a));
 }
 // ================= Layers panel =================
+// the sheets say so while the layers and stories are still on their way (the index's second part, main.js)
+const loadingNote = '<p class="note">Loading…</p>';
 export function renderLayers(){
   renderStories();
+  if (!S.moreIn) { $('lSections').innerHTML = loadingNote; return; }
   const html = [];
   for (const sec of SECTIONS.filter(s => !STORY_SECTIONS.includes(s))) {
     const Ls = byArea(S.layers.filter(L => L.section === sec && L.groups.some(g => g.count > 0)));
@@ -88,6 +91,7 @@ function storyCount(gs){
   return new Set(gs.flatMap(g => (g.items || []).flatMap(it => (typeof it[0] === 'number' ? [it[0]] : it[1]).map(r => r + '|' + it[0])))).size;
 }
 export function renderStories(){
+  if (!S.moreIn) { $('stSections').innerHTML = loadingNote; return; }
   const html = [], row = (key, title, n, L, g, indent, parts) => `<div class="srow${indent ? ' sub' : ''}">
       ${parts ? `<button class="fold" data-fold="${esc(key)}" aria-expanded="false" aria-controls="parts-${esc(key)}" aria-label="Show the parts of ${esc(title)}"></button>` : indent ? '' : '<span class="nofold"></span>'}
       <button class="sopen" data-set="${esc(key)}" data-title="${esc(title)}"><span>${esc(title)}</span><span class="n">${fmt(n)}</span></button>
