@@ -169,16 +169,16 @@ a.fab{display:grid;place-items:center;text-decoration:none;color:inherit}
 .pcards{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 12px 6px;scroll-padding:0 12px;scrollbar-width:none;overscroll-behavior-x:contain}
 .pcards::-webkit-scrollbar{display:none}
 .pcard{cursor:pointer;flex:0 0 100%;scroll-snap-align:start;scroll-snap-stop:always;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:10px 12px;
-  box-shadow:var(--shadow-1);display:grid;gap:4px;position:relative;max-height:34vh;overflow-y:auto;box-sizing:border-box}
+  box-shadow:var(--shadow-1);display:grid;gap:6px;position:relative;max-height:48vh;overflow-y:auto;box-sizing:border-box;align-content:start}
 .pcard.on{border-color:var(--ink)}
 .pcard h3{margin:0 0 0 30px;font:600 18px/1.2 var(--serif);text-wrap:balance}
 .pcard p{margin:0;font:15px/1.4 var(--serif)}
 .pcard .textbtn{margin-left:0;justify-self:start}
 .pmeta{font:400 13px var(--sans);color:var(--muted)}
 .pnum{position:absolute;top:10px;left:10px;width:22px;height:22px;border-radius:50%;background:var(--hl);color:var(--on-strong);font:600 12px/22px var(--sans);text-align:center}
-.pin{width:26px;height:26px;border-radius:50%;border:2px solid var(--on-strong);background:var(--hl);color:var(--on-strong);font:600 12px var(--sans);
+.pin{width:26px;height:26px;border-radius:50%;border:2px solid var(--on-strong);background:var(--pc,var(--hl));color:var(--on-strong);font:600 12px var(--sans);
   display:grid;place-items:center;cursor:pointer;box-shadow:var(--shadow-pin);padding:0}
-.pin.on{background:var(--ink);color:var(--paper);transform:scale(1.25)}
+.pin.on{border-color:var(--ink);transform:scale(1.25)}
 .pin.dim{filter:opacity(.35)}       /* (not opacity: the map sets each marker's own) */
 .allplaces{display:block;margin:4px 0 0}
 @media (min-width:760px){ .placesbar{left:16px;right:auto;width:420px;bottom:16px} .phead{margin:0} .pcards{padding:2px 0 6px;scroll-padding:0} }
@@ -284,3 +284,62 @@ details.area>.srow{margin-left:14px}
 .parts>.srow{margin-left:22px}
 @media (prefers-reduced-motion:reduce){.srow .fold::before{transition:none}}
 .srow .nofold{flex:0 0 22px}
+
+/* ================= the story card (app/city/story.js): the same in a thread, on a building's card, in Contents ================= */
+p.schap{margin:0;font:600 11px/1.3 var(--sans);text-transform:uppercase;letter-spacing:.05em}
+.shead2{display:flex;align-items:flex-start;gap:9px}
+.snum{flex:none;width:22px;height:22px;border-radius:50%;background:var(--hl);color:var(--on-strong);font:600 12px/22px var(--sans);text-align:center}
+h3.stitle{flex:1;margin:0;font:600 18px/1.25 var(--serif);text-wrap:balance}
+.sshare{flex:none;width:36px;height:36px;margin:-6px -4px 0 0;border:0;background:none;border-radius:10px;display:grid;place-items:center;color:var(--ink);cursor:pointer}
+.sshare svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+p.smeta{margin:0;font:600 13px/1.35 var(--sans);color:var(--ink)}
+p.swho{margin:0;font:14px/1.45 var(--serif)}
+p.stext{margin:0;font:15.5px/1.45 var(--serif)}
+p.shere{margin:0;font:13px/1.4 var(--sans);color:var(--muted)}
+p.slbl,.slbl{margin:6px 0 2px;font:600 11px/1.3 var(--sans);color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.srel p{margin:2px 0;font:13px/1.45 var(--sans);color:var(--ink)}
+.srel .rk{color:var(--muted)}
+.srel a{color:var(--link);text-underline-offset:3px;text-decoration-thickness:1px}
+.ssrc ol{margin:0;padding-left:20px;font:13px/1.45 var(--sans);color:var(--muted)}
+.ssrc li{margin:1px 0;padding:1px 4px;border-radius:4px;overflow-wrap:anywhere}
+.ssrc li.hit{animation:fnhit 1.6s ease-out}
+.ssrc a{color:inherit}
+.story.scard{display:grid;gap:6px;padding:12px 0;border-top:1px solid var(--line)}
+/* a line to scale: dots on it, years at its ends and the chosen one's above */
+.tline{position:relative;height:34px;margin:4px 0 6px}
+.tline.cur{margin-top:20px}
+.tline::before{content:"";position:absolute;left:0;right:0;top:7px;height:2px;background:var(--line)}
+.tdot{position:absolute;top:3px;width:10px;height:10px;margin-left:-5px;border-radius:50%}
+.tdot.on{top:0;width:16px;height:16px;margin-left:-8px;box-shadow:0 0 0 3px var(--paper),0 0 0 4px var(--ink)}
+.tyr{position:absolute;top:19px;font:11px var(--sans);color:var(--muted);transform:translateX(-50%)}
+.tyr.start{transform:none;margin-left:-8px}.tyr.end{transform:translateX(-100%);margin-left:8px}
+.tyr.mid{top:-16px;font-weight:600;color:var(--ink)}
+/* a thread's opening card: its chapters; a chapter's: its stories, to choose from */
+.plist{display:grid;margin-top:4px}
+.plist button{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;min-height:36px;border-bottom:1px solid var(--line);color:var(--ink)}
+.plist button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.plist.chaps{border-left:2px solid var(--line);padding-left:10px;margin-left:3px}
+.plist.chaps button{border-bottom:0;min-height:34px}
+.plist i{flex:none;width:9px;height:9px;border-radius:50%}
+.plist .pdate{flex:none;min-width:40px;font:600 13px var(--sans);color:var(--muted)}
+.plist .pname{flex:1;font:15px/1.3 var(--serif)}
+/* Contents: chapters by a line, their year by it; a chapter opens into its full text */
+.contents{padding:12px 14px 24px}
+.contents .chd{display:flex;align-items:center;gap:8px;margin:4px 0 8px}
+.contents .chd b{flex:1;font:600 20px/1.2 var(--serif)}
+.contents > p{margin:0 0 12px;font:15px/1.45 var(--serif)}
+.cchap{display:grid;grid-template-columns:44px 12px 1fr;column-gap:10px;position:relative}
+.cchap::before{content:"";position:absolute;left:59px;top:0;bottom:0;width:2px;background:var(--line)}
+.cyr{font:600 15px/30px var(--serif)}
+.cdot{position:relative;width:12px;height:12px;border-radius:50%;margin-top:9px}
+.cbody{min-width:0;padding-bottom:10px}
+.chead{all:unset;cursor:pointer;display:flex;align-items:center;gap:6px;width:100%;min-height:30px;font:600 16px/1.3 var(--serif);color:var(--ink)}
+.chead:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chead span:first-child{flex:1}.chead .chev{color:var(--muted);font-size:14px}
+.cbody > p{margin:2px 0 8px;font:15px/1.45 var(--serif);color:var(--ink)}
+.crow{all:unset;cursor:pointer;display:flex;align-items:center;gap:8px;min-height:32px;width:100%;box-sizing:border-box}
+.crow .pname{flex:1;font:14.5px/1.3 var(--sans)}
+.crow.here{background:color-mix(in srgb,var(--ink) 8%,transparent);border-radius:6px;padding:0 6px;margin:0 -6px;font-weight:600}
+.crow .snum{width:20px;height:20px;font-size:10px;line-height:20px}
+.cstory{display:grid;gap:6px;padding:10px 0;border-top:1px solid var(--line)}
+.cstory .pmap{display:inline}

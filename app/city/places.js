@@ -5,7 +5,8 @@ import { S } from './state.js';
 import { fstate, isB, isThread, loadCard, loadSet, parseRef, refCentre, refOf, storyFor, tiled } from './data.js';
 import { groundAt, paintBuildings } from './map.js';
 import { closeSheet } from './sheet.js';
-import { openRef, refName } from './cards.js';
+import { openRef, openWho, refName } from './cards.js';
+import { chapterColour, footnotes, relatedOf, shareStory, storyCard, storyLink, yearOf } from './story.js';
 
 // A place's card in the strip: its name, date and the story that ties it to the set; a building whose card file
 // has not arrived yet shows its name (from the index) and fills in when the file comes (fillCard)
@@ -37,13 +38,29 @@ const src = s => s && s.url ? `<p class="psrc">${esc(s.kind || 'Source')}: <a hr
 // follow before the next chapter)
 function introHtml(P, card){
   const ch = card?.chapter;
-  if (ch) return `<p class="pmeta pchap">Chapter ${ch.j} of ${ch.m}</p><h3 class="ptitle">${esc(ch.title)}</h3>${ch.text ? citedText(ch.text, P.cites) : ''}
-    <p class="pmeta">${ch.n} ${ch.n === 1 ? 'story' : 'stories'}</p>
-    <button class="textbtn pnext" data-first>${P.page ? 'Show them on the map' : 'Start'}</button>`;
+  if (ch) {
+    const k = P.cards.indexOf(card), yrs = span(chapterCards(P, k));
+    return `<p class="pmeta pchap" style="color:${ch.colour}">Chapter ${ch.j} of ${ch.m}${yrs ? ' · ' + yrs : ''}</p><h3 class="ptitle">${esc(ch.title)}</h3>${ch.text ? citedText(ch.text, P.cites) : ''}
+      <div class="plist">${chapterCards(P, k).map(c => `<button data-go="${P.cards.indexOf(c)}"><span class="snum" style="background:${c.colour}">${c.n}</span><span class="pdate">${esc(dateOf(c))}</span><span class="pname">${esc(c.hint?.name || refName(c.refs[0]))}</span></button>`).join('')}</div>`;
+  }
   const n = P.cards.filter(c => !c.intro).length;
+  // a thread of chapters: its chapters to choose from, each with its years; else how many stories, and Start
+  const chaps = P.cards.map((c, k) => [c, k]).filter(([c]) => c.chapter);
   return `<h3 class="ptitle">${esc(P.name)}</h3>${P.intro ? citedText(P.intro, P.cites) : ''}
-    <p class="pmeta">${n} ${n === 1 ? 'story' : 'stories'}${P.chapters ? ` in ${P.chapters} chapters` : ''}</p>
-    <button class="textbtn pnext" data-first>${P.page ? 'Show them on the map' : 'Start'}</button>`;
+    ${chaps.length ? `<div class="plist chaps">${chaps.map(([c, k]) => `<button data-go="${k}"><i style="background:${c.chapter.colour}"></i><span class="pdate">${esc(span(chapterCards(P, k)).split('–')[0])}</span><span class="pname">${esc(c.chapter.title)}</span></button>`).join('')}</div>`
+      : `<p class="pmeta">${n} ${n === 1 ? 'story' : 'stories'}</p><button class="textbtn pnext" data-first>Start</button>`}`;
+}
+// a story's date in a list: the thread's, else its own, else the year the build ordered it by
+function dateOf(c){
+  const t = ready(c.refs) ? told(c.refs[0], S.places.name, c.hint) : {};
+  return c.hint?.when || t.when || (Number.isFinite(c.hint?.y) ? String(c.hint.y) : '');
+}
+// the years of a run of cards: "1831", "1842–1847"
+function span(cs){
+  const ys = cs.map(c => Number.isFinite(c.hint?.y) ? c.hint.y : yearOf(c.hint?.when)).filter(Number.isFinite);
+  if (!ys.length) return '';
+  const a = Math.min(...ys), b = Math.max(...ys);
+  return a === b ? String(a) : `${a}–${b}`;
 }
 // one story's card, laid out as the thread's page tells it: its name; its date and where it is; who the person was;
 // what it tells, each with its source; the full card (Details), or, in the page view, the way to the map
@@ -76,28 +93,44 @@ function cardHtml(card, n, P){
   // a pin not placed exactly (its halo on the map)
   const ap = ts.find(x => x.approx)?.approx;
   if (ap) meta.push(`place approximate, within about ${ap} m`);
-  const seen = new Set(), parts = [];
-  ts.forEach((x, j) => {
-    if (!x.text || seen.has(x.text)) return; seen.add(x.text);
-    parts.push(`<p>${esc(plain(x.text))}</p>${x.here ? `<p class="phere">${esc(x.here)}</p>` : ''}${src(x.source)}`
-      + (refs.length > 1 ? `<button class="textbtn" data-open="${refs[j]}">Details</button>` : ''));
-  });
-  return `<div class="pnum">${n}</div><h3>${esc(title)}</h3>
-    ${meta.length ? `<div class="pmeta pwhen">${esc(meta.join(' · '))}</div>` : ''}
-    ${who?.text ? `<p class="pabout"><i>${esc(who.text)}</i>${who.life && !life ? ` (${esc(who.life)})` : ''}</p>${src({ kind: 'Wikipedia', url: who.url, title: who.title })}` : ''}
-    ${parts.join('')}
-    <div class="pbtns">${refs.length === 1 ? `<button class="textbtn" data-open="${refs[0]}">Details</button>` : ''}<button class="textbtn pmap" data-map>Show on the map</button></div>`;
+  // its words (several places of one story, as a person's two plaques: each one's words once), and their sources
+  const seen = new Set(), texts = ts.filter(x => x.text && !seen.has(x.text) && seen.add(x.text));
+  const st = { ...first, text: texts.map(x => x.text).join('\n\n'),
+    sources: [...(Array.isArray(first.sources) ? first.sources : []), ...texts.slice(1).map(x => x.source).filter(Boolean)],
+    here: texts.map(x => x.here).filter(Boolean).join(' ') };
+  const ch = card.chapter || (P.chapterList && hint?.ch != null ? P.chapterList[hint.ch] : null);
+  const about = refs.map(r => `<button class="textbtn" data-open="${r}">About ${esc(refName(r))} ›</button>`).join('');
+  return storyCard({ n, colour: card.colour, title,
+    chapter: ch ? `Chapter ${hint.ch + 1} of ${P.chapterList.length} · ${ch.title}` : '',
+    meta: meta.join(' · '), s: st, who: who?.text ? { text: who.text, url: who.url, title: who.title } : null,
+    rel: relatedOf(st, refs, { title, thread: P.thread, self: hint?.person ? name : null }),
+    share: P.thread ? storyLink(P.thread, title) : '',
+    extra: `<div class="pbtns">${about}<button class="textbtn pmap" data-map>Show on the map</button></div>` });
 }
 const numOf = (P, k) => P.cards[k].n;       // a story's number: the opening cards (the set's, each chapter's) have none
 function wire(el){
   el.querySelectorAll('[data-open]').forEach(btn => btn.onclick = () => openRef(parseRef(btn.dataset.open)));
+  el.querySelectorAll('[data-ref]').forEach(x => x.onclick = e => { e.preventDefault(); openRef(parseRef(x.dataset.ref)); });
+  el.querySelectorAll('[data-who]').forEach(x => x.onclick = e => { e.preventDefault(); openWho(x.dataset.who); });
+  el.querySelectorAll('[data-thread]').forEach(x => x.onclick = e => { e.preventDefault(); showThread(x.dataset.thread); });
+  el.querySelectorAll('[data-share]').forEach(x => x.onclick = e => { e.stopPropagation(); shareStory(x.dataset.share, x.dataset.title); });
+  el.querySelectorAll('[data-go]').forEach(x => x.onclick = e => { e.stopPropagation(); pageView(false); goToCard(+x.dataset.go); });
+  el.querySelectorAll('[data-chap]').forEach(x => x.onclick = () => openChapter(+x.dataset.chap));
+  el.querySelectorAll('[data-fn]').forEach(x => x.onclick = e => {        // to the source in the card's own list
+    e.preventDefault(); e.stopPropagation();
+    const li = document.getElementById('fn' + x.dataset.fn); if (!li) return;
+    li.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    li.classList.remove('hit'); void li.offsetWidth; li.classList.add('hit');
+  });
   el.querySelectorAll('[data-map]').forEach(btn => btn.onclick = () => { pageView(false); goToCard(+el.dataset.i); });
   el.querySelectorAll('[data-first]').forEach(btn => btn.onclick = () => { pageView(false); goToCard(+el.dataset.i + 1); });
 }
 function fillCard(k){
-  const P = S.places, el = P && $('pCards').querySelector(`[data-i="${k}"]`);
-  if (!el || el.dataset.full) return;
+  const P = S.places; if (!P) return;
   const c = P.cards[k]; if (!c.intro && !ready(c.refs)) return;
+  if (P.page) { const x = $('pCards').querySelector(`.cstory[data-i="${k}"]`); if (x && x.querySelector('.pwait')) { x.innerHTML = cardHtml(c, c.n, P); wire(x); } return; }
+  const el = $('pCards').querySelector(`.pcard[data-i="${k}"]`);
+  if (!el || el.dataset.full) return;
   el.innerHTML = cardHtml(c, numOf(P, k), P); el.dataset.full = '1'; wire(el);
 }
 // the cards round the one in view, loaded first (a big set, as a group from the graph, has places in dozens of
@@ -116,7 +149,7 @@ function loadAround(k){
 // a set of places as cards: one card for each story (hints: for each place, the name and story layer of what put it
 // in the set; places of the same story, as a person's two plaques, share its card), after an opening card with the
 // set's title and introduction when it has one (a thread, a place)
-export function showPlaces(name, bs, hints, intro, set, chapters, cites){
+export function showPlaces(name, bs, hints, intro, set, chapters, cites, thread){
   // the stories' words are in the card files. A small set (a person, a story: one or two files) waits for them,
   // showing the bar meanwhile; a big set, or one whose places' whereabouts need the files, shows at once
   // (the single data file, with no card files: every building is complete already)
@@ -129,7 +162,7 @@ export function showPlaces(name, bs, hints, intro, set, chapters, cites){
     $('pCards').innerHTML = `<p class="pwait">Finding ${bs.length} ${bs.length === 1 ? 'place' : 'places'}…</p>`;
     $('placesbar').hidden = false; $('timebar').hidden = true;
     return (set ? set.catch(() => {}) : Promise.all(need.map(b => loadCard(b).catch(() => {}))))
-      .then(() => showPlaces(name, bs, hints, intro, set && need.some(b => !S.features[b].full) ? null : set, chapters, cites));
+      .then(() => showPlaces(name, bs, hints, intro, set && need.some(b => !S.features[b].full) ? null : set, chapters, cites, thread));
   }
   closeSheet();
   clearPlaces(false);
@@ -140,13 +173,15 @@ export function showPlaces(name, bs, hints, intro, set, chapters, cites){
     // a thread of several chapters: each opens with its own card, and its stories do not mix with the next's
     if (chapters && h?.ch != null && h.ch !== ch) {
       ch = h.ch;
-      const c = chapters[ch]; if (c) cards.push({ intro: true, chapter: { ...c, j: ch + 1, m: chapters.length, n: 0 } });
+      const c = chapters[ch]; if (c) cards.push({ intro: true, chapter: { ...c, j: ch + 1, m: chapters.length, n: 0, colour: chapterColour(ch + 1, chapters.length) } });
     }
     if (h && last && !last.intro && last.hint?.name === h.name && h.ch === last.hint.ch) last.refs.push(b);
     else cards.push({ refs: [b], hint: h });
   });
   let num = 0, open = null;
   cards.forEach(c => { if (!c.intro) { c.n = ++num; if (open) open.n++; } else { c.n = 0; open = c.chapter || null; } });
+  // each story in its chapter's colour (pin, number, label); a set without chapters in one
+  cards.forEach(c => { if (!c.intro) c.colour = chapters && c.hint?.ch != null ? chapterColour(c.hint.ch + 1, chapters.length) : 'var(--hl)'; });
   // a story at the place the card before it showed, and only there: the map, there already, stays
   let before = null;
   cards.forEach(c => {
@@ -157,7 +192,7 @@ export function showPlaces(name, bs, hints, intro, set, chapters, cites){
     c.same = !!r && before === r;
     before = r;
   });
-  const P = S.places = { name, intro, cites, bs, cards, chapters: chapters ? chapters.length : 0, i: 0, page: false, set: need.length && set ? set : null };
+  const P = S.places = { name, intro, cites, thread, chapterList: chapters || null, bs, cards, chapters: chapters ? chapters.length : 0, i: 0, page: false, set: need.length && set ? set : null };
   if (P.set) P.set.catch(() => {}).then(() => { if (S.places !== P) return; P.set = null;
     P.cards.forEach((c, k) => fillCard(k)); loadAround(P.i); });
   bs.filter(isB).forEach(b => fstate(b, { hl:true }));
@@ -170,8 +205,7 @@ export function showPlaces(name, bs, hints, intro, set, chapters, cites){
     c.refs.filter(b => !isB(b) && refOf(b).properties?.approx).map(b => ({ type:'Feature',
       properties:{ approx: refOf(b).properties.approx }, geometry:{ type:'Point', coordinates: refCentre(b) } }))) });
   $('pName').textContent = name;
-  $('pCards').innerHTML = cards.map((c, k) => `<article class="pcard${c.intro ? ' pintro' : ''}" data-i="${k}">${cardHtml(c, numOf(P, k), P)}</article>`).join('');
-  $('pCards').querySelectorAll('.pcard').forEach(el => { if (el.querySelector('.pwait') == null) el.dataset.full = '1'; wire(el); });
+  strip(P);
   $('placesbar').hidden = false; $('timebar').hidden = true;
   $('placesbar').classList.remove('page'); $('pPage').setAttribute('aria-pressed', 'false');
   $('pCards').scrollLeft = 0;
@@ -179,6 +213,16 @@ export function showPlaces(name, bs, hints, intro, set, chapters, cites){
   // all the places in view first; a card tapped (or swiped to) then goes to its place. Measured once the strip
   // has its cards: its height is the bottom of the view
   requestAnimationFrame(() => { if (S.places === P) fitAll(); });
+}
+// the strip of cards
+function strip(P){
+  $('pCards').innerHTML = P.cards.map((c, k) => `<article class="pcard${c.intro ? ' pintro' : ''}" data-i="${k}">${cardHtml(c, numOf(P, k), P)}</article>`).join('');
+  $('pCards').querySelectorAll('.pcard').forEach(el => { if (el.querySelector('.pwait') == null) el.dataset.full = '1'; wire(el); });
+}
+// a whole thread, by its id
+function showThread(id){
+  const L = S.layers.find(x => x.id === id); if (!L) return;
+  showGroups(L.groups.filter(g => g.count > 0).map(g => g.key), L.title);
 }
 // the story cards of the chapter whose opening card is card k (up to the next chapter's)
 function chapterCards(P, k){
@@ -233,7 +277,7 @@ export function showGroups(keys, title){
       const rs = typeof it[0] === 'number' ? [it[0]] : it[1], name = typeof it[0] === 'number' ? it[1] : it[0];
       const h = it[2] || {}, layer = h.layer || (g.layer.kind === 'stories' ? g.layer.id : h.person || h.plaque ? 'people' : null);
       for (const r of rs.map(x => typeof x === 'number' ? x : parseRef(String(x))))
-        if (!seen.has(r + '|' + name)) { seen.add(r + '|' + name); refs.push(r); hints.push({ name, layer, when: h.when, person: h.person, ch }); }
+        if (!seen.has(r + '|' + name)) { seen.add(r + '|' + name); refs.push(r); hints.push({ name, layer, when: h.when, y: h.y, person: h.person, ch }); }
     }
   }
   if (!refs.length) return false;
@@ -245,20 +289,44 @@ export function showGroups(keys, title){
   // opens with its own introduction
   const several = whole && isThread(Ls[0]) && chaps.length > 1 && chaps.every(c => c.text);
   const alone = keys.length === 1 && chaps.length === 1 && chaps[0].text ? chaps[0].text : undefined;
-  showPlaces(title, refs, hints, whole ? (Ls[0].intro || '') : alone, set, several ? chaps : undefined, Ls.length === 1 ? Ls[0].cites : undefined);
+  showPlaces(title, refs, hints, whole ? (Ls[0].intro || '') : alone, set, several ? chaps : undefined, Ls.length === 1 ? Ls[0].cites : undefined,
+    whole && isThread(Ls[0]) && Ls[0].section === 'Threads' ? Ls[0].id : undefined);
   return true;
 }
-// the set as a page, as the thread's share page tells it, scrolled through on the map's screen; each story's
-// "Show on the map" goes back to the cards at its card
+// Contents: the set as a list down a line, a chapter's year by it, each story numbered under its chapter; a chapter's
+// heading opens its full text in place (its introduction, then each story's card); Open all opens every chapter
 export function pageView(on){
   const P = S.places; if (!P) return;
   P.page = on;
   $('placesbar').classList.toggle('page', on);
   $('pPage').setAttribute('aria-pressed', String(on));
-  $('pPage').setAttribute('aria-label', on ? 'Show as cards' : 'Show as a page');
-  $('pCards').querySelectorAll('.pintro').forEach(el => { el.innerHTML = introHtml(P, P.cards[+el.dataset.i]); wire(el); });
-  if (on) { loadAround(0); $('pCards').scrollTop = 0; }
-  else goToCard(P.i, false);
+  $('pPage').setAttribute('aria-label', on ? 'Back to the cards' : 'Contents');
+  if (on) { P.open = P.open || new Set(); loadAround(0); contents(P); $('pCards').scrollTop = 0; }
+  else { strip(P); goToCard(P.i, false); }
+}
+function contents(P){
+  const groups = [];                       // [{ chapter card index or -1, its cards }]
+  P.cards.forEach((c, k) => { if (c.intro) { if (c.chapter) groups.push({ k, c, cards: [] }); } else { if (!groups.length) groups.push({ k: -1, c: null, cards: [] }); groups[groups.length - 1].cards.push([c, k]); } });
+  const row = ([c, k]) => `<button class="crow${k === P.i ? ' here' : ''}" data-go="${k}"><span class="snum" style="background:${c.colour}">${c.n}</span><span class="pname">${esc(c.hint?.name || refName(c.refs[0]))}</span>${k === P.i ? '<span class="muted">you are here</span>' : ''}</button>`;
+  const full = g => (g.c?.chapter.text ? citedText(g.c.chapter.text, P.cites) : '') + g.cards.map(([c, k]) => `<article class="cstory" data-i="${k}">${ready(c.refs) ? cardHtml(c, c.n, P) : '<p class="pwait">Loading…</p>'}</article>`).join('');
+  const html = groups.map((g, j) => {
+    const open = P.open.has(j) || !g.c, yrs = span(g.cards.map(([c]) => c));
+    const colour = g.c ? g.c.chapter.colour : 'var(--hl)';
+    return `<section class="cchap"><b class="cyr" style="color:${colour}">${esc(yrs.split('–')[0])}</b><i class="cdot" style="background:${colour}"></i>
+      <div class="cbody">${g.c ? `<button class="chead" data-chap="${j}" aria-expanded="${open}"><span>${esc(g.c.chapter.title)}</span><span class="chev">${open ? '▾' : '▸'}</span></button>` : ''}
+      ${open ? full(g) : g.cards.map(row).join('')}</div></section>`;
+  }).join('');
+  $('pCards').innerHTML = `<div class="contents"><div class="chd"><b>${esc(P.name)}</b>${groups.some(g => g.c) ? `<button class="textbtn" data-chap="-1">${P.open.size === groups.length ? 'Close all' : 'Open all'}</button>` : ''}</div>
+    ${P.intro ? citedText(P.intro, P.cites) : ''}${html}</div>`;
+  wire($('pCards'));
+  $('pCards').querySelectorAll('.cstory').forEach(wire);
+}
+function openChapter(j){
+  const P = S.places; if (!P) return;
+  const n = P.cards.filter(c => c.chapter).length;
+  if (j < 0) P.open = P.open.size === n ? new Set() : new Set([...Array(n).keys()]);
+  else P.open.has(j) ? P.open.delete(j) : P.open.add(j);
+  const y = $('pCards').scrollTop; contents(P); $('pCards').scrollTop = y;
 }
 $('pPage').onclick = () => pageView(!(S.places && S.places.page));
 // From place to place as Google Earth flew: up and out (curve: higher is further out), across, and down again,
@@ -354,7 +422,7 @@ export function setPlace(k, fly = true){
 }
 const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 export function goToCard(k, smooth = true){
-  const card = $('pCards').querySelector(`[data-i="${k}"]`);
+  const card = $('pCards').querySelector(`.pcard[data-i="${k}"]`);
   if (!card) return;
   // (the card already open: no scroll to wait for, so the map goes back to it now)
   if (S.places && S.places.i === k && !S.places.page) return setPlace(k);
@@ -426,6 +494,7 @@ export function drawPins(){
     const html = `${shown}${more ? `<span class="more">+${more}</span>` : ''}`;
     el.classList.add('pin'); el.classList.toggle('joined', !!more); el.classList.toggle('on', mine);
     el.classList.toggle('dim', !!chap && !nums.some(x => chap.has(x)));
+    el.style.setProperty('--pc', (P && P.cards[cardOf(shown)]?.colour) || 'var(--hl)');     // its chapter's colour
     if (el.innerHTML !== html) el.innerHTML = html;
     el.setAttribute('aria-label', more ? `Stories ${nums.join(', ')} here` : `Story ${shown}`);
     el.onclick = e => {

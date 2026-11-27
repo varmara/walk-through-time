@@ -9,6 +9,7 @@
 import { CITY_ID } from './util.js';
 import { S } from './state.js';
 import { loadCard } from './data.js';
+import { footnotes } from './story.js';
 import { KINDS, DEFAULTS, prepare, visible, groupSpots, radius as radiusOf, simulation, forces as setForces,
   isDefaultLayout } from './graphlayout.js';
 
@@ -481,24 +482,30 @@ function select(id, fromCards){
   $('sTitle').textContent = n.label;
   $('sType').textContent = n.type === 'place'
     ? 'Place' + (n.year != null ? ' · ' + (n.f === 'area' ? 'probably ' : n.f === 'exact' ? '' : 'c. ') + n.year : '')
-    : KIND_TITLE[n.type] ? KIND_TITLE[n.type].replace(/s$/, '') : n.type;
+    : (KIND_TITLE[n.type] ? KIND_TITLE[n.type].replace(/s$/, '') : n.type) + (n.about?.life ? ' · ' + n.about.life : '');
   const mine = G.links.filter(l => l.s === id || l.t === id);
   const places = n.type === 'place' ? [id] : mine.map(l => (l.s === id ? l.t : l.s)).filter(x => G.byId.get(x).type === 'place');
   $('go').hidden = !places.length;
   $('go').textContent = places.length > 1 ? `Show ${places.length} places on the map` : 'Show on the map';
   $('go').onclick = () => go(`./?focus=${places.join(',')}&name=${encodeURIComponent(n.label)}`);
-  const groups = {};
-  mine.forEach(l => { const o = G.byId.get(l.s === id ? l.t : l.s); (groups[o.type] = groups[o.type] || []).push([o, l]); });
-  // (their note's own words are told once, here: not again under the place the note is told at)
-  const said = n.about && n.about.text ? n.about.text.trim() : null;
-  const again = l => !!(said && l.text && l.text.trim().startsWith(said.slice(0, 80)));
-  $('links').innerHTML = (n.about && n.about.text ? `<div class="about"><p>${esc(n.about.text)}</p>${n.about.url ? `<div class="src">${esc(n.about.kind || 'Wikipedia')}: <a href="${esc(n.about.url)}" target="_blank" rel="noopener">${esc(n.about.title)}</a></div>` : ''}</div>` : '')
-    + `<h3>Linked to ${mine.length}</h3>` + Object.entries(groups)
-    .sort((a, b) => KINDS.findIndex(k => k[0] === a[0]) - KINDS.findIndex(k => k[0] === b[0]))
-    .map(([k, xs]) => xs.map(([o, l]) => `<div class="link">
-      <button data-id="${esc(o.id)}"><i style="background:var(--k-${kindKey(o.type)})"></i>${esc(o.label)}</button>
-      ${again(l) ? '' : (l.text ? `<p>${esc(l.text)}</p>` : '') + (l.src && l.src.url ? `<div class="src">${l.how === 'mention' ? 'Named in this story · ' : ''}${esc(l.src.kind || 'Source')}: <a href="${esc(l.src.url)}" target="_blank" rel="noopener">${esc(l.src.title)}</a></div>` : '')}
-    </div>`).join('')).join('');
+  // the card, as a story's is in a thread: who or what it is, its words with their sources, and what it is related
+  // to, one line for each kind; each related name picks out its point here
+  const N = footnotes(), said = n.about && n.about.text ? n.about.text.trim() : null;
+  const again = t => !!(said && t && t.trim().startsWith(said.slice(0, 80)));
+  const told = new Set(), texts = [];
+  for (const l of mine) if (l.text && !again(l.text) && !told.has(l.text)) { told.add(l.text); texts.push(l); }
+  const words = (said ? `<p class="swho"><i>${esc(said)}</i>${n.about.url ? N.cite({ kind: n.about.kind || 'Wikipedia', title: n.about.title, url: n.about.url }) : ''}</p>` : '')
+    + texts.map(l => `<p class="stext">${esc(l.text.replace(/\[\^[\w-]+\]/g, ''))}${l.src && l.src.url ? N.cite(l.src) : ''}</p>`).join('');
+  const kindOf = o => o.type === 'place' ? 'Places' : o.type === 'theme' ? 'Threads' : o.type === 'events' ? 'Events' : 'People';
+  const rel = { People: [], Places: [], Events: [], Threads: [] };
+  for (const l of mine) { const o = G.byId.get(l.s === id ? l.t : l.s); if (o && !rel[kindOf(o)].includes(o)) rel[kindOf(o)].push(o); }
+  const lines = Object.entries(rel).filter(([, xs]) => xs.length)
+    .map(([k, xs]) => `<p><span class="rk">${k}:</span> ${xs.map(o => `<button class="rl" data-id="${esc(o.id)}">${esc(o.label)}</button>`).join(' · ')}</p>`).join('');
+  $('links').innerHTML = `<div class="gcard">${words}${lines ? `<div class="srel"><p class="slbl">Related</p>${lines}</div>` : ''}${N.html()}</div>`;
+  $('links').querySelectorAll('[data-fn]').forEach(x => x.onclick = e => {
+    e.preventDefault();
+    const li = $('links').querySelector('#fn' + CSS.escape(x.dataset.fn)); if (li) li.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
   $('links').scrollTop = 0;
   $('links').querySelectorAll('[data-id]').forEach(b => b.onclick = () => {
     const o = G.byId.get(b.dataset.id); select(o.id, true);

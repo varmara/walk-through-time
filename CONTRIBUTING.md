@@ -116,10 +116,11 @@ When the Lords threw out the Bill, a crowd burned the castle of the
   that holds the check words in that sentence; and its `when:` and `made:` dates are footnoted to the page that
   gives them (the build log lists a date that none of its pages gives: it is shown without a source).
 - **Links.** `[[Note]]` or `[[Note|words shown]]` links another note, or a person on the map by the name the
-  People layer gives them (who need not have a note yet). On the person's card, the story is listed under "In
-  these stories and events"; in the graph, the person is linked to its places. A link to a story is its "see
-  also". A building is linked with its OpenStreetMap address, which opens it on the map. The build stops on a
-  `[[link]]` that finds nothing.
+  People layer gives them (who need not have a note yet). The words show as plain text: every link goes under the
+  card's **Related** lines instead (People, Places, Events, Threads), with the people its words name in full and
+  the threads it is in. On the person's card, the story is listed under "In these stories and events"; in the
+  graph, the person is linked to its places. A building is linked with its OpenStreetMap address. The build stops
+  on a `[[link]]` that finds nothing.
 - **A fact goes in the text**, with a footnote when it comes from another page. Where it has a place or a time of
   its own, it is a story or event of its own.
 - **Places stay places.** A pin is named for the place (a tomb, an address), never for a person.

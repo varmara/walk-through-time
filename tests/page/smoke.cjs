@@ -107,11 +107,15 @@ const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (
     if (intros > 1) { await counterAfter(() => page.click('#pNext')); check(/^Chapter 1 of \d+$/.test(await text('#pCount')) && /^Chapter 1 of/.test(await text('#pCards .pintro.on')), 'a thread of several chapters opens its first chapter on a card of its own'); }
     for (let i = 0; i < intros && !/^1 of /.test(await text('#pCount')); i++) { await counterAfter(() => page.click('#pNext')); }
     check(await text('#pCount') === `1 of ${n}`, "the next card is its first story, numbered");
-    // the same cards as a page: one under another, each with its way back to the map
+    // Contents: the thread's chapters and stories down a line; a chapter's heading opens its full text; a story
+    // there goes back to its card
     await page.click('#pPage'); await page.waitForTimeout(500);
-    check(await page.$eval('#placesbar', el => el.classList.contains('page')) && (await page.$$('#pCards .pmap')).length > 0, 'the thread shows as a page');
-    const back = await page.$$('#pCards .pcard:not(.pintro) [data-map]');
-    if (back[1]) { await counterAfter(() => back[1].click()); }
+    check(await page.$eval('#placesbar', el => el.classList.contains('page')) && (await page.$$('#pCards .crow, #pCards .cstory')).length > 0, 'Contents lists the thread');
+    const head = await page.$('#pCards .chead');
+    if (head) { await head.click(); await page.waitForTimeout(800); check((await page.$$('#pCards .cstory')).length > 0, "a chapter's heading opens its full text"); }
+    const k2 = await page.evaluate(async () => (await import(new URL('../app/city/state.js', location.href).href)).S.places.cards.findIndex(c => !c.intro && c.n === 2));
+    const back = await page.$(`#pCards .crow[data-go="${k2}"], #pCards .cstory[data-i="${k2}"] [data-map]`);
+    if (back) { await counterAfter(() => back.click()); }
     check(!(await page.$eval('#placesbar', el => el.classList.contains('page'))) && await text('#pCount') === `2 of ${n}`, '"Show on the map" goes back to its card');
   }
   // a link to a place opens its cards, not a tickbox

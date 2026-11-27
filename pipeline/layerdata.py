@@ -128,6 +128,10 @@ def in_date_order(meta, stories, pins, dates, about):
                     first = when_year(hint["when"])
                 elif person and born(name) is not None:
                     first = born(name)
+                if first is not None and L["kind"] == "topics":     # its year, for the chapters' years on the page
+                    if len(it) < 3:
+                        it.append({})
+                    it[2]["y"] = first
                 keyed.append((later(first), it))
             # by date, an undated item staying after the one listed before it; or, for a thread that says
             # "sort: as listed", in the order written

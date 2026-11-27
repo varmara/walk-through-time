@@ -14,7 +14,7 @@ import { drawMap } from './map.js';
 import { stopPlay, updateYear } from './timebar.js';
 import { applyLayers, drawLegend, groundNote, renderLayers } from './panels.js';
 import { openRef, selectBuilding, showPerson, showPin } from './cards.js';
-import { showGroups, showPlaces } from './places.js';
+import { goToCard, showGroups, showPlaces } from './places.js';
 
 export async function main(){
   progress(5, 'loading map data…');
@@ -120,6 +120,16 @@ export async function openLink(q, first){
     if (i >= 0) selectBuilding(i);
   } else if (bq != null && +bq < S.features.length) selectBuilding(+bq);
   if (keys.length) showGroups(keys, groupTitle);
+  // a story shared from a thread (?layer=…&story=…): the thread opens at its card
+  const sq = q.get('story');
+  if (sq && keys.length) {
+    // (the thread's cards may wait for their file first)
+    let tries = 0;
+    const t = setInterval(() => {
+      const k = S.places ? S.places.cards.findIndex(c => !c.intro && c.hint?.name === sq) : -1;
+      if (k > 0 || ++tries > 50) { clearInterval(t); if (k > 0) goToCard(k, false); }
+    }, 200);
+  }
   if (q.get('person')) showPerson(q.get('person'));
   const pq = /^(-?\d+\.\d+),(-?\d+\.\d+)$/.exec(q.get('pin') || '');
   if (pq) {
