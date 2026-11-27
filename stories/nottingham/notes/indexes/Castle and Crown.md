@@ -5,10 +5,10 @@ id: crown
 sort: as listed
 ---
 
-For nearly six centuries the castle on its sandstone rock was a royal fortress, and the town grew up below it. These stories follow its history from Norman stronghold to the Civil War, its rebuilding as a ducal mansion, the burning of that mansion in 1831, and its reopening as a museum.
+After the Norman Conquest William the Conqueror built a castle at Nottingham and gave it into the keeping of William Peverel.[^nott] For six centuries it was the Crown's; then it was the dukes'; at last it was the town's.
 
-## The medieval castle
-Medieval kings held Nottingham Castle as a royal fortress, and kept the forests and parks around it for hunting. It was here in 1330 that the young Edward III seized Roger Mortimer and took power for himself. Edward IV added new royal apartments, but under the Tudors the castle was neglected and fell into disrepair.
+## The royal castle, 1068–1600
+William also made Sherwood a royal hunting forest, under forest laws, covering perhaps a quarter of the county; King John and Edward I hunted there.[^sher] The castle was the kings' house beside it.
 - [[Statue of Robin Hood]]
 - [[The middle bailey wall]]
 - [[A royal hunting park]]
@@ -16,8 +16,8 @@ Medieval kings held Nottingham Castle as a royal fortress, and kept the forests 
 - [[Edward IV's tower, 1476]]
 - [[The castle in decay]]
 
-## The Civil War
-In August 1642 Charles I raised his standard at Nottingham, marking the start of the Civil War. The town and castle were soon held for Parliament, and under Colonel John Hutchinson they withstood repeated attacks from the Royalist garrison at Newark.
+## The Civil War, 1642–1651
+The war grew out of a long struggle between the monarchy and Parliament for political and religious control. When the fighting began in August 1642, Charles left York for Nottingham, close to the Royalist Midlands.[^ecw]
 - 1642: [[Charles I]]
 - [[Charles I raised his standard, 1642]]
 - 1642: [[Henry Ireton]]
@@ -27,13 +27,19 @@ In August 1642 Charles I raised his standard at Nottingham, marking the start of
 - [[Royalist raids on Nottingham]]
 - [[Lucy Hutchinson]]
 
-## The dukes' mansion
-After the war the castle was demolished. In 1663 the Duke of Newcastle bought the ruined castle, with the deer park beside it, and in the 1670s he built a mansion on the rock. In 1831, when the House of Lords rejected the Second Reform Bill, rioters burned the mansion, and the shell stood empty for more than forty years.
+## The dukes' mansion, 1663–1831
+William Cavendish had fought for the King and gone into exile. At the Restoration he came home and won back most of his estates, and in 1665 he was made Duke of Newcastle.[^cav]
 - [[The castle's deer park]]
 - 1670s: [[Nottingham Castle]]
 - [[The castle burned, 1831]]
 
-## The castle museum
-Thomas Chambers Hine restored the ruined mansion, and in 1878 it opened as a museum and art gallery, the first municipal one outside London. Its grounds also hold the city's memorial to Albert Ball, the airman killed in 1917.
+## The castle museum, 1878
+From 1845 Parliament let boroughs of 10,000 people or more raise a halfpenny rate to set up museums.[^mus]
 - [[Nottingham Castle Museum]]
 - [[Statue of Captain Albert Ball]]
+
+[^nott]: https://en.wikipedia.org/wiki/Nottingham — title: Nottingham — check: William the Conqueror built a castle | William Peverel
+[^sher]: https://en.wikipedia.org/wiki/Sherwood_Forest — title: Sherwood Forest — check: Royal Hunting Forest | forest laws | quarter | King John | Edward I
+[^ecw]: https://en.wikipedia.org/wiki/First_English_Civil_War — title: First English Civil War — check: political and religious control | August 1642 | left York for Nottingham
+[^cav]: https://en.wikipedia.org/wiki/William_Cavendish,_1st_Duke_of_Newcastle — title: William Cavendish, 1st Duke of Newcastle — check: exile | estates | 1665
+[^mus]: https://en.wikipedia.org/wiki/Museums_Act_1845 — title: Museums Act 1845 — check: 10,000
