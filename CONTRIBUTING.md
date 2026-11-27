@@ -164,8 +164,8 @@ follows one story across the map, through any places: the castle and the Crown, 
 about. It is listed under "Themes", opening as numbered cards, and is a theme in the graph. Every index note is a thread: one with an
 `area:` is a place (listed under "Around the map", usually with `sort: as listed`), one without is a theme; a thread may list people, plaques and buildings as well as stories; anything can be on several threads, and a card lists the threads it is on, each
 opening that thread. Stories do not link to the next one in a thread in their text, so a story can join a thread
-anywhere without others changing: the cards keep date order, and the `##` headings are its chapters, by period
-or by strand (The Civil War, The dukes' mansion).
+anywhere without others changing. Without `sort: as listed` the cards keep date order; the `##` headings are its
+chapters.
 
 A thread of several chapters opens each chapter with an introduction card of its own, so the chapters do not mix:
 write it as prose under the `##` heading, before the chapter's first member. Every chapter of such a thread needs
@@ -174,6 +174,26 @@ alike. An introduction sets the stage: the background the cards below it leave o
 the wider country was going through), not a retelling of their own words. Its facts are footnoted as a story's
 are: `[^k]` in the text, and the `[^k]: …` line anywhere in the index (below the last member reads best). The
 build checks them the same way and leaves out a footnote whose page fails, with a line in its log.
+
+**A thread reads as a story.** A reader swipes through it card by card, or reads it whole from its Contents, so
+its order is the telling, not a list:
+
+- **One chapter, one episode.** A chapter is one event or one stretch of time (the cheese riot, 1766; the Luddites,
+  1811), not a heading over several: two riots are two chapters. A chapter's title ends with its year or years
+  ("The Reform riots, 1831", "Chartists, 1842–1847"): the opening card's list of chapters and Contents show it.
+- **`sort: as listed`**, and the cards in the order the story happens: the cause before what it led to, the
+  person before their places and their deeds (Jesse Boot, then his shop, then his factory), the event before what
+  is left of it. Give a line its thread date (`- 1847: [[Feargus O'Connor]]`) where the card's own date would mislead.
+- **A place once.** A place told twice in a row is one card's story told on, not two cards: the map does not move
+  between them. Where the same place comes back later in the story, it comes back as the story does, with no
+  "back at" or "again".
+- **The introductions set the stage, the cards tell.** The thread's introduction says what the whole story is
+  about and what lay behind it; a chapter's says what the wider country was going through and why it happened then.
+  Neither retells a card, and every fact in them is footnoted.
+- **What a thread needs and has not.** A gap in the story (a riot with no card for the day it began) is a new
+  story or event note, with its place and source, not a sentence in an introduction.
+- **Related, not repeated.** A card's Related lines link its people, places, events and threads; a thread need not
+  list a card only to connect it.
 
 ```markdown
 ## The Civil War
