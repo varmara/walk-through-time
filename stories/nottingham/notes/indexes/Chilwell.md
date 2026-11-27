@@ -13,3 +13,4 @@ Chilwell began as a hamlet on the road to Ashby-de-la-Zouch, where Roman finds s
 - [[Christ Church, Chilwell]]
 - [[Hall, manor and green]]
 - [[National Shell Filling Factory]]
+- [[Chilwell's ordnance depot]]

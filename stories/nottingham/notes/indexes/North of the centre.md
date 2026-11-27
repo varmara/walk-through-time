@@ -16,6 +16,7 @@ North of the old town lay open fields and common land until the 19th century. As
 - [[The Arboretum]]
 - [[Statue of Feargus O'Connor]]
 - [[The Arboretum war memorial]]
+- [[The Boer War memorial, 1903]]
 - [[Memorial to Samuel Morley]]
 - [[Votes for women, 1918]]
 - [[Church Cemetery]]

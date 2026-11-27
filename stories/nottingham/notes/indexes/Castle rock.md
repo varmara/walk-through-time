@@ -20,6 +20,7 @@ The sandstone rock at the western end of the old town has been the site of Notti
 - [[Hutchinson's garrison]]
 - [[St Nicholas' Church]]
 - [[Royalist raids on Nottingham]]
+- [[Marshal Tallard at Newdigate House, 1705]]
 - [[The castle burned, 1831]]
 - [[Statue of Captain Albert Ball]]
 - [[Nottingham Castle Museum]]
