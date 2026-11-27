@@ -5,7 +5,7 @@ id: names
 sort: as listed
 ---
 
-Before anything here was written down, people left their names on the land and their things in the ground. Each chapter is one of the peoples who named it, and the record that first wrote the names down.
+Before anything here was written down, people left their names on the land and their things in the ground.
 
 ## Before the English, c. 1000 BC–AD 400
 The Roman road called the Fosse Way was built in the first and second centuries AD, from Exeter in the south-west to Lincoln in the north-east, and crossed this county with a stopping place at Castle Hill near Bingham.[^fosse]
