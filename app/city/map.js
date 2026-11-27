@@ -12,10 +12,28 @@ export function isDark(){
 }
 
 // ================= Map =================
+// the buildings with something to read: a story of their own (the index's "near" list) or a pin on them
+let toldIds = null;
+export function toldList(){
+  if (!toldIds && S.data.near) toldIds = [...new Set([...S.data.near.map(n => n[0]),
+    ...(S.data.pins?.features || []).map(f => f.properties.on).filter(i => typeof i === 'number')])];
+  return toldIds || [];
+}
+const told = () => ['in', ['id'], ['literal', toldList()]];
+// their hatching: fine diagonal ink lines with clear gaps, laid on their roofs (the era colour shows between)
+function hatch(){
+  const n = 8, c = document.createElement('canvas'); c.width = c.height = n;
+  const g = c.getContext('2d'); g.strokeStyle = tok(isDark() ? '--bg' : '--ink'); g.globalAlpha = isDark() ? 0.8 : 0.6; g.lineWidth = 1.2;   // dark lines: the buildings are light in both themes
+  for (const o of [-n, 0, n]) { g.beginPath(); g.moveTo(o, n); g.lineTo(o + n, 0); g.stroke(); }
+  const img = g.getImageData(0, 0, n, n);
+  if (S.map.hasImage('hatch')) S.map.updateImage('hatch', img); else S.map.addImage('hatch', img, { pixelRatio:1 });
+}
+let bFilter = null;
+function hatchFilter(){ return bFilter ? ['all', bFilter, told()] : told(); }
 // era colour by year, faded towards the background by how precise the date is (as colourFor)
 export function eraColour(){
   const step = t => ['step', ['get', 'y'], mix(ERAS[0][3], tok('--bg'), t), ...ERAS.slice(1).flatMap(e => [e[0], mix(e[3], tok('--bg'), t)])];
-  return ['case', ['!', ['has', 'y']], tok('--unknown'),
+  return ['case', ['!', ['has', 'y']], ['case', told(), tok('--told'), tok('--unknown')],
     ['match', ['coalesce', ['get', 'f'], 'exact'], ...['approx', 'century', 'area'].flatMap(f => [f, step(FADE[f])]), step(0)]];
 }
 export function buildingColour(){
@@ -53,9 +71,13 @@ export function paintBuildings(){
   if (!S.map || !S.map.getLayer('b')) return;
   markLayers();
   S.map.setPaintProperty('b', 'fill-extrusion-color', buildingColour());
+  hatch();
+  S.map.setFilter('told', hatchFilter());
+  S.map.setLayoutProperty('told', 'visibility', S.places ? 'none' : 'visible');   // only the open set's places stand out
 }
 export function filterBuildings(f){
-  if (S.map.getLayer('b')) S.map.setFilter('b', f);
+  bFilter = f;
+  if (S.map.getLayer('b')) { S.map.setFilter('b', f); S.map.setFilter('told', hatchFilter()); }
 }
 export const pinColour = () => ['match', ['get', 'layer'], ...PIN_LAYERS.flatMap(L => [L, tok('--p-' + L)]), tok('--marked')];
 export const basicColour = () => ['match', ['get', 't'], ...BASICS.flatMap(k => [k, tok('--b-' + k)]), tok('--muted')];
@@ -124,6 +146,11 @@ export function drawMap(){
         'fill-extrusion-color':buildingColour(),
         'fill-extrusion-height':['get', 'h'], 'fill-extrusion-base':['coalesce', ['get', 'base'], 0], 'fill-extrusion-opacity':0.95,
         'fill-extrusion-vertical-gradient':true } });
+      // the hatching on the roofs of buildings with something to read: a thin see-through slab just above the roof
+      hatch();
+      S.map.addLayer({ id:'told', type:'fill-extrusion', source:'b', ...(T ? { 'source-layer':'b' } : {}), filter:told(),
+        paint:{ 'fill-extrusion-pattern':'hatch', 'fill-extrusion-base':['+', ['get', 'h'], 0.05],
+          'fill-extrusion-height':['+', ['get', 'h'], 0.25], 'fill-extrusion-opacity':1 } });
 
       S.map.addSource('storypins', { type:'geojson', data: S.data.pins || { type:'FeatureCollection', features:[] } });
       // a pin whose place is not known exactly (", approximate" in its note): a pale halo of its radius in metres,

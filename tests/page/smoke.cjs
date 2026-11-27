@@ -126,6 +126,12 @@ const check = (ok, what) => { console.log((ok ? 'ok   ' : 'FAIL ') + what); if (
   await open('');
   await page.click('#bMap');
   check((await page.$$('#legend [data-per]')).length >= 5, 'the Map sheet shows the legend of periods');
+  check(!!(await page.$('#legend i.hatched')), 'the legend shows the hatching of buildings with a story');
+  check(await page.evaluate(async () => { const { S } = await import(new URL('../app/city/state.js', location.href).href);
+    const M = await import(new URL('../app/city/map.js', location.href).href);
+    return !!S.map.getLayer('told') && S.map.hasImage('hatch') && M.toldList().length > 0
+      && JSON.stringify(M.eraColour()).includes(getComputedStyle(document.documentElement).getPropertyValue('--told').trim()); }),
+    'buildings with a story are hatched, and undated ones have a colour of their own');
 
   if (known) {
     await open('?osm=' + known.osm);

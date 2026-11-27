@@ -88,6 +88,7 @@ input[type=range]{width:100%;accent-color:var(--ink);height:28px;margin:0}
 .legend{display:flex;flex-wrap:wrap;gap:4px 12px}
 .legend div,.legend .per{display:flex;align-items:center;gap:5px;font:400 13px var(--sans);color:var(--muted);white-space:nowrap}
 .legend i{flex:0 0 12px;height:12px;border-radius:2px}
+.legend i.hatched{background:repeating-linear-gradient(135deg,#2a231d 0 1px,transparent 1px 4px),var(--era-5);opacity:.85}
 /* a period is a switch: tap to hide its buildings (struck through, its swatch hollow) */
 .legend .per{background:none;border:0;padding:6px 2px;margin:-6px 0;cursor:pointer;color:var(--ink)}
 .legend .per[aria-pressed="false"]{color:var(--muted);text-decoration:line-through}

@@ -155,6 +155,11 @@ Tables in the same folder, each with a Note column saying why:
 
 ### Places and threads
 
+**On the map**, a building with something to read (a story of its own, or a pin tied to it with `at:`) has its roof
+hatched with fine diagonal lines, so a reader sees at a glance where there is a story. The period colour still shows
+between the lines; an undated one is a warm grey (`--told`) instead of the pale "no date". Colour alone could not
+mark it: the periods run from dark to light, so a building darkened or lightened looks like the next period.
+
 Every story lives in at least one **place**: a Places index for a small area of the map (the castle rock, the Lace Market,
 Wilford, Ruddington). A place is told as a thread of where it is: listed in the Stories sheet under "Around the map",
 folded by its `area`, it may list the people, plaques and buildings that belong there as well as its stories, and its

@@ -266,6 +266,8 @@ export function drawLegend(){
     + `<i style="background:${colour}"></i>${esc(label)}</button>`;
   $('legend').innerHTML = ERAS.map(e => sw(e[2], e[3], e[2])).join('')
     + sw(NODATE, 'var(--unknown)', 'no date')
+    + `<div><i style="background:var(--told)"></i>no date, has a story</div>`
+    + `<div><i class="hatched"></i>has a story to read</div>`
     + `<div><i style="background:var(--marked)"></i>in a ticked layer, no date</div>`
     + `<span class="perall"><button type="button" class="linkish" data-all="1">Show all</button>`
     + `<button type="button" class="linkish" data-all="0">Hide all</button></span>`;
