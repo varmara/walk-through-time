@@ -21,10 +21,11 @@ export async function main(){
   // the index's second part (what the map draws without: names, people, places' names…), fetched at once,
   // alongside the first; merged when it comes (pipeline/s10_tiles.py)
   const moreUrl = `../data/${CITY_ID}-more.json`, moreFirst = fetchJSON(moreUrl).catch(() => null);
-  S.city = await fetchJSON(`../cities/${CITY_ID}.json`);
+  const early = window.__early || {};
+  S.city = await fetchJSON(`../cities/${CITY_ID}.json`, undefined, early.city);
   setPeriods(S.city.periods);
   drawLegend();
-  S.data = await fetchData(`../data/${CITY_ID}.json`);
+  S.data = await fetchData(`../data/${CITY_ID}.json`, early.index);
   S.more = !S.data.versions?.more ? Promise.resolve() : moreFirst.then(m => m && m.build === S.data.build ? m
     : fetchJSON(`${moreUrl}?v=${S.data.versions.more}`)).then(mergeMore);     // (from another build: this one's)
   keepOnPhone(S.data.build);

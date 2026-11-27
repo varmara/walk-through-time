@@ -24,6 +24,13 @@
   // The page's own scripts and styles carry the version of their content (pipeline/pages.py): a phone keeps them
   // until they change, and fetches them again as soon as they do.
   window.__v = '{{v}}';
+  // The city's settings and the map's index are asked for here, at once, while the map's library and the page's
+  // scripts are still on their way; app/city/main.js takes the answers up (util.js: fetchJSON, fetchData).
+  window.__early = {
+    city: fetch('../cities/{{id}}.json', { cache: 'no-cache' }),
+    index: fetch('../data/{{id}}.json', { cache: 'no-cache' })
+  };
+  window.__early.city.catch(function () {}); window.__early.index.catch(function () {});
   document.write('<link rel="stylesheet" href="../app/theme.css?v=' + window.__v + '">');
   document.write('<link rel="stylesheet" href="../app/city.css?v=' + window.__v + '">');
 </script>
@@ -146,7 +153,6 @@
 window.addEventListener('error', e => { const s = document.getElementById('status'); if (s) s.textContent = 'Error: ' + e.message; });
 window.addEventListener('unhandledrejection', e => { const s = document.getElementById('status'); if (s) s.textContent = 'Error: ' + ((e.reason && e.reason.message) || e.reason); });
 </script>
-<script src="../lib/maplibre-gl.js?v={{v}}"></script>
 <script>
   // The page's modules (app/city/), each fetched with the same ?v= as the styles, through an import map
   (function () {
@@ -155,6 +161,8 @@ window.addEventListener('unhandledrejection', e => { const s = document.getEleme
     document.write('<script type="importmap">' + JSON.stringify({ imports: imports }) + '<\/script>');
   })();
 </script>
+<!-- A module runs once the page is read, so the scripts download while the map's library does, and run after it -->
 <script type="module" src="../app/city/main.js"></script>
+<script src="../lib/maplibre-gl.js?v={{v}}"></script>
 </body>
 </html>
