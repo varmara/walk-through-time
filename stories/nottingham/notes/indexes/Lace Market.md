@@ -10,6 +10,8 @@ The hill east of the Market Square was the site of the Saxon town, taken by the 
 
 - [[The Danes in Nottingham, 868]]
 - [[St Mary's Church, Nottingham]]
+- [[The body snatchers of Barker Gate, 1827]]
+- [[George Africanus]]
 - [[Weekday Cross]]
 - [[Shire Hall]]
 - [[The crush at Saville's hanging, 1844]]

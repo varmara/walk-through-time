@@ -14,6 +14,7 @@ Pressure to enclose the common fields round the town for building began in 1787,
 - [[Tower House]]
 - [[Park Terrace]]
 - [[St Ann's Allotments]]
+- [[The body snatchers of Barker Gate, 1827]]
 - [[General Cemetery]]
 - [[A railway suburb]]
 
