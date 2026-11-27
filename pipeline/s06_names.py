@@ -72,8 +72,8 @@ def main(city_id):
     hand, titles = cur.get("names", {}), cur.get("titles", {})
     story_name = {}
     for e in cur["entries"]:
-        # a person's or a fact's name, or an event's (names: no), is not the building's
-        if e.get("layer") not in ("people", "facts") and e.get("names", True):
+        # a person's name, or an event's (names: no), is not the building's
+        if e.get("layer") != "people" and e.get("names", True):
             story_name.setdefault(str(e["b"]), e["name"])
     fallback = dict(lay.get("names", {}))           # plaque addresses
     inside, named = {}, {}

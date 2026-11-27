@@ -95,15 +95,6 @@ def main(city_id):
     photos = load(city_id, "photos") if work(city_id, "photos").exists() else {}
     leads = load(city_id, "pageimages") if work(city_id, "pageimages").exists() else {}     # s06_summaries
     gained = []         # buildings whose photo is the lead photo of a Wikipedia article: nothing else had one
-    dyk, pin_dyk = {}, {}
-    for e in cur["entries"]:
-        if e["layer"] != "facts":
-            continue
-        d = {"text": e["story"], "source": e["source"], **({"weblinks": e["weblinks"]} if e.get("weblinks") else {})}
-        if e["b"] is not None:
-            dyk.setdefault(str(e["b"]), []).append(d)
-        elif e.get("pin"):            # a fact at a pin a note made: on that pin's card
-            pin_dyk.setdefault((round(e["pin"][0], 6), round(e["pin"][1], 6)), []).append(d)
     commons = lambda f: "http://commons.wikimedia.org/wiki/Special:FilePath/" + urllib.parse.quote(f.replace(" ", "_"))  # noqa: E731
     names = load(city_id, "names")              # s06_names: every naming rule is there
 
@@ -188,7 +179,7 @@ def main(city_id):
             "image": info.get("image") or ((photos.get(k) or {}).get("photo") and commons(photos[k]["photo"]["file"]))
                      or (lead and commons(lead["file"])),
             "credit": None if info.get("image") else (photos.get(k) or {}).get("photo") or lead,
-            "archive": (photos.get(k) or {}).get("archive"), "dyk": dyk.get(k), "article": article, "architects": architects(k, info),
+            "archive": (photos.get(k) or {}).get("archive"), "article": article, "architects": architects(k, info),
             "cat": info.get("commonscat"),
             "L": ("," + ",".join(lay["member"][k]) + ",") if k in lay["member"] else None,
             "stories": lay["stories"].get(k),
@@ -228,8 +219,6 @@ def main(city_id):
              "geometry": {"type": "Point", "coordinates": [pn["x"], pn["y"]]}} for k, pn in enumerate(lay.get("pins", []))]
     for f in pins:          # pins: their layer's group, their person, where they stand
         pp = f["properties"]
-        if (d := pin_dyk.get(tuple(round(c, 6) for c in f["geometry"]["coordinates"]))):
-            pp["dyk"] = d
         if (lead := (leads.get(f"p{pp['i']}") or {}).get("photo")):      # its article's lead photo (s06_summaries)
             pp["image"], pp["credit"] = commons(lead["file"]), lead
             gained.append((f"p{pp['i']}", pp.get("name"), leads[f"p{pp['i']}"]["article"], lead["file"]))

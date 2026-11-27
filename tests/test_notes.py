@@ -26,12 +26,6 @@ the house of the [[Henry Pelham-Clinton|Duke of Newcastle]].[^castle]
 
 It reopened as a museum.
 
-> [!fact]
-> source: https://en.wikipedia.org/wiki/Nottingham_Castle
-> check: 1878
->
-> It reopened in 1878.
-
 [^castle]: https://en.wikipedia.org/wiki/Nottingham_Castle — check: 1878 | museum
 """
 
@@ -45,13 +39,10 @@ at:
   - Lowe's Silk Mill
 ---
 He lived by the mill.
-
-> [!fact]
-> A fact about him.
 """
 
 
-# the indexes: a Places index (Civic) listing the event, the People layer; the facts layer is made when none
+# the indexes: a Places index (Civic) listing the event, the People layer
 INDEXES = {"indexes/Civic.md": "---\ntype: index\narea: The city\nid: civic\norder: 1\n---\nThe council.\n\n- [[The castle burned]]\n",
            "indexes/People.md": "---\ntype: index\narea: The city\nid: people\nkind: people\norder: 2\n---\nWho lived here.\n"}
 
@@ -71,7 +62,7 @@ def load(files, indexes=True):
 
 class Read(unittest.TestCase):
     def test_event(self):
-        info, (civic, people, facts) = load({"events/The castle burned.md": EVENT})
+        info, (civic, people) = load({"events/The castle burned.md": EVENT})
         a, b = civic["entries"]
         self.assertEqual((a["name"], a["source"], a["sources"]), ("The castle burned", "en:1831 reform riots", ["en:Nottingham Castle"]))
         self.assertEqual(a["facts"], ("8 October 1831", "Duke of Newcastle"))
@@ -84,36 +75,28 @@ class Read(unittest.TestCase):
                                          ["Nottingham Castle", "https://www.openstreetmap.org/way/16459858"]])
         self.assertEqual(a["cites"], {"castle": {"source": "en:Nottingham Castle", "check": ("1878", "museum")}})
         self.assertEqual(a["see"], ["Mortimer's Hole"])
-        # the fact: at the note's places, with its own source and words
-        self.assertEqual([(f["at"], f["source"], f["facts"], f["story"]) for f in facts["entries"]],
-                         [("osm:way/16459858", "en:Nottingham Castle", ("1878",), "It reopened in 1878."),
-                          ("pin:-1.2165,52.9265", "en:Nottingham Castle", ("1878",), "It reopened in 1878.")])
         self.assertEqual(info["names"], ["The castle burned", "Civic", "People"])
-        self.assertEqual([(L["id"], L["intro"]) for L in info["layers"]], [("civic", "The council."), ("people", "Who lived here."),
-                                                                          ("facts", "")])
+        self.assertEqual([(L["id"], L["intro"]) for L in info["layers"]], [("civic", "The council."), ("people", "Who lived here.")])
 
     def test_person_and_a_pin_another_note_made(self):
-        info, (civic, people, facts) = load({"events/The castle burned.md": EVENT, "people/William Thompson.md": PERSON})
+        info, (civic, people) = load({"events/The castle burned.md": EVENT, "people/William Thompson.md": PERSON})
         (p,) = people["entries"]
         self.assertEqual((p["name"], p["group"], p["at"], p["where"]), ("William Thompson", "sport", "pin:-1.2165,52.9265", "Lowe's Silk Mill"))
         self.assertEqual((p["source"], p["read"]), ("web:https://map.mappingwomenssuffrage.org.uk/items/show/1", "2026-11-14"))
         self.assertEqual(info["people"]["William Thompson"], {"wikipedia": "William Thompson (boxer)", "group": "sport"})
-        # a person's fact with no place of its own: on their card
-        (f,) = [f for f in facts["entries"] if f.get("who")]
-        self.assertEqual((f["who"], f["unplaced"], f["source"]), ("William Thompson", True, p["source"]))
 
     def test_person_with_no_text_or_place(self):
-        info, (civic, people, facts) = load({"people/W. G. Grace.md": "---\ntype: person\nwikipedia: no\n---\n"})
+        info, (civic, people) = load({"people/W. G. Grace.md": "---\ntype: person\nwikipedia: no\n---\n"})
         self.assertEqual(people["entries"], [])
         self.assertIs(info["people"]["W. G. Grace"]["wikipedia"], False)
 
     def test_quotes(self):
-        _, (civic, people, facts) = load({"people/A.md": "---\ntype: person\nsource: he:1\nquote:\n  - Paid for by A.\n"
+        _, (civic, people) = load({"people/A.md": "---\ntype: person\nsource: he:1\nquote:\n  - Paid for by A.\n"
                                                          "  - \"1908\"\nat:\n  - P, 52.9, -1.1\n---\nText.\n"})
         self.assertEqual(people["entries"][0]["quote"], ["Paid for by A.", "1908"])
 
     def test_person_text_with_no_place(self):
-        _, (civic, people, facts) = load({"people/A.md": "---\ntype: person\nsource: en:A\n---\nWho they were.\n"})
+        _, (civic, people) = load({"people/A.md": "---\ntype: person\nsource: en:A\n---\nWho they were.\n"})
         (p,) = people["entries"]
         self.assertTrue(p["unplaced"])
         self.assertNotIn("at", p)
@@ -122,13 +105,13 @@ class Read(unittest.TestCase):
         idx = ("---\ntype: index\narea: The city\nid: civic\norder: 1\n---\nThe council.\n\n## Old\n- [[The castle burned]]\n"
                "\n## New\n- [[B]]\n")
         b = EVENT.replace("check: 8 October 1831 | Duke of Newcastle\n", "")
-        _, (civic, people, facts) = load({"indexes/Civic.md": idx, "events/The castle burned.md": EVENT, "stories/B.md": b})
+        _, (civic, people) = load({"indexes/Civic.md": idx, "events/The castle burned.md": EVENT, "stories/B.md": b})
         self.assertEqual(civic["groups"], [["civic-old", "Old"], ["civic-new", "New"]])     # id-heading
         self.assertEqual({(e["name"], e["group"]) for e in civic["entries"]}, {("The castle burned", "civic-old"), ("B", "civic-new")})
 
     def test_a_story_in_two_places(self):
         """A story listed in two Places indexes is told in both (Trent Bridge: West Bridgford and the Meadows)."""
-        _, (other, civic, people, facts) = load({"events/The castle burned.md": EVENT,
+        _, (other, civic, people) = load({"events/The castle burned.md": EVENT,
                                                  "indexes/Civic.md": "---\ntype: index\narea: The city\norder: 2\n---\n- [[The castle burned]]\n",
                                                  "indexes/Other.md": "---\ntype: index\narea: The city\norder: 1\n---\n- [[The castle burned]]\n"})
         self.assertEqual([e["name"] for e in civic["entries"]], [e["name"] for e in other["entries"]])
@@ -150,6 +133,8 @@ class Read(unittest.TestCase):
             ("---\ntype: event\nsource: en:A\nat:\n  - Pin, -100.1, 52.9\n---\nText.\n", "latitude, then longitude"),
             ("---\ntype: index\nsection: Elsewhere\n---\n", "section: is no longer used"),
             ("---\ntype: [\n---\n", "not valid YAML"),
+            # (no "Did you know?": a fact goes in the text, or is a story of its own)
+            ("---\ntype: event\nsource: en:A\nat:\n  - Pin, 52.9, -1.1\n---\nText.\n\n> [!fact]\n> A fact.\n", "[!fact] callout"),
         ]:
             with self.subTest(want=want), self.assertRaisesRegex(notes.NoteError, re.escape(want)):
                 load({"events/The castle burned.md": text})

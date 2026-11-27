@@ -1,7 +1,7 @@
 // Walk Through Time, city page: cards for buildings, areas and plaques.
 // Every card is one layout. A kind of card only says what goes in it (buildingCard, areaCard, pinCard); renderCard
 // draws it into the slots of the sheet in <city>/index.html, in their order there, and hides the empty ones:
-//   image + credit · summary · facts (rows) · Did you know · old pictures · more old pictures · stories · links
+//   image + credit · summary · facts (rows) · old pictures · more old pictures · stories · links
 import { $, dateText, eraOf, esc, flightPace, whenText } from './util.js';
 import { S } from './state.js';
 import { areaOf, byOsm, centreOf, fstate, isB, isThread, loadCard, parseRef, pinOf, refOf, routeOf, saveActive, storyOf, tiled } from './data.js';
@@ -36,7 +36,7 @@ export const HOURS_NOTE = 'Opening hours from OpenStreetMap, which anyone can ed
 export const layerTitle = id => S.layers.find(L => L.id === id)?.title || id;
 
 // ================= The one layout =================
-// card: { title, image: {src, alt, credit (html)}, summary (html), rows: [[label, html]], dyk: [{text, source}],
+// card: { title, image: {src, alt, credit (html)}, summary (html), rows: [[label, html]],
 //         archive: [{file, year, author, licence}], coll: [{title, url}], stories: [story], after (html), links: [html] }
 // story: { label, text, source, place, who, pin }: a story layer's entry, a plaque's words, an area's description
 // ================= Footnotes: every source on a card, numbered once in reading order =================
@@ -124,7 +124,7 @@ export function showPerson(name){
     // (words told at a place, "designed this showroom": under that place's name)
     ...(o && o.story ? [{ text: o.story, source: o.source, sources: o.sources, cites: o.cites, weblinks: o.weblinks,
       label: o.at && o.at.length ? 'At ' + o.at.map(r => thenTitle(typeof r === 'number' ? r : parseRef(String(r)), o.story)).join(' and ') : '' }] : [])];
-  renderCard({ title: name, rows, after, stories, dyk: info.facts || [], links: [], share: { title: name, url: shareOf('person', name) } });
+  renderCard({ title: name, rows, after, stories, links: [], share: { title: name, url: shareOf('person', name) } });
   // the names of buildings whose card files are not here yet: fetched, then the list again
   const told = ((o && o.at) || []).map(r => typeof r === 'number' ? r : parseRef(String(r))).filter(r => isB(r) && !S.features[r].full);
   if (told.length) Promise.all(told.map(r => loadCard(r).catch(() => {}))).then(() => { if ($('sTitle').textContent === name && told.every(r => S.features[r].full)) showPerson(name); });
@@ -205,7 +205,6 @@ export function renderCard(c){
   const N = c.N || notes();
   fill('cSum', c.summary);
   $('cFacts').innerHTML = (c.rows || []).map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
-  fill('cDyk', c.dyk && c.dyk.length && '<h3>Did you know?</h3>' + c.dyk.map(d => prose(d, N, N.cite(d.source))).join(''));
   fill('cArch', c.archive && c.archive.length && archiveHtml(c.archive));
   fill('cColl', c.coll && c.coll.length && collHtml(c.coll));
   $('cStories').innerHTML = (c.stories || []).map(st => storyHtml(st, N)).join('') + (c.after || '') + topicsHtml(c.topics) + N.html();
@@ -505,7 +504,7 @@ function buildingCard(p, id){
   const cr = J(p.credit), file = p.image && decodeURIComponent(p.image.split('/Special:FilePath/')[1] || '').replace(/_/g, ' ');
   const image = p.image && { src: p.image.replace(/^http:/, 'https:') + '?width=640', alt: p.name || '', file,
     credit: `Photo${cr && credit(cr) ? ': ' + credit(cr) : ''} · <a href="${esc(filePage(file))}" target="_blank" rel="noopener">Wikimedia Commons</a>` };
-  return { title: p.full || p.name || placeName(p), image, summary, rows, dyk: J(p.dyk), archive: J(p.archive), coll: J(p.coll),
+  return { title: p.full || p.name || placeName(p), image, summary, rows, archive: J(p.archive), coll: J(p.coll),
            stories, after, links, N, cat: p.cat };    // the title, for landmarks: what it was · what it is
 }
 
@@ -587,7 +586,7 @@ function pinCard(p){
   return { title: p.name, image, rows, stories: withPeople([{ text: p.text, source: J(p.source), place: J(p.place), who: p.who, see: p.see,
              layer: p.layer, people: J(p.people), sources: J(p.sources), cites: J(p.cites), weblinks: J(p.weblinks), own: p.own,
              when: p.when, made: p.made, here: p.here, whenSrc: J(p.whenSrc), madeSrc: J(p.madeSrc) }]),
-           dyk: J(p.dyk), coll: J(p.coll),
+           coll: J(p.coll),
            links: placeLinks(p, false) };
 }
 

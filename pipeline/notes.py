@@ -17,13 +17,6 @@ A note is Markdown with properties at the top (YAML) and its text below. Its nam
     When the Lords threw out the Reform Bill, a crowd burned [Nottingham Castle](https://www.openstreetmap.org/way/16459858),
     the house of the [[Henry Pelham-Clinton, 4th Duke of Newcastle|Duke of Newcastle]].[^castle]
 
-    > [!fact]
-    > at: https://www.openstreetmap.org/way/…        (optional: the note's own places, else)
-    > source: …                                      (optional: the note's own, else)
-    > check: …
-    >
-    > A short fact, shown under "Did you know?".
-
     [^castle]: https://en.wikipedia.org/wiki/Nottingham_Castle — check: 1878 | museum
 
 A person note (type: person) may also give `kind:` (writers, sport…: else Wikidata's occupation decides) and
@@ -116,8 +109,8 @@ def split(path):
 
 
 def body_parts(body, name):
-    """The note's text (paragraphs joined by blank lines), its fact callouts and its footnotes."""
-    lines, facts, notes = [], [], {}
+    """The note's text (paragraphs joined by blank lines) and its footnotes."""
+    lines, notes = [], {}
     i, src = 0, body.splitlines()
     while i < len(src):
         line = src[i]
@@ -133,29 +126,13 @@ def body_parts(body, name):
             i += 1
             continue
         if re.match(r"^>\s*\[!fact\]", line.strip(), re.I):
-            block = []
-            i += 1
-            while i < len(src) and src[i].lstrip().startswith(">"):
-                block.append(src[i].lstrip()[1:].strip())
-                i += 1
-            props, text = {}, []
-            for b in block:
-                m = re.match(r"^(at|source|check|read|title):\s*(.*)$", b)
-                if m and not text:
-                    if m[1] == "at":
-                        props.setdefault("at", []).append(m[2])
-                    else:
-                        props[m[1]] = m[2]
-                elif b or text:
-                    text.append(b)
-            if not "".join(text).strip():
-                raise NoteError(f"{name}: a fact callout with no text")
-            facts.append({**props, "text": " ".join(t for t in text if t)})
-            continue
+            # (there is no "Did you know?" any more: a fact goes in the text, or is its own story where it has its own
+            # place or time)
+            raise NoteError(f"{name}: a [!fact] callout: write it into the text, or as a story of its own")
         lines.append(line)
         i += 1
     paras = [" ".join(x.strip() for x in p.splitlines() if x.strip()) for p in re.split(r"\n\s*\n", "\n".join(lines))]
-    return "\n\n".join(p for p in paras if p and not p.startswith("#")), facts, notes
+    return "\n\n".join(p for p in paras if p and not p.startswith("#")), notes
 
 
 def place(a, name, pins):
@@ -223,11 +200,11 @@ def index_layer(name, props, body):
     city", "South of the Trent"): its stories and events live there (their pins and their place on a building's
     card), and with sort: as listed its cards keep the order written; a thread without an area is a theme.
     Properties: id (else from the file's name), area, sort, order (its place in
-    the section), kind (people or facts, for those layers, whose members are not listed). A group's key, which
+    the section), kind (people, for that layer, whose members are not listed). A group's key, which
     links and remembered tickboxes use, is the id and its heading: wilford-the-village."""
     L = {"id": str(props.get("id") or slug(name)), "title": str(props.get("title") or name), "note": name,
-         # (the Stories sheet's section follows: a place, or the People and Did you know layers, or a theme)
-         "section": "Places" if props.get("area") or props.get("kind") in ("people", "facts") else "Threads",
+         # (the Stories sheet's section follows: a place, or the People layer, or a theme)
+         "section": "Places" if props.get("area") or props.get("kind") == "people" else "Threads",
          "order": props.get("order"),
          **({"area": str(props["area"])} if props.get("area") else {}),
          # "sort: as listed": its stories in the order written, not by date (Wilford: the Roman ford, found in 1900,
@@ -288,7 +265,7 @@ def topic(L, kinds):
 
 def load(folder):
     """The notes under the folder as the build's layers. Returns {"layers": the Places indexes (with the People
-    and facts layers), each with its notes' entries; "topics": the Threads indexes, for s06_layers.topic_layers;
+    layer), each with its notes' entries; "topics": the Threads indexes, for s06_layers.topic_layers;
     "people": {name: {"wikipedia": title | False, "group"}}; "names": [note names]}. Raises NoteError naming the
     note for anything it cannot read, and for a story or event no Places index lists (or two do)."""
     folder = Path(folder)
@@ -331,14 +308,11 @@ def load(folder):
             else:            # (a story can be in several places: Trent Bridge in West Bridgford and the Meadows)
                 home.setdefault(m["name"], []).append((L, m["group"]))
     layers = [L for L in indexes if L["section"] == "Places"]
-    if not any(L.get("kind") == "facts" for L in layers):
-        layers.append({"id": "facts", "kind": "facts", "title": "Did you know", "intro": "", "entries": [], "members": []})
     topics = [topic(L, kinds) for L in indexes if L["section"] == "Threads"]
     # each place, told as a thread of its stories, people, plaques and buildings (s06_layers puts its members in
     # the place's layer)
-    topics += [{**topic(L, kinds), "place": True} for L in layers if L.get("kind") not in ("people", "facts")]
+    topics += [{**topic(L, kinds), "place": True} for L in layers if L.get("kind") != "people"]
     people_layer = next((L for L in layers if L.get("kind") == "people"), None)
-    facts_layer = next((L for L in layers if L.get("kind") == "facts"), None)
     info = {}
     for name, props, body in notes:
         if props.get("type") == "index":
@@ -347,7 +321,7 @@ def load(folder):
             kind = props.get("type")
             if kind not in TYPES:
                 raise NoteError(f"{name}: type: must be one of {', '.join(TYPES)}")
-            text, facts, fns = body_parts(body, name)
+            text, fns = body_parts(body, name)
             story, links, web = inline(text)
             for k in re.findall(r"\[\^([\w-]+)\]", story):
                 if k not in fns:
@@ -392,7 +366,7 @@ def load(folder):
                 homes = [(T, next((k for k, t in T.get("groups", []) if t == g), None)) for T, g in home[name]]
                 target, group = homes[0]
             else:
-                target = group = None       # facts only (a note of "Did you know?" callouts)
+                target = group = None       # no text: nothing to tell
             base = {k: v for k, v in base.items() if v not in ((), [], {}, None) or k in ("name", "story")}
             if story:
                 if not places and kind != "person":
@@ -409,26 +383,6 @@ def load(folder):
                             if where in pins and pins[where][2]:
                                 e["approx"] = pins[where][2]      # its halo's radius, in metres
                         T["entries"].append(e)
-            for f in facts:
-                if facts_layer is None:
-                    raise NoteError(f"{name}: a fact callout, but there is no facts layer (kind: facts)")
-                fsrc = [ref(f["source"])] if f.get("source") else sources
-                if not fsrc:
-                    raise NoteError(f"{name}: a fact callout with no source, in a note with none")
-                ftext, flinks, fweb = inline(f["text"])
-                fplaces = [place(a, name, pins) for a in f.get("at", [])] or places
-                fe = {"name": shown, "note": name, "source": fsrc[0], "sources": fsrc[1:],
-                      "facts": checks(f.get("check")),
-                      "story": ftext, "links": flinks, "weblinks": fweb, "cites": {},
-                      **({"read": f.get("read") or base.get("read")} if f.get("read") or base.get("read") else {}),
-                      **({"title": f["title"]} if f.get("title") else {})}
-                if kind == "person" and not f.get("at"):
-                    facts_layer["entries"].append({**fe, "who": name, "unplaced": True})
-                else:
-                    if not fplaces:
-                        raise NoteError(f"{name}: a fact callout with no at:, in a note with no places")
-                    for at, where in fplaces:
-                        facts_layer["entries"].append({**fe, "at": at, **({"where": where} if where else {})})
         except NoteError as e:
             problems.append(str(e))
     if problems:

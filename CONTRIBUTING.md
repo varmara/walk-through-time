@@ -32,7 +32,7 @@ Two or three plain sentences on the history behind the layer.
 | `area` | makes the thread a place: a small area of the map, where each of its stories lives, folded under this heading in "Around the map" (`The city`, `South of the Trent`, `West`, `North and east`). Without it, the thread is a theme |
 | `order` | its place in its section of the Layers sheet; else after those with one, by name |
 | `sort` | `as listed`: a place's stories in the order written, not by date (Wilford's Roman ford, found in 1900, tells of the earliest times and comes first) |
-| `kind` | `people` for the People layer and `facts` for "Did you know", whose members are not listed |
+| `kind` | `people` for the People layer, whose members are not listed |
 
 Each story is a note of its own in `notes/stories/` (events in `notes/events/`), listed in at least one Places
 index (Trent Bridge is in both West Bridgford and the Meadows); threads may list it too:
@@ -126,8 +126,8 @@ When the Lords threw out the Bill, a crowd burned the castle of the
   these stories and events"; in the graph, the person is linked to its places. A link to a story is its "see
   also". A building is linked with its OpenStreetMap address, which opens it on the map. The build stops on a
   `[[link]]` that finds nothing.
-- **Facts** (`> [!fact]`) show under "Did you know?" on the note's places, or the callout's own `at:`; in a
-  person's note, with no `at:`, on their card. A note may hold several.
+- **A fact goes in the text**, with a footnote when it comes from another page. Where it has a place or a time of
+  its own, it is a story or event of its own. (There is no "Did you know?": a `> [!fact]` callout stops the build.)
 - **Places stay places.** A pin is named for the place (a tomb, an address), never for a person.
 
 A **person** note (`type: person`) may give `kind:` (architects, writers, science, industry, sport, arts, faith,

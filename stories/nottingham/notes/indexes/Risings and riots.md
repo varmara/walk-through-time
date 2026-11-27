@@ -15,6 +15,7 @@ After a poor harvest food was dear, and when merchants began carting cheese away
 ## The Luddites, 1811
 Frame-breakers went after the "wide" knitting frames used to make cheap goods. The movement began in Arnold in March 1811 and spread across Nottinghamshire.
 - [[The first Luddites]]
+- [[A Luddite shot at Bulwell, 1811]]
 
 ## The Pentrich rising, 1817
 In June 1817 men from Derbyshire marched on Nottingham, led by Jeremiah Brandreth, the Nottingham Captain. The news that set them marching was a hoax by a government informer, and the rising ended at Giltbrook.

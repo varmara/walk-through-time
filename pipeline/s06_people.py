@@ -341,7 +341,7 @@ def main(city_id):
     # a hand-written entry, a resident's article or another story already telling who designed it
     told = {(int(i), s2["source"]["title"]) for i, ss in out.stories.items() for s2 in ss if s2.get("source")}
     told |= {(e["b"], e["source"]["title"]) for e in cur["entries"]
-             if isinstance(e.get("b"), int) and e.get("source") and e["layer"] != "facts"}
+             if isinstance(e.get("b"), int) and e.get("source")}
     fixes = cur.get("architects", {})            # stories/<city>/architects.md: OpenStreetMap's names, made plain
     # an architect with no article: a page about them that is not Wikipedia, by either name (Wikidata's too)
     links = {n: f["source"] for raw, f in fixes.items() if f.get("source") for n in (raw, f.get("name") or raw)}
@@ -420,13 +420,9 @@ def main(city_id):
     people["groups"] = sorted(pg.values(), key=lambda g: order.index(g["key"]) if g["key"] in order else 99)
 
     about = about_people({n: h for n, h in want.items() if n not in nowiki}, c_words(city_id))
-    # a person note's own text and facts, on their card after (or instead of) Wikipedia's opening
+    # a person note's own text, on their card after (or instead of) Wikipedia's opening
     for n, o in own.items():
         about.setdefault(n, {"title": n})["own"] = o
-    for e in cur["entries"]:
-        if e["layer"] == "facts" and e.get("who"):
-            about.setdefault(e["who"], {"title": e["who"]}).setdefault("facts", []).append(
-                {"text": e["story"], "source": e["source"], **({"links": e["links"]} if e.get("links") else {})})
     log(f"s06 people: Wikipedia articles for {len(about)} of {len(want)} people")
     missing = sorted({n for ns in arch.values() for n, _ in ns if n not in about and n not in links and person_like(n)})
     if missing:

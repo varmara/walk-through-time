@@ -46,7 +46,7 @@ def slug(s):
 
 
 def load(folder):
-    """Everything a city's stories folder holds: CURATED (the story layers, with the People and facts layers, and
+    """Everything a city's stories folder holds: CURATED (the story layers, with the People layer, and
     their entries), TOPICS, NOTES (who the person notes are, and every note's name) and the correction tables."""
     folder = Path(folder)
     from . import notes

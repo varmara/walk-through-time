@@ -66,8 +66,6 @@ def main(city_id):
 
     # ---- story layers (the Places indexes, stories/<city>/notes/indexes/); the People layer, from s06_people, where the stories put it
     for L in cur["layers"]:
-        if L.get("kind") == "facts":    # 'Did you know' facts go on the cards (s07), not into a layer
-            continue
         if L.get("kind") == "people":
             meta.append(ppl["meta"])
             continue
@@ -95,7 +93,7 @@ def main(city_id):
         more = [t for t in e.get("links", []) if t not in persons and t != e["name"] and t not in e.get("see", [])]
         if more:
             e["see"] = e.get("see", []) + more
-    cross_links(cur["entries"], {L["id"] for L in cur["layers"] if L.get("kind") not in ("facts", "people")}, persons)
+    cross_links(cur["entries"], {L["id"] for L in cur["layers"] if L.get("kind") != "people"}, persons)
     link_people(cur, ppl)
     if not any(m["kind"] == "people" for m in meta):
         meta.append(ppl["meta"])
@@ -118,7 +116,7 @@ def main(city_id):
 
     # ---- topics (the Threads indexes, stories/<city>/notes/indexes/): stories, people, plaques and buildings from any layer, on one subject
     topic_meta = topic_layers(cur.get("topics") or [], cur["entries"], ppl["meta"], out, ctx.buildings, bname,
-                              {L["id"] for L in cur["layers"] if L.get("kind") not in ("facts", "people")})
+                              {L["id"] for L in cur["layers"] if L.get("kind") != "people"})
     # a place's members, as its thread lists them (its stories, and the people, plaques and buildings that belong
     # there), in its own layer: a place is a thread of where it is
     by_id = {m["id"]: m for m in meta}

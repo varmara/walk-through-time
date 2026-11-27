@@ -12,12 +12,7 @@ note: a pin at the article's point
 
 In November 1645 Parliament's troops under Sydnam Poyntz, with [[John Hutchinson|Colonel John Hutchinson]] leading
 the assault, stormed Shelford House, held for the King by Philip Stanhope. About 160 of its defenders were killed,
-and the house was burnt that night.
+and the house was burnt that night. The house had grown out of Shelford Priory, granted to Michael Stanhope when it
+was dissolved; what survived the fire is now a private house, Shelford Manor.[^priory]
 
-> [!fact]
-> at: Shelford Manor
-> source: https://en.wikipedia.org/wiki/Shelford_Priory
-> check: Ralph Haunselyn | 1536 | Michael Stanhope | Shelford Manor
->
-> The house had been Shelford Priory, founded by Ralph Haunselyn around 1160–80 and granted to Michael Stanhope when
-> it was dissolved in 1536. What survived the fire is now a private house, Shelford Manor.
+[^priory]: https://en.wikipedia.org/wiki/Shelford_Priory — title: Shelford Priory — check: Michael Stanhope | Shelford Manor | 1536 — read: 2026-11-27

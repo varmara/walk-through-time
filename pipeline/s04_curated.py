@@ -409,7 +409,7 @@ def main(city_id):
                     cites[k] = cp
             b = how = None
             if not why and e.get("unplaced"):
-                pass                 # a person's own text or fact: on their card, not on a place
+                pass                 # a person's own text: on their card, not on a place
             elif not why:
                 at = e.get("at", "")
                 if at in ("pin", "pin:article"):     # a pin at the article's own point: a village, a site with no building
@@ -452,7 +452,7 @@ def main(city_id):
                     how = e.get("_how") or "pin where the story file puts it" if at == "pinned" else "pin at the article's coordinates (no building there: a bridge, a ground, a square)"
                 elif b is None:
                     why = "could not place it on a building, and the article has no coordinates"
-            if not why and L.get("groups") and L.get("kind") != "people" and L.get("kind") != "facts" and e.get("group") not in {k for k, _ in L["groups"]}:
+            if not why and L.get("groups") and L.get("kind") != "people" and e.get("group") not in {k for k, _ in L["groups"]}:
                 log(f"    {L['id']} / {e['name']}: group {e.get('group')!r} is not one of the layer's groups: put in the first")
                 e = {**e, "group": L["groups"][0][0]}
             if why:
