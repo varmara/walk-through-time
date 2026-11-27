@@ -80,6 +80,7 @@ def main(city_id):
                 e["_story"] = out.stories[str(e["b"])][-1]
         groups = L.get("groups") or [[L["id"], L["title"]]]
         meta.append({"id": L["id"], "title": L["title"], "intro": L.get("intro", ""), "section": "Places",
+                     **({"cites": L["cites"]} if L.get("cites") else {}),
                      **({"area": L["area"]} if L.get("area") else {}),
                      **({"asListed": True} if L.get("asListed") else {}),
                      "kind": "stories",
@@ -318,6 +319,7 @@ def topic_layers(topics, entries, people, out, buildings, bname, story_layers):
         if tid in items and T["groups"]:
             groups.insert(0, [tid, "Other"])
         meta.append({"id": tid, "title": T["title"], "intro": T.get("intro", ""), "section": "Threads", "kind": "topics",
+                     **({"cites": T["cites"]} if T.get("cites") else {}),
                      **({"asListed": True} if T.get("asListed") else {}), **({"place": True} if T.get("place") else {}),
                      "groups": [{"key": k, "title": t, "count": len({r for it in items.get(k, []) for r in it[1]}),
                                  "items": items.get(k, []),

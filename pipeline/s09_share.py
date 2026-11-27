@@ -206,11 +206,11 @@ def layer_pages(data, city_id, city_name, site, out):
             if arts:
                 head = f"<h2>{e(g['title'])}</h2>" if len(L["groups"]) > 1 else ""
                 if head and g.get("intro"):
-                    head += f'<p class="intro">{e(g["intro"])}</p>'      # (a thread's chapter: its own introduction)
+                    head += f'<p class="intro">{e(unmarked(g["intro"]))}</p>'      # (a thread's chapter: its own introduction)
                 sections.append(head + "".join(arts))
         if not n:
             continue
-        intro = L.get("intro") or ""
+        intro = unmarked(L.get("intro") or "")
         body = (top + f'<h1>{e(L["title"])}</h1>'
                 + (f'<p class="intro">{e(intro)}</p>' if intro else "")
                 + f'<p class="go"><a href="{mapurl}?layer={urllib.parse.quote(L["id"])}">See all {n} on the map</a></p>'
@@ -225,7 +225,7 @@ def layer_pages(data, city_id, city_name, site, out):
         listed.append((L, n))
     body = (f'<p class="top"><a href="{mapurl}">The map of {e(city_name)}</a></p>'
             f"<h1>Stories of {e(city_name)}</h1><ul class=\"layers\">"
-            + "".join(f'<li><a href="layer-{L["id"]}.html"><b>{e(L["title"])}</b></a> <span class="n">{n} places</span><br>{e(L.get("intro") or "")}</li>'
+            + "".join(f'<li><a href="layer-{L["id"]}.html"><b>{e(L["title"])}</b></a> <span class="n">{n} places</span><br>{e(unmarked(L.get("intro") or ""))}</li>'
                       for L, n in listed) + "</ul>")
     (out / "layers.html").write_text(doc(f"Stories of {city_name} · Walk Through Time",
                                          f"Stories of {city_name}'s buildings, place by place.", f"{site}app/share.png",

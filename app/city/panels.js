@@ -1,5 +1,5 @@
 // Walk Through Time, city page: The Layers sheet and the Map sheet (base maps, the legend of eras).
-import { $, CITY_ID, ERAS, PIN_LAYERS, SECTIONS, STORY_LABELS, STORY_SECTIONS, esc, fmt, store } from './util.js';
+import { $, CITY_ID, ERAS, PIN_LAYERS, SECTIONS, STORY_LABELS, STORY_SECTIONS, citedText, esc, fmt, store } from './util.js';
 import { S } from './state.js';
 import { hasPins, isArea, isStorySet, isThread, kindOf, marksBuildings, parseRef, saveActive } from './data.js';
 import { addNls, paintBuildings, setHills, setLand } from './map.js';
@@ -143,7 +143,7 @@ export function renderStories(){
 }
 export function infoHtml(L, g, withIntro = true){
   const parts = [];
-  if (withIntro && L.intro) parts.push(`<p>${esc(L.intro)}</p>`);
+  if (withIntro && L.intro) parts.push(citedText(L.intro, L.cites));
   // items are [name, [buildings]] (older data: [building, name]); long lists sort ignoring a leading "The"
   const norm = it => typeof it[0] === 'number' ? [it[1], [it[0]]] : it;
   const sortKey = n => n.replace(/^the\s+/i, '').toLowerCase();

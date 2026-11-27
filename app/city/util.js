@@ -32,6 +32,18 @@ export const store = { get(k){ try { return localStorage.getItem(k); } catch { r
                 set(k,v){ try { localStorage.setItem(k,v); } catch {} } };
 export const say = t => { $('status').textContent = t || ''; };
 export const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+// an introduction's words with its footnotes ([^k], pipeline/notes.py): each a number linking its page, and the
+// pages listed below it, numbered in the order the text first cites them
+export function citedText(text, cites){
+  const list = [], at = {};
+  const h = esc(text).replace(/\[\^([\w-]+)\]/g, (all, k) => {
+    const c = cites && cites[k]; if (!c) return '';
+    if (!at[c.url]) { list.push(c); at[c.url] = list.length; }
+    return `<sup class="fn"><a href="${esc(c.url)}" target="_blank" rel="noopener" aria-label="Source ${at[c.url]}">${at[c.url]}</a></sup>`;
+  });
+  const one = (c, i) => `${i + 1}. <a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.title)}</a>${c.kind && c.kind !== c.title && c.kind !== 'Wikipedia' ? ' · ' + esc(c.kind) : ''}`;
+  return `<p>${h}</p>` + (list.length ? `<p class="src">${list.map(one).join('<br>')}</p>` : '');
+}
 export const fmt = n => n.toLocaleString('en-GB');
 export function progress(p, step){ $('lpct').textContent = Math.round(p) + '%'; if (step) $('lstep').textContent = step; }
 

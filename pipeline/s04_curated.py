@@ -340,6 +340,16 @@ def main(city_id):
                 except Exception as ex:  # noqa: BLE001
                     arts[ref] = None
                     log(f"    {ref}: {ex}")
+    T = _tables.get(city_id, {})
+    intro_sets = [*layers, *(T.get("TOPICS") or [])]      # (an index's introduction and its chapters')
+    for L in intro_sets:
+        for c in (L.get("cites") or {}).values():
+            if c["source"] not in arts and not c["source"].startswith("web:"):
+                try:
+                    arts[c["source"]] = article(c["source"])
+                except Exception as ex:  # noqa: BLE001
+                    arts[c["source"]] = None
+                    log(f"    {c['source']}: {ex}")
     for L in layers:   # list entries that could not be fetched: check against the quoted passages instead
         for e in L["entries"]:
             for ref in refs_of(e):
@@ -496,14 +506,35 @@ def main(city_id):
         log(f"s04 {L['id']}: {kept}/{len(L['entries'])} stories kept")
     for d in dropped:
         log(f"    dropped {d['layer']} / {d['name']}: {d['why']}")
+    # an introduction's footnotes, each checked for its own words as a story's are; one that fails is left out (its
+    # mark with it), and the log says so
+    def intro_cites(L):
+        out = {}
+        for k, c in (L.get("cites") or {}).items():
+            why = None
+            if c["source"].startswith("web:"):
+                p = written_by_hand({"source": c["source"], "name": L["title"], "read": c.get("read"), "title": c.get("title")})
+                if not read_ok(c.get("read")):
+                    why = "another site's page: it needs the date it was read (— read: 2026-11-14)"
+            elif (p := arts.get(c["source"])) is None:
+                why = "Wikipedia article not found"
+            elif missing := [f for f in c.get("check", ()) if f.lower() not in p["text"]]:
+                why = "its page does not mention: " + ", ".join(missing)
+            if why:
+                log(f"    dropped {L['id']} / introduction's footnote [^{k}]: {why}")
+            else:
+                out[k] = {"title": p["title"], "url": p["url"], "kind": p["kind"], **({"read": p["read"]} if p.get("read") else {})}
+        return out
+    for L in intro_sets:
+        if L.get("cites"):
+            L["cites"] = intro_cites(L)
     meta = []
     for L in layers:
-        m = {k: L[k] for k in ("id", "title", "intro", "kind", "groups", "area", "asListed") if k in L}
+        m = {k: L[k] for k in ("id", "title", "intro", "kind", "groups", "area", "asListed", "cites") if k in L}
         if L.get("kind") == "people":
             used = {e["group"] for e in entries if e["layer"] == L["id"]}
             m["groups"] = [["people-" + k, t] for k, t, _ in PEOPLE_GROUPS if "people-" + k in used]
         meta.append(m)
-    T = _tables.get(city_id, {})
     save(city_id, "curated", {"layers": meta, "entries": entries, "dropped": dropped,
                               **{k.lower(): T.get(k) or default for k, default in (
                                   ("WIKIPEDIA", {}), ("PLAQUES", {}), ("PLAQUE_PEOPLE", {}), ("TOPICS", []),

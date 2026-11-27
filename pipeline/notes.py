@@ -108,6 +108,18 @@ def split(path):
     return {}, raw
 
 
+def footnote(m, name):
+    """A footnote's line, '[^k]: page — title: … — check: a | b — read: 2026-11-14', as {source, title, check, read}."""
+    parts = [p.strip() for p in re.split(r"\s+[—–]\s+", m[2])]
+    fn = {"source": ref(parts[0])}
+    for p in parts[1:]:
+        k, _, v = p.partition(":")
+        if k.strip() not in ("check", "read", "title"):
+            raise NoteError(f"{name}: footnote [^{m[1]}]: '{k.strip()}' is not check, read or title")
+        fn[k.strip()] = checks(v) if k.strip() == "check" else v.strip()
+    return fn
+
+
 def body_parts(body, name):
     """The note's text (paragraphs joined by blank lines) and its footnotes."""
     lines, notes = [], {}
@@ -115,14 +127,7 @@ def body_parts(body, name):
     while i < len(src):
         line = src[i]
         if m := FOOTNOTE_DEF.match(line.strip()):
-            parts = [p.strip() for p in re.split(r"\s+[—–]\s+", m[2])]
-            fn = {"source": ref(parts[0])}
-            for p in parts[1:]:
-                k, _, v = p.partition(":")
-                if k.strip() not in ("check", "read", "title"):
-                    raise NoteError(f"{name}: footnote [^{m[1]}]: '{k.strip()}' is not check, read or title")
-                fn[k.strip()] = checks(v) if k.strip() == "check" else v.strip()
-            notes[m[1]] = fn
+            notes[m[1]] = footnote(m, name)
             i += 1
             continue
         lines.append(line)
@@ -192,6 +197,9 @@ def index_layer(name, props, body):
         - plaque: Plaque to Albert Ball                                   a plaque, by its title (a topic)
         - [Wollaton Hall](https://www.openstreetmap.org/way/4438894)      a building (a topic)
 
+    An introduction's facts are footnoted as a story's are ([^k] in the text, its '[^k]: …' line anywhere in the
+    index), and checked the same way.
+
     Every index is a thread. A place is a thread with an area: (the heading it folds under in "Around the map", "The
     city", "South of the Trent"): its stories and events live there (their pins and their place on a building's
     card), and with sort: as listed its cards keep the order written; a thread without an area is a theme.
@@ -209,12 +217,14 @@ def index_layer(name, props, body):
          **({"kind": str(props["kind"])} if props.get("kind") else {}), "entries": [], "members": []}
     if props.get("section") is not None:
         raise NoteError(f"{name}: section: is no longer used: a place is a thread with an area:, a theme one without")
-    intro, group, groups, gintro = [], None, [], {}
+    intro, group, groups, gintro, cites = [], None, [], {}, {}
     for n, raw in enumerate(body.splitlines(), 1):
         line = raw.strip()
         if not line:
             continue
-        if line.startswith("## "):
+        if m := FOOTNOTE_DEF.match(line):       # an introduction's footnote, as a story's: anywhere in the index
+            cites[m[1]] = footnote(m, name)
+        elif line.startswith("## "):
             group = line[3:].strip()
             groups.append([f"{L['id']}-{slug(group)}", group])
             gintro[group] = []
@@ -240,6 +250,11 @@ def index_layer(name, props, body):
         else:
             raise NoteError(f"{name}: '{line[:60]}': below the introduction, only ## groups and - members")
     L["intro"] = " ".join(intro)
+    for k in re.findall(r"\[\^([\w-]+)\]", " ".join([L["intro"], *(" ".join(t) for t in gintro.values())])):
+        if k not in cites:
+            raise NoteError(f"{name}: footnote [^{k}] has no line '[^{k}]: …' in the index")
+    if cites:
+        L["cites"] = cites
     if groups:
         L["groups"] = groups
         if any(gintro.values()):
@@ -255,6 +270,7 @@ def topic(L, kinds):
             **({"asListed": True} if L.get("asListed") else {}),
             "groups": [t for _, t in L.get("groups", [])], "keys": {t: k for k, t in L.get("groups", [])},
             **({"intros": L["groupIntros"]} if L.get("groupIntros") else {}),
+            **({"cites": L["cites"]} if L.get("cites") else {}),
             "members": [{**m, "kind": ("story" if kinds.get(m["name"]) in ("story", "event") else "person")
                          if m["kind"] == "note" else m["kind"]} for m in L["members"]]}
 

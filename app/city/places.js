@@ -1,6 +1,6 @@
 // Walk Through Time, city page: Places: a thread, a place or a person with several buildings, as numbered pins and
 // cards that swipe sideways one at a time, or the same cards one under another as a page.
-import { $, dateText, esc, flightPace, whenText } from './util.js';
+import { $, citedText, dateText, esc, flightPace, whenText } from './util.js';
 import { S } from './state.js';
 import { fstate, isB, isThread, loadCard, loadSet, parseRef, refCentre, refOf, storyFor, tiled } from './data.js';
 import { groundAt, paintBuildings } from './map.js';
@@ -37,11 +37,11 @@ const src = s => s && s.url ? `<p class="psrc">${esc(s.kind || 'Source')}: <a hr
 // follow before the next chapter)
 function introHtml(P, card){
   const ch = card?.chapter;
-  if (ch) return `<p class="pmeta pchap">Chapter ${ch.j} of ${ch.m}</p><h3 class="ptitle">${esc(ch.title)}</h3>${ch.text ? `<p>${esc(ch.text)}</p>` : ''}
+  if (ch) return `<p class="pmeta pchap">Chapter ${ch.j} of ${ch.m}</p><h3 class="ptitle">${esc(ch.title)}</h3>${ch.text ? citedText(ch.text, P.cites) : ''}
     <p class="pmeta">${ch.n} ${ch.n === 1 ? 'story' : 'stories'}</p>
     <button class="textbtn pnext" data-first>${P.page ? 'Show them on the map' : 'Start'}</button>`;
   const n = P.cards.filter(c => !c.intro).length;
-  return `<h3 class="ptitle">${esc(P.name)}</h3>${P.intro ? `<p>${esc(P.intro)}</p>` : ''}
+  return `<h3 class="ptitle">${esc(P.name)}</h3>${P.intro ? citedText(P.intro, P.cites) : ''}
     <p class="pmeta">${n} ${n === 1 ? 'story' : 'stories'}${P.chapters ? ` in ${P.chapters} chapters` : ''}</p>
     <button class="textbtn pnext" data-first>${P.page ? 'Show them on the map' : 'Start'}</button>`;
 }
@@ -116,7 +116,7 @@ function loadAround(k){
 // a set of places as cards: one card for each story (hints: for each place, the name and story layer of what put it
 // in the set; places of the same story, as a person's two plaques, share its card), after an opening card with the
 // set's title and introduction when it has one (a thread, a place)
-export function showPlaces(name, bs, hints, intro, set, chapters){
+export function showPlaces(name, bs, hints, intro, set, chapters, cites){
   // the stories' words are in the card files. A small set (a person, a story: one or two files) waits for them,
   // showing the bar meanwhile; a big set, or one whose places' whereabouts need the files, shows at once
   // (the single data file, with no card files: every building is complete already)
@@ -129,7 +129,7 @@ export function showPlaces(name, bs, hints, intro, set, chapters){
     $('pCards').innerHTML = `<p class="pwait">Finding ${bs.length} ${bs.length === 1 ? 'place' : 'places'}…</p>`;
     $('placesbar').hidden = false; $('timebar').hidden = true;
     return (set ? set.catch(() => {}) : Promise.all(need.map(b => loadCard(b).catch(() => {}))))
-      .then(() => showPlaces(name, bs, hints, intro, set && need.some(b => !S.features[b].full) ? null : set, chapters));
+      .then(() => showPlaces(name, bs, hints, intro, set && need.some(b => !S.features[b].full) ? null : set, chapters, cites));
   }
   closeSheet();
   clearPlaces(false);
@@ -157,7 +157,7 @@ export function showPlaces(name, bs, hints, intro, set, chapters){
     c.same = !!r && before === r;
     before = r;
   });
-  const P = S.places = { name, intro, bs, cards, chapters: chapters ? chapters.length : 0, i: 0, page: false, set: need.length && set ? set : null };
+  const P = S.places = { name, intro, cites, bs, cards, chapters: chapters ? chapters.length : 0, i: 0, page: false, set: need.length && set ? set : null };
   if (P.set) P.set.catch(() => {}).then(() => { if (S.places !== P) return; P.set = null;
     P.cards.forEach((c, k) => fillCard(k)); loadAround(P.i); });
   bs.filter(isB).forEach(b => fstate(b, { hl:true }));
@@ -245,7 +245,7 @@ export function showGroups(keys, title){
   // opens with its own introduction
   const several = whole && isThread(Ls[0]) && chaps.length > 1 && chaps.every(c => c.text);
   const alone = keys.length === 1 && chaps.length === 1 && chaps[0].text ? chaps[0].text : undefined;
-  showPlaces(title, refs, hints, whole ? (Ls[0].intro || '') : alone, set, several ? chaps : undefined);
+  showPlaces(title, refs, hints, whole ? (Ls[0].intro || '') : alone, set, several ? chaps : undefined, Ls.length === 1 ? Ls[0].cites : undefined);
   return true;
 }
 // the set as a page, as the thread's share page tells it, scrolled through on the map's screen; each story's

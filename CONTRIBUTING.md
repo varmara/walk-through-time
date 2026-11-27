@@ -169,8 +169,10 @@ or by strand (The Civil War, The dukes' mansion).
 A thread of several chapters opens each chapter with an introduction card of its own, so the chapters do not mix:
 write it as prose under the `##` heading, before the chapter's first member. Every chapter of such a thread needs
 one (a test checks), even a chapter of one story; a thread of a single chapter needs none. This holds for places and themes
-alike. Say only what the cards
-below it tell: it frames them, and adds no facts of its own.
+alike. An introduction sets the stage: the background the cards below it leave out (why it happened then, what
+the wider country was going through), not a retelling of their own words. Its facts are footnoted as a story's
+are: `[^k]` in the text, and the `[^k]: …` line anywhere in the index (below the last member reads best). The
+build checks them the same way and leaves out a footnote whose page fails, with a line in its log.
 
 ```markdown
 ## The Civil War

@@ -109,6 +109,18 @@ class Read(unittest.TestCase):
         self.assertEqual(civic["groups"], [["civic-old", "Old"], ["civic-new", "New"]])     # id-heading
         self.assertEqual({(e["name"], e["group"]) for e in civic["entries"]}, {("The castle burned", "civic-old"), ("B", "civic-new")})
 
+    def test_intro_footnotes(self):
+        """An index's introduction, and a chapter's, are footnoted as a story is."""
+        idx = ("---\ntype: index\nid: war\n---\nWar came.[^a]\n\n## Old\nThe old days.[^b]\n- [[The castle burned]]\n\n"
+               "[^a]: https://en.wikipedia.org/wiki/Chartism — check: six reforms\n"
+               "[^b]: https://example.org/x — title: X — read: 2026-11-27\n")
+        info, _ = load({"indexes/War.md": idx, "events/The castle burned.md": EVENT})
+        (t,) = [t for t in info["topics"] if t["id"] == "war"]
+        self.assertEqual(t["cites"], {"a": {"source": "en:Chartism", "check": ("six reforms",)},
+                                      "b": {"source": "web:https://example.org/x", "title": "X", "read": "2026-11-27"}})
+        with self.assertRaisesRegex(notes.NoteError, r"footnote \[\^c\] has no line"):
+            load({"indexes/War.md": "---\ntype: index\nid: war\n---\nWar.[^c]\n", "events/The castle burned.md": EVENT})
+
     def test_a_story_in_two_places(self):
         """A story listed in two Places indexes is told in both (Trent Bridge: West Bridgford and the Meadows)."""
         _, (other, civic, people) = load({"events/The castle burned.md": EVENT,
