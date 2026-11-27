@@ -17,10 +17,11 @@ England has more than 3,000 deserted medieval villages. Many were once thought t
 Between 1536 and 1541 Henry VIII dissolved the monasteries, priories, convents and friaries of England, Wales and Ireland, seized their wealth and sold their property. Thomas Cromwell ran the work, and in 1536 the Pilgrimage of Grace rose against it in Yorkshire and Lincolnshire.[^diss]
 - [[Lenton Priory]]
 
-## Riot and railway, 1831–1887
+## Riot and railway, 1829–1904
 Riots burned the castle and a mill in 1831. Later in the century the railways took more: Victoria station alone, opened in 1900, needed a 13-acre site and the demolition of some 1,300 houses and 24 pubs.[^vic]
 - 1831: [[Lowe's Silk Mill]]
 - 1887: [[St Ann's Well]]
+- 1904: [[Sneinton Hermitage]]
 
 ## Making way, 1926–1960
 Between the wars and after the Second World War, old buildings gave way to a new Council House, new roads and new parks, and a village station lost its passengers.
