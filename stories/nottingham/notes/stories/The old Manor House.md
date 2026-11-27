@@ -17,4 +17,4 @@ of 30 July 1951 in the University of Nottingham's Manuscripts and Special Collec
 next to it stands the only house left of the row once called Manor House and Main Road Cottages.
 
 [^appendix]: https://www.transportnottingham.com/wp-content/uploads/2024/08/1A.Wilford-Village-Appendix.pdf — title: 1A. Wilford Village Appendix (transportnottingham.com) — read: 2026-11-16
-[^photo]: https://mss-cat.nottingham.ac.uk/Calmview/Record.aspx?src=CalmView.Catalog&id=RE%2fDOP%2fH%2f50%2f23 — title: Wilford Manor House, photograph, 30 July 1951, RE/DOP/H/50/23 (University of Nottingham Manuscripts and Special Collections) — read: 2026-11-27
+[^photo]: https://mss-cat.nottingham.ac.uk/Calmview/TreeBrowse.aspx?src=CalmView.Catalog&field=RefNo&key=RE%2FDOP%2FH%2F50 — title: Wilford Manor House, photograph, 30 July 1951, RE/DOP/H/50/23 (University of Nottingham Manuscripts and Special Collections) — read: 2026-11-27
