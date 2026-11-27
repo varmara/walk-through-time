@@ -27,7 +27,7 @@ After the Second World War the city stopped raising statues to its MPs and soldi
 - 1952: [[Statue of Robin Hood]]
 - 2008: [[Statue of Brian Clough]]
 
-## Women on the plinth, 2019–2026
+## Honouring women, 2019–2026
 Fewer than one in twenty of Britain's sculptures show a woman who was not royal.[^njm]
 - [[Florence Paton's sculpture, 2019]]
 - [[Standing in This Place, 2025]]
