@@ -11,8 +11,11 @@ After the Norman Conquest William the Conqueror built a castle at Nottingham and
 William also made Sherwood a royal hunting forest, under forest laws, covering perhaps a quarter of the county; King John and Edward I hunted there.[^sher] The castle was the kings' house beside it.
 - [[Statue of Robin Hood]]
 - [[The middle bailey wall]]
+- [[Richard I's siege, 1194]]
+- [[The Welsh hostages, 1212]]
 - [[A royal hunting park]]
 - [[Mortimer's Hole]]
+- [[London's mayor at the castle, 1392]]
 - [[Edward IV's tower, 1476]]
 - [[The castle in decay]]
 
@@ -31,6 +34,7 @@ The war grew out of a long struggle between the monarchy and Parliament for poli
 William Cavendish had fought for the King and gone into exile. At the Restoration he came home and won back most of his estates, and in 1665 he was made Duke of Newcastle.[^cav]
 - [[The castle's deer park]]
 - 1670s: [[Nottingham Castle]]
+- [[Princess Anne at Nottingham, 1688]]
 - [[The castle burned, 1831]]
 
 ## The castle museum, 1878

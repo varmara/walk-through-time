@@ -29,6 +29,7 @@ As the town grew richer in the 18th and 19th centuries, the streets around the s
 - [[Bromley House]]
 - [[Theatre Royal]]
 - [[The Black Boy Hotel]]
+- [[Princess Anne at Nottingham, 1688]]
 - [[Royal Concert Hall]]
 - [[Albert Hall]]
 - [[Nottingham Playhouse]]

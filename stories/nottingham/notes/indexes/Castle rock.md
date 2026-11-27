@@ -10,10 +10,13 @@ The sandstone rock at the western end of the old town has been the site of Notti
 
 - [[Nottingham Castle]]
 - [[The middle bailey wall]]
+- [[Richard I's siege, 1194]]
+- [[The Welsh hostages, 1212]]
 - [[The town wall]]
 - [[Ye Olde Trip to Jerusalem]]
 - [[Statue of Robin Hood]]
 - [[Mortimer's Hole]]
+- [[London's mayor at the castle, 1392]]
 - [[Ye Olde Salutation Inn]]
 - [[Severn's Building]]
 - [[Charles I raised his standard, 1642]]
