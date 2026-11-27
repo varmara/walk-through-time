@@ -1,9 +1,10 @@
 // Walk Through Time: keeps what the map has loaded on the phone, so coming back (or walking back down a street)
 // loads almost nothing, and the parts already seen still work with no signal.
 //
-//   files whose address carries ?v= (card files, map tiles, the page's own scripts and styles): their address
-//     changes whenever they do, so a kept copy is always right: served from the phone, fetched only once
-//   everything else from this site (the index, the pages): fetched fresh, the kept copy used only when offline
+//   files whose address carries ?v= (the index and its second part, card files, map tiles, the page's own scripts
+//     and styles): their address changes whenever they do, so a kept copy is always right: served from the phone,
+//     fetched only once
+//   everything else from this site (the pages): fetched fresh, the kept copy used only when offline
 //   other sites (fonts, base maps, photos): left to the browser
 // Map and ground tiles are kept apart from the rest (TILES, at most MAX_TILES, the oldest dropped first): a few
 // thousand of them in one store made looking up a card's file there slow on a phone.

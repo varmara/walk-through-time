@@ -28,7 +28,7 @@ export async function main(){
   drawLegend();
   const drawing = S.boot ? drawMap() : null;
   drawing?.catch(() => {});                       // (reported where it is waited for, below)
-  S.data = await fetchData(`../data/${CITY_ID}.json`, early.index);
+  S.data = await fetchData(`../data/${CITY_ID}.json${S.boot ? '?v=' + S.boot.versions.index : ''}`, early.index);
   // the index's second part (what the map draws without: names, people, places' names…, pipeline/s10_tiles.py): asked
   // for once the map is drawn, so the map's own files have the connection to themselves; at once for a link that
   // names a person, a place or a layer, which needs it to open
@@ -257,7 +257,7 @@ function keepOnPhone(build){
   if (!('serviceWorker' in navigator) || !build) return;
   navigator.serviceWorker.register('../sw.js').catch(() => {});
   // the data files' current versions: the worker drops kept copies of any other
-  const vs = S.data.versions, keep = vs && [build, vs.tiles, vs.ground, vs.graph, vs.more, ...vs.cards, ...vs.osm,
+  const vs = S.data.versions, keep = vs && [build, S.boot?.versions.index, vs.tiles, vs.ground, vs.graph, vs.more, ...vs.cards, ...vs.osm,
     ...Object.values(vs.sets || {})].filter(Boolean);
   navigator.serviceWorker.ready.then(reg => reg.active && reg.active.postMessage({ build, v: window.__v, keep })).catch(() => {});
 }

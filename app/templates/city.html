@@ -30,7 +30,8 @@
   try { window.__boot = JSON.parse(document.getElementById('boot').textContent); } catch (e) { window.__boot = null; }
   // The map's index (and without that, the city's settings) is asked for here, at once, while the map's library and
   // the page's scripts are still on their way; app/city/main.js takes the answers up (util.js: fetchJSON, fetchData).
-  window.__early = { index: fetch('../data/{{id}}.json', { cache: 'no-cache' }) };
+  // (with its version in the address, the index is kept on the phone until it changes: sw.js; without, asked for afresh)
+  window.__early = { index: window.__boot ? fetch('../data/{{id}}.json?v=' + window.__boot.versions.index) : fetch('../data/{{id}}.json', { cache: 'no-cache' }) };
   if (!window.__boot) window.__early.city = fetch('../cities/{{id}}.json', { cache: 'no-cache' });
   for (var k in window.__early) window.__early[k].catch(function () {});
   document.write('<link rel="stylesheet" href="../app/theme.css?v=' + window.__v + '">');

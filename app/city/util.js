@@ -47,6 +47,9 @@ export function citedText(text, cites){
 export const fmt = n => n.toLocaleString('en-GB');
 export function progress(p, step){ $('lpct').textContent = Math.round(p) + '%'; if (step) $('lstep').textContent = step; }
 
+// a file with its version in the address (?v=) never changes under that address: the browser's copy is used as it is;
+// any other is asked after each time
+const cacheOf = url => /[?&]v=/.test(url) ? {} : { cache:'no-cache' };
 // early: a request the page started in its head (window.__early), used in place of a fresh one; if it failed, the
 // file is asked for again here
 const viaEarly = async (url, early, opts) => {
@@ -57,7 +60,7 @@ export async function fetchJSON(url, ms = 30000, early){
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), ms);
   try {
-    const r = await viaEarly(url, early, { cache:'no-cache', signal: ctrl.signal });
+    const r = await viaEarly(url, early, { ...cacheOf(url), signal: ctrl.signal });
     if (!r.ok) throw new Error('HTTP ' + r.status);
     return await r.json();
   } catch (e) {
@@ -66,7 +69,7 @@ export async function fetchJSON(url, ms = 30000, early){
 }
 // The data file is large, so read it as a stream and show how much has arrived.
 export async function fetchData(url, early){
-  const r = await viaEarly(url, early, { cache:'no-cache' });
+  const r = await viaEarly(url, early, cacheOf(url));
   if (!r.ok) throw new Error(r.status === 404 ? 'the data file has not been built yet' : 'HTTP ' + r.status);
   if (!r.body || !window.TextDecoder) return r.json();
   const reader = r.body.getReader(), parts = [];

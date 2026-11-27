@@ -42,8 +42,8 @@ def version():
 
 def boot(city, out):
     """What the city's map starts from, written into its page as JSON so the map can be drawn before the index has
-    arrived: the city's settings, the tiles' and the ground's, and the data files' versions (read from the built
-    index in the site, data/<city>.json). "null" for a page written without built data: the page then loads them."""
+    arrived: the city's settings, the tiles' and the ground's, and the data files' versions (the index's own, and the rest read from
+    the built index in the site, data/<city>.json). "null" for a page written without built data: the page then loads them."""
     f = Path(out) / "data" / f"{city['id']}.json"
     if not f.exists():
         return "null"
@@ -51,7 +51,8 @@ def boot(city, out):
     if not ix.get("tiles"):
         return "null"
     keep = {"city": city, "tiles": ix["tiles"], "ground": ix.get("ground"), "build": ix["build"],
-            "versions": {k: ix["versions"][k] for k in ("tiles", "ground", "more")}}
+            "versions": {**{k: ix["versions"][k] for k in ("tiles", "ground", "more")},
+                         "index": hashlib.sha1(f.read_bytes()).hexdigest()[:10]}}
     return json.dumps(keep, separators=(",", ":"), ensure_ascii=False).replace("<", "\\u003c")     # (nothing can close the script)
 
 
