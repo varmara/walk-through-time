@@ -2,45 +2,52 @@
 type: index
 order: 9
 id: victorian
+sort: as listed
 ---
 
-In the 19th century Nottingham grew from a crowded market town into a large industrial city. New suburbs, parks, public buildings and commercial buildings were built, and in 1897 Nottingham was made a city.
+In the 19th century Nottingham broke out of its old bounds. In 1877 the borough took in the parishes of Basford, Bulwell, Radford, Sneinton and others round it.[^1877]
 
-## Parks and cemeteries
-As the town grew, public parks and cemeteries were laid out on the hills to the north, among them the General Cemetery in 1836 and the Arboretum in 1852.
-- [[General Cemetery]]
-- [[The Arboretum]]
-- [[Church Cemetery]]
-- [[Forest Recreation Ground]]
+## A town hemmed in, 1790s–1840s
+Pressure to enclose the common fields round the town for building began in 1787, but the burgesses who had rights in them, and the owners of town sites, who gained as land grew dearer, held it off until 1845. Building could spread only to a few places, such as Radford, Hyson Green, Sneinton and Carrington, and the framework knitters stayed in the most crowded parts of the town.[^fields]
+- [[Mapperley Hall and the Wrights]]
+- [[Samuel Hall's Sherwood]]
+- [[Tower House]]
+- [[Park Terrace]]
 - [[St Ann's Allotments]]
+- [[General Cemetery]]
+- [[A railway suburb]]
 
-## Buildings
-The prosperity of the lace trade paid for a new generation of buildings in the town centre: warehouses, offices, hotels, theatres and music halls. Architects such as T. C. Hine and Watson Fothergill gave Victorian Nottingham its distinctive character.
+## The fields enclosed, 1845–1856
+The Inclosure Act of 1845 opened the fields to building, and made room too for a chain of green spaces, among them the Arboretum and the Forest.[^green]
+- [[New Town]]
+- [[The Arboretum]]
+- [[Hine's Park]]
+- [[Who lived in the Park]]
 - [[Adams Building]]
+- [[Church Cemetery]]
+
+## Building the lace town, 1865–1898
+From 1870 a school board was set up wherever school places fell short, to give children of 5 to 12 an elementary education, though it was not yet free or compulsory.[^1870]
+- [[Theatre Royal]]
+- [[Forest Recreation Ground]]
+- [[Clifton village school]]
+- [[Malt Cross]]
+- [[University College]]
+- [[The Black Boy Hotel]]
+- [[Guildhall]]
 - [[Watson Fothergill's offices]]
 - [[Furley & Co]]
-- [[The Black Boy Hotel]]
-- [[Theatre Royal]]
 - [[Royal Concert Hall]]
-- [[Malt Cross]]
-- [[Tower House]]
 
-## Villages become suburbs
-The enclosure of the open fields in 1845 allowed Nottingham to expand at last. The Park was laid out with villas for the well-to-do, while new working-class districts and railway suburbs spread over the former fields and absorbed the surrounding villages.
+## A city, 1889–1900
+In 1889 Nottingham became a county borough, under the Local Government Act of 1888.[^cb]
 - [[Village to suburb]]
-- [[Park Terrace]]
-- [[Hine's Park]]
-- [[Samuel Hall's Sherwood]]
 - [[Radford grows]]
-- [[Mapperley Hall and the Wrights]]
-- [[New Town]]
-- [[A railway suburb]]
-- [[Who lived in the Park]]
-
-## Public buildings
-Civic and public buildings reflected the town's growing status: a university college, a guildhall, new schools and a great railway station. In 1897 Nottingham was granted city status.
-- [[University College]]
-- [[Guildhall]]
-- [[Clifton village school]]
 - [[A city, 1897]]
 - [[Nottingham Victoria station]]
+
+[^1877]: https://en.wikipedia.org/wiki/History_of_Nottingham — title: History of Nottingham — check: 1877 | Basford | Bulwell | Radford | Sneinton
+[^fields]: https://nottingham.ac.uk/manuscriptsandspecialcollections/learning/healthhousing/theme1/expansion.aspx — title: Expansion (University of Nottingham Manuscripts and Special Collections) — read: 2026-11-27
+[^green]: https://nottingham.ac.uk/humanities/departments/history/research/research-projects/past-projects/green-spaces-project.aspx — title: Green Spaces project (University of Nottingham) — read: 2026-11-27
+[^1870]: https://en.wikipedia.org/wiki/Elementary_Education_Act_1870 — title: Elementary Education Act 1870 — check: school board | neither free nor compulsory
+[^cb]: https://en.wikipedia.org/wiki/History_of_Nottingham — title: History of Nottingham — check: county borough | Local Government Act 1888
