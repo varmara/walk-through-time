@@ -2,6 +2,7 @@
 // One object, so that any module can read and change it (an imported variable cannot be reassigned).
 export const S = {
   city: null,            // cities/<city>.json
+  boot: null,            // what the map starts from, written into the page by the build (pipeline/pages.py): the city's settings, the tiles' and the ground's, the files' versions
   data: null,            // data/<city>.json: the index (what the map draws), areas; the layers and pins come with its second part
   features: [],          // one per building: { properties, full } (full: its card file has been merged in)
   map: null,             // the MapLibre map

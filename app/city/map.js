@@ -1,7 +1,7 @@
 // Walk Through Time, city page: The map: MapLibre layers for buildings (coloured by era), roads, water, parks, areas and pins.
 import { AREA_TYPES, BASICS, CITY_ID, ERAS, FADE, LAND, PIN_LAYERS, mix, store, tok } from './util.js';
 import { S } from './state.js';
-import { bsrc, marksBuildings, ver } from './data.js';
+import { bsrc, conf, marksBuildings, ver } from './data.js';
 import { turnNeedle } from './sheet.js';
 import { selectBuilding, showArea, showBasic, showLand, showPin, showRoute } from './cards.js';
 import { drawPins } from './places.js';
@@ -15,7 +15,7 @@ export function isDark(){
 // the buildings with something to read: a story of their own (the index's "near" list) or a pin on them
 let toldIds = null;
 export function toldList(){
-  if (!toldIds && S.data.near) toldIds = [...new Set([...S.data.near.map(n => n[0]),
+  if (!toldIds && S.data?.near) toldIds = [...new Set([...S.data.near.map(n => n[0]),
     ...(S.data.pins?.features || []).map(f => f.properties.on).filter(i => typeof i === 'number')])];
   return toldIds || [];
 }
@@ -103,7 +103,7 @@ export function drawMap(){
     });
     S.map.addControl(new maplibregl.AttributionControl({ compact:true, customAttribution:
       '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors · Historic England (OGL) · Natural England (OGL) · Wikidata (CC0) · Wikipedia (CC BY-SA)'
-      + (S.data.ground ? ' · Ground: ' + S.data.ground.credit + ' (OGL)' : '') }), 'bottom-right');
+      + (conf('ground') ? ' · Ground: ' + conf('ground').credit + ' (OGL)' : '') }), 'bottom-right');
 
     // a tile that could not be fetched (no connection, or the page left while it loaded) is fetched again when
     // it is next in view: not an error of the page's. Anything else is reported as the map would
@@ -117,7 +117,7 @@ export function drawMap(){
       S.map.addLayer({ id:'osm', type:'raster', source:'osm', layout:{ visibility:'none' }, paint:{ 'raster-opacity':0.75, 'raster-saturation':-0.6 } });
       const key = store.get('mtKey'); if (key) addNls(key);
       // the city's tiles (outlines of buildings, roads, water, parks), or the old single file's GeoJSON
-      const T = S.data.tiles, tileUrl = T && new URL(`../data/${CITY_ID}/tiles/{z}/{x}/{y}.pbf?v=${ver('tiles')}`, location.href).href
+      const T = conf('tiles'), tileUrl = T && new URL(`../data/${CITY_ID}/tiles/{z}/{x}/{y}.pbf?v=${ver('tiles')}`, location.href).href
         .replace(/^https?:/, window.DecompressionStream ? 'gzt:' : location.protocol).replace('%7Bz%7D', '{z}').replace('%7Bx%7D', '{x}').replace('%7By%7D', '{y}');
       const src = (name, extra = {}) => T ? { source:'city', 'source-layer':name, ...extra } : { source:name, ...extra };
       if (T) S.map.addSource('city', { type:'vector', tiles:[tileUrl], minzoom:T.minzoom, maxzoom:T.maxzoom });
@@ -132,16 +132,18 @@ export function drawMap(){
 
       if (T) addLand(src);
       // areas (nature, conservation): from the tiles, or the older data file's GeoJSON
-      const areaSrc = T && S.data.areas ? src('areas') : { source:'nature' };
-      if (!(T && S.data.areas)) S.map.addSource('nature', { type:'geojson', data: S.data.nature || { type:'FeatureCollection', features:[] } });
+      const areasIn = T && (S.boot || S.data.areas);         // (a page with its own start-up settings is of a build that has them)
+      const areaSrc = areasIn ? src('areas') : { source:'nature' };
+      if (!areasIn) S.map.addSource('nature', { type:'geojson', data: S.data.nature || { type:'FeatureCollection', features:[] } });
       S.map.addLayer({ id:'nature-fill', type:'fill', ...areaSrc, layout:{ visibility:'none' },
         paint:{ 'fill-color':natureColour(), 'fill-opacity':0.32 } });
       S.map.addLayer({ id:'nature-line', type:'line', ...areaSrc, layout:{ visibility:'none' },
         paint:{ 'line-color':natureColour(), 'line-width':2, 'line-dasharray':[2, 1] } });
 
       // walking routes: from the tiles, or the older data file's GeoJSON
-      const routeSrc = T && Array.isArray(S.data.routes) ? src('routes') : { source:'routes' };
-      if (!(T && Array.isArray(S.data.routes))) S.map.addSource('routes', { type:'geojson', data: S.data.routes || { type:'FeatureCollection', features:[] } });
+      const routesIn = T && (S.boot || Array.isArray(S.data.routes));
+      const routeSrc = routesIn ? src('routes') : { source:'routes' };
+      if (!routesIn) S.map.addSource('routes', { type:'geojson', data: S.data.routes || { type:'FeatureCollection', features:[] } });
       S.map.addLayer({ id:'routes', type:'line', ...routeSrc, layout:{ visibility:'none', 'line-cap':'round', 'line-join':'round' },
         paint:{ 'line-color':tok('--route'), 'line-width':['interpolate', ['linear'], ['zoom'], 11, 2, 17, 5], 'line-dasharray':[1.6, 1.2] } });
 
@@ -156,7 +158,7 @@ export function drawMap(){
         paint:{ 'fill-extrusion-pattern':['step', ['zoom'], 'hatch-finest', 15, 'hatch-fine', 16, 'hatch'], 'fill-extrusion-base':['+', ['get', 'h'], 0.05],
           'fill-extrusion-height':['+', ['get', 'h'], 0.25], 'fill-extrusion-opacity':1 } });
 
-      S.map.addSource('storypins', { type:'geojson', data: S.data.pins || { type:'FeatureCollection', features:[] } });
+      S.map.addSource('storypins', { type:'geojson', data: S.data?.pins || { type:'FeatureCollection', features:[] } });
       // a pin whose place is not known exactly (", approximate" in its note): a pale halo of its radius in metres,
       // drawn on the ground under the buildings; 'approx' holds the open story set's, 'storypins-halo' a ticked layer's
       const mPx = 1 / (156543.03 * Math.cos(S.map.getCenter().lat * Math.PI / 180));     // pixels per metre at zoom 0
@@ -188,6 +190,7 @@ export function drawMap(){
       S.map.on('moveend', drawPins); S.map.on('sourcedata', e => { if (e.sourceId === 'places' && e.isSourceLoaded) drawPins(); });
 
       S.map.on('click', e => {
+        if (!S.features.length) return;                // (the map can be drawn before the index is in)
         if (e.originalEvent && e.originalEvent.target.closest('.pin')) return;
         const pinHit = S.map.getLayoutProperty('storypins', 'visibility') === 'visible'
           && S.map.queryRenderedFeatures([[e.point.x - 8, e.point.y - 8], [e.point.x + 8, e.point.y + 8]], { layers:['storypins'] })[0];
@@ -276,7 +279,7 @@ export function setLand(types, Y){
 // ================= the ground: hills from the Environment Agency's survey (pipeline/s10_ground.py) =================
 // Two sources over the same tiles, as MapLibre advises: one raises the map (terrain), one shades it (hillshade).
 function addGround(){
-  const G = S.data.ground;
+  const G = conf('ground');
   if (!G) return;
   const url = new URL(`../data/${CITY_ID}/ground/{z}/{x}/{y}.png?v=${ver('ground')}`, location.href).href
     .replace('%7Bz%7D', '{z}').replace('%7Bx%7D', '{x}').replace('%7By%7D', '{y}');

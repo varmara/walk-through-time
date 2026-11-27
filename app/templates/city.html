@@ -20,17 +20,19 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap"></noscript>
 <link rel="stylesheet" href="../lib/maplibre-gl.css?v={{v}}">
+<script type="application/json" id="boot">{{boot}}</script>
 <script>
   // The page's own scripts and styles carry the version of their content (pipeline/pages.py): a phone keeps them
   // until they change, and fetches them again as soon as they do.
   window.__v = '{{v}}';
-  // The city's settings and the map's index are asked for here, at once, while the map's library and the page's
-  // scripts are still on their way; app/city/main.js takes the answers up (util.js: fetchJSON, fetchData).
-  window.__early = {
-    city: fetch('../cities/{{id}}.json', { cache: 'no-cache' }),
-    index: fetch('../data/{{id}}.json', { cache: 'no-cache' })
-  };
-  window.__early.city.catch(function () {}); window.__early.index.catch(function () {});
+  // What the map starts from (the city's settings, the tiles' and the ground's, the files' versions), written in by
+  // the build (pipeline/pages.py), so the map need not wait for the index; null on a page written without data.
+  try { window.__boot = JSON.parse(document.getElementById('boot').textContent); } catch (e) { window.__boot = null; }
+  // The map's index (and without that, the city's settings) is asked for here, at once, while the map's library and
+  // the page's scripts are still on their way; app/city/main.js takes the answers up (util.js: fetchJSON, fetchData).
+  window.__early = { index: fetch('../data/{{id}}.json', { cache: 'no-cache' }) };
+  if (!window.__boot) window.__early.city = fetch('../cities/{{id}}.json', { cache: 'no-cache' });
+  for (var k in window.__early) window.__early[k].catch(function () {});
   document.write('<link rel="stylesheet" href="../app/theme.css?v=' + window.__v + '">');
   document.write('<link rel="stylesheet" href="../app/city.css?v=' + window.__v + '">');
 </script>

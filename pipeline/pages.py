@@ -40,6 +40,21 @@ def version():
     return h.hexdigest()[:10]
 
 
+def boot(city, out):
+    """What the city's map starts from, written into its page as JSON so the map can be drawn before the index has
+    arrived: the city's settings, the tiles' and the ground's, and the data files' versions (read from the built
+    index in the site, data/<city>.json). "null" for a page written without built data: the page then loads them."""
+    f = Path(out) / "data" / f"{city['id']}.json"
+    if not f.exists():
+        return "null"
+    ix = json.loads(f.read_text())
+    if not ix.get("tiles"):
+        return "null"
+    keep = {"city": city, "tiles": ix["tiles"], "ground": ix.get("ground"), "build": ix["build"],
+            "versions": {k: ix["versions"][k] for k in ("tiles", "ground", "more")}}
+    return json.dumps(keep, separators=(",", ":"), ensure_ascii=False).replace("<", "\\u003c")     # (nothing can close the script)
+
+
 def cities():
     return [json.loads(p.read_text()) | {"id": p.stem} for p in sorted((ROOT / "cities").glob("*.json"))]
 
@@ -55,7 +70,8 @@ def main(out=ROOT):
         e = lambda s: html.escape(s or "", quote=True)  # noqa: E731
         values = {"id": c["id"], "name": e(c["name"]), "site": site, "v": v,
                   "description": e(page.get("description") or f"{c['name']} in 3D, every building coloured by the year it was built."),
-                  "share": e(page.get("share") or f"Historic {c['name']} in 3D, building by building.")}
+                  "share": e(page.get("share") or f"Historic {c['name']} in 3D, building by building."),
+                  "boot": boot(c, out)}
         (out / c["id"]).mkdir(parents=True, exist_ok=True)
         (out / c["id"] / "index.html").write_text(fill(city_t, values))
         (out / c["id"] / "graph.html").write_text(fill(graph_t, values))

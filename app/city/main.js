@@ -19,9 +19,15 @@ import { goToCard, showGroups, showPlaces } from './places.js';
 export async function main(){
   progress(5, 'loading map data…');
   const early = window.__early || {};
-  S.city = await fetchJSON(`../cities/${CITY_ID}.json`, undefined, early.city);
+  // The page carries what the map starts from (S.boot): the map is drawn at once, its tiles downloading while the
+  // index does. A page written without it (a computer with no built data) loads the city's settings and starts the
+  // map once the index is in.
+  S.boot = window.__boot;
+  S.city = S.boot ? S.boot.city : await fetchJSON(`../cities/${CITY_ID}.json`, undefined, early.city);
   setPeriods(S.city.periods);
   drawLegend();
+  const drawing = S.boot ? drawMap() : null;
+  drawing?.catch(() => {});                       // (reported where it is waited for, below)
   S.data = await fetchData(`../data/${CITY_ID}.json`, early.index);
   // the index's second part (what the map draws without: names, people, places' names…, pipeline/s10_tiles.py): asked
   // for once the map is drawn, so the map's own files have the connection to themselves; at once for a link that
@@ -60,7 +66,7 @@ export async function main(){
   if (S.data.layers) setLayers();                // (the old single file has them in it)
 
   progress(90, 'drawing the map…');
-  await drawMap();
+  await (drawing || drawMap());
   progress(100);
   $('loader').classList.add('done');
   startMore?.();

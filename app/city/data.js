@@ -36,10 +36,13 @@ export function standingBy(Y){
   for (const [y, c] of S.hist.years) { if (y > Y) break; n += c; }
   return n;
 }
-export const tiled = () => !!S.data.index;
+export const tiled = () => !!(S.boot ? S.boot.tiles : S.data.index);
+// a setting the map starts from (the tiles', the ground's): the page carries its own copy (S.boot, pipeline/pages.py), so
+// the map can start before the index arrives; the index's, once it is in
+export const conf = k => (S.data ? S.data[k] : null) ?? S.boot?.[k];
 // a data file's version, from its content (pipeline/s10_tiles.py: versions): kept on the phone until it changes;
 // an older index has only the build's
-export const ver = (kind, n) => { const v = S.data.versions?.[kind]; return (Array.isArray(v) ? v[n] : v) || S.data.build; };
+export const ver = (kind, n) => { const v = conf('versions')?.[kind]; return (Array.isArray(v) ? v[n] : v) || conf('build'); };
 // where the buildings are drawn from: their layer in the city's one tile source (roads, water and the rest are
 // its other layers, so each tile is fetched and unpacked once), or the old single file's GeoJSON
 export const bsrc = () => tiled() ? { source:'city', sourceLayer:'b' } : { source:'b' };
