@@ -69,6 +69,7 @@ export async function main(){
   await (drawing || drawMap());
   progress(100);
   $('loader').classList.add('done');
+  const firstView = settled();
   startMore?.();
   if (S.data.built) $('dataNote').textContent = 'Data updated ' + new Date(S.data.built).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' }) + '.';
   applyLayers();
@@ -76,7 +77,7 @@ export async function main(){
   await S.more.catch(() => {});        // a link may name a person, or need the buildings' names
   mapReady();
   await openLink(new URLSearchParams(location.search), true);
-  later(prefetchGraph);
+  firstView.then(() => later(prefetchGraph));
 }
 
 // a link that needs the index's second part before anything is drawn: a person, a pin, places, a layer, the graph
@@ -229,7 +230,10 @@ addEventListener('popstate', e => {
 });
 addEventListener('hashchange', syncGraph);
 
-// Once the map is drawn and the phone idle: the graph's files fetched ahead (the browser keeps them), so the graph
+// The map's first view complete (it reports idle: every tile it asked for is in), or 20 s on, for a map kept moving
+const settled = () => new Promise(ok => { const t = setTimeout(ok, 20000); S.map.once('idle', () => { clearTimeout(t); ok(); }); });
+
+// Once the map's first view is in and the phone idle: the graph's files fetched ahead (the browser keeps them), so the graph
 // opens from the phone rather than the network. Not on a connection set to save data.
 const later = f => (window.requestIdleCallback ? requestIdleCallback(f, { timeout: 8000 }) : setTimeout(f, 3000));
 function prefetchGraph(){
