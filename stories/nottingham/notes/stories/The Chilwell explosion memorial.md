@@ -10,5 +10,7 @@ see:
   - "[[National Shell Filling Factory]]"
 ---
 
-In St Mary's churchyard a memorial remembers the 134 people killed on 1 July 1918 in the explosion at the shell
+In St Mary's churchyard a memorial remembers the 134 people killed on 1 July 1918 (137 by another count)[^count] in the explosion at the shell
 factory in Chilwell, still the largest number of deaths caused by a single explosion in mainland Britain.
+
+[^count]: https://en.wikipedia.org/wiki/Shell_Crisis_of_1915 — title: Shell Crisis of 1915 — check: Chilwell | 137
