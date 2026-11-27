@@ -100,13 +100,7 @@ see:
   - "[[Lowe's Silk Mill]]"     # other stories to link from this one
 ---
 When the Lords threw out the Bill, a crowd burned the castle of the
-[[Henry Pelham-Clinton, 4th Duke of Newcastle|Duke of Newcastle]].[^castle]
-
-> [!fact]
-> source: https://en.wikipedia.org/wiki/Nottingham_Castle
-> check: 1878
->
-> The castle reopened as a museum in 1878.
+[[Henry Pelham-Clinton, 4th Duke of Newcastle|Duke of Newcastle]]. It reopened as a museum in 1878.[^castle]
 
 [^castle]: https://en.wikipedia.org/wiki/Nottingham_Castle — check: 1878 | museum
 ```
@@ -116,7 +110,7 @@ When the Lords threw out the Bill, a crowd burned the castle of the
   facts and links only; the build does not read it. Historic England blocks the build, so a note resting on a
   list entry also gives `quote:`, the passages copied from it, which the check words are found in instead.
   Which sites may be used, and how: [SOURCES.md](SOURCES.md).
-- **Footnotes** (`[^name]`) let one paragraph or fact rest on its own page, checked for its own words, or
+- **Footnotes** (`[^name]`) let one sentence or paragraph rest on its own page, checked for its own words, or
   `— read: 2026-11-14` for another site's.
 - **Footnotes the build adds.** A story with several sources gets a footnote after each sentence, to the page
   that holds the check words in that sentence; and its `when:` and `made:` dates are footnoted to the page that
@@ -127,7 +121,7 @@ When the Lords threw out the Bill, a crowd burned the castle of the
   also". A building is linked with its OpenStreetMap address, which opens it on the map. The build stops on a
   `[[link]]` that finds nothing.
 - **A fact goes in the text**, with a footnote when it comes from another page. Where it has a place or a time of
-  its own, it is a story or event of its own. (There is no "Did you know?": a `> [!fact]` callout stops the build.)
+  its own, it is a story or event of its own.
 - **Places stay places.** A pin is named for the place (a tomb, an address), never for a person.
 
 A **person** note (`type: person`) may give `kind:` (architects, writers, science, industry, sport, arts, faith,

@@ -125,10 +125,6 @@ def body_parts(body, name):
             notes[m[1]] = fn
             i += 1
             continue
-        if re.match(r"^>\s*\[!fact\]", line.strip(), re.I):
-            # (there is no "Did you know?" any more: a fact goes in the text, or is its own story where it has its own
-            # place or time)
-            raise NoteError(f"{name}: a [!fact] callout: write it into the text, or as a story of its own")
         lines.append(line)
         i += 1
     paras = [" ".join(x.strip() for x in p.splitlines() if x.strip()) for p in re.split(r"\n\s*\n", "\n".join(lines))]

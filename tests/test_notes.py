@@ -133,8 +133,6 @@ class Read(unittest.TestCase):
             ("---\ntype: event\nsource: en:A\nat:\n  - Pin, -100.1, 52.9\n---\nText.\n", "latitude, then longitude"),
             ("---\ntype: index\nsection: Elsewhere\n---\n", "section: is no longer used"),
             ("---\ntype: [\n---\n", "not valid YAML"),
-            # (no "Did you know?": a fact goes in the text, or is a story of its own)
-            ("---\ntype: event\nsource: en:A\nat:\n  - Pin, 52.9, -1.1\n---\nText.\n\n> [!fact]\n> A fact.\n", "[!fact] callout"),
         ]:
             with self.subTest(want=want), self.assertRaisesRegex(notes.NoteError, re.escape(want)):
                 load({"events/The castle burned.md": text})
