@@ -50,10 +50,11 @@ function introHtml(P, card){
     ${chaps.length ? `<div class="plist chaps">${chaps.map(([c, k]) => `<button data-go="${k}"><i style="background:${c.chapter.colour}"></i><span class="pdate">${esc(chapterYears(c.chapter.title, chapterCards(P, k)).split('–')[0])}</span><span class="pname">${esc(c.chapter.title)}</span></button>`).join('')}</div>`
       : `<p class="pmeta">${n} ${n === 1 ? 'story' : 'stories'}</p><button class="textbtn pnext" data-first>Start</button>`}`;
 }
-// a story's date in a list: the thread's, else its own, else the year the build ordered it by
+// a story's date in a list: the thread's, else its own (not a year the build took from its words: Addensburgh's
+// 1774 is its ferry, not its name)
 function dateOf(c){
   const t = ready(c.refs) ? told(c.refs[0], S.places.name, c.hint) : {};
-  return c.hint?.when || t.when || (Number.isFinite(c.hint?.y) ? String(c.hint.y) : '');
+  return c.hint?.when || t.when || '';
 }
 // a chapter's years: those its title ends with ("The Reform riots, 1831"), else its stories'
 function chapterYears(title, cs){

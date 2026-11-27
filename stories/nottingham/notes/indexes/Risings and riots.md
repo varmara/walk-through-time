@@ -28,11 +28,11 @@ Parliament's seats had not been redrawn for population in many decades: some bor
 - [[Colwick Hall, 1831]]
 - [[Lowe's Silk Mill]]
 
-## The Chartists, 1842
+## The Chartists, 1842–1847
 The People's Charter of 1838 asked for six reforms, among them a vote for every man over 21, the secret ballot and pay for MPs. The Commons refused to hear its first petition, of 1.3 million signatures, in 1839, and rejected the second, of over three million, in May 1842.[^charter] That summer, after employers had cut wages by up to a quarter in the slump, a general strike spread from Stalybridge and Ashton to Manchester and beyond.[^strike]
-- 1847: [[Feargus O'Connor]]
 - [[Sturge and Walter, 1842]]
 - [[The Battle of Mapperley Hills, 1842]]
+- 1847: [[Feargus O'Connor]]
 
 ## The Bogs, 1872
 Enclosure turned land held in common into private property.[^encl] Nottingham's burgesses, who held common rights in the town's fields, had held off their enclosure from 1787 until 1845, though it kept the town from growing outwards.[^fields] Who made the attempt on Bulwell's Bogs is unclear: Samuel Thomas Cooper, lord of the manor since he bought Bulwell Hall, had died the year before, in 1871.[^cooper]
