@@ -20,13 +20,18 @@ export function toldList(){
   return toldIds || [];
 }
 const told = () => ['in', ['id'], ['literal', toldList()]];
-// their hatching: fine diagonal ink lines with clear gaps, laid on their roofs (the era colour shows between)
+// their hatching: fine diagonal ink lines with clear gaps, laid on their roofs (the era colour shows between); closer
+// lines when zoomed out, where the buildings are small (drawn at twice the size, for sharp lines on phones)
+const HATCH = { hatch:[8, 1.2], 'hatch-fine':[4, 0.9], 'hatch-finest':[3, 0.8] };      // spacing and line width, in screen pixels
 function hatch(){
-  const n = 8, c = document.createElement('canvas'); c.width = c.height = n;
-  const g = c.getContext('2d'); g.strokeStyle = tok(isDark() ? '--bg' : '--ink'); g.globalAlpha = isDark() ? 0.8 : 0.6; g.lineWidth = 1.2;   // dark lines: the buildings are light in both themes
-  for (const o of [-n, 0, n]) { g.beginPath(); g.moveTo(o, n); g.lineTo(o + n, 0); g.stroke(); }
-  const img = g.getImageData(0, 0, n, n);
-  if (S.map.hasImage('hatch')) S.map.updateImage('hatch', img); else S.map.addImage('hatch', img, { pixelRatio:1 });
+  for (const [id, [n, w]] of Object.entries(HATCH)) {
+    const c = document.createElement('canvas'); c.width = c.height = n * 2;
+    const g = c.getContext('2d'); g.scale(2, 2);
+    g.strokeStyle = tok(isDark() ? '--bg' : '--ink'); g.globalAlpha = isDark() ? 0.8 : 0.6; g.lineWidth = w;   // dark lines: the buildings are light in both themes
+    for (const o of [-n, 0, n]) { g.beginPath(); g.moveTo(o, n); g.lineTo(o + n, 0); g.stroke(); }
+    const img = g.getImageData(0, 0, n * 2, n * 2);
+    if (S.map.hasImage(id)) S.map.updateImage(id, img); else S.map.addImage(id, img, { pixelRatio:2 });
+  }
 }
 let bFilter = null;
 function hatchFilter(){ return bFilter ? ['all', bFilter, told()] : told(); }
@@ -149,7 +154,7 @@ export function drawMap(){
       // the hatching on the roofs of buildings with something to read: a thin see-through slab just above the roof
       hatch();
       S.map.addLayer({ id:'told', type:'fill-extrusion', source:'b', ...(T ? { 'source-layer':'b' } : {}), filter:told(),
-        paint:{ 'fill-extrusion-pattern':'hatch', 'fill-extrusion-base':['+', ['get', 'h'], 0.05],
+        paint:{ 'fill-extrusion-pattern':['step', ['zoom'], 'hatch-finest', 15, 'hatch-fine', 16, 'hatch'], 'fill-extrusion-base':['+', ['get', 'h'], 0.05],
           'fill-extrusion-height':['+', ['get', 'h'], 0.25], 'fill-extrusion-opacity':1 } });
 
       S.map.addSource('storypins', { type:'geojson', data: S.data.pins || { type:'FeatureCollection', features:[] } });
