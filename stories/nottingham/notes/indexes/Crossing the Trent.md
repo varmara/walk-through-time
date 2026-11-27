@@ -2,32 +2,46 @@
 type: index
 order: 10
 id: trent
+sort: as listed
 ---
 
-The Trent was both a barrier and a highway. Nottingham grew where the river could be crossed, and for centuries the town depended on its bridge. These stories cover the fords, ferries and bridges, and the long effort to control the river's floods.
+The Trent is the third-longest river in the United Kingdom, and it once marked the boundary between the north of England and the south.[^trent] Nottingham grew where it could be crossed.
 
-## Fords and ferries
-Before there were bridges, the river was crossed at fords and by ferry. Finds from a Bronze Age settlement and a Roman ford show how long people have lived and crossed here. In the early 10th century Edward the Elder built defences at the bridge against the Danes, who had taken Nottingham in 868.
+## Fords, c. 1000 BC–AD 400
+Long before any bridge, people crossed where the river ran shallow. The Trent is known for sudden floods after storms and spring snowmelt, and its flood records go back some 900 years.[^floods]
 - [[Bronze Age finds, 1937]]
 - [[The Roman ford]]
-- [[Addensburgh]]
-- [[Barton in the Beans]]
+
+## A bridge against the Danes, 868–924
+Edward the Elder of Wessex ended Danish rule in Nottingham with an assault in the summer of 918.[^five]
 - [[The Danes in Nottingham, 868]]
-- [[Ferry Inn]]
 - [[A fort at the bridge]]
 
-## The bridges
-The medieval Trent Bridge, begun in 1156, served the town for some seven hundred years, despite repeated floods. It was replaced in the 1860s and 1870s by the present bridge. Other crossings followed: toll and suspension bridges at Wilford, a railway bridge at Lady Bay and, in 1958, Clifton Bridge.
+## The medieval bridge, 1156–1683
+Medieval bridges often had a chapel on or beside them, where a priest said mass for travellers and for the bridge's benefactors. At the Reformation the Acts of 1545 and 1547 that abolished chantries closed them.[^chapel]
 - [[Trent Bridge]]
 - [[The old bridge in flood, 1683]]
+
+## From ferries to bridges, 17th century–1906
+From 1848 towns could set up boards of health, to look after their sewers, streets and water; the first were a response to cholera.[^health] It was the age of the borough engineer.
+- [[Ferry Inn]]
+- [[Addensburgh]]
+- [[Barton in the Beans]]
 - [[Marriott Ogle Tarbotton]]
 - [[Wilford Toll Bridge]]
-- [[Wilford Suspension Bridge]]
-- [[Clifton Bridge]]
 - [[Lady Bay Bridge]]
+- [[Wilford Suspension Bridge]]
 
-## Taming the river
-The Trent flooded often, and the low-lying Meadows and riverside villages suffered most. The Victoria Embankment was built at the end of the 19th century, and the severe flood of 1947 led to new defences. Gravel workings along the valley were later turned into a national watersports centre.
+## The river tamed, 1898–1971
+In March 1947 snow that had lain all winter thawed fast over frozen ground and ran straight into the rivers; more than 100,000 properties across the country were flooded.[^1947]
 - [[Victoria Embankment]]
 - [[The 1947 flood]]
+- [[Clifton Bridge]]
 - [[National Watersports Centre]]
+
+[^trent]: https://en.wikipedia.org/wiki/River_Trent — title: River Trent — check: third-longest river | Northern England and Southern England
+[^floods]: https://en.wikipedia.org/wiki/River_Trent — title: River Trent — check: dramatic flooding | snowmelt
+[^five]: https://en.wikipedia.org/wiki/Five_Boroughs_of_the_Danelaw — title: Five Boroughs of the Danelaw — check: King Edward of Wessex | summer of 918
+[^chapel]: https://en.wikipedia.org/wiki/Bridge_chapel — title: Bridge chapel — check: spiritual needs of travellers | benefactors | 1545 | 1547
+[^health]: https://en.wikipedia.org/wiki/Public_Health_Act_1848 — title: Public Health Act 1848 — check: sewers | water | cholera
+[^1947]: https://en.wikipedia.org/wiki/Winter_of_1946%E2%80%9347_in_the_United_Kingdom — title: Winter of 1946–47 in the United Kingdom — check: snowmelt | frozen ground | More than 100,000 properties
