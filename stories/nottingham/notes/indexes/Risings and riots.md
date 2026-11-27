@@ -22,8 +22,9 @@ In June 1817 men from Derbyshire marched on Nottingham, led by Jeremiah Brandret
 - [[The Pentrich rising, 1817]]
 
 ## The Reform riots, 1831
-When the House of Lords threw out the Second Reform Bill in October 1831, rioting broke out in Nottingham. In the days that followed crowds burned the castle, damaged Colwick Hall and burned a silk mill in Beeston; three men were hanged.
+When the House of Lords threw out the Second Reform Bill in October 1831, rioting broke out in Nottingham. In the days that followed crowds burned the castle, sacked Colwick Hall and burned a silk mill in Beeston; three men were hanged.
 - [[The castle burned, 1831]]
+- [[Colwick Hall, 1831]]
 - [[Lowe's Silk Mill]]
 
 ## The Chartists, 1842
