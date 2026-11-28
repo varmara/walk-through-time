@@ -236,7 +236,9 @@ def main(city_id):
     # each kind of file's version, from its content: a phone keeps what it has loaded until that changes (sw.js),
     # so a story edited does not make it load the city's tiles and hills again; a card file, each of its own
     graph = Path("data") / f"{city_id}-graph.json"
-    versions = {"tiles": version(sorted(tiles.rglob("*.pbf"))), "ground": version(sorted((root / "ground").rglob("*.png"))),
+    # (the hills' tiles are the files of the ground's own type: s09_ground says which; none without hills)
+    hills = sorted((root / "ground").rglob(f"*.{ground['meta']['ext']}")) if ground else []
+    versions = {"tiles": version(sorted(tiles.rglob("*.pbf"))), "ground": version(hills),
                 "cards": [version([root / "cards" / f"{n}.json"]) for n in range(max(cards) + 1 if cards else 0)],
                 "osm": [version([root / "osm" / f"{n}.json"]) for n in range(OSM_PARTS)],
                 "graph": version([graph]), "sets": {k: version([f]) for k, f in sets.items()}}

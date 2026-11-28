@@ -5,8 +5,10 @@
            as GeoTIFF. Open Government Licence; "© Environment Agency copyright and/or database right".
   area     the city's box and MARGIN around it, so the hills do not end in a cliff at the map's edge; beyond the
            survey, and in its few gaps (water, glass), the nearest height is carried on.
-  tiles    data/<city>/ground/{z}/{x}/{y}.png (copied there by s10_tiles), zoom MIN_Z to MAX_Z, 256 px, "Terrarium" encoding (MapLibre's
-           raster-dem): red * 256 + green + blue / 256 - 32768 metres, heights to 0.1 m (enough, and the PNGs smaller).
+  tiles    data/<city>/ground/{z}/{x}/{y}.webp (copied there by s10_tiles), zoom MIN_Z to MAX_Z, 256 px, "Terrarium"
+           encoding (MapLibre's raster-dem): red * 256 + green + blue / 256 - 32768 metres, heights to 0.1 m (enough,
+           and the files smaller). Lossless WebP: the very pixels a PNG would hold (so the very heights), in about
+           60% of the bytes; never a lossy kind, which would change heights.
 
 Buildings on a slope: the map stands each building at the ground under its middle, so on a steep street (the
 Park's cliff, Mapperley) its uphill side would be buried. For each building this step measures how far the ground
@@ -27,6 +29,8 @@ import shutil
 import time
 import urllib.request
 import zipfile
+from collections import deque
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from .common import city, load, log, save
@@ -37,6 +41,7 @@ PRODUCT, RES = "lidar_composite_dtm", "2m"
 MIN_Z, MAX_Z = 10, 15
 MARGIN = 0.02                 # degrees, about 1.5 km
 TILE = 256
+EXT = "webp"                  # the tiles' file type (also in ground.json, for the page)
 CREDIT = "© Environment Agency copyright and/or database right"
 
 
@@ -103,15 +108,26 @@ def terrarium(h):
     return np.dstack([r, g, np.minimum(b, 255)]).astype("uint8")
 
 
+def encode(arr):
+    """A tile (Terrarium pixels) as lossless WebP. Method 6, the smallest: about a second a tile, paid once, as the
+    tiles are made again only when the area or this script changes."""
+    from PIL import Image
+    buf = io.BytesIO()
+    Image.fromarray(arr, "RGB").save(buf, "WEBP", lossless=True, quality=100, method=6)
+    return buf.getvalue()
+
+
 def build(c, out, cache):
     import numpy as np
     import rasterio
-    from PIL import Image
+    from PIL import features
     from rasterio.enums import Resampling
     from rasterio.fill import fillnodata
     from rasterio.transform import Affine
     from rasterio.warp import reproject
 
+    if not features.check("webp"):
+        raise RuntimeError("this Pillow cannot write WebP")
     box = ground_box(c)
     sq = squares(box)
     if not sq:
@@ -167,26 +183,39 @@ def build(c, out, cache):
     h = np.pad(h, pad, mode="edge")
     transform = transform * Affine.translation(-pad, -pad)
 
-    count = 0
-    for z in range(MIN_Z, MAX_Z + 1):
-        for x, y in tiles_for(box, z):
-            left, bottom, right, top = mercator_bounds(z, x, y)
-            dst = np.zeros((TILE, TILE), "float32")
-            reproject(h, dst, src_transform=transform, src_crs=crs,
-                      dst_transform=rasterio.transform.from_bounds(left, bottom, right, top, TILE, TILE),
-                      dst_crs="EPSG:3857", resampling=Resampling.average if z < MAX_Z else Resampling.bilinear)
-            p = out / "tiles" / str(z) / str(x) / f"{y}.png"
-            p.parent.mkdir(parents=True, exist_ok=True)
-            buf = io.BytesIO()
-            Image.fromarray(terrarium(dst), "RGB").save(buf, "PNG", optimize=True)
-            p.write_bytes(buf.getvalue())
-            count += 1
+    count, total = 0, 0
+    workers = os.cpu_count() or 2
+    waiting = deque()                 # (file, its encoding under way), oldest first: at most a few at a time in memory
+
+    def write_oldest():
+        nonlocal total
+        p, job = waiting.popleft()
+        data = job.result()
+        p.write_bytes(data)
+        total += len(data)
+
+    with ThreadPoolExecutor(workers) as pool:         # (Pillow lets go of the interpreter while it encodes)
+        for z in range(MIN_Z, MAX_Z + 1):
+            for x, y in tiles_for(box, z):
+                left, bottom, right, top = mercator_bounds(z, x, y)
+                dst = np.zeros((TILE, TILE), "float32")
+                reproject(h, dst, src_transform=transform, src_crs=crs,
+                          dst_transform=rasterio.transform.from_bounds(left, bottom, right, top, TILE, TILE),
+                          dst_crs="EPSG:3857", resampling=Resampling.average if z < MAX_Z else Resampling.bilinear)
+                p = out / "tiles" / str(z) / str(x) / f"{y}.{EXT}"
+                p.parent.mkdir(parents=True, exist_ok=True)
+                waiting.append((p, pool.submit(encode, terrarium(dst))))
+                count += 1
+                while len(waiting) > 4 * workers:
+                    write_oldest()
+        while waiting:
+            write_oldest()
     lo, hi = float(np.percentile(h, 1)), float(np.percentile(h, 99))
     meta = {"minzoom": MIN_Z, "maxzoom": MAX_Z, "encoding": "terrarium", "tileSize": TILE,
             "bounds": [round(box["w"], 4), round(box["s"], 4), round(box["e"], 4), round(box["n"], 4)],
-            "year": max(s["year"] for s in sq), "credit": CREDIT, "range": [round(lo), round(hi)]}
+            "ext": EXT, "year": max(s["year"] for s in sq), "credit": CREDIT, "range": [round(lo), round(hi)]}
     (out / "ground.json").write_text(json.dumps(meta))
-    log(f"    {count} tiles, ground from {lo:.0f} to {hi:.0f} m above sea level")
+    log(f"    {count} tiles ({total / 1e6:.1f} MB), ground from {lo:.0f} to {hi:.0f} m above sea level")
     return meta
 
 

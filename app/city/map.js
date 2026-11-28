@@ -276,12 +276,12 @@ export function setLand(types, Y){
   }
 }
 
-// ================= the ground: hills from the Environment Agency's survey (pipeline/s10_ground.py) =================
+// ================= the ground: hills from the Environment Agency's survey (pipeline/s09_ground.py) =================
 // Two sources over the same tiles, as MapLibre advises: one raises the map (terrain), one shades it (hillshade).
 function addGround(){
   const G = conf('ground');
   if (!G) return;
-  const url = new URL(`../data/${CITY_ID}/ground/{z}/{x}/{y}.png?v=${ver('ground')}`, location.href).href
+  const url = new URL(`../data/${CITY_ID}/ground/{z}/{x}/{y}.${G.ext}?v=${ver('ground')}`, location.href).href
     .replace('%7Bz%7D', '{z}').replace('%7Bx%7D', '{x}').replace('%7By%7D', '{y}');
   const dem = { type:'raster-dem', tiles:[url], tileSize:G.tileSize || 256, encoding:G.encoding || 'terrarium',
     minzoom:G.minzoom, maxzoom:G.maxzoom, bounds:G.bounds };
@@ -301,20 +301,21 @@ function addGround(){
 // off, or off the survey). The map knows a height only where it has drawn the ground close up: flying from the whole
 // city to a place on a hill it took the ground there as 0 m, and the place landed well above the middle of the view
 const groundTiles = new Map();
-const groundUrl = key => new URL(`../data/${CITY_ID}/ground/${key}.png?v=${ver('ground')}`, location.href);
+const groundUrl = key => new URL(`../data/${CITY_ID}/ground/${key}.${conf('ground').ext}?v=${ver('ground')}`, location.href);
 const tileOf = (lon, lat, z) => { const n = 2 ** z; return [(lon + 180) / 360 * n, (1 - Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360)) / Math.PI) / 2 * n]; };
 export async function groundAt([lon, lat]){
-  const G = S.data.ground;
+  const G = conf('ground');
   if (!G || !S.map?.getTerrain()) return 0;
   const z = G.maxzoom, size = G.tileSize || 256, [fx, fy] = tileOf(lon, lat, z);
   const x = Math.floor(fx), y = Math.floor(fy), key = `${z}/${x}/${y}`;
   if (!groundTiles.has(key)) {
     if (groundTiles.size > 64) groundTiles.delete(groundTiles.keys().next().value);
     groundTiles.set(key, fetch(groundUrl(key))
-      .then(r => r.ok ? r.blob() : null).then(b => b && createImageBitmap(b)).then(img => {
+      .then(r => r.ok ? r.blob() : null)
+      .then(b => b && createImageBitmap(b, { colorSpaceConversion:'none', premultiplyAlpha:'none' })).then(img => {
         if (!img) return null;
         const c = document.createElement('canvas'); c.width = c.height = size;
-        const g = c.getContext('2d', { willReadFrequently: true }); g.drawImage(img, 0, 0, size, size);
+        const g = c.getContext('2d', { colorSpace:'srgb', willReadFrequently: true }); g.drawImage(img, 0, 0, size, size);
         return g.getImageData(0, 0, size, size).data;
       }).catch(() => null));
   }
