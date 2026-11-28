@@ -1,0 +1,295 @@
+// Walk Through Time, city page: Start-up: loads the city settings and the index, draws the map, opens a building or a set of places from the link.
+import './util.js';
+import './data.js';
+import './map.js';
+import './timebar.js';
+import './sheet.js';
+import './panels.js';
+import './cards.js';
+import './places.js';
+import { $, CITY_ID, fetchData, fetchJSON, progress, setPeriods } from './util.js';
+import { S } from './state.js';
+import { areaOf, byOsm, cardFileOf, fromIndex, isStorySet, loadCard, loadCardFile, parseRef, pinOf, refOf, saveActive, tiled } from './data.js';
+import { drawMap } from './map.js';
+import { stopPlay, updateYear } from './timebar.js';
+import { applyLayers, drawLegend, groundNote, renderLayers } from './panels.js';
+import { openRef, selectBuilding, showPerson, showPin } from './cards.js';
+import { goToCard, showGroups, showPlaces } from './places.js';
+
+export async function main(){
+  progress(5, 'loading map data…');
+  const early = window.__early || {};
+  // The page carries what the map starts from (S.boot): the map is drawn at once, its tiles downloading while the
+  // index does. A page written without it (a computer with no built data) loads the city's settings and starts the
+  // map once the index is in.
+  S.boot = window.__boot;
+  S.city = S.boot ? S.boot.city : await fetchJSON(`../cities/${CITY_ID}.json`, undefined, early.city);
+  setPeriods(S.city.periods);
+  drawLegend();
+  const drawing = S.boot ? drawMap() : null;
+  drawing?.catch(() => {});                       // (reported where it is waited for, below)
+  S.data = await fetchData(`../data/${CITY_ID}.json${S.boot ? '?v=' + S.boot.versions.index : ''}`, early.index);
+  // the index's second part (what the map draws without: layers, pins, names, people…, pipeline/s10_tiles.py): asked
+  // for once the map's first view is in, so the map's own files have the connection to themselves; at once for a
+  // link that names a person, a place or a layer, which needs it to open, and for a tap on Stories or Layers
+  let startMore;
+  S.more = !S.data.versions?.more ? Promise.resolve() : new Promise(ok => { startMore = ok; })
+    .then(() => fetchJSON(`../data/${CITY_ID}-more.json?v=${S.data.versions.more}`, undefined, undefined, 'low'))   // (a tap's card first)
+    .then(m => { if (m.build !== S.data.build) throw new Error('the second part of the index is from another build'); mergeMore(m); });
+  S.more.catch(() => {});
+  if (startMore && wantsMore()) startMore();
+  keepOnPhone(S.data.build);
+  if (graphWanted()) syncGraph();                // a link to the graph (#graph): opened now, the map drawn behind
+  progress(70, 'reading buildings…');
+  S.features = S.data.index ? fromIndex(S.data.index) : S.data.buildings.features;
+  if (!S.features.length) throw new Error('no buildings in the map data');
+  // ?focus=b12,b40… (from the graph): fetch those buildings' card files now, while the map is drawn, not
+  // after (a person's places can be in a dozen files)
+  for (const x of (new URLSearchParams(location.search).get('focus') || '').split(',')) {
+    if (/^b\d+$/.test(x) && +x.slice(1) < S.features.length) loadCard(+x.slice(1)).catch(() => {});
+  }
+  let known = 0;
+  let estimated = 0;
+  if (!(S.data.index && S.data.index.hist)) S.features.forEach((f, i) => {     // an older file: count them here
+    f.id = i;
+    if (f.properties.y != null) f.properties.f === 'area' ? estimated++ : known++;
+  });
+  else {
+    S.hist = { years: S.data.index.hist, undated: S.data.index.undated };
+    estimated = S.data.index.estimated;
+    known = S.features.length - S.data.index.undated - estimated;
+  }
+  S.stats = { total: S.features.length, known, estimated };
+  groundNote();
+
+  // (the layers and pins come with the index's second part, once the map is drawn: setLayers, below)
+  if (S.data.layers) setLayers();                // (the old single file has them in it)
+
+  progress(90, 'drawing the map…');
+  await (drawing || drawMap());
+  progress(100);
+  $('loader').classList.add('done');
+  const firstView = settled();
+  firstView.then(() => startMore?.());
+  S.loadMore = () => startMore?.();             // (a tap on Stories or Layers before then asks at once)
+  if (S.data.built) $('dataNote').textContent = 'Data updated ' + new Date(S.data.built).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' }) + '.';
+  applyLayers();
+  updateYear();
+  await S.more.catch(() => {});        // a link may name a person, or need the buildings' names
+  mapReady();
+  await openLink(new URLSearchParams(location.search), true);
+  firstView.then(() => later(prefetchGraph));
+  firstView.then(cardsAhead);      // (card files need not wait for the second part: it fills in only what is missing)
+}
+
+// The card files of the buildings on screen, fetched each time the map comes to rest (at most 8 files, nearest the
+// middle first, a few KB each), so a first tap on a building opens its card at once. Not on a connection set to
+// save data.
+function cardsAhead(){
+  if (navigator.connection?.saveData || !tiled()) return;
+  let busy = false;
+  const ahead = () => {
+    if (busy) return;
+    const c = S.map.getCenter(), files = new Map();
+    for (const f of S.map.queryRenderedFeatures({ layers:['b'] })) {
+      if (f.id == null || !S.features[f.id] || S.features[f.id].full) continue;
+      const n = cardFileOf(f.id);
+      if (S.cardFiles[n]) continue;
+      const g = f.geometry.type === 'Polygon' ? f.geometry.coordinates[0][0] : f.geometry.coordinates[0][0][0];
+      const d = (g[0] - c.lng) ** 2 + (g[1] - c.lat) ** 2;
+      if (!files.has(n) || d < files.get(n)) files.set(n, d);
+    }
+    const ns = [...files].sort((a, b) => a[1] - b[1]).slice(0, 8).map(x => x[0]);
+    if (!ns.length) return;
+    busy = true;
+    Promise.allSettled(ns.map(n => loadCardFile(n, 'low'))).then(() => { busy = false; });
+  };
+  S.map.on('idle', ahead);
+  ahead();
+}
+
+// a link that needs the index's second part before anything is drawn: a person, a pin, places, a layer, the graph
+function wantsMore(){
+  const q = new URLSearchParams(location.search);
+  return graphWanted() || ['person', 'pin', 'focus', 'group', 'layer', 'story'].some(k => q.has(k));
+}
+
+// The layers (their groups, what each place belongs to) and the pins, from the index's second part: the Layers and
+// Stories sheets are drawn from them, and the ticked layers saved on the phone are kept only if they still exist
+function setLayers(){
+  S.moreIn = true;
+  S.layers = (S.data.layers || []).map(L => ({ ...L, groups: (L.groups || []).map(g => Array.isArray(g) ? { key: g[0], title: g[1] } : g) }));
+  S.layers.forEach(L => L.groups.forEach(g => S.groups.set(g.key, { ...g, layer: L })));
+  S.layers.forEach(L => L.groups.forEach(g => (g.items || []).forEach(it => {
+    const [name, bs] = typeof it[0] === 'number' ? [it[1], [it[0]]] : it;
+    if (bs.length > 1) bs.filter(b => typeof b === 'number').forEach(b => (S.entitiesAt[b] = S.entitiesAt[b] || []).some(x => x.name === name) || S.entitiesAt[b].push({ name, bs }));
+  })));
+  S.active = new Set([...S.active].filter(k => S.groups.has(k) && !isStorySet(k)));
+  saveActive();
+  renderLayers();
+
+}
+
+// the index's second part, into the first: the named buildings' details (into those already made), people, …
+function mergeMore(m){
+  Object.assign(S.data.index.props, m.props);
+  for (const k of Object.keys(m)) if (k !== 'build' && k !== 'props') S.data[k] = m[k];     // (pipeline/s10_tiles.py: MORE)
+  (S.madeFeatures || []).forEach((f, i) => { if (f && m.props[i]) f.properties = { ...m.props[i], ...f.properties }; });
+  S.inLayers = null;
+  setLayers();
+  if (S.map) { S.map.getSource('storypins')?.setData(S.data.pins); applyLayers(); }
+  document.body.dataset.more = 'in';            // (the page test waits for it)
+}
+
+// What a link asks the map to show: on opening the page, and from the graph (its "Show on the map" opens the same
+// links in the page, without loading it again).
+//   ?layer=inns              that layer ticked
+//   ?group=people-architects,inns   those layer groups ticked (the rest off), their places as numbered cards
+//   ?focus=b12,p3&name=…     those places (as a set when there are several)
+//   ?osm=way/123&b=…         a shared building
+//   ?person=Name             a shared person's card
+//   ?pin=52.95533,-1.13998   a shared pin's card: the pin standing there (a plaque, a story's place)
+export async function openLink(q, first){
+  let ticked = false;
+  const lq = q.get('layer'), lyr = lq && S.layers.find(L => L.id === lq);
+  // a place's, a thread's or the People's link opens its cards (as ?group= does); any other layer is ticked
+  const storyLyr = lyr && lyr.groups.some(g => isStorySet(g.key));
+  if (lyr && !storyLyr) { lyr.groups.filter(g => g.count > 0).forEach(g => S.active.add(g.key)); ticked = true; }
+  const gq = q.get('group') || (storyLyr && !q.get('focus') ? lq : null);
+  // a group's key, or a story layer's id (the graph's story themes): all its groups
+  const keys = gq ? [...new Set(gq.split(',').flatMap(k => S.groups.has(k) ? [k]
+    : (S.layers.find(L => L.id === k)?.groups || []).filter(g => g.count > 0).map(g => g.key)))] : [];
+  const tick = keys.filter(k => !isStorySet(k));
+  if (tick.length) { S.active.clear(); tick.forEach(k => S.active.add(k)); ticked = true; }
+  if (ticked) { saveActive(); renderLayers(); applyLayers(); if (!first) updateYear(); }
+  // a group's places as numbered cards, person by person (or story by story) in date order, each place once
+  const asked = gq ? gq.split(',') : [], whole = asked.length === 1 && S.layers.find(L => L.id === asked[0]);
+  const groupTitle = whole ? whole.title : keys.length === 1 ? S.groups.get(keys[0]).title : 'Story themes';
+  const focus = q.get('focus'), osm = q.get('osm');
+  // a shared building: the OpenStreetMap id is the lasting key; ?b= is its place in the build the link was made
+  // from, used only if it still points at the same building (positions change between builds)
+  const bq = q.get('b');
+  if (osm) {
+    let i = bq != null && +bq < S.features.length ? +bq : -1;
+    if (i >= 0 && tiled()) { await loadCard(i).catch(() => {}); if (S.features[i].properties.osm !== osm) i = -1; }
+    else if (i >= 0 && S.features[i].properties.osm !== osm) i = -1;
+    if (i < 0) i = await byOsm(osm).catch(() => -1);
+    if (i >= 0) selectBuilding(i);
+  } else if (bq != null && +bq < S.features.length) selectBuilding(+bq);
+  if (keys.length) showGroups(keys, groupTitle);
+  // a story shared from a thread (?layer=…&story=…): the thread opens at its card
+  const sq = q.get('story');
+  if (sq && keys.length) {
+    // (the thread's cards may wait for their file first)
+    let tries = 0;
+    const t = setInterval(() => {
+      const k = S.places ? S.places.cards.findIndex(c => !c.intro && c.hint?.name === sq) : -1;
+      if (k > 0 || ++tries > 50) { clearInterval(t); if (k > 0) goToCard(k, false); }
+    }, 200);
+  }
+  if (q.get('person')) showPerson(q.get('person'));
+  const pq = /^(-?\d+\.\d+),(-?\d+\.\d+)$/.exec(q.get('pin') || '');
+  if (pq) {
+    const [lat, lon] = [+pq[1], +pq[2]];
+    const d = f => Math.hypot((f.geometry.coordinates[0] - lon) * 67000, (f.geometry.coordinates[1] - lat) * 111000);
+    const best = (S.data.pins?.features || []).reduce((b, f) => !b || d(f) < d(b) ? f : b, null);
+    if (best && d(best) < 15) showPin(best.properties);
+  }
+  if (focus) {
+    const refs = focus.split(',').map(x => x[0] === 'b' ? +x.slice(1) : x)
+      .filter(r => typeof r === 'number' ? r < S.features.length : r[0] === 'p' ? S.data.pins && pinOf(r) : refOf(r));
+    if (refs.length > 1) showPlaces(q.get('name') || 'Selected places', refs);
+    else if (refs.length) openRef(refs[0]);
+  }
+}
+
+// ================= The graph, over the map (#graph) =================
+// The graph button opens it in this page (app/city/graph.js, loaded the first time): "← Map" or the phone's Back
+// closes it and the map is as it was; opened again, it is as it was left. While it is open the map is hidden and
+// still (nothing of it drawn); while it is closed the graph's layout and drawing stop.
+const graphWanted = () => location.hash === '#graph';
+let mapReady;
+const mapDone = new Promise(ok => { mapReady = ok; });      // the map drawn: links can be opened
+let graph = null;
+const graphModule = () => graph = graph || import('./graph.js');
+async function syncGraph(){
+  if (graphWanted()) {
+    if (!S.data) return;                         // main() opens it once the map's index is in
+    stopPlay();
+    S.map?.stop();
+    pauseMap(true);
+    document.body.classList.add('graph-open');
+    (await graphModule()).showGraph({ back: closeGraph, go: fromGraph });
+  } else if (graph) {
+    (await graph).hideGraph();
+    document.body.classList.remove('graph-open');
+    pauseMap(false);
+  }
+}
+// The map still while the graph covers it: MapLibre draws a frame whenever a tile arrives or anything moves, hidden
+// or not, and on a phone those frames would slow the graph. Its frames are skipped (tiles still load) and one is
+// drawn when the map shows again. (MapLibre 4's own render step, lib/maplibre-gl.js; left alone if it changes.)
+function pauseMap(on){
+  const m = S.map;
+  if (!m || typeof m._render !== 'function') return;
+  if (on && !m._paused) { m._paused = m._render; m._render = function(){ return this; }; }
+  else if (!on && m._paused) { m._render = m._paused; delete m._paused; m.triggerRepaint(); }
+}
+// "← Map": back in history when the graph was opened from this page, or else the graph's address let go
+function closeGraph(){
+  if (history.state && history.state.graph) history.back();
+  else { history.replaceState(null, '', location.pathname + location.search); syncGraph(); }
+}
+// "Show on the map": the map opens those places, at a new address, so Back returns to the graph
+function fromGraph(href){
+  const u = new URL(href, location.href);
+  history.pushState({ link: 1 }, '', u.pathname + u.search);
+  syncGraph();
+  mapDone.then(() => openLink(u.searchParams));
+}
+$('bGraph').addEventListener('click', e => {
+  e.preventDefault();
+  if (!graphWanted()) history.pushState({ graph: 1 }, '', location.pathname + location.search + '#graph');
+  syncGraph();
+});
+addEventListener('popstate', e => {
+  syncGraph();
+  if (!graphWanted() && e.state && e.state.link) mapDone.then(() => openLink(new URLSearchParams(location.search)));   // Forward
+});
+addEventListener('hashchange', syncGraph);
+
+// The map's first view complete (it reports idle: every tile it asked for is in), or 20 s on, for a map kept moving
+const settled = () => new Promise(ok => { const t = setTimeout(ok, 20000); S.map.once('idle', () => { clearTimeout(t); ok(); }); });
+
+// Once the map's first view is in and the phone idle: the graph's files fetched ahead (the browser keeps them), so the graph
+// opens from the phone rather than the network. Not on a connection set to save data.
+const later = f => (window.requestIdleCallback ? requestIdleCallback(f, { timeout: 8000 }) : setTimeout(f, 3000));
+function prefetchGraph(){
+  if (navigator.connection?.saveData || graph) return;
+  const v = window.__v || '';
+  for (const m of ['graphlayout', 'graph']) {
+    const l = document.createElement('link'); l.rel = 'modulepreload'; l.fetchPriority = 'low'; l.href = `../app/city/${m}.js?v=${v}`; document.head.appendChild(l);
+  }
+  for (const u of [`../lib/d3.min.js?v=${v}`, `../app/graph.css?v=${v}`, `../data/${CITY_ID}-graph.json?v=${S.data.versions?.graph || S.data.build}`]) fetch(u, { priority:'low' }).catch(() => {});
+}
+
+// ================= Layout =================
+export const bar = $('timebar');
+export const fit = () => document.documentElement.style.setProperty('--bar-h', (bar.offsetHeight + 20) + 'px');
+if (window.ResizeObserver) new ResizeObserver(() => requestAnimationFrame(fit)).observe(bar);
+fit(); addEventListener('resize', fit);
+
+main().catch(e => {
+  $('lpct').textContent = '—';
+  $('lstep').textContent = 'Could not load the map: ' + e.message + '. Check your connection and reload the page.';
+});
+
+// what the map has loaded stays on the phone (sw.js): repeat visits load little, and seen streets work offline
+function keepOnPhone(build){
+  if (!('serviceWorker' in navigator) || !build) return;
+  navigator.serviceWorker.register('../sw.js').catch(() => {});
+  // the data files' current versions: the worker drops kept copies of any other
+  const vs = S.data.versions, keep = vs && [build, S.boot?.versions.index, vs.tiles, vs.ground, vs.graph, vs.more, ...vs.cards, ...vs.osm,
+    ...Object.values(vs.sets || {})].filter(Boolean);
+  navigator.serviceWorker.ready.then(reg => reg.active && reg.active.postMessage({ build, v: window.__v, keep })).catch(() => {});
+}

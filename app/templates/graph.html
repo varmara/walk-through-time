@@ -1,0 +1,16 @@
+<!doctype html>
+<!-- The old address of the graph: it now opens over the map (#graph), so this sends links there, keeping ?node=.
+     Written for each city by pipeline/pages.py. -->
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{name}} graph · Walk Through Time</title>
+<meta name="robots" content="noindex">
+<link rel="canonical" href="{{site}}{{id}}/#graph">
+<script>location.replace('./' + location.search + '#graph');</script>
+</head>
+<body>
+<p><a href="./#graph">Open the graph of {{name}}</a></p>
+</body>
+</html>
