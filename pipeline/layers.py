@@ -9,7 +9,7 @@ Hand-written stories are a different kind of layer: see stories/<city>/ (Markdow
 """
 from dataclasses import dataclass, field
 
-from .geo import building_at, point_in_ring
+from .geo import bbox, building_at, point_in_ring
 
 LAYERS = []
 
@@ -38,18 +38,29 @@ class Context:
 def within(ctx, features, group):
     """Buildings whose centre lies inside any of the polygon features. group: key or fn(feature) -> key."""
     out = {}
+    centres = _centres(ctx.buildings)
     for f in features:
         g = f.get("geometry") or {}
         polys = [g["coordinates"]] if g.get("type") == "Polygon" else g.get("coordinates", []) if g.get("type") == "MultiPolygon" else []
         for poly in polys:
             outer = poly[0]
-            xs, ys = [c[0] for c in outer], [c[1] for c in outer]
-            for i, b in enumerate(ctx.buildings):
-                bb = b["bb"]
-                cx, cy = (bb[0] + bb[2]) / 2, (bb[1] + bb[3]) / 2
-                if min(xs) <= cx <= max(xs) and min(ys) <= cy <= max(ys) and point_in_ring(cx, cy, outer):
+            x0, y0, x1, y1 = bbox(outer)          # (once per outline: per building, it took most of this step)
+            for i, (cx, cy) in enumerate(centres):
+                if x0 <= cx <= x1 and y0 <= cy <= y1 and point_in_ring(cx, cy, outer):
                     out[i] = group(f) if callable(group) else group
     return out
+
+
+_centre_lists = {}
+
+
+def _centres(buildings):
+    """Each building's bounding-box centre, worked out once per list of buildings."""
+    key = id(buildings)
+    if key not in _centre_lists or _centre_lists[key][0] is not buildings:
+        _centre_lists[key] = (buildings, [((b["bb"][0] + b["bb"][2]) / 2, (b["bb"][1] + b["bb"][3]) / 2)
+                                          for b in buildings])
+    return _centre_lists[key][1]
 
 
 def containing_places(ctx, test, group):

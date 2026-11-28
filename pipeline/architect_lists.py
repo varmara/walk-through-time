@@ -11,7 +11,7 @@ South Road). Wikipedia text is CC BY-SA; only the facts are kept, with a link to
 import re
 
 from .common import log
-from .geo import point_in_ring
+from .geo import point_in_ring, ring_test
 
 NUM = re.compile(r"^(\d+)([a-z]?)$", re.I)
 
@@ -102,11 +102,13 @@ def architect_lists(cfg, buildings, areas, wikitexts):
                  for r in ([a["geometry"]["coordinates"][0]] if a["geometry"]["type"] == "Polygon"
                            else [p[0] for p in a["geometry"]["coordinates"]])]
 
+        tests = [ring_test(r) for r in rings]
+
         def inside(b):
-            if not rings:
+            if not tests:
                 return True
             x, y = (b["bb"][0] + b["bb"][2]) / 2, (b["bb"][1] + b["bb"][3]) / 2
-            return any(point_in_ring(x, y, r) for r in rings)
+            return any(t(x, y) for t in tests)
 
         addr, named = {}, {}
         for i, b in enumerate(buildings):

@@ -13,6 +13,31 @@ def point_in_ring(x, y, ring):
     return inside
 
 
+def ring_test(ring):
+    """fn(x, y) -> point_in_ring(x, y, ring), for a ring tested many times: its bounds checked first, and a long
+    ring's edges tested together (numpy: the same arithmetic, so the same answers)."""
+    x0, y0, x1, y1 = bbox(ring)
+    try:
+        import numpy as np
+    except ImportError:
+        np = None
+    if len(ring) < 64 or np is None:
+        return lambda x, y: x0 <= x <= x1 and y0 <= y <= y1 and point_in_ring(x, y, ring)
+    a = np.asarray(ring, dtype="float64")
+    xi, yi = a[:, 0], a[:, 1]
+    xj, yj = np.roll(xi, 1), np.roll(yi, 1)
+
+    def test(x, y):
+        if not (x0 <= x <= x1 and y0 <= y <= y1):
+            return False
+        cross = (yi > y) != (yj > y)
+        if not cross.any():
+            return False
+        k = np.flatnonzero(cross)
+        return bool(np.count_nonzero(x < (xj[k] - xi[k]) * (y - yi[k]) / (yj[k] - yi[k]) + xi[k]) % 2)
+    return test
+
+
 def bbox(ring):
     xs = [c[0] for c in ring]
     ys = [c[1] for c in ring]

@@ -21,7 +21,7 @@ import urllib.parse
 
 from .common import load, log, save, work
 from .layerdata import AREAS
-from .geo import centroid, point_in_ring
+from .geo import centroid, point_in_ring, ring_test
 from .texts import TEMPLATES
 from .s00_fetch_nature import rings_of
 from .s05_dates import info_for, osm_article
@@ -31,12 +31,13 @@ from .s06_names import streets, where
 def councils(city_id):
     """fn(x, y) -> the name of the council a point is in (s00_fetch_councils), or None. Looked up by small grid
     cell, testing the outlines exactly only in cells a boundary crosses."""
-    cs = [(c["name"], rings_of(c["geometry"])) for c in (load(city_id, "councils") if work(city_id, "councils").exists() else [])]
+    cs = [(c["name"], [ring_test(r) for r in rings_of(c["geometry"])])
+          for c in (load(city_id, "councils") if work(city_id, "councils").exists() else [])]
     if not cs:
         return lambda x, y: None
 
     def exact(x, y):
-        return next((n for n, rs in cs if any(point_in_ring(x, y, r) for r in rs)), None)
+        return next((n for n, rs in cs if any(t(x, y) for t in rs)), None)
     cells = {}
 
     def at(x, y):
@@ -110,11 +111,16 @@ def main(city_id):
             xs, ys = [x for r in rs for x, _ in r], [y for r in rs for _, y in r]
             cons.append((f["properties"]["name"], rs, (min(xs), min(ys), max(xs), max(ys))))
 
+    fits = {}        # (name, layers, people, areas) -> the collections: most buildings share the same few
+
     def collections_for(name, layer_keys, whos, xy):
         n = (name or "").lower()
-        areas = {a for a, rs, (x0, y0, x1, y1) in cons
-                 if xy and x0 <= xy[0] <= x1 and y0 <= xy[1] <= y1 and any(point_in_ring(xy[0], xy[1], r) for r in rs)}
-        out = [{"title": c["title"], "url": c["url"]} for c in colls if collection_fits(c, n, layer_keys, whos, areas)]
+        areas = frozenset(a for a, rs, (x0, y0, x1, y1) in cons
+                          if xy and x0 <= xy[0] <= x1 and y0 <= xy[1] <= y1 and any(point_in_ring(xy[0], xy[1], r) for r in rs))
+        key = (n, layer_keys, tuple(whos), areas)
+        if key not in fits:
+            fits[key] = [i for i, c in enumerate(colls) if collection_fits(c, n, layer_keys, whos, set(areas))]
+        out = [{"title": colls[i]["title"], "url": colls[i]["url"]} for i in fits[key]]
         return out or None
 
     # opening hours and websites: the building's own, then the places inside it
