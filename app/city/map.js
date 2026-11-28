@@ -205,7 +205,7 @@ export function drawMap(){
           .map(id => near(id, 7)).find(Boolean);
         if (land) return showLand(land.properties);
         const hit = S.map.queryRenderedFeatures(e.point, { layers:['b'] })[0];
-        if (hit) return selectBuilding(hit.id, [e.lngLat.lng, e.lngLat.lat]);
+        if (hit) return selectBuilding(hit.id, [e.lngLat.lng, e.lngLat.lat], hit.properties);
         const area = S.map.getLayer('nature-fill') && S.map.getLayoutProperty('nature-fill', 'visibility') === 'visible'
           && S.map.queryRenderedFeatures(e.point, { layers:['nature-fill'] })[0];
         if (area) return showArea((S.data.areas && S.data.areas[area.properties.i]) || area.properties);   // some areas are only in the tiles
@@ -277,7 +277,9 @@ export function setLand(types, Y){
 }
 
 // ================= the ground: hills from the Environment Agency's survey (pipeline/s09_ground.py) =================
-// Two sources over the same tiles, as MapLibre advises: one raises the map (terrain), one shades it (hillshade).
+// One source raises the map (terrain) and shades it (hillshade). MapLibre advises two, for crisper shading; but the
+// second asked for many finer tiles of its own: one source halved the hills' downloads (1.3-1.6 MB to 0.7 MB on a
+// short visit), the shading only softer seen across the whole city, the same close up.
 function addGround(){
   const G = conf('ground');
   if (!G) return;
@@ -286,10 +288,9 @@ function addGround(){
   const dem = { type:'raster-dem', tiles:[url], tileSize:G.tileSize || 256, encoding:G.encoding || 'terrarium',
     minzoom:G.minzoom, maxzoom:G.maxzoom, bounds:G.bounds };
   S.map.addSource('ground', dem);
-  S.map.addSource('groundShade', { ...dem });
   const dark = isDark();
   // light: dark brown shadows; dark: the shadows drawn whitish, as dark shading cannot be seen on a dark map
-  S.map.addLayer({ id:'hillshade', type:'hillshade', source:'groundShade', paint:{
+  S.map.addLayer({ id:'hillshade', type:'hillshade', source:'ground', paint:{
     'hillshade-exaggeration':['interpolate', ['linear'], ['zoom'], 11, 0.75, 16, 0.5],
     'hillshade-shadow-color': dark ? 'rgba(255,250,240,0.55)' : 'rgba(45,30,15,0.62)',
     'hillshade-highlight-color': dark ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0.3)',
