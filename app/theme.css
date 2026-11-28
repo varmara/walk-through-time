@@ -1,7 +1,7 @@
 /* Walk Through Time: every colour, font and shadow, in one place, for the city page and the graph page.
    The look is the 1880s Ordnance Survey sheet the map can show underneath ("Survey sheet"): survey paper,
    engraver's sepia ink, a carmine accent, and the eras as hand-tinted washes, from the carmine the surveyors
-   coloured buildings with to Prussian blue. Type: Spectral (names, the year, stories) and Public Sans (the rest).
+   coloured buildings with to Prussian blue. Type: Public Sans throughout (it was Spectral for names and stories).
    Colours are hex, because the map (MapLibre) and app/city/*.js mix them in code.
    Three blocks: light; dark when the phone is set to dark (unless the page says light); and dark when the page
    says so (data-theme="dark" on <html>). Keep the two dark blocks the same. */
@@ -32,9 +32,8 @@
   --edge:#bdb6a8; --k-theme:#9b2335; --k-place:#8b857b; --k-architects:#3d7f73; --k-writers:#2e4f7a;
   --k-science:#6b5b8f; --k-industry:#b07a2a; --k-sport:#a63a3f; --k-arts:#8f3f72; --k-faith:#6e5430;
   --k-military:#56702f; --k-public:#4c7a99; --k-other:#7d776d; --k-events:#c46a4a;
-  /* type: names, the year and stories in Spectral; everything else in Public Sans */
+  /* type: Public Sans for everything, names and stories too (easier to read on a phone than a serif) */
   --sans:"Public Sans",system-ui,-apple-system,sans-serif;
-  --serif:"Spectral",Georgia,"Times New Roman",serif;
   --mono:var(--sans);                               /* numbers in tables and counts: the same face, tabular */
   /* depth */
   --shadow-1:0 1px 2px rgba(42,35,29,.12),0 2px 8px rgba(42,35,29,.08); --shadow-2:var(--shadow-1);

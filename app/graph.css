@@ -4,7 +4,7 @@
    Colours, fonts and shadows: app/theme.css (its custom properties reach in from the page). */
 
 [hidden]{display:none!important}
-:host{position:fixed;inset:0;z-index:60;display:block;font:15px/1.4 var(--sans);color:var(--ink);background:var(--bg);
+:host{position:fixed;inset:0;z-index:60;display:block;font:16px/1.4 var(--sans);color:var(--ink);background:var(--bg);
   overflow:hidden;-webkit-text-size-adjust:100%}
 :host([hidden]){display:none!important}
 button,input{font:inherit;color:inherit}
@@ -27,10 +27,10 @@ a{color:var(--accent)}
 /* the settings panel, as Obsidian's: sections that fold, toggles and sliders */
 .settings{position:fixed;z-index:8;top:calc(env(safe-area-inset-top,0px) + 62px);right:12px;width:min(300px,calc(100vw - 24px));
   max-height:calc(100vh - 140px);overflow-y:auto;background:var(--paper);border:1px solid var(--line);border-radius:12px;
-  box-shadow:var(--shadow-2);font-size:14px}
+  box-shadow:var(--shadow-2);font-size:15px}
 .shd{display:flex;align-items:center;gap:4px;padding:8px 8px 8px 14px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--paper)}
 .shd b{flex:1}
-.shd button{width:34px;height:34px;border:0;border-radius:8px;background:none;cursor:pointer;font-size:16px;color:var(--muted)}
+.shd button{width:34px;height:34px;border:0;border-radius:8px;background:none;cursor:pointer;font-size:17px;color:var(--muted)}
 .shd button:active{background:var(--bg)}
 .sec{border-bottom:1px solid var(--line)}
 .sec:last-child{border-bottom:0}
@@ -52,7 +52,7 @@ a{color:var(--accent)}
 .sl span{display:flex;justify-content:space-between;gap:8px}
 .sl output{color:var(--muted);font-variant-numeric:tabular-nums}
 .sl input{width:100%;accent-color:var(--accent);margin:0;height:28px}
-.settings .note{margin:0;font-size:12px;color:var(--muted)}
+.settings .note{margin:0;font-size:13px;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){ .tg > i,.tg > i::after,.sec summary::before{transition:none} }
 
 .zoom{position:fixed;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 44px);z-index:7;display:flex;flex-direction:column;
@@ -66,8 +66,8 @@ a{color:var(--accent)}
   padding:12px 16px calc(env(safe-area-inset-bottom,0px) + 14px)}
 @media (min-width:760px){ .sheet{left:auto;top:12px;right:12px;bottom:12px;width:380px;max-height:none;border-radius:16px;border:1px solid var(--line)} }
 .shead{display:flex;align-items:flex-start;gap:10px}
-.shead h2{margin:0;font:600 22px/1.15 var(--serif);flex:1}
-.stype{font:500 13px var(--sans);color:var(--muted);margin-top:2px}
+.shead h2{margin:0;font:600 22px/1.15 var(--sans);flex:1}
+.stype{font:500 14px var(--sans);color:var(--muted);margin-top:2px}
 .close{flex:none;width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--bg);cursor:pointer}
 .sacts{display:flex;gap:8px;margin:10px 0 4px}
 .go{flex:1;padding:9px 12px;border-radius:10px;border:0;background:var(--accent);color:var(--on-strong);font-weight:600;cursor:pointer}
@@ -87,27 +87,27 @@ a{color:var(--accent)}
 @media (min-width:760px){ .more{display:none} }
 @media (prefers-reduced-motion:reduce){ .sheet{transition:none} }
 .links{overflow-y:auto;margin-top:6px;-webkit-overflow-scrolling:touch}
-.links h3{font:500 13px var(--sans);color:var(--muted);margin:10px 0 4px}
+.links h3{font:500 14px var(--sans);color:var(--muted);margin:10px 0 4px}
 .link{border-top:1px solid var(--line);padding:8px 0}
 .link button{background:none;border:0;padding:0;font-weight:600;cursor:pointer;text-align:left;display:flex;gap:6px;align-items:center}
 .link button i{width:9px;height:9px;border-radius:50%;flex:none}
-.link p{margin:3px 0 0;font:15px/1.45 var(--serif)}
-.link .src{font-size:12px;color:var(--muted)}
+.link p{margin:3px 0 0;font:16px/1.45 var(--sans)}
+.link .src{font-size:13px;color:var(--muted)}
 .loading{position:fixed;inset:0;display:grid;place-items:center;color:var(--muted)}
-.about{margin:8px 0 4px;font:15px/1.45 var(--serif)}
+.about{margin:8px 0 4px;font:16px/1.45 var(--sans)}
 .about p{margin:0 0 4px}
-.about .src{font-size:12px;color:var(--muted)}
+.about .src{font-size:13px;color:var(--muted)}
 /* a point's card: as a story's in a thread (app/city/story.js) */
 .gcard{display:grid;gap:8px;padding:4px 0 12px}
 .gcard p{margin:0}
-.gcard .swho{font:15px/1.45 var(--serif)}
-.gcard .stext{font:15.5px/1.45 var(--serif)}
+.gcard .swho{font:16px/1.45 var(--sans)}
+.gcard .stext{font:16.5px/1.45 var(--sans)}
 .gcard .slbl{margin:6px 0 2px;font:600 11px/1.3 var(--sans);color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
-.gcard .srel p{margin:2px 0;font:13px/1.45 var(--sans)}
+.gcard .srel p{margin:2px 0;font:14px/1.45 var(--sans)}
 .gcard .rk{color:var(--muted)}
 .gcard .rl{all:unset;cursor:pointer;color:var(--link);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
 .gcard .rl:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .gcard sup.fn{font:600 10.5px/1 var(--sans);margin-left:1px}
 .gcard sup.fn a{text-decoration:none;color:var(--link);padding:0 2px}
-.gcard .ssrc ol{margin:0;padding-left:20px;font:13px/1.45 var(--sans);color:var(--muted)}
+.gcard .ssrc ol{margin:0;padding-left:20px;font:14px/1.45 var(--sans);color:var(--muted)}
 .gcard .ssrc a{color:inherit}

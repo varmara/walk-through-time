@@ -70,23 +70,23 @@ def page(p, i, city_id, city_name, site):
 
 
 FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
-         '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&family=Spectral:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap">')
+         '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&display=swap">')
 
-# the Survey sheet look of the map page (app/theme.css): survey paper, sepia ink, carmine links; Spectral and Public Sans
+# the Survey sheet look of the map page (app/theme.css): survey paper, sepia ink, carmine links; Public Sans
 STYLE = """:root{--bg:#f4f2ec;--ink:#2a231d;--muted:#6d6459;--line:#d3cec2;--link:#7c1d2b;
---sans:"Public Sans",system-ui,-apple-system,sans-serif;--serif:"Spectral",Georgia,"Times New Roman",serif;color-scheme:light}
+--sans:"Public Sans",system-ui,-apple-system,sans-serif;color-scheme:light}
 @media (prefers-color-scheme:dark){:root{--bg:#2a2521;--ink:#ece6dc;--muted:#a59b8e;--line:#3d3631;--link:#eb8b95;color-scheme:dark}}
-body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 var(--serif)}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 var(--sans)}
 main{max-width:640px;margin:0 auto;padding:24px 16px 64px}
 a{color:var(--link);text-decoration-color:color-mix(in srgb,var(--link) 40%,transparent);text-underline-offset:2px}
 .top{font:15px/1.4 var(--sans);display:flex;gap:18px;flex-wrap:wrap;margin:0 0 28px}
-h1{font:italic 500 36px/1.1 var(--serif);margin:0 0 12px;letter-spacing:-.01em} .intro{font-size:18px}
+h1{font:600 36px/1.1 var(--sans);margin:0 0 12px;letter-spacing:-.01em} .intro{font-size:18px}
 h2{font:600 15px/1.3 var(--sans);color:var(--muted);margin:36px 0 0}
 article{border-top:1px solid var(--line);padding:18px 0}
-article h3{margin:0 0 4px;font:600 22px/1.25 var(--serif)} .meta{font:14px/1.4 var(--sans);color:var(--muted);margin:0 0 8px}
+article h3{margin:0 0 4px;font:600 22px/1.25 var(--sans)} .meta{font:14px/1.4 var(--sans);color:var(--muted);margin:0 0 8px}
 article p{margin:6px 0} .src{font:13px/1.4 var(--sans);color:var(--muted)} .here{font:14px/1.45 var(--sans);color:var(--muted)}
 .go{font:500 15px/1.4 var(--sans);margin-top:10px} ul.layers{padding:0;list-style:none}
-ul.layers li{border-top:1px solid var(--line);padding:14px 0} ul.layers b{font:600 20px/1.3 var(--serif)}
+ul.layers li{border-top:1px solid var(--line);padding:14px 0} ul.layers b{font:600 20px/1.3 var(--sans)}
 ul.layers .n{font:14px var(--sans);color:var(--muted)}
 footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font:13px/1.5 var(--sans);color:var(--muted)}"""
 
