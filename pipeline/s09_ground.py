@@ -15,12 +15,21 @@ Park's cliff, Mapperley) its uphill side would be buried. For each building this
 under its outline rises above its middle (`rise`, in work/<city>/ground.json), and s10_tiles makes the building
 that much taller; the map already sinks a building's foot 10 m into the ground on its downhill side.
 
-If the survey catalogue cannot be asked (its address has changed before), the squares kept from earlier are used.
+When the hills are made again: only when their source changes. Each build asks the catalogue which squares cover
+the area (one small request); the hills' fingerprint is the area, those squares' names (each names its survey year,
+so a newer survey is a new name) and FORMAT, the way the tiles are made: raise FORMAT when changing that (the zooms,
+the encoding), and only then. Other edits to this script do not make the hills again.
 
-The squares are kept as downloaded in $WTT_RAW (the build keeps that folder in the repo's "raw-data" release:
-tools/raw.sh) and used again while younger than $WTT_MAX_AGE_DAYS (any age, if unset), so only missing squares
-are downloaded. The tiles are kept in $WTT_CACHE under a fingerprint of the area and this script. Needs rasterio, numpy and Pillow (the build
-installs them); without them the step says so and the map has no hills.
+Where the made hills are kept: under their fingerprint in $WTT_CACHE (the build cache, which GitHub drops after a
+week unused), and as hills-<city>-<fingerprint>.tar in $WTT_RAW, which the build keeps in the repo's "raw-data"
+release (tools/raw.sh), so a build after a quiet week unpacks them in seconds instead of making them again.
+
+If the catalogue cannot be asked (its address has changed before): the last hills made, else the squares kept
+from earlier. If the hills cannot be made: the last build's, else (s10_tiles) the hills already published.
+
+The squares are kept as downloaded in $WTT_RAW (and so in the release); a square's name has its survey year, so one
+kept is never downloaded again. Needs rasterio, numpy and Pillow (the build installs them); without them, the last
+hills made are used.
 """
 import hashlib
 import io
@@ -28,6 +37,7 @@ import json
 import math
 import os
 import shutil
+import tarfile
 import time
 import urllib.request
 import zipfile
@@ -36,7 +46,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from .common import city, load, log, save
-from .web import UA, fresh
+from .web import UA
 
 SEARCH = "https://environment.data.gov.uk/tiles/collections/survey/search"
 PRODUCT, RES = "lidar_composite_dtm", "2m"
@@ -44,6 +54,7 @@ MIN_Z, MAX_Z = 10, 15
 MARGIN = 0.02                 # degrees, about 1.5 km
 TILE = 256
 EXT = "webp"                  # the tiles' file type (also in ground.json, for the page)
+FORMAT = 2                    # how the tiles are made (1: PNG, 2: lossless WebP); raise it to make them again
 CREDIT = "© Environment Agency copyright and/or database right"
 
 
@@ -124,15 +135,15 @@ def terrarium(h):
 
 
 def encode(arr):
-    """A tile (Terrarium pixels) as lossless WebP. Method 6, the smallest: about a second a tile, paid once, as the
-    tiles are made again only when the area or this script changes."""
+    """A tile (Terrarium pixels) as lossless WebP. Method 6, the smallest: slow, but paid once, as the tiles are made
+    again only when their source changes."""
     from PIL import Image
     buf = io.BytesIO()
     Image.fromarray(arr, "RGB").save(buf, "WEBP", lossless=True, quality=100, method=6)
     return buf.getvalue()
 
 
-def build(c, out, cache):
+def build(c, out, cache, sq):
     import numpy as np
     import rasterio
     from PIL import features
@@ -144,13 +155,6 @@ def build(c, out, cache):
     if not features.check("webp"):
         raise RuntimeError("this Pillow cannot write WebP")
     box = ground_box(c)
-    try:
-        sq = squares(box)
-    except Exception as e:  # noqa: BLE001 - the catalogue is down or has moved: the squares kept from earlier will do
-        sq = kept_squares(cache)
-        if not sq:
-            raise
-        log(f"s09 ground: the survey catalogue could not be asked ({e}); using the {len(sq)} squares kept from earlier")
     if not sq:
         raise RuntimeError("the survey catalogue found no ground model for this area")
     tifs, used, got = [], [], 0
@@ -158,7 +162,7 @@ def build(c, out, cache):
     unpacked.mkdir(parents=True, exist_ok=True)
     for s in sq:
         z = cache / f"ground-{s['label']}.zip"
-        if s["uri"] and not fresh(z):
+        if s["uri"] and not z.exists():
             z.write_bytes(fetch(s["uri"]))
             got += 1
         with zipfile.ZipFile(z) as zf:
@@ -250,38 +254,107 @@ def build(c, out, cache):
     return meta
 
 
-def stamp(c):
-    return hashlib.sha256(json.dumps(ground_box(c)).encode() + Path(__file__).read_bytes()).hexdigest()[:16]
+def fingerprint(box, sq):
+    """The hills' source: the area, the squares (by name: each names its survey year) and how the tiles are made."""
+    src = {"box": box, "squares": sorted(x["label"] for x in sq), "format": FORMAT,
+           "tiles": [MIN_Z, MAX_Z, TILE, EXT, PRODUCT, RES]}
+    return hashlib.sha256(json.dumps(src, sort_keys=True).encode()).hexdigest()[:16]
+
+
+def package(downloads, city_id, fp):
+    return Path(downloads) / f"hills-{city_id}-{fp}.tar"
+
+
+def unpack(tar, done):
+    tmp = done.with_name("tiles-unpacking")
+    shutil.rmtree(tmp, ignore_errors=True)
+    tmp.mkdir(parents=True)
+    with tarfile.open(tar) as t:
+        t.extractall(tmp, filter="data")
+    tmp.rename(done)
+
+
+def pack(done, tar):
+    part = tar.with_suffix(".partial")
+    with tarfile.open(part, "w") as t:          # (WebP and npz are packed already: no compression)
+        for name in ("ground.json", "dem.npz", "tiles"):
+            t.add(done / name, arcname=name)
+    part.rename(tar)
+    for old in tar.parent.glob(tar.name.rsplit("-", 1)[0] + "-*.tar"):
+        if old != tar:
+            old.unlink()
+
+
+def find(root, downloads, city_id, fp):
+    """The hills already made from this source (fp), here or in the release; with no fingerprint (the catalogue
+    could not be asked), the last made."""
+    if fp:
+        done = root / f"tiles-{fp}"
+        if (done / "ground.json").exists():
+            return done, "kept from the last build (their source is unchanged)"
+        tar = package(downloads, city_id, fp)
+        if tar.exists():
+            unpack(tar, done)
+            return done, "unpacked from the raw-data release (their source is unchanged)"
+        return None, None
+    made = sorted((d for d in root.glob("tiles-*") if (d / "ground.json").exists()), key=lambda d: d.stat().st_mtime)
+    if made:
+        return made[-1], "the last made"
+    tars = sorted(Path(downloads).glob(f"hills-{city_id}-*.tar"))
+    if tars:
+        done = root / f"tiles-{tars[-1].stem.rsplit('-', 1)[1]}"
+        unpack(tars[-1], done)
+        return done, "the last made, from the raw-data release"
+    return None, None
 
 
 def main(city_id):
     c = city(city_id)
+    box = ground_box(c)
     root = Path(os.environ.get("WTT_CACHE") or "work") / "ground" / city_id
-    done = root / f"tiles-{stamp(c)}"
-    if not (done / "ground.json").exists():
+    root.mkdir(parents=True, exist_ok=True)
+    downloads = Path(os.environ.get("WTT_RAW") or "raw")      # the squares as downloaded, and the hills: kept
+    downloads.mkdir(parents=True, exist_ok=True)               # (tools/raw.sh)
+    try:
+        sq = squares(box)
+    except Exception as e:  # noqa: BLE001 - the catalogue is down or has moved
+        log(f"s09 ground: the survey catalogue could not be asked ({e})")
+        sq = None
+    fp = fingerprint(box, sq) if sq else None
+    done, how = find(root, downloads, city_id, fp)
+    if done:
+        log(f"s09 ground: the hills {how}")
+    else:
         try:
             import numpy, rasterio, PIL  # noqa: F401
         except ImportError:
             log("s09 ground: rasterio, numpy or Pillow is missing")
             keep_last(city_id)
             return
-        downloads = Path(os.environ.get("WTT_RAW") or "raw")      # the squares as downloaded: kept (tools/raw.sh)
-        downloads.mkdir(parents=True, exist_ok=True)
+        if sq is None:
+            sq = kept_squares(downloads)
+            log(f"s09 ground: using the {len(sq)} squares kept from earlier")
+            fp = fingerprint(box, sq)
+        done = root / f"tiles-{fp}"
         tmp = root / "tiles-partial"
         shutil.rmtree(tmp, ignore_errors=True)
         try:
-            build(c, tmp, downloads)
+            build(c, tmp, downloads, sq)
         except Exception as e:  # noqa: BLE001 - the map works without hills
             log(f"s09 ground: the hills could not be built: {e}")
             shutil.rmtree(tmp, ignore_errors=True)
-            keep_last(city_id)
-            return
-        tmp.rename(done)
-        for old in root.glob("tiles-*"):          # the last build's, now that this one is whole
-            if old != done:
-                shutil.rmtree(old, ignore_errors=True)
-    else:
-        log("s09 ground: the tiles of the last build (area and script unchanged)")
+            done, how = find(root, downloads, city_id, None)
+            if not done:
+                keep_last(city_id)
+                return
+            log(f"s09 ground: the hills {how}")
+        else:
+            tmp.rename(done)
+            pack(done, package(downloads, city_id, fp))
+            log(f"    packed for the raw-data release: {package(downloads, city_id, fp).name}")
+    for old in root.glob("tiles-*"):              # others: an older source's
+        if old != done:
+            shutil.rmtree(old, ignore_errors=True)
     meta = json.loads((done / "ground.json").read_text())
     rise = rises(city_id, done / "dem.npz")
     save(city_id, "ground", {"tiles": str(done / "tiles"), "meta": meta, "rise": rise})

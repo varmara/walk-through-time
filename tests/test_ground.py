@@ -86,3 +86,40 @@ class SquaresAnswer(unittest.TestCase):
             got = g.squares({"w": -1.2, "s": 52.9, "e": -1.1, "n": 53.0})
         self.assertEqual([s["label"] for s in got], ["a22"])
         self.assertTrue(f.call_args[0][0].startswith("https://environment.data.gov.uk/tiles/collections/survey/"))
+
+
+class HillsSource(unittest.TestCase):
+    def test_made_again_only_when_the_source_changes(self):
+        from unittest import mock
+        from pipeline import s09_ground as g
+        box = {"w": -1.2, "s": 52.9, "e": -1.1, "n": 53.0}
+        a = [{"label": "lidar_composite_dtm-2022-2m-SK54aa"}, {"label": "lidar_composite_dtm-2022-2m-SK55bb"}]
+        same = g.fingerprint(box, list(reversed(a)))
+        self.assertEqual(g.fingerprint(box, a), same)
+        newer = [a[0], {"label": "lidar_composite_dtm-2025-2m-SK55bb"}]          # a newer survey of one square
+        self.assertNotEqual(g.fingerprint(box, newer), same)
+        self.assertNotEqual(g.fingerprint({**box, "n": 53.1}, a), same)
+        with mock.patch.object(g, "FORMAT", g.FORMAT + 1):
+            self.assertNotEqual(g.fingerprint(box, a), same)
+
+    def test_hills_come_back_from_the_release(self):
+        from pipeline import s09_ground as g
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            made = d / "cache" / "tiles-abc"
+            (made / "tiles" / "10").mkdir(parents=True)
+            (made / "tiles" / "10" / "1.webp").write_bytes(b"w")
+            (made / "ground.json").write_text("{}")
+            (made / "dem.npz").write_bytes(b"n")
+            raw = d / "raw"
+            raw.mkdir()
+            (raw / "hills-x-old.tar").write_bytes(b"")
+            g.pack(made, g.package(raw, "x", "abc"))
+            self.assertEqual(sorted(p.name for p in raw.iterdir()), ["hills-x-abc.tar"])    # the older one gone
+            fresh = d / "elsewhere"                                  # the build cache dropped
+            fresh.mkdir()
+            done, how = g.find(fresh, raw, "x", "abc")
+            self.assertIn("release", how)
+            self.assertEqual((done / "tiles" / "10" / "1.webp").read_bytes(), b"w")
+            self.assertEqual(g.find(fresh, raw, "x", "other"), (None, None))       # another source: made again
+            self.assertEqual(g.find(fresh, raw, "x", None)[0], done)               # catalogue down: the last made

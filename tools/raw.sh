@@ -4,6 +4,8 @@
 #   web-open.tar.NN   saved answers from openly licensed sources (cache/open/, see pipeline/web.py), in parts
 #                     of under 2 GB; their dates are kept, so the age limit still applies after a round trip
 #   ground-*.zip      the Environment Agency's ground model squares as downloaded (pipeline/s09_ground.py)
+#   hills-<city>-<fingerprint>.tar   a city's hills as made from them (s09_ground), so they are not made again
+#                     when the build cache has been dropped; one per city, the older removed
 # Only openly licensed data goes here (the release is public): council map data and other sites' pages stay in
 # the build cache (cache/other/).
 #
@@ -28,7 +30,8 @@ fetch)
   if [ -f "$RAW/dates.txt" ]; then
     while read -r name when; do [ -f "$RAW/$name" ] && touch -d "@$when" "$RAW/$name"; done < "$RAW/dates.txt"
   fi
-  echo "Ground squares from the release: $(ls "$RAW"/ground-*.zip 2>/dev/null | wc -l)"
+  echo "Ground squares from the release: $(ls "$RAW"/ground-*.zip 2>/dev/null | wc -l)," \
+       "hills: $(ls "$RAW"/hills-*.tar 2>/dev/null | wc -l)"
   touch "$RAW/.fetched"
   ;;
 save)
@@ -57,6 +60,17 @@ it is not downloaded again within a month (tools/raw.sh). Not part of the site. 
     [ -f "$f" ] || continue
     if [ "$f" -nt "$RAW/.fetched" ] || ! echo "$have" | grep -qx "${f##*/}"; then
       gh release upload "$TAG" "$f" --clobber && echo "Uploaded ${f##*/}"
+    fi
+  done
+  # hills made by this build: uploaded, and the city's older hills removed
+  for f in "$RAW"/hills-*.tar; do
+    [ -f "$f" ] || continue
+    name=${f##*/}
+    if [ "$f" -nt "$RAW/.fetched" ] || ! echo "$have" | grep -qx "$name"; then
+      gh release upload "$TAG" "$f" --clobber && echo "Uploaded $name"
+      for old in $(echo "$have" | grep "^${name%-*}-[0-9a-f]*\.tar\$" || true); do
+        [ "$old" = "$name" ] || { gh release delete-asset "$TAG" "$old" -y && echo "Removed $old"; }
+      done
     fi
   done
   for f in "$RAW"/ground-*.zip; do [ -f "$f" ] && echo "${f##*/} $(stat -c %Y "$f")"; done > "$RAW/dates.txt"
