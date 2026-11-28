@@ -1,11 +1,13 @@
 #!/bin/sh
 # Raw downloads kept between builds in the repo's "raw-data" release, so they outlive GitHub's build cache
-# (which drops anything unused for a week) and nothing is downloaded twice within a month:
+# (which drops anything unused for a week) and nothing is downloaded twice:
 #   web-open.tar.NN   saved answers from openly licensed sources (cache/open/, see pipeline/web.py), in parts
 #                     of under 2 GB; their dates are kept, so the age limit still applies after a round trip
 #   ground-*.zip      the Environment Agency's ground model squares as downloaded (pipeline/s09_ground.py)
 #   hills-<city>-<fingerprint>.tar   a city's hills as made from them (s09_ground), so they are not made again
 #                     when the build cache has been dropped; one per city, the older removed
+# "fetch" does not download the squares (about 700 MB): only the build that makes the hills needs them, and
+# s09_ground fetches those it needs from the release itself (their names are in raw/assets.txt).
 # Only openly licensed data goes here (the release is public): council map data and other sites' pages stay in
 # the build cache (cache/other/).
 #
@@ -21,17 +23,14 @@ mkdir -p "$RAW" "$CACHE/open"
 case "$1" in
 fetch)
   if ! gh release view "$TAG" >/dev/null 2>&1; then echo "No $TAG release yet"; touch "$RAW/.fetched"; exit 0; fi
-  gh release download "$TAG" -D "$RAW" --clobber
+  gh release download "$TAG" -D "$RAW" --clobber -p 'web-open.tar.*' -p 'hills-*.tar'
+  gh release view "$TAG" --json assets -q '.assets[].name' > "$RAW/assets.txt"
   if ls "$RAW"/web-open.tar.* >/dev/null 2>&1; then
     cat "$RAW"/web-open.tar.* | tar -x -C "$CACHE" --skip-old-files
     echo "Saved web answers from the release: $(find "$CACHE/open" -name '*.gz' | wc -l) in all"
   fi
-  # downloading resets a file's date: dates.txt has when each was really downloaded
-  if [ -f "$RAW/dates.txt" ]; then
-    while read -r name when; do [ -f "$RAW/$name" ] && touch -d "@$when" "$RAW/$name"; done < "$RAW/dates.txt"
-  fi
-  echo "Ground squares from the release: $(ls "$RAW"/ground-*.zip 2>/dev/null | wc -l)," \
-       "hills: $(ls "$RAW"/hills-*.tar 2>/dev/null | wc -l)"
+  echo "In the release: $(grep -c '^ground-' "$RAW/assets.txt") ground squares (fetched only to make hills)," \
+       "hills fetched: $(ls "$RAW"/hills-*.tar 2>/dev/null | wc -l)"
   touch "$RAW/.fetched"
   ;;
 save)
@@ -55,12 +54,10 @@ it is not downloaded again within a month (tools/raw.sh). Not part of the site. 
     [ -f "$RAW/new/$name" ] || { gh release delete-asset "$TAG" "$name" -y && echo "Removed $name"; }
   done
   rm -rf "$RAW/new"
-  # ground squares downloaded by this build (new, or refreshed after a month), and everyone's dates
+  # ground squares new to the release (a square's name has its survey year: one kept never changes)
   for f in "$RAW"/ground-*.zip; do
     [ -f "$f" ] || continue
-    if [ "$f" -nt "$RAW/.fetched" ] || ! echo "$have" | grep -qx "${f##*/}"; then
-      gh release upload "$TAG" "$f" --clobber && echo "Uploaded ${f##*/}"
-    fi
+    echo "$have" | grep -qx "${f##*/}" || { gh release upload "$TAG" "$f" --clobber && echo "Uploaded ${f##*/}"; }
   done
   # hills made by this build: uploaded, and the city's older hills removed
   for f in "$RAW"/hills-*.tar; do
@@ -73,8 +70,8 @@ it is not downloaded again within a month (tools/raw.sh). Not part of the site. 
       done
     fi
   done
-  for f in "$RAW"/ground-*.zip; do [ -f "$f" ] && echo "${f##*/} $(stat -c %Y "$f")"; done > "$RAW/dates.txt"
-  gh release upload "$TAG" "$RAW/dates.txt" --clobber
+  # (squares' download dates are no longer kept: nothing asks a square's age)
+  if echo "$have" | grep -qx dates.txt; then gh release delete-asset "$TAG" dates.txt -y; fi
   ;;
 *) echo "usage: sh tools/raw.sh fetch|save"; exit 2 ;;
 esac

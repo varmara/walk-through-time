@@ -123,3 +123,19 @@ class HillsSource(unittest.TestCase):
             self.assertEqual((done / "tiles" / "10" / "1.webp").read_bytes(), b"w")
             self.assertEqual(g.find(fresh, raw, "x", "other"), (None, None))       # another source: made again
             self.assertEqual(g.find(fresh, raw, "x", None)[0], done)               # catalogue down: the last made
+
+
+class SquaresInTheRelease(unittest.TestCase):
+    def test_squares_only_in_the_release_are_offered_and_fetched_from_it(self):
+        import os
+        from unittest import mock
+        from pipeline import s09_ground as g
+        with tempfile.TemporaryDirectory() as d:
+            (Path(d) / "assets.txt").write_text("web-open.tar.00\nground-lidar_composite_dtm-2022-2m-SK54aa.zip\n"
+                                                "hills-x-abc.tar\n")
+            self.assertEqual([s["label"] for s in g.kept_squares(d)], ["lidar_composite_dtm-2022-2m-SK54aa"])
+            with mock.patch.dict(os.environ, {"WTT_RAW": d, "GITHUB_REPOSITORY": "o/r"}):
+                self.assertEqual(g.released("ground-lidar_composite_dtm-2022-2m-SK54aa.zip"),
+                                 "https://github.com/o/r/releases/download/raw-data/"
+                                 "ground-lidar_composite_dtm-2022-2m-SK54aa.zip")
+                self.assertIsNone(g.released("ground-lidar_composite_dtm-2025-2m-SK54aa.zip"))   # new: from the survey

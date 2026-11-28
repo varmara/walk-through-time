@@ -27,8 +27,8 @@ release (tools/raw.sh), so a build after a quiet week unpacks them in seconds in
 If the catalogue cannot be asked (its address has changed before): the last hills made, else the squares kept
 from earlier. If the hills cannot be made: the last build's, else (s10_tiles) the hills already published.
 
-The squares are kept as downloaded in $WTT_RAW (and so in the release); a square's name has its survey year, so one
-kept is never downloaded again. Needs rasterio, numpy and Pillow (the build installs them); without them, the last
+The squares are kept as downloaded in $WTT_RAW and in the release; a square's name has its survey year, so one kept
+is never downloaded from the survey again. A build fetches them from the release only when it makes the hills. Needs rasterio, numpy and Pillow (the build installs them); without them, the last
 hills made are used.
 """
 import hashlib
@@ -77,13 +77,30 @@ def squares(box):
     return sorted(best.values(), key=lambda s: s["label"])
 
 
+def in_release(cache):
+    """The names of the files in the raw-data release (raw/assets.txt, written by tools/raw.sh fetch)."""
+    f = Path(cache) / "assets.txt"
+    return set(f.read_text().split()) if f.exists() else set()
+
+
+def released(name):
+    """The address of a file in the repo's raw-data release, if it is there (on GitHub Actions)."""
+    repo = os.environ.get("GITHUB_REPOSITORY")
+    cache = os.environ.get("WTT_RAW") or "raw"
+    if repo and name in in_release(cache):
+        return f"https://github.com/{repo}/releases/download/raw-data/{name}"
+    return None
+
+
 def kept_squares(cache):
     """The squares already kept in the raw folder, named as the catalogue named them (ground-<label>.zip): for when
     the catalogue cannot be asked (its address has changed before). All are offered; build() leaves out those that do
     not touch the area."""
     best = {}
-    for z in sorted(Path(cache).glob(f"ground-{PRODUCT}-*-{RES}-*.zip")):
-        label = z.stem[len("ground-"):]
+    names = {z.name for z in Path(cache).glob(f"ground-{PRODUCT}-*-{RES}-*.zip")}
+    names |= {n for n in in_release(cache) if n.startswith(f"ground-{PRODUCT}-") and f"-{RES}-" in n and n.endswith(".zip")}
+    for name in sorted(names):
+        label = name[len("ground-"):-len(".zip")]
         year, tile = label.split("-")[1], label.split("-")[-1]
         if tile not in best or year > best[tile]["year"]:
             best[tile] = {"label": label, "uri": None, "year": year}
@@ -157,14 +174,23 @@ def build(c, out, cache, sq):
     box = ground_box(c)
     if not sq:
         raise RuntimeError("the survey catalogue found no ground model for this area")
-    tifs, used, got = [], [], 0
+    tifs, used, got, kept = [], [], 0, 0
     unpacked = out / "unpacked"
     unpacked.mkdir(parents=True, exist_ok=True)
     for s in sq:
         z = cache / f"ground-{s['label']}.zip"
-        if s["uri"] and not z.exists():
-            z.write_bytes(fetch(s["uri"]))
-            got += 1
+        if not z.exists():
+            from_release = released(z.name)
+            if from_release:
+                z.write_bytes(fetch(from_release))
+                kept += 1
+            elif s["uri"]:
+                z.write_bytes(fetch(s["uri"]))
+                got += 1
+            else:
+                raise RuntimeError(f"{z.name} is neither here nor in the release, and has no address")
+        else:
+            kept += 1
         with zipfile.ZipFile(z) as zf:
             name = next(n for n in zf.namelist() if n.lower().endswith(".tif"))
             tif = unpacked / name
@@ -181,7 +207,7 @@ def build(c, out, cache, sq):
         raise RuntimeError("none of the ground squares touches this area")
     sq = used
     log(f"s09 ground: {len(sq)} squares of the {PRODUCT} {RES} ({', '.join(sorted({s['year'] for s in sq}))}), "
-        f"{got} downloaded, {len(sq) - got} kept from earlier")
+        f"{got} downloaded from the survey, {kept} kept from earlier")
 
     # the squares side by side on their common 2 m grid (rasterio's merge gave a mosaic of zeros here)
     srcs = [rasterio.open(t) for t in tifs]
