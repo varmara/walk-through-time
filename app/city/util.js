@@ -56,11 +56,13 @@ const viaEarly = async (url, early, opts) => {
   if (early) { try { const r = await early; if (r.ok) return r; } catch {} }
   return fetch(url, opts);
 };
-export async function fetchJSON(url, ms = 30000, early){
+// priority: 'high' for what a tap waits for (a card's file), 'low' for what is fetched ahead in the background, so
+// on a slow connection a tap is not shared out with downloads nobody is waiting for
+export async function fetchJSON(url, ms = 30000, early, priority){
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), ms);
   try {
-    const r = await viaEarly(url, early, { ...cacheOf(url), signal: ctrl.signal });
+    const r = await viaEarly(url, early, { ...cacheOf(url), signal: ctrl.signal, ...(priority ? { priority } : {}) });
     if (!r.ok) throw new Error('HTTP ' + r.status);
     return await r.json();
   } catch (e) {

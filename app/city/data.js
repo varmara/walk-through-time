@@ -47,14 +47,19 @@ export const ver = (kind, n) => { const v = conf('versions')?.[kind]; return (Ar
 // its other layers, so each tile is fetched and unpacked once), or the old single file's GeoJSON
 export const bsrc = () => tiled() ? { source:'city', sourceLayer:'b' } : { source:'b' };
 export const fstate = (id, st) => S.map.setFeatureState({ ...bsrc(), id }, st);
+// a building's card file: the details of the buildings numbered n * chunk to (n + 1) * chunk - 1
+export const cardFileOf = id => Math.floor(id / S.data.tiles.chunk);
+export const cardUrl = n => `../data/${CITY_ID}/cards/${n}.json?v=${ver('cards', n)}`;
+// one card file, fetched once (priority: 'high' when a tap waits for it, 'low' when fetched ahead) and merged into
+// its buildings' properties
+export function loadCardFile(n, priority){
+  return S.cardFiles[n] = S.cardFiles[n] || fetchJSON(cardUrl(n), undefined, undefined, priority).then(chunk => {
+    for (const [i, extra] of Object.entries(chunk)) if (!S.features[i].full) { Object.assign(S.features[i].properties, extra); S.features[i].full = true; }
+  }).catch(e => { delete S.cardFiles[n]; throw e; });
+}
 export function loadCard(id){       // the card's details, merged into the building's properties
   if (!tiled() || S.features[id].full) return Promise.resolve();
-  const n = Math.floor(id / S.data.tiles.chunk);
-  S.cardFiles[n] = S.cardFiles[n] || fetchJSON(`../data/${CITY_ID}/cards/${n}.json?v=${ver('cards', n)}`).catch(e => { delete S.cardFiles[n]; throw e; });
-  return S.cardFiles[n].then(chunk => {
-    for (const [i, extra] of Object.entries(chunk)) if (!S.features[i].full) { Object.assign(S.features[i].properties, extra); S.features[i].full = true; }
-    S.features[id].full = true;
-  });
+  return loadCardFile(cardFileOf(id), 'high').then(() => { S.features[id].full = true; });
 }
 // a thread's or place's own cards, in one small file (pipeline/s10_tiles.py): null when the build has none
 export function loadSet(id){

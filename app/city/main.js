@@ -9,7 +9,7 @@ import './cards.js';
 import './places.js';
 import { $, CITY_ID, fetchData, fetchJSON, progress, setPeriods } from './util.js';
 import { S } from './state.js';
-import { areaOf, byOsm, fromIndex, isStorySet, loadCard, parseRef, pinOf, refOf, saveActive, tiled } from './data.js';
+import { areaOf, byOsm, cardFileOf, fromIndex, isStorySet, loadCard, loadCardFile, parseRef, pinOf, refOf, saveActive, tiled } from './data.js';
 import { drawMap } from './map.js';
 import { stopPlay, updateYear } from './timebar.js';
 import { applyLayers, drawLegend, groundNote, renderLayers } from './panels.js';
@@ -34,7 +34,7 @@ export async function main(){
   // link that names a person, a place or a layer, which needs it to open, and for a tap on Stories or Layers
   let startMore;
   S.more = !S.data.versions?.more ? Promise.resolve() : new Promise(ok => { startMore = ok; })
-    .then(() => fetchJSON(`../data/${CITY_ID}-more.json?v=${S.data.versions.more}`))
+    .then(() => fetchJSON(`../data/${CITY_ID}-more.json?v=${S.data.versions.more}`, undefined, undefined, 'low'))   // (a tap's card first)
     .then(m => { if (m.build !== S.data.build) throw new Error('the second part of the index is from another build'); mergeMore(m); });
   S.more.catch(() => {});
   if (startMore && wantsMore()) startMore();
@@ -79,6 +79,33 @@ export async function main(){
   mapReady();
   await openLink(new URLSearchParams(location.search), true);
   firstView.then(() => later(prefetchGraph));
+  firstView.then(cardsAhead);      // (card files need not wait for the second part: it fills in only what is missing)
+}
+
+// The card files of the buildings on screen, fetched each time the map comes to rest (at most 8 files, nearest the
+// middle first, a few KB each), so a first tap on a building opens its card at once. Not on a connection set to
+// save data.
+function cardsAhead(){
+  if (navigator.connection?.saveData || !tiled()) return;
+  let busy = false;
+  const ahead = () => {
+    if (busy) return;
+    const c = S.map.getCenter(), files = new Map();
+    for (const f of S.map.queryRenderedFeatures({ layers:['b'] })) {
+      if (f.id == null || !S.features[f.id] || S.features[f.id].full) continue;
+      const n = cardFileOf(f.id);
+      if (S.cardFiles[n]) continue;
+      const g = f.geometry.type === 'Polygon' ? f.geometry.coordinates[0][0] : f.geometry.coordinates[0][0][0];
+      const d = (g[0] - c.lng) ** 2 + (g[1] - c.lat) ** 2;
+      if (!files.has(n) || d < files.get(n)) files.set(n, d);
+    }
+    const ns = [...files].sort((a, b) => a[1] - b[1]).slice(0, 8).map(x => x[0]);
+    if (!ns.length) return;
+    busy = true;
+    Promise.allSettled(ns.map(n => loadCardFile(n, 'low'))).then(() => { busy = false; });
+  };
+  S.map.on('idle', ahead);
+  ahead();
 }
 
 // a link that needs the index's second part before anything is drawn: a person, a pin, places, a layer, the graph
@@ -241,9 +268,9 @@ function prefetchGraph(){
   if (navigator.connection?.saveData || graph) return;
   const v = window.__v || '';
   for (const m of ['graphlayout', 'graph']) {
-    const l = document.createElement('link'); l.rel = 'modulepreload'; l.href = `../app/city/${m}.js?v=${v}`; document.head.appendChild(l);
+    const l = document.createElement('link'); l.rel = 'modulepreload'; l.fetchPriority = 'low'; l.href = `../app/city/${m}.js?v=${v}`; document.head.appendChild(l);
   }
-  for (const u of [`../lib/d3.min.js?v=${v}`, `../app/graph.css?v=${v}`, `../data/${CITY_ID}-graph.json?v=${S.data.versions?.graph || S.data.build}`]) fetch(u).catch(() => {});
+  for (const u of [`../lib/d3.min.js?v=${v}`, `../app/graph.css?v=${v}`, `../data/${CITY_ID}-graph.json?v=${S.data.versions?.graph || S.data.build}`]) fetch(u, { priority:'low' }).catch(() => {});
 }
 
 // ================= Layout =================

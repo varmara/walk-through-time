@@ -4,7 +4,7 @@
 //   image + credit · summary · facts (rows) · old pictures · more old pictures · stories · links
 import { $, dateText, eraOf, esc, flightPace, whenText } from './util.js';
 import { S } from './state.js';
-import { areaOf, byOsm, centreOf, fstate, isB, isThread, loadCard, parseRef, pinOf, refOf, routeOf, saveActive, storyOf, tiled } from './data.js';
+import { areaOf, byOsm, cardFileOf, cardUrl, centreOf, fstate, isB, isThread, loadCard, parseRef, pinOf, refOf, routeOf, saveActive, storyOf, tiled } from './data.js';
 import { openSheet, shareOf } from './sheet.js';
 import { applyLayers, renderLayers } from './panels.js';
 import { showGroups, showPlaces } from './places.js';
@@ -332,23 +332,58 @@ function withPeople(stories){
 }
 
 // ================= Buildings =================
-// at: where the building was tapped, to move there at once; otherwise its centre, which is in its card file
-export function selectBuilding(id, at){
+// What the page knows of a building before its card file arrives: its year and era (from the map's tile, tp), its
+// listing; the rest follows. A first tap used to show only "Loading…" until the file came.
+function firstCard(id, tp){
+  const p = { ...(tp || {}), ...S.features[id].properties }, rows = [];
+  if (p.y != null && p.f !== 'area') {
+    const era = eraOf(p.y);
+    rows.push(['Built', `${esc(dateText(p.y, p.f))}<span class="pill" style="border-color:${era[3]}">${esc(era[2])}</span>`]);
+  }
+  if (p.grade) rows.push(['Listing', `Grade ${esc(p.grade)} listed`]);
+  rows.push(['', '<span class="muted">More about it is loading…</span>']);
+  return { title: refName(id), rows };
+}
+// ?timing: how long the card took, on the card itself (to measure on a phone): from the tap to the card, and the
+// file's own download (when it was asked for, how long it took, and how many other downloads it shared the
+// connection with); "fetched ahead" when it was already on its way before the tap
+function timingRow(id, t0, ahead){
+  const n = cardFileOf(id), e = performance.getEntriesByName(new URL(cardUrl(n), location.href).href).pop();
+  let file = ahead ? 'fetched ahead of the tap' : 'not measured';
+  if (e) {
+    const along = performance.getEntriesByType('resource').filter(r => r !== e && r.startTime < e.responseEnd && r.responseEnd > e.startTime).length;
+    // (through the service worker a file reports no bytes transferred, kept or not; the map's tiles are fetched
+    // where the page's list of downloads does not see them)
+    const size = e.encodedBodySize ? ` ${Math.round(e.encodedBodySize / 1024)} KB` : '', via = e.workerStart > 0 ? ', via the service worker' : '';
+    file = `${Math.round(e.responseEnd - e.startTime)} ms${size}${via}, asked ${Math.round(e.startTime - t0)} ms after the tap`
+      + `${ahead ? ' (fetched ahead)' : ''}, alongside ${along} other page downloads (map tiles not counted)`;
+  }
+  $('cFacts').insertAdjacentHTML('beforeend', `<dt>Timing</dt><dd>card in ${Math.round(performance.now() - t0)} ms; its file ${esc(file)}</dd>`);
+}
+
+// at: where the building was tapped, to move there at once; otherwise its centre, which is in its card file.
+// tp: the tapped tile's properties (its year), for the card drawn before its file arrives
+export function selectBuilding(id, at, tp){
   unlight();
   if (S.selectedId != null) fstate(S.selectedId, { sel:false });
   S.selectedId = id;
   fstate(id, { sel:true });
   const go = c => c && S.map.easeTo({ center:c, zoom:Math.max(S.map.getZoom(), 16.5), duration:Math.round(700 * flightPace()),
     padding: innerWidth >= 760 ? { right: 400 } : { bottom: innerHeight * 0.45 } });
-  if (S.features[id].full || !tiled()) { if (at || centreOf(id)) go(at || centreOf(id)); return showCard(id); }
+  if (S.features[id].full || !tiled()) {
+    if (at || centreOf(id)) go(at || centreOf(id));
+    showCard(id);
+    if (tiled() && /[?&]timing\b/.test(location.search)) $('cFacts').insertAdjacentHTML('beforeend', '<dt>Timing</dt><dd>card at once: its file was fetched ahead of the tap</dd>');
+    return;
+  }
   // the card first, then the glide: moving the map (with hills, especially) loads tiles and keeps a phone busy,
   // and the card's file would wait behind them
-  renderCard({ title: refName(id), rows: [['Loading…', '']] });     // the title at once, the details when their file arrives
-  const t0 = performance.now();
+  renderCard(firstCard(id, tp));      // what the page knows at once, the details when their file arrives
+  const t0 = performance.now(), ahead = !!S.cardFiles[cardFileOf(id)];
   loadCard(id).then(() => {
     if (S.selectedId !== id) return;
     showCard(id);
-    if (/[?&]timing\b/.test(location.search)) console.log(`card ${id}: ${Math.round(performance.now() - t0)} ms`);
+    if (/[?&]timing\b/.test(location.search)) timingRow(id, t0, ahead);
     requestAnimationFrame(() => S.selectedId === id && go(at || centreOf(id)));
   }).catch(() => {
     if (S.selectedId !== id) return;
