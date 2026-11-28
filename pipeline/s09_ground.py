@@ -38,7 +38,7 @@ from pathlib import Path
 from .common import city, load, log, save
 from .web import UA, fresh
 
-SEARCH = "https://environment.data.gov.uk/backend/catalog/api/tiles/collections/survey/search"
+SEARCH = "https://environment.data.gov.uk/tiles/collections/survey/search"
 PRODUCT, RES = "lidar_composite_dtm", "2m"
 MIN_Z, MAX_Z = 10, 15
 MARGIN = 0.02                 # degrees, about 1.5 km
@@ -262,28 +262,43 @@ def main(city_id):
         try:
             import numpy, rasterio, PIL  # noqa: F401
         except ImportError:
-            log("s09 ground: rasterio, numpy or Pillow is missing; the map has no hills this build")
-            save(city_id, "ground", {})
+            log("s09 ground: rasterio, numpy or Pillow is missing")
+            keep_last(city_id)
             return
         downloads = Path(os.environ.get("WTT_RAW") or "raw")      # the squares as downloaded: kept (tools/raw.sh)
         downloads.mkdir(parents=True, exist_ok=True)
-        for old in root.glob("tiles-*"):
-            shutil.rmtree(old, ignore_errors=True)
         tmp = root / "tiles-partial"
         shutil.rmtree(tmp, ignore_errors=True)
         try:
             build(c, tmp, downloads)
         except Exception as e:  # noqa: BLE001 - the map works without hills
-            log(f"s09 ground: no hills this build: {e}")
-            save(city_id, "ground", {})
+            log(f"s09 ground: the hills could not be built: {e}")
+            shutil.rmtree(tmp, ignore_errors=True)
+            keep_last(city_id)
             return
         tmp.rename(done)
+        for old in root.glob("tiles-*"):          # the last build's, now that this one is whole
+            if old != done:
+                shutil.rmtree(old, ignore_errors=True)
     else:
         log("s09 ground: the tiles of the last build (area and script unchanged)")
     meta = json.loads((done / "ground.json").read_text())
     rise = rises(city_id, done / "dem.npz")
     save(city_id, "ground", {"tiles": str(done / "tiles"), "meta": meta, "rise": rise})
     log(f"    {len(rise)} buildings stand on a slope: made taller by up to {max(rise.values(), default=0):.0f} m")
+
+
+def keep_last(city_id):
+    """The hills could not be built: keep the last build's (its work file and tiles, if still here), else none.
+    (s10_tiles then falls back to the hills already published.)"""
+    try:
+        last = load(city_id, "ground")
+    except FileNotFoundError:
+        last = {}
+    if last and Path(last.get("tiles", "")).exists():
+        log("s09 ground: keeping the hills of the last build")
+        return
+    save(city_id, "ground", {})
 
 
 def rises(city_id, dem):

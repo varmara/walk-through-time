@@ -132,6 +132,17 @@ def main(city_id):
         return
     feats = pkg["buildings"]["features"]
     root = Path("data") / city_id
+    # the hills already published (restored from the site branch), set aside: kept if this build has none
+    published = None
+    if (root / "ground").is_dir() and out_json.exists():
+        try:
+            meta = json.loads(out_json.read_text()).get("ground")
+        except ValueError:
+            meta = None
+        if meta:
+            aside = Path(tempfile.mkdtemp()) / "ground"
+            shutil.copytree(root / "ground", aside)
+            published = {"tiles": str(aside), "meta": meta, "rise": {}}
     shutil.rmtree(root, ignore_errors=True)
     (root / "cards").mkdir(parents=True)
     (root / "osm").mkdir()
@@ -147,6 +158,9 @@ def main(city_id):
     if ground and not Path(ground.get("tiles", "")).exists():
         log("s10 tiles: the ground's tiles are not here (a build that did not run s09_ground); no hills")
         ground = {}
+    if not ground and published:
+        log("s10 tiles: no hills built this time; keeping the published hills (buildings on slopes are not raised)")
+        ground = published
     rise = ground.get("rise", {})
     tile_feats, props, cards, storied = [], [], {}, []
     for i, f in enumerate(feats):

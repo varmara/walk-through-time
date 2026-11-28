@@ -48,3 +48,41 @@ class KeptSquares(unittest.TestCase):
         self.assertEqual([s["label"] for s in got],
                          ["lidar_composite_dtm-2022-2m-SK54aa", "lidar_composite_dtm-2022-2m-SK55bb"])
         self.assertTrue(all(s["uri"] is None for s in got))
+
+
+class KeepLast(unittest.TestCase):
+    def test_keeps_last_hills_when_they_cannot_be_built(self):
+        import os
+        from unittest import mock
+        from pipeline import s09_ground as g
+        cwd = os.getcwd()
+        with tempfile.TemporaryDirectory() as d:
+            os.chdir(d)
+            try:
+                (Path(d) / "tiles").mkdir()
+                g.save("x", "ground", {"tiles": str(Path(d) / "tiles"), "meta": {"ext": "webp"}, "rise": {"1": 2}})
+                g.keep_last("x")
+                self.assertEqual(g.load("x", "ground")["rise"], {"1": 2})       # untouched
+                g.save("x", "ground", {"tiles": str(Path(d) / "gone"), "meta": {}})
+                g.keep_last("x")
+                self.assertEqual(g.load("x", "ground"), {})                      # its tiles are gone: no hills
+            finally:
+                os.chdir(cwd)
+
+
+class SquaresAnswer(unittest.TestCase):
+    def test_reads_the_catalogue_answer(self):
+        import json
+        from unittest import mock
+        from pipeline import s09_ground as g
+
+        def hit(product, res, year, tile, label):
+            return {"product": {"id": product}, "resolution": {"label": res}, "year": {"id": year},
+                    "tile": {"id": tile}, "label": label, "uri": f"https://environment.data.gov.uk/tiles/{label}"}
+        answer = {"count": 3, "results": [hit("lidar_composite_dtm", "2m", "2021", "SK5035", "a21"),
+                                          hit("lidar_composite_dtm", "2m", "2022", "SK5035", "a22"),
+                                          hit("lidar_composite_dtm", "1m", "2022", "SK5035", "a1m")]}
+        with mock.patch.object(g, "fetch", return_value=json.dumps(answer).encode()) as f:
+            got = g.squares({"w": -1.2, "s": 52.9, "e": -1.1, "n": 53.0})
+        self.assertEqual([s["label"] for s in got], ["a22"])
+        self.assertTrue(f.call_args[0][0].startswith("https://environment.data.gov.uk/tiles/collections/survey/"))
