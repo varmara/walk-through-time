@@ -15,6 +15,8 @@ Park's cliff, Mapperley) its uphill side would be buried. For each building this
 under its outline rises above its middle (`rise`, in work/<city>/ground.json), and s10_tiles makes the building
 that much taller; the map already sinks a building's foot 10 m into the ground on its downhill side.
 
+If the survey catalogue cannot be asked (its address has changed before), the squares kept from earlier are used.
+
 The squares are kept as downloaded in $WTT_RAW (the build keeps that folder in the repo's "raw-data" release:
 tools/raw.sh) and used again while younger than $WTT_MAX_AGE_DAYS (any age, if unset), so only missing squares
 are downloaded. The tiles are kept in $WTT_CACHE under a fingerprint of the area and this script. Needs rasterio, numpy and Pillow (the build
@@ -61,6 +63,19 @@ def squares(box):
         t = x["tile"]["id"]
         if t not in best or x["year"]["id"] > best[t]["year"]:
             best[t] = {"label": x["label"], "uri": x["uri"], "year": x["year"]["id"]}
+    return sorted(best.values(), key=lambda s: s["label"])
+
+
+def kept_squares(cache):
+    """The squares already kept in the raw folder, named as the catalogue named them (ground-<label>.zip): for when
+    the catalogue cannot be asked (its address has changed before). All are offered; build() leaves out those that do
+    not touch the area."""
+    best = {}
+    for z in sorted(Path(cache).glob(f"ground-{PRODUCT}-*-{RES}-*.zip")):
+        label = z.stem[len("ground-"):]
+        year, tile = label.split("-")[1], label.split("-")[-1]
+        if tile not in best or year > best[tile]["year"]:
+            best[tile] = {"label": label, "uri": None, "year": year}
     return sorted(best.values(), key=lambda s: s["label"])
 
 
@@ -124,27 +139,43 @@ def build(c, out, cache):
     from rasterio.enums import Resampling
     from rasterio.fill import fillnodata
     from rasterio.transform import Affine
-    from rasterio.warp import reproject
+    from rasterio.warp import reproject, transform_bounds
 
     if not features.check("webp"):
         raise RuntimeError("this Pillow cannot write WebP")
     box = ground_box(c)
-    sq = squares(box)
+    try:
+        sq = squares(box)
+    except Exception as e:  # noqa: BLE001 - the catalogue is down or has moved: the squares kept from earlier will do
+        sq = kept_squares(cache)
+        if not sq:
+            raise
+        log(f"s09 ground: the survey catalogue could not be asked ({e}); using the {len(sq)} squares kept from earlier")
     if not sq:
         raise RuntimeError("the survey catalogue found no ground model for this area")
-    tifs, got = [], 0
+    tifs, used, got = [], [], 0
     unpacked = out / "unpacked"
     unpacked.mkdir(parents=True, exist_ok=True)
     for s in sq:
         z = cache / f"ground-{s['label']}.zip"
-        if not fresh(z):
+        if s["uri"] and not fresh(z):
             z.write_bytes(fetch(s["uri"]))
             got += 1
         with zipfile.ZipFile(z) as zf:
             name = next(n for n in zf.namelist() if n.lower().endswith(".tif"))
             tif = unpacked / name
             tif.write_bytes(zf.read(name))
-        tifs.append(tif)
+        with rasterio.open(tif) as r:             # (a kept square may belong to another area)
+            w, so, e, n = transform_bounds("EPSG:4326", r.crs, box["w"], box["s"], box["e"], box["n"])
+            near = r.bounds.right >= w and r.bounds.left <= e and r.bounds.top >= so and r.bounds.bottom <= n
+        if near:
+            tifs.append(tif)
+            used.append(s)
+        else:
+            tif.unlink()
+    if not tifs:
+        raise RuntimeError("none of the ground squares touches this area")
+    sq = used
     log(f"s09 ground: {len(sq)} squares of the {PRODUCT} {RES} ({', '.join(sorted({s['year'] for s in sq}))}), "
         f"{got} downloaded, {len(sq) - got} kept from earlier")
 

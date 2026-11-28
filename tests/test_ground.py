@@ -1,6 +1,10 @@
 """The hills' tiles: heights written as lossless WebP come back exactly (pipeline/s09_ground.py)."""
 import io
+import tempfile
 import unittest
+from pathlib import Path
+
+from pipeline.s09_ground import kept_squares
 
 try:
     import numpy as np
@@ -31,3 +35,16 @@ class GroundTiles(unittest.TestCase):
         png = io.BytesIO()
         Image.fromarray(pixels, "RGB").save(png, "PNG", optimize=True)
         self.assertLess(len(encode(pixels)), png.tell())
+
+
+class KeptSquares(unittest.TestCase):
+    def test_latest_year_of_each_square(self):
+        # the survey catalogue has been unreachable before: the squares kept from earlier stand in, named as it named them
+        with tempfile.TemporaryDirectory() as d:
+            for name in ("lidar_composite_dtm-2021-2m-SK54aa", "lidar_composite_dtm-2022-2m-SK54aa",
+                         "lidar_composite_dtm-2022-2m-SK55bb", "lidar_composite_dtm-2022-1m-SK54aa", "web-open.tar.00"):
+                (Path(d) / f"ground-{name}.zip" if name.startswith("lidar") else Path(d) / name).write_bytes(b"x")
+            got = kept_squares(d)
+        self.assertEqual([s["label"] for s in got],
+                         ["lidar_composite_dtm-2022-2m-SK54aa", "lidar_composite_dtm-2022-2m-SK55bb"])
+        self.assertTrue(all(s["uri"] is None for s in got))
