@@ -20,7 +20,7 @@ import re
 from .common import city, log, save
 from .geo import metres
 from .s00_fetch_osm import OVERPASS
-from .web import http
+from .web import cached, http, keep
 
 WDQS = "https://query.wikidata.org/sparql"
 # the tags a card uses; the rest are dropped
@@ -113,11 +113,18 @@ def routes(c):
         t = el.get("tags", {})
         if not t.get("name"):
             continue
+        q = f"""[out:json][timeout:60];rel({el['id']});way(r){box};out geom;"""
+        if cached("failed", "overpass route", q) is not None:
+            # it failed before: every server timed out (a long route), costing a build ten minutes; asked again
+            # only by the refresh, which asks again for what is older than a month ($WTT_MAX_AGE_DAYS)
+            log(f"    route {t['name']}: left out, as all servers failed on it before")
+            continue
         try:
             # one try per server and a short wait: a busy server should cost a route, not the build
-            ways = overpass(f"""[out:json][timeout:60];rel({el['id']});way(r){box};out geom;""", tries=1, timeout=90)
+            ways = overpass(q, tries=1, timeout=90)
         except Exception as e:  # noqa: BLE001 - leave that route out
             log(f"    route {t['name']}: {e}")
+            keep("failed", "overpass route", q, b"1")
             continue
         lines = [[[round(p["lon"], 5), round(p["lat"], 5)] for p in w.get("geometry", []) if p] for w in ways]
         lines = [ln for ln in lines if len(ln) > 1]
