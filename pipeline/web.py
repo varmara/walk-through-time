@@ -56,6 +56,13 @@ def fresh(f):
     return f.exists() and (not days or time.time() - f.stat().st_mtime < float(days) * 86400)
 
 
+def permanent(e):
+    """An answer that asking again will not change: the page is missing or refused (4xx), not a busy server or a
+    timeout (408, 429 and 5xx are worth another try)."""
+    import urllib.error
+    return isinstance(e, urllib.error.HTTPError) and 400 <= e.code < 500 and e.code not in (408, 429)
+
+
 def _open(req, timeout):
     _asked[0] += 1
     return urllib.request.urlopen(req, timeout=timeout)
@@ -114,6 +121,8 @@ def http(url, data=None, params=None, accept="application/json", tries=4, timeou
             return out
         except Exception as e:  # noqa: BLE001 - retry any network or server error
             last = e
+            if permanent(e):
+                break
             if attempt < tries - 1:
                 wait = 10 * (attempt + 1)
                 log(f"  {url.split('/')[2]}: {e}; retrying in {wait}s")
@@ -136,7 +145,10 @@ def http_bytes(url, tries=3, timeout=180):
             return raw
         except Exception as e:  # noqa: BLE001
             last = e
-            time.sleep(10 * (attempt + 1))
+            if permanent(e):
+                break
+            if attempt < tries - 1:
+                time.sleep(10 * (attempt + 1))
     raise RuntimeError(f"{url}: {last}")
 
 
@@ -160,5 +172,8 @@ def http_text(url, tries=3, timeout=60):
                     "text": " ".join(body.split())}
         except Exception as e:  # noqa: BLE001
             last = e
-            time.sleep(5 * (attempt + 1))
+            if permanent(e):
+                break
+            if attempt < tries - 1:
+                time.sleep(5 * (attempt + 1))
     raise RuntimeError(f"{url}: {last}")
